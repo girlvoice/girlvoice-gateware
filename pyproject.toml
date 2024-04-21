@@ -1,0 +1,23 @@
+[project]
+name = "girlvoice"
+version = "0.1.0"
+description = "A real-time vocoder and more!"
+authors = [
+    {name = "Sage Walker", email = "sage@caesium.dev"},
+]
+dependencies = [
+    "amaranth @ git+https://github.com/amaranth-lang/amaranth.git",
+    "amaranth-boards @ git+https://github.com/amaranth-lang/amaranth-boards.git",
+    "yowasp-nextpnr-ice40>=0.7.0.0.post519",
+    "yowasp-nextpnr-nexus>=0.7.0.0.post519",
+]
+requires-python = "==3.11.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.scripts]
+'_'.env_file = ".env.toolchain"
