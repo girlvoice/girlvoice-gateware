@@ -1,0 +1,36 @@
+[*]
+[*] GTKWave Analyzer v3.3.118 (w)1999-2023 BSI
+[*] Sun Mar 31 03:38:14 2024
+[*]
+[dumpfile] "/home/sage/programming_stuff/sage/girlvoice/amsrc/gtkw/i2s_rx.vcd"
+[dumpfile_mtime] "Sun Mar 31 03:38:08 2024"
+[dumpfile_size] 33626
+[savefile] "/home/sage/programming_stuff/sage/girlvoice/amsrc/gtkw/I2S_Rx.gtkw"
+[timestart] 0
+[size] 1863 1003
+[pos] -1 -1
+*-22.000000 8400000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] bench.
+[sst_width] 269
+[signals_width] 203
+[sst_expanded] 1
+[sst_vpaned_height] 341
+@28
+bench.top.clk
+bench.top.fsm_state
+bench.top.lrclk
+@24
+bench.top.bit_count[4:0]
+@22
+bench.top.clk_div[3:0]
+@28
+bench.top.sclk
+@22
+bench.top.shift_reg[31:0]
+@23
+bench.top.data[31:0]
+@28
+bench.top.sdin
+bench.top.valid
+[pattern_trace] 1
+[pattern_trace] 0
