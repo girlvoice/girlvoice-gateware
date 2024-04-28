@@ -3,11 +3,12 @@ from amaranth.build import *
 from amaranth.build.plat import Platform
 from amaranth_boards.icebreaker import ICEBreakerPlatform
 
+from amlib.dsp import *
+
 from i2s import i2s_rx, i2s_tx
 
 class GirlTop(Elaboratable):
-    def __init__(self) -> None:
-        pass
+
     def elaborate(self, platform:Platform):
         m = Module()
 
@@ -36,7 +37,6 @@ class GirlTop(Elaboratable):
             i_PACKAGEPIN = platform.request("clk12", dir="-"),
             o_PLLOUTGLOBAL = ClockSignal("sync"),
             o_LOCK = pll_lock,
-
         )
 
         m.domains.sync = cd_sync = ClockDomain("sync", local=True)
@@ -50,6 +50,13 @@ class GirlTop(Elaboratable):
 
         m.d.comb += sclk_i.o.eq(ClockSignal())
         m.d.comb += dac_sd_mode_n.o.eq(1)
+
+        m.submodules.fir = fir = FixedPointFIRFilter(
+            sample_rate=62.
+            bitwidth=16,
+            fraction_width=16,
+
+        )
 
         return m
 

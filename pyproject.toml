@@ -6,6 +6,7 @@ authors = [
     {name = "Sage Walker", email = "sage@caesium.dev"},
 ]
 dependencies = [
+    "amlib @ git+https://github.com/amaranth-farm/amlib.git",
     "amaranth @ git+https://github.com/amaranth-lang/amaranth.git",
     "amaranth-boards @ git+https://github.com/amaranth-lang/amaranth-boards.git",
     "yowasp-nextpnr-ice40>=0.7.0.0.post519",
