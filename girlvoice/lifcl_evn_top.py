@@ -34,7 +34,7 @@ class GirlTop(Elaboratable):
         clk_div = Signal(range(clk_ratio))
 
         bclk = Signal()
-        with m.If(clk_div >= (clk_ratio - 1) // 2):
+        with m.If(clk_div >= (clk_ratio - 1)):
             m.d.sync += clk_div.eq(0)
             m.d.sync += bclk.eq(~bclk)
         with m.Else():
@@ -55,8 +55,6 @@ class GirlTop(Elaboratable):
         m.d.comb += rx.sclk.eq(bclk)
         m.d.comb += rx.sdin.eq(adc_dout.i)
 
-        adc_sample_out = Signal(18)
-        # m.d.comb += adc_sample_out.eq(rx.source.data >> 6)
 
         clk_sig = Signal()
         m.d.comb += sclk_i.o.eq(clk_sig)
@@ -76,11 +74,10 @@ class GirlTop(Elaboratable):
         m.d.comb += amp_bclk.o.eq(bclk)
         m.d.comb += dac_din.o.eq(tx.sdout)
 
-        shift_reg = Signal(18)
-
         m.d.comb += tx.sink.data.eq(rx.source.data)
         m.d.comb += tx.sink.valid.eq(1)
         m.d.comb += tx.sclk.eq(bclk)
+        m.d.comb += tx.clk_div.eq(clk_div)
         m.d.comb += rx.source.ready.eq(tx.sink.ready)
 
         m.d.comb += platform.request("led", 0).o.eq(rx.source.data.xor())

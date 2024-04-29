@@ -18,6 +18,7 @@ class i2s_tx(wiring.Component):
     def __init__(self, sys_clk_freq, sclk_freq, sample_width=32):
         self.clk_ratio = int(sys_clk_freq // sclk_freq)
         self.sample_width = sample_width
+        self.clk_div = Signal(range(self.clk_ratio))
         super().__init__()
 
     def elaborate(self, platform):
@@ -29,14 +30,9 @@ class i2s_tx(wiring.Component):
         m.d.comb += sclk_negedge.eq(~self.sclk & sclk_last)
         m.d.sync += sclk_last.eq(self.sclk)
 
-        clk_div = Signal(range(self.clk_ratio))
+        clk_div = self.clk_div
         bit_count = Signal(range(32))
         shift_out = Signal(self.sample_width)
-
-        with m.If(clk_div >= (self.clk_ratio - 1)):
-            m.d.sync += clk_div.eq(0)
-        with m.Else():
-            m.d.sync += clk_div.eq(clk_div + 1)
 
         with m.If(sclk_negedge):
             m.d.sync += bit_count.eq(bit_count + 1)
@@ -61,9 +57,6 @@ class i2s_tx(wiring.Component):
         with m.If(bit_count == 31):
             with m.If(sclk_negedge):
                 m.d.sync += self.lrclk.eq(~self.lrclk)
-            # with m.If(clk_div == (self.clk_ratio - 2)):
-            #     m.d.sync += self.sink.ready.eq(1)
-
 
 
         return m
@@ -78,7 +71,6 @@ class i2s_rx(wiring.Component):
     sdin: In(1)
 
     def __init__(self, sys_clk_freq, sclk_freq, sample_width=18):
-        # self.clk_ratio = int(sys_clk_freq // sclk_freq)
         self.sample_width = sample_width
         super().__init__()
 
@@ -122,34 +114,42 @@ class i2s_rx(wiring.Component):
         return m
 
 
-# class i2s(wiring.Component):
-#     source: Out(Stream(32))
-#     sink: In(Stream(32))
+class i2s(wiring.Component):
+    source: Out(StreamSignature(32))
+    sink: In(StreamSignature(32))
 
-#     sclk: Out(1)
+    sclk: Out(1)
 
-#     def __init__(self, sys_clk_freq, sclk_freq):
-#         self.clk_ratio = int(sys_clk_freq // sclk_freq)
-#         super().__init__()
+    def __init__(self, sys_clk_freq, sclk_freq, sample_width=32):
+        self.clk_ratio = int(sys_clk_freq // sclk_freq)
+        self.rx = i2s_rx(sys_clk_freq=sys_clk_freq, sclk_freq=sclk_freq, sample_width=sample_width)
+        self.tx = i2s_tx(sys_clk_freq=sys_clk_freq, sclk_freq=sclk_freq, sample_width=sample_width)
+        super().__init__()
 
-#     def elaborate(self, platform):
-#         m = Module()
+    def elaborate(self, platform):
+        m = Module()
 
-#         m.submodules.rx = rx = i2s_rx()
-#         m.submodules.tx = tx = i2s_tx()
+        m.submodules.rx = rx = self.rx
+        m.submodules.tx = tx = self.tx
 
-#         cd_sclk = m.domains.sclk = ClockDomain(local=True, clk_edge="neg")
-#         m.d.comb += cd_sclk.clk.eq(self.sclk)
+        clk_div = Signal(range(self.clk_ratio))
+
+        m.d.comb += [
+            tx.sclk.eq(self.sclk),
+            rx.sclk.eq(self.sclk),
+        ]
 
 
-#         clk_div = Signal(range(self.clk_ratio))
-#         with m.If(clk_div >= (self.clk_ratio - 1) // 2):
-#             m.d.sync += clk_div.eq(0)
-#             m.d.sync += self.sclk.eq(~self.sclk)
-#         with m.Else():
-#             m.d.sync += clk_div.eq(clk_div + 1)
+        with m.If(clk_div >= (self.clk_ratio - 1) // 2):
+            m.d.sync += clk_div.eq(0)
+            m.d.sync += self.sclk.eq(~self.sclk)
+        with m.Else():
+            m.d.sync += clk_div.eq(clk_div + 1)
 
-#         return m
+        wiring.connect(m, wiring.flipped(self.source), rx.source)
+        wiring.connect(m, wiring.flipped(self.sink), tx.sink)
+
+        return m
 
 def tx_tb():
     sys_clk_freq = 64e6
