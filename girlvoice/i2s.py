@@ -59,6 +59,7 @@ class i2s_tx(wiring.Component):
                 m.d.sync += self.lrclk.eq(~self.lrclk)
 
 
+
         return m
 
 class i2s_rx(wiring.Component):
@@ -70,7 +71,7 @@ class i2s_rx(wiring.Component):
     sclk: In(1)
     sdin: In(1)
 
-    def __init__(self, sample_width=18):
+    def __init__(self, sys_clk_freq, sclk_freq, sample_width=18):
         self.sample_width = sample_width
         super().__init__()
 
