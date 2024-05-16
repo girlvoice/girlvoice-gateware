@@ -30,18 +30,15 @@ class GirlTop(Elaboratable):
             clkout_freq=sync_freq)
         platform.add_clock_constraint(cd_sync.clk, sync_freq)
 
-
         clk_ratio = int(sync_freq // bclk_freq)
         clk_div = Signal(range(clk_ratio))
 
         bclk = Signal()
-        # m.d.comb += bclk.eq(clk_div >= (clk_ratio - 1))
         with m.If(clk_div >= (clk_ratio - 1) // 2):
             m.d.sync += clk_div.eq(0)
             m.d.sync += bclk.eq(~bclk)
         with m.Else():
             m.d.sync += clk_div.eq(clk_div + 1)
-
 
         ## RX from ADC
         m.submodules.i2s_rx = rx = i2s_rx(sys_clk_freq=sync_freq, sclk_freq=bclk_freq, sample_width=24)
@@ -82,13 +79,12 @@ class GirlTop(Elaboratable):
         m.d.comb += rx.source.ready.eq(tx.sink.ready)
         m.d.comb += tx.sink.valid.eq(rx.source.valid)
 
-
         m.d.comb += platform.request("led", 0).o.eq(pll.locked)
 
         return m
 
 if __name__ == "__main__":
-    p = LIFCLEVNPlatform(VCCIO6="1V8", toolchain="Radiant")
+    p = LIFCLEVNPlatform(VCCIO6="1V8", toolchain="Oxide")
 
     prototype_resources = [
         Resource("mic", 0,
