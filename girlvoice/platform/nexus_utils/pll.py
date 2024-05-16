@@ -76,8 +76,8 @@ class NXPLL(Elaboratable):
         (clko_freq_min, clko_freq_max) = self.clko_freq_range
         assert freq >= clko_freq_min
         assert freq <= clko_freq_max
-        #assert self.nclkouts < self.nclkouts_max
-        assert self.nclkouts == 0, "Only one clkout allowed [TODO: add support for multiple clock outputs]"
+        assert self.nclkouts < self.nclkouts_max
+        # assert self.nclkouts == 0, "Only one clkout allowed [TODO: add support for multiple clock outputs]"
         self.clkouts[self.nclkouts] = (cd.clk, freq, phase, margin)
         #create_clkout_log(self.logger, cd.name, freq, margin, self.nclkouts)
         self.nclkouts += 1

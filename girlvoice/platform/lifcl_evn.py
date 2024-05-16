@@ -90,9 +90,9 @@ class LIFCLEVNPlatform(LatticePlatform):
             Subsignal("sda", Pins("W5", dir="io"), Attrs(IO_TYPE="LVCMOS18H")),
         ),
 
-        *LEDResources(pins={0: "E17", 1: "F13", 2: "G13", 3: "F14", 4: "L16", 5: "L15", 6: "L20", 7: "L19"}, invert=True,
+        *LEDResources(pins={0: "E17", 1: "F13", 2: "G13", 3: "F14", 4: "L16", 5: "L15", 6: "L20", 7: "L19"}, invert=False,
                               attrs=Attrs(IO_TYPE=bank1_iostandard)),
-        *LEDResources(pins={8: "R17", 9: "R18", 10: "U20", 11: "T20", 12: "W20", 13: "V20"}, invert=True,
+        *LEDResources(pins={8: "R17", 9: "R18", 10: "U20", 11: "T20", 12: "W20", 13: "V20"}, invert=False,
                               attrs=Attrs(IO_TYPE=bank2_iostandard)),
 
         *ButtonResources(pins="G14 G15", invert=True,
@@ -344,6 +344,40 @@ class LIFCLEVNPlatform(LatticePlatform):
         ecpprog = os.environ.get("ECPPROG", "ecpprog")
         with products.extract("{}.bit".format(name)) as bitstream_filename:
             subprocess.check_call([ecpprog, "-S", bitstream_filename])
+
+
+    def build(self, elaboratable, name="top",
+                build_dir="build", do_local_build=True,
+                program_opts=None, do_program=False, use_radiant_docker=False,
+                **kwargs):
+
+            docker_image = "radiant-container:latest"
+
+            WAYLAND_DISPLAY = os.environ.get("WAYLAND_DISPLAY", "")
+            XDG_RUNTIME_DIR = os.environ.get("XDG_RUNTIME_DIR", "")
+            DISPLAY = os.environ.get("DISPLAY", "")
+            HOST_UID = os.getuid()
+
+            docker_args = [
+                "--mac-address", "8c:8c:aa:e3:74:08",
+                "-e", "XDG_RUNTIME_DIR=/run/user/$(id -u)",
+                "-e", f"HOST_UID={HOST_UID}",
+                "-e", f"WAYLAND_DISPLAY={WAYLAND_DISPLAY}",                                      # Wayland passthrough
+                "-v", f"{XDG_RUNTIME_DIR}/{WAYLAND_DISPLAY}:{XDG_RUNTIME_DIR}/{WAYLAND_DISPLAY}",   # Wayland passthrough
+                "-e", f"DISPLAY={DISPLAY}",                                                      # X11 passthrough
+                "-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw",                                      # X11 passthrough
+                "--ipc=host",                                                               # X11 passthrough (MIT-SHM)
+            ]
+
+            if use_radiant_docker and self.toolchain == "Radiant":
+                build_plan = super().build(elaboratable, name, build_dir, False, program_opts, do_program, **kwargs)
+                products = build_plan.execute_local_docker(root=build_dir, image=docker_image, docker_args=docker_args)
+                if not do_program:
+                    return products
+                self.toolchain_program(products, name, **(program_opts or {}))
+            else:
+                do_build = do_local_build
+                super().build(elaboratable, name, build_dir, do_build, program_opts, do_program, **kwargs)
 
 if __name__ == "__main__":
     LIFCLEVNPlatform(VCCIO6="1V8").build(Blinky(), do_program=True)

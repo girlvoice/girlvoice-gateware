@@ -9,7 +9,7 @@ from amaranth_boards.resources import *
 __all__ = ["GirlvoiceRevAPlatform"]
 
 class GirlvoiceRevAPlatform(LatticePlatform):
-    device = "LIFCL-40"
+    device = "LIFCL-17"
     package = "SG72"
     speed = "8"
     default_clk = "clk12"
@@ -31,7 +31,7 @@ class GirlvoiceRevAPlatform(LatticePlatform):
         #     attrs=Attrs(IO_TYPE="LVCMOS33")
         # ),
 
-        Resource("pwr_en", 0, Pins("10", dir="o"), Attrs(IO_TYPE="LVCMOS18")),
+        Resource("pwr_en", 0, Pins("28", dir="o", invert=True), Attrs(IO_TYPE="LVCMOS18H")),
 
         Resource("btn_pwr", 0, Pins("9", dir="i", invert=True), Attrs(IO_TYPE="LVCMOS18")),
         Resource("button_up", 0, Pins("19", dir="i", invert=True), Attrs(IO_TYPE="LVCMOS18")),
@@ -85,7 +85,7 @@ class GirlvoiceRevAPlatform(LatticePlatform):
         }),
         Connector("aux_i2s", 0, {
             "MCLK": "22",
-            "SDIN": "28",
+            "SDIN": "10",
             "SDOUT": "27",
         })
 
@@ -104,8 +104,9 @@ if __name__ == "__main__":
 
     m = Module()
 
-    count = Signal(8)
+    count = Signal(24)
     m.d.sync += count.eq(count + 1)
-    m.d.comb += p.request("led", 0).o.eq(count[7])
+    m.d.comb += p.request("led", 0).o.eq(count[-1])
+    m.d.comb += p.request("pwr_en", 0).o.eq(0)
 
-    p.build(Module())
+    p.build(m)

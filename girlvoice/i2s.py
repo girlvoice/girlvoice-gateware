@@ -9,28 +9,37 @@ from amaranth.sim import Simulator, Tick
 from girlvoice.stream import StreamSignature
 
 class i2s_tx(wiring.Component):
-    sink: In(StreamSignature(32))
-
-    lrclk: Out(1)
-    sclk: In(1)
-    sdout: Out(1)
 
     def __init__(self, sys_clk_freq, sclk_freq, sample_width=32):
         self.clk_ratio = int(sys_clk_freq // sclk_freq)
         self.sample_width = sample_width
         self.clk_div = Signal(range(self.clk_ratio))
-        super().__init__()
+        super().__init__({
+            "sink": In(StreamSignature(sample_width)),
+            "lrclk": Out(1),
+            "sclk": Out(1),
+            "sdout": Out(1),
+        })
 
     def elaborate(self, platform):
         m = Module()
 
+        clk_div = self.clk_div
+
         sclk_last = Signal()
         sclk_negedge = Signal()
+
+        m.d.comb += self.sclk.eq(clk_div[-1])
+        with m.If(clk_div >= (self.clk_ratio - 1)):
+            m.d.sync += clk_div.eq(0)
+
+        with m.Else():
+            m.d.sync += clk_div.eq(clk_div + 1)
 
         m.d.comb += sclk_negedge.eq(~self.sclk & sclk_last)
         m.d.sync += sclk_last.eq(self.sclk)
 
-        clk_div = self.clk_div
+
         bit_count = Signal(range(32))
         shift_out = Signal(self.sample_width)
 
@@ -51,7 +60,7 @@ class i2s_tx(wiring.Component):
                     m.d.sync += self.sdout.eq(shift_out[self.sample_width - 1])
 
                 with m.If(bit_count >= (self.sample_width)):
-                    with m.If(clk_div == (self.clk_ratio - 2)):
+                    with m.If(sclk_negedge):
                         m.next = "IDLE"
 
         with m.If(bit_count == 31):
@@ -68,10 +77,11 @@ class i2s_rx(wiring.Component):
 
     # I2S IO
     lrclk: Out(1)
-    sclk: In(1)
+    sclk: Out(1)
     sdin: In(1)
 
     def __init__(self, sys_clk_freq, sclk_freq, sample_width=18):
+        self.clk_ratio = int(sys_clk_freq // sclk_freq)
         self.sample_width = sample_width
         super().__init__()
 
@@ -81,8 +91,17 @@ class i2s_rx(wiring.Component):
         sclk_last = Signal()
         sclk_negedge = Signal()
 
+        clk_div = Signal(range(self.clk_ratio))
+
+
         m.d.comb += sclk_negedge.eq(~self.sclk & sclk_last)
         m.d.sync += sclk_last.eq(self.sclk)
+
+        m.d.comb += self.sclk.eq(clk_div[-1])
+        with m.If(clk_div >= (self.clk_ratio - 1)):
+            m.d.sync += clk_div.eq(0)
+        with m.Else():
+            m.d.sync += clk_div.eq(clk_div + 1)
 
         shift_reg = Signal(32)
         bit_count = Signal(range(32))
@@ -155,7 +174,7 @@ class i2s(wiring.Component):
 def tx_tb():
     sys_clk_freq = 64e6
     sclk_freq = 4e6
-    dut = i2s_tx(sys_clk_freq=sys_clk_freq, sclk_freq=sclk_freq, sample_width=32)
+    dut = i2s_tx(sys_clk_freq=sys_clk_freq, sclk_freq=sclk_freq, sample_width=18)
     sim = Simulator(dut)
 
     samples = [(C(i, 32) ) for i in range(32)]
@@ -181,7 +200,7 @@ def tx_tb():
         sim.run()
 
 def rx_tb():
-    sys_clk_freq = 24e6
+    sys_clk_freq = 64e6
     sclk_freq = 4e6
     dut = i2s_rx(sys_clk_freq=sys_clk_freq, sclk_freq=sclk_freq)
     sim = Simulator(dut)
@@ -217,7 +236,7 @@ def rx_tb():
 
 def main():
     tx_tb()
-    # rx_tb()
+    rx_tb()
 
 
 if __name__ == "__main__":

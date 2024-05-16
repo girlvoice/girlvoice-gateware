@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:b3cb4a40b118616c17200f11430b1f253aaae2e5a9a61027b97047274330b9ea"
+content_hash = "sha256:6c795e3114122ecc64d3e74302e88acd53d03e631a31ff8147e67f041cdea66a"
 
 [[package]]
 name = "amaranth"
@@ -63,6 +63,32 @@ dependencies = [
     "amaranth<=4,>=0.2",
     "numpy",
     "scipy",
+]
+
+[[package]]
+name = "click"
+version = "8.1.7"
+requires_python = ">=3.7"
+summary = "Composable command line interface toolkit"
+groups = ["default"]
+dependencies = [
+    "colorama; platform_system == \"Windows\"",
+]
+files = [
+    {file = "click-8.1.7-py3-none-any.whl", hash = "sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28"},
+    {file = "click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"},
+]
+
+[[package]]
+name = "colorama"
+version = "0.4.6"
+requires_python = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
+summary = "Cross-platform colored terminal text."
+groups = ["default"]
+marker = "platform_system == \"Windows\""
+files = [
+    {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
+    {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
 ]
 
 [[package]]
@@ -212,4 +238,17 @@ dependencies = [
 ]
 files = [
     {file = "yowasp_runtime-1.53-py3-none-any.whl", hash = "sha256:74d28d70a57a9ab48ce3441c4fa5bea10ca7c7020aaccc8f4fed9ffb65cf4bde"},
+]
+
+[[package]]
+name = "yowasp-yosys"
+version = "0.40.0.0.post707"
+summary = "Yosys Open SYnthesis Suite"
+groups = ["default"]
+dependencies = [
+    "click",
+    "yowasp-runtime~=1.12",
+]
+files = [
+    {file = "yowasp_yosys-0.40.0.0.post707-py3-none-any.whl", hash = "sha256:b65a895d909c742a898f4a0a935b2daf197b79eeb2a46d42ea0bc4f8dededfbe"},
 ]

@@ -1,3 +1,4 @@
+from os import sync
 from amaranth import *
 from amaranth.build import *
 from amaranth.build.plat import Platform
@@ -13,7 +14,7 @@ class GirlTop(Elaboratable):
 
         ## Clock Defs
 
-        sync_freq = 64e6
+        sync_freq = 32e6
         bclk_freq = 4e6
 
         clk_sync = Signal()
@@ -21,7 +22,7 @@ class GirlTop(Elaboratable):
 
         clkin = platform.request("clk12", dir="i").i
 
-        m.submodules.pll = NXPLL(
+        m.submodules.pll = pll = NXPLL(
             clkin=clkin,
             clkin_freq=12e6,
             cd_out=cd_sync,
@@ -34,7 +35,8 @@ class GirlTop(Elaboratable):
         clk_div = Signal(range(clk_ratio))
 
         bclk = Signal()
-        with m.If(clk_div >= (clk_ratio - 1)):
+        # m.d.comb += bclk.eq(clk_div >= (clk_ratio - 1))
+        with m.If(clk_div >= (clk_ratio - 1) // 2):
             m.d.sync += clk_div.eq(0)
             m.d.sync += bclk.eq(~bclk)
         with m.Else():
@@ -42,26 +44,27 @@ class GirlTop(Elaboratable):
 
 
         ## RX from ADC
-        m.submodules.i2s_rx = rx = i2s_rx(sys_clk_freq=64e6, sclk_freq=4e6, sample_width=18)
+        m.submodules.i2s_rx = rx = i2s_rx(sys_clk_freq=sync_freq, sclk_freq=bclk_freq, sample_width=24)
 
-        adc = platform.request("adc", 0)
+        adc = platform.request("mic", 0)
+
         adc_dout = adc.data
         adc_lr_clk = adc.lrclk
         adc_bclk = adc.bclk
-        sclk_i = adc.sclk
+        # sclk_i = adc.sclk
 
         m.d.comb += adc_lr_clk.o.eq(rx.lrclk)
-        m.d.comb += adc_bclk.o.eq(bclk)
-        m.d.comb += rx.sclk.eq(bclk)
+        m.d.comb += adc_bclk.o.eq(rx.sclk)
         m.d.comb += rx.sdin.eq(adc_dout.i)
+        m.d.comb += adc.sel.o.eq(0)
 
-
-        clk_sig = Signal()
-        m.d.comb += sclk_i.o.eq(clk_sig)
-        m.d.sync += clk_sig.eq(~clk_sig)
+        # adc_sclk = ClockDomain("adc_sclk")
+        # m.domains += adc_sclk
+        # pll.create_clkout(adc_sclk, 16e6)
+        # m.d.comb += sclk_i.o.eq(adc_sclk.clk)
 
         ## TX to DAC
-        m.submodules.i2s_tx = tx = i2s_tx(sys_clk_freq=64e6, sclk_freq=4e6, sample_width=18)
+        m.submodules.i2s_tx = tx = i2s_tx(sys_clk_freq=sync_freq, sclk_freq=bclk_freq, sample_width=24)
 
         amp = platform.request("amp", 0)
         amp_lr_clk = amp.lrclk
@@ -70,26 +73,26 @@ class GirlTop(Elaboratable):
         dac_sd_mode_n = amp.en
 
         m.d.comb += dac_sd_mode_n.o.eq(1)
-        m.d.comb += amp_lr_clk.o.eq(tx.lrclk)
-        m.d.comb += amp_bclk.o.eq(bclk)
+        m.d.comb += amp_lr_clk.o.eq(~tx.lrclk)
+        m.d.comb += amp_bclk.o.eq(tx.sclk)
         m.d.comb += dac_din.o.eq(tx.sdout)
 
-        m.d.comb += tx.sink.data.eq(rx.source.data)
-        m.d.comb += tx.sink.valid.eq(1)
-        m.d.comb += tx.sclk.eq(bclk)
-        m.d.comb += tx.clk_div.eq(clk_div)
-        m.d.comb += rx.source.ready.eq(tx.sink.ready)
 
-        m.d.comb += platform.request("led", 0).o.eq(rx.source.data.xor())
+        m.d.comb += tx.sink.data.eq(rx.source.data)
+        m.d.comb += rx.source.ready.eq(tx.sink.ready)
+        m.d.comb += tx.sink.valid.eq(rx.source.valid)
+
+
+        m.d.comb += platform.request("led", 0).o.eq(pll.locked)
 
         return m
 
 if __name__ == "__main__":
-    p = LIFCLEVNPlatform(VCCIO6="1V8")
+    p = LIFCLEVNPlatform(VCCIO6="1V8", toolchain="Radiant")
 
     prototype_resources = [
         Resource("mic", 0,
-            Subsignal("clk", Pins("RASP_IO06", dir="o", conn=("RASP", 0)), Attrs(IO_TYPE="LVCMOS18")),
+            Subsignal("bclk", Pins("RASP_IO06", dir="o", conn=("RASP", 0)), Attrs(IO_TYPE="LVCMOS18")),
             Subsignal("data", Pins("RASP_IO05", dir="i", conn=("RASP", 0)), Attrs(IO_TYPE="LVCMOS18")),
             Subsignal("lrclk", Pins("RASP_IO19", dir="o", conn=("RASP", 0)), Attrs(IO_TYPE="LVCMOS18")),
             Subsignal("sel", Pins("RASP_IO26", dir="o", conn=("RASP", 0)), Attrs(IO_TYPE="LVCMOS18"))
@@ -113,4 +116,4 @@ if __name__ == "__main__":
     ]
     p.add_resources(prototype_resources)
     p.add_resources(pmod_adc)
-    p.build(GirlTop(), do_program=False)
+    p.build(GirlTop(), do_program=False, use_radiant_docker=True)
