@@ -9,9 +9,15 @@ dependencies = [
     "amlib @ git+https://github.com/amaranth-farm/amlib.git",
     "amaranth @ git+https://github.com/amaranth-lang/amaranth.git",
     "amaranth-boards @ git+https://github.com/amaranth-lang/amaranth-boards.git",
+    "migen @ git+https://github.com/m-labs/migen.git@4790bb577681a8c3a8d226bc196a4e5deb39e4df",
     "yowasp-nextpnr-ice40>=0.7.0.0.post519",
     "yowasp-nextpnr-nexus>=0.7.0.0.post519",
     "yowasp-yosys>=0.40.0.0.post707",
+    "litex>=2023.12",
+    "pythondata-cpu-vexriscv @ git+https://github.com/litex-hub/pythondata-cpu-vexriscv.git",
+    "pythondata-software-picolibc @ git+https://github.com/litex-hub/pythondata-software-picolibc.git",
+    "pythondata-software-compiler-rt @ git+https://github.com/litex-hub/pythondata-software-compiler_rt.git",
+    "meson>=1.4.0",
 ]
 requires-python = "==3.11.*"
 readme = "README.md"
