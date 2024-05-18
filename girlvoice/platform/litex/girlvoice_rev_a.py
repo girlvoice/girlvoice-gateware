@@ -2,6 +2,7 @@ from litex.build.generic_platform import *
 from litex.build.lattice import LatticeNexusPlatform
 from litex.build.lattice.programmer import IceStormProgrammer
 
+
 # IOs ----------------------------------------------------------------------------------------------
 
 _io = [
@@ -26,6 +27,11 @@ _io = [
         Subsignal("hold", Pins("52")),
         IOStandard("LVCMOS33")
     ),
+
+    ("i2c", 0,
+        Subsignal("scl", Pins("44")),
+        Subsignal("sda", Pins("42")),
+    )
 ]
 
 

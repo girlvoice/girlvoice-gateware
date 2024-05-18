@@ -7,6 +7,7 @@ use core::marker::PhantomData;
 use core::ops::Deref;
 #[allow(unused_imports)]
 use generic::*;
+use riscv as _;
 #[doc = r"Common register and bit access and modify traits"]
 pub mod generic {
     use core::marker;

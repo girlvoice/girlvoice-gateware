@@ -24,6 +24,7 @@ from litex.soc.cores.clock import *
 from litex.soc.integration.soc_core import *
 from litex.soc.integration.soc import SoCRegion
 from litex.soc.integration.builder import *
+from litex.soc.cores.bitbang import I2CMaster
 
 kB = 1024
 mB = 1024*kB
@@ -98,6 +99,9 @@ class BaseSoC(SoCCore):
         led = platform.request("user_led", 0)
 
         self.led_gpio = GPIOOut(led)
+
+
+        self.i2c = I2CMaster(platform.request("i2c"))
         # SPI Flash --------------------------------------------------------------------------------
         # if with_spi_flash:
         #     from litespi.modules import MX25L12833F
