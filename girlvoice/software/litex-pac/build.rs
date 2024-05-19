@@ -14,4 +14,31 @@ fn main() {
         println!("cargo:rerun-if-changed=device.x");
     }
     println!("cargo:rerun-if-changed=build.rs");
+
+    // If the svd file changes, rebuild this crate
+    println!("cargo:rerun-if-changed=girlsoc.svd");
+    let svd = String::from_utf8(include_bytes!("girlsoc.svd").to_vec())
+        .expect("svd file wasn't valid utf8");
+
+    // Generate the svd file to a string in RAM
+    let pac_file = svd2rust::generate(&svd, svd2rust::Target::RISCV, false)
+        .expect("couldn't generate file with svd2rust");
+
+    // This appears to be what they do inside svd2rust:main.rs
+    let lib_rs = pac_file.lib_rs.replace("] ", "]\n");
+
+    // Generate the output PAC file
+    let mut out_file = fs::File::create("src/lib.rs").expect("couldn't open output file");
+    for line in lib_rs.lines() {
+        // if bad_strings.contains(&line) {
+        //     println!("Found bad string, skipping");
+        //     continue;
+        // }
+        out_file
+            .write(line.as_bytes())
+            .expect("couldn't write line to lib.rs");
+        out_file
+            .write(b"\n")
+            .expect("couldn't write line ending to lib.rs");
+    }
 }

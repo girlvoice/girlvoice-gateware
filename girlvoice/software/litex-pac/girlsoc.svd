@@ -3,7 +3,7 @@
 <device schemaVersion="1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="CMSIS-SVD.xsd" >
     <vendor>litex</vendor>
     <name>SOC</name>
-    <description><![CDATA[Litex SoC 2024-05-17 00:50:32]]></description>
+    <description><![CDATA[Litex SoC 2024-05-18 16:40:38]]></description>
 
     <addressUnitBits>8</addressUnitBits>
     <width>32</width>
@@ -80,8 +80,64 @@ to the Wishbone/CSR bus are working correctly. The initial reset value of
             </addressBlock>
         </peripheral>
         <peripheral>
-            <name>IDENTIFIER_MEM</name>
+            <name>I2C</name>
             <baseAddress>0xF0000800</baseAddress>
+            <groupName>I2C</groupName>
+            <registers>
+                <register>
+                    <name>W</name>
+                    <addressOffset>0x0000</addressOffset>
+                    <resetValue>0x05</resetValue>
+                    <size>32</size>
+                    <fields>
+                        <field>
+                            <name>scl</name>
+                            <msb>0</msb>
+                            <bitRange>[0:0]</bitRange>
+                            <lsb>0</lsb>
+                            <description><![CDATA[Drives the state of the SCL pad.]]></description>
+                        </field>
+                        <field>
+                            <name>oe</name>
+                            <msb>1</msb>
+                            <bitRange>[1:1]</bitRange>
+                            <lsb>1</lsb>
+                            <description><![CDATA[Output Enable - if 0, both the SCL and SDA output drivers are disconnected.]]></description>
+                        </field>
+                        <field>
+                            <name>sda</name>
+                            <msb>2</msb>
+                            <bitRange>[2:2]</bitRange>
+                            <lsb>2</lsb>
+                            <description><![CDATA[Drives the state of the SDA pad.]]></description>
+                        </field>
+                    </fields>
+                </register>
+                <register>
+                    <name>R</name>
+                    <addressOffset>0x0004</addressOffset>
+                    <resetValue>0x00</resetValue>
+                    <size>32</size>
+                    <fields>
+                        <field>
+                            <name>sda</name>
+                            <msb>0</msb>
+                            <bitRange>[0:0]</bitRange>
+                            <lsb>0</lsb>
+                            <description><![CDATA[Contains the current state of the SDA pad.]]></description>
+                        </field>
+                    </fields>
+                </register>
+            </registers>
+            <addressBlock>
+                <offset>0</offset>
+                <size>0x8</size>
+                <usage>registers</usage>
+            </addressBlock>
+        </peripheral>
+        <peripheral>
+            <name>IDENTIFIER_MEM</name>
+            <baseAddress>0xF0001000</baseAddress>
             <groupName>IDENTIFIER_MEM</groupName>
             <registers>
                 <register>
@@ -108,7 +164,7 @@ to the Wishbone/CSR bus are working correctly. The initial reset value of
         </peripheral>
         <peripheral>
             <name>LED_GPIO</name>
-            <baseAddress>0xF0001000</baseAddress>
+            <baseAddress>0xF0001800</baseAddress>
             <groupName>LED_GPIO</groupName>
             <registers>
                 <register>
@@ -135,7 +191,7 @@ to the Wishbone/CSR bus are working correctly. The initial reset value of
         </peripheral>
         <peripheral>
             <name>TIMER0</name>
-            <baseAddress>0xF0001800</baseAddress>
+            <baseAddress>0xF0002000</baseAddress>
             <groupName>TIMER0</groupName>
             <registers>
                 <register>
@@ -281,7 +337,7 @@ register to disable individual events.]]></description>
         </peripheral>
         <peripheral>
             <name>UART</name>
-            <baseAddress>0xF0002000</baseAddress>
+            <baseAddress>0xF0002800</baseAddress>
             <groupName>UART</groupName>
             <registers>
                 <register>
@@ -484,6 +540,7 @@ register to disable individual events.]]></description>
             <constant name="CONFIG_CPU_INTERRUPTS" value="2" />
             <constant name="TIMER0_INTERRUPT" value="1" />
             <constant name="UART_INTERRUPT" value="0" />
+            <constant name="CONFIG_HAS_I2C" value="None" />
         </constants>
     </vendorExtensions>
 </device>

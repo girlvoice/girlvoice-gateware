@@ -7,7 +7,6 @@ use core::marker::PhantomData;
 use core::ops::Deref;
 #[allow(unused_imports)]
 use generic::*;
-use riscv as _;
 #[doc = r"Common register and bit access and modify traits"]
 pub mod generic {
     use core::marker;
@@ -1036,6 +1035,193 @@ module"]
         }
     }
 }
+#[doc = "I2C"]
+pub struct I2c {
+    _marker: PhantomData<*const ()>,
+}
+unsafe impl Send for I2c {}
+impl I2c {
+    #[doc = r"Pointer to the register block"]
+    pub const PTR: *const i2c::RegisterBlock = 0xf000_0800 as *const _;
+    #[doc = r"Return the pointer to the register block"]
+    #[inline(always)]
+    pub const fn ptr() -> *const i2c::RegisterBlock {
+        Self::PTR
+    }
+    #[doc = r" Steal an instance of this peripheral"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" Ensure that the new instance of the peripheral cannot be used in a way"]
+    #[doc = r" that may race with any existing instances, for example by only"]
+    #[doc = r" accessing read-only or write-only registers, or by consuming the"]
+    #[doc = r" original peripheral and using critical sections to coordinate"]
+    #[doc = r" access between multiple new instances."]
+    #[doc = r""]
+    #[doc = r" Additionally, other software such as HALs may rely on only one"]
+    #[doc = r" peripheral instance existing to ensure memory safety; ensure"]
+    #[doc = r" no stolen instances are passed to such software."]
+    pub unsafe fn steal() -> Self {
+        Self {
+            _marker: PhantomData,
+        }
+    }
+}
+impl Deref for I2c {
+    type Target = i2c::RegisterBlock;
+    #[inline(always)]
+    fn deref(&self) -> &Self::Target {
+        unsafe { &*Self::PTR }
+    }
+}
+impl core::fmt::Debug for I2c {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("I2c").finish()
+    }
+}
+#[doc = "I2C"]
+pub mod i2c {
+    #[repr(C)]
+    #[doc = "Register block"]
+    pub struct RegisterBlock {
+        w: W,
+        r: R,
+    }
+    impl RegisterBlock {
+        #[doc = "0x00 - "]
+        #[inline(always)]
+        pub const fn w(&self) -> &W {
+            &self.w
+        }
+        #[doc = "0x04 - "]
+        #[inline(always)]
+        pub const fn r(&self) -> &R {
+            &self.r
+        }
+    }
+    #[doc = "W (rw) register accessor: \n\nYou can [`read`](crate::generic::Reg::read) this register and get [`w::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`w::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@w`]
+module"]
+    pub type W = crate::Reg<w::WSpec>;
+    #[doc = ""]
+    pub mod w {
+        #[doc = "Register `W` reader"]
+        pub type R = crate::R<WSpec>;
+        #[doc = "Register `W` writer"]
+        pub type W = crate::W<WSpec>;
+        #[doc = "Field `scl` reader - Drives the state of the SCL pad."]
+        pub type SclR = crate::BitReader;
+        #[doc = "Field `scl` writer - Drives the state of the SCL pad."]
+        pub type SclW<'a, REG> = crate::BitWriter<'a, REG>;
+        #[doc = "Field `oe` reader - Output Enable - if 0, both the SCL and SDA output drivers are disconnected."]
+        pub type OeR = crate::BitReader;
+        #[doc = "Field `oe` writer - Output Enable - if 0, both the SCL and SDA output drivers are disconnected."]
+        pub type OeW<'a, REG> = crate::BitWriter<'a, REG>;
+        #[doc = "Field `sda` reader - Drives the state of the SDA pad."]
+        pub type SdaR = crate::BitReader;
+        #[doc = "Field `sda` writer - Drives the state of the SDA pad."]
+        pub type SdaW<'a, REG> = crate::BitWriter<'a, REG>;
+        impl R {
+            #[doc = "Bit 0 - Drives the state of the SCL pad."]
+            #[inline(always)]
+            pub fn scl(&self) -> SclR {
+                SclR::new((self.bits & 1) != 0)
+            }
+            #[doc = "Bit 1 - Output Enable - if 0, both the SCL and SDA output drivers are disconnected."]
+            #[inline(always)]
+            pub fn oe(&self) -> OeR {
+                OeR::new(((self.bits >> 1) & 1) != 0)
+            }
+            #[doc = "Bit 2 - Drives the state of the SDA pad."]
+            #[inline(always)]
+            pub fn sda(&self) -> SdaR {
+                SdaR::new(((self.bits >> 2) & 1) != 0)
+            }
+        }
+        impl W {
+            #[doc = "Bit 0 - Drives the state of the SCL pad."]
+            #[inline(always)]
+            #[must_use]
+            pub fn scl(&mut self) -> SclW<WSpec> {
+                SclW::new(self, 0)
+            }
+            #[doc = "Bit 1 - Output Enable - if 0, both the SCL and SDA output drivers are disconnected."]
+            #[inline(always)]
+            #[must_use]
+            pub fn oe(&mut self) -> OeW<WSpec> {
+                OeW::new(self, 1)
+            }
+            #[doc = "Bit 2 - Drives the state of the SDA pad."]
+            #[inline(always)]
+            #[must_use]
+            pub fn sda(&mut self) -> SdaW<WSpec> {
+                SdaW::new(self, 2)
+            }
+        }
+        #[doc = "\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`w::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`w::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
+        pub struct WSpec;
+        impl crate::RegisterSpec for WSpec {
+            type Ux = u32;
+        }
+        #[doc = "`read()` method returns [`w::R`](R) reader structure"]
+        impl crate::Readable for WSpec {}
+        #[doc = "`write(|w| ..)` method takes [`w::W`](W) writer structure"]
+        impl crate::Writable for WSpec {
+            type Safety = crate::Unsafe;
+            const ZERO_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+            const ONE_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+        }
+        #[doc = "`reset()` method sets W to value 0x05"]
+        impl crate::Resettable for WSpec {
+            const RESET_VALUE: u32 = 0x05;
+        }
+    }
+    #[doc = "R (rw) register accessor: \n\nYou can [`read`](crate::generic::Reg::read) this register and get [`r::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`r::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@r`]
+module"]
+    pub type R = crate::Reg<r::RSpec>;
+    #[doc = ""]
+    pub mod r {
+        #[doc = "Register `R` reader"]
+        pub type R = crate::R<RSpec>;
+        #[doc = "Register `R` writer"]
+        pub type W = crate::W<RSpec>;
+        #[doc = "Field `sda` reader - Contains the current state of the SDA pad."]
+        pub type SdaR = crate::BitReader;
+        #[doc = "Field `sda` writer - Contains the current state of the SDA pad."]
+        pub type SdaW<'a, REG> = crate::BitWriter<'a, REG>;
+        impl R {
+            #[doc = "Bit 0 - Contains the current state of the SDA pad."]
+            #[inline(always)]
+            pub fn sda(&self) -> SdaR {
+                SdaR::new((self.bits & 1) != 0)
+            }
+        }
+        impl W {
+            #[doc = "Bit 0 - Contains the current state of the SDA pad."]
+            #[inline(always)]
+            #[must_use]
+            pub fn sda(&mut self) -> SdaW<RSpec> {
+                SdaW::new(self, 0)
+            }
+        }
+        #[doc = "\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`r::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`r::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
+        pub struct RSpec;
+        impl crate::RegisterSpec for RSpec {
+            type Ux = u32;
+        }
+        #[doc = "`read()` method returns [`r::R`](R) reader structure"]
+        impl crate::Readable for RSpec {}
+        #[doc = "`write(|w| ..)` method takes [`r::W`](W) writer structure"]
+        impl crate::Writable for RSpec {
+            type Safety = crate::Unsafe;
+            const ZERO_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+            const ONE_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+        }
+        #[doc = "`reset()` method sets R to value 0"]
+        impl crate::Resettable for RSpec {
+            const RESET_VALUE: u32 = 0;
+        }
+    }
+}
 #[doc = "IDENTIFIER_MEM"]
 pub struct IdentifierMem {
     _marker: PhantomData<*const ()>,
@@ -1043,7 +1229,7 @@ pub struct IdentifierMem {
 unsafe impl Send for IdentifierMem {}
 impl IdentifierMem {
     #[doc = r"Pointer to the register block"]
-    pub const PTR: *const identifier_mem::RegisterBlock = 0xf000_0800 as *const _;
+    pub const PTR: *const identifier_mem::RegisterBlock = 0xf000_1000 as *const _;
     #[doc = r"Return the pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const identifier_mem::RegisterBlock {
@@ -1149,7 +1335,7 @@ pub struct LedGpio {
 unsafe impl Send for LedGpio {}
 impl LedGpio {
     #[doc = r"Pointer to the register block"]
-    pub const PTR: *const led_gpio::RegisterBlock = 0xf000_1000 as *const _;
+    pub const PTR: *const led_gpio::RegisterBlock = 0xf000_1800 as *const _;
     #[doc = r"Return the pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const led_gpio::RegisterBlock {
@@ -1255,7 +1441,7 @@ pub struct Timer0 {
 unsafe impl Send for Timer0 {}
 impl Timer0 {
     #[doc = r"Pointer to the register block"]
-    pub const PTR: *const timer0::RegisterBlock = 0xf000_1800 as *const _;
+    pub const PTR: *const timer0::RegisterBlock = 0xf000_2000 as *const _;
     #[doc = r"Return the pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const timer0::RegisterBlock {
@@ -1732,7 +1918,7 @@ pub struct Uart {
 unsafe impl Send for Uart {}
 impl Uart {
     #[doc = r"Pointer to the register block"]
-    pub const PTR: *const uart::RegisterBlock = 0xf000_2000 as *const _;
+    pub const PTR: *const uart::RegisterBlock = 0xf000_2800 as *const _;
     #[doc = r"Return the pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const uart::RegisterBlock {
@@ -2254,6 +2440,8 @@ static mut DEVICE_PERIPHERALS: bool = false;
 pub struct Peripherals {
     #[doc = "CTRL"]
     pub ctrl: Ctrl,
+    #[doc = "I2C"]
+    pub i2c: I2c,
     #[doc = "IDENTIFIER_MEM"]
     pub identifier_mem: IdentifierMem,
     #[doc = "LED_GPIO"]
@@ -2285,6 +2473,9 @@ impl Peripherals {
         DEVICE_PERIPHERALS = true;
         Peripherals {
             ctrl: Ctrl {
+                _marker: PhantomData,
+            },
+            i2c: I2c {
                 _marker: PhantomData,
             },
             identifier_mem: IdentifierMem {
