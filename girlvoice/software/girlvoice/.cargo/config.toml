@@ -8,3 +8,6 @@ rustflags = [
 
 [build]
 target = "riscv32imac-unknown-none-elf"
+
+[env]
+LITEX_BUILD_DIR = "/home/sage/programming_stuff/sage/girlvoice/girlvoice/targets/build/girlvoice_rev_a"
