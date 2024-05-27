@@ -9,7 +9,7 @@ from amaranth_boards.resources import *
 __all__ = ["GirlvoiceRevAPlatform"]
 
 class GirlvoiceRevAPlatform(LatticePlatform):
-    device = "LIFCL-17"
+    device = "LIFCL-40"
     package = "SG72"
     speed = "8"
     default_clk = "clk12"
@@ -31,9 +31,9 @@ class GirlvoiceRevAPlatform(LatticePlatform):
         #     attrs=Attrs(IO_TYPE="LVCMOS33")
         # ),
 
-        Resource("pwr_en", 0, Pins("28", dir="o", invert=True), Attrs(IO_TYPE="LVCMOS18H")),
+        Resource("pwr_en", 0, Pins("28", dir="o"), Attrs(IO_TYPE="LVCMOS18H")),
 
-        Resource("btn_pwr", 0, Pins("9", dir="i", invert=True), Attrs(IO_TYPE="LVCMOS18")),
+        Resource("btn_pwr", 0, Pins("27", dir="i"), Attrs(IO_TYPE="LVCMOS18H")),
         Resource("button_up", 0, Pins("19", dir="i", invert=True), Attrs(IO_TYPE="LVCMOS18")),
         Resource("button_down", 0, Pins("20", dir="i", invert=True), Attrs(IO_TYPE="LVCMOS18")),
 
@@ -41,7 +41,7 @@ class GirlvoiceRevAPlatform(LatticePlatform):
         Resource("aux_dout", 0, Pins("SDOUT", dir="o", conn=("aux_i2s", 0)), Attrs(IO_TYPE="LVCMOS18")),
         Resource("aux_din", 0, Pins("SDIN", dir="i", conn=("aux_i2s", 0)), Attrs(IO_TYPE="LVCMOS18")),
 
-        Resource("led", 0, Pins("13", dir="o", invert=True), Attrs(IO_TYPE="LVCMOS18H")),
+        Resource("led", 0, Pins("13", dir="o"), Attrs(IO_TYPE="LVCMOS18H")),
 
         Resource("mic", 0,
             Subsignal("clk", Pins("SCLK", dir="o", conn=("mic_i2s", 0)), Attrs(IO_TYPE="LVCMOS18H")),
@@ -83,11 +83,11 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             "ENABLE": "34",
             "INT": "37",
         }),
-        Connector("aux_i2s", 0, {
-            "MCLK": "22",
-            "SDIN": "10",
-            "SDOUT": "27",
-        })
+        # Connector("aux_i2s", 0, {
+        #     "MCLK": "22",
+        #     "SDIN": "10",
+        #     "SDOUT": "27",
+        # })
 
     ]
 
@@ -107,6 +107,6 @@ if __name__ == "__main__":
     count = Signal(24)
     m.d.sync += count.eq(count + 1)
     m.d.comb += p.request("led", 0).o.eq(count[-1])
-    m.d.comb += p.request("pwr_en", 0).o.eq(0)
+    m.d.comb += p.request("pwr_en", 0).o.eq(1)
 
     p.build(m)

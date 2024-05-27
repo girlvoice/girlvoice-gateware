@@ -114,7 +114,7 @@ class BaseSoC(SoCCore):
 def main():
     from litex.build.parser import LiteXArgumentParser
     parser = LiteXArgumentParser(platform=girlvoice_rev_a.Platform, description="LiteX SoC on Crosslink-NX Eval Board.")
-    parser.add_target_argument("--device",        default="LIFCL-17-8SG72C", help="FPGA device.")
+    parser.add_target_argument("--device",        default="LIFCL-40-8SG72C", help="FPGA device.")
     parser.add_target_argument("--sys-clk-freq",  default=75e6, type=float,   help="System clock frequency.")
     parser.add_target_argument("--serial",        default="serial",           help="UART Pins")
     parser.add_target_argument("--programmer",    default="iceprog",          help="Programmer (radiant or iceprog).")
