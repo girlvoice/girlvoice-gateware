@@ -5,7 +5,7 @@ from amaranth_boards.icebreaker import ICEBreakerPlatform
 
 from amlib.dsp import *
 
-from i2s import i2s_rx, i2s_tx
+from girlvoice.io.i2s import i2s_rx, i2s_tx
 
 class GirlTop(Elaboratable):
 

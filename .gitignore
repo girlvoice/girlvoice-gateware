@@ -39,6 +39,10 @@ MANIFEST
 # Environments
 .env
 .venv
+.devenv
+.buildenv
 
 # GTKwave traces
 *.vcd
+
+webhelp/

@@ -18,8 +18,9 @@ dependencies = [
     "pythondata-software-picolibc @ git+https://github.com/litex-hub/pythondata-software-picolibc.git",
     "pythondata-software-compiler-rt @ git+https://github.com/litex-hub/pythondata-software-compiler_rt.git",
     "meson>=1.4.0",
+    "ninja>=1.11.1.1",
 ]
-requires-python = "==3.11.*"
+requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "MIT"}
 

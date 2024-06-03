@@ -5,7 +5,7 @@ from amaranth.build.plat import Platform
 
 from girlvoice.platform.lifcl_evn import LIFCLEVNPlatform
 from girlvoice.platform.nexus_utils.pll import NXPLL
-from girlvoice.i2s import i2s_rx, i2s_tx
+from girlvoice.io.i2s import i2s_rx, i2s_tx
 
 class GirlTop(Elaboratable):
 

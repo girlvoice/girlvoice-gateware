@@ -5,7 +5,7 @@ from amaranth.build.plat import Platform
 
 from girlvoice.platform.girlvoice_rev_a import GirlvoiceRevAPlatform
 from girlvoice.platform.nexus_utils.pll import NXPLL
-from girlvoice.i2s import i2s_rx, i2s_tx
+from girlvoice.io.i2s import i2s_rx, i2s_tx
 
 class GirlTop(Elaboratable):
 
@@ -106,6 +106,6 @@ class GirlTop(Elaboratable):
         return m
 
 if __name__ == "__main__":
-    p = GirlvoiceRevAPlatform(toolchain="Oxide")
+    p = GirlvoiceRevAPlatform(toolchain="Radiant")
 
-    p.build(GirlTop(), do_program=False, use_radiant_docker=False)
+    p.build(GirlTop(), do_program=False, use_radiant_docker=True)
