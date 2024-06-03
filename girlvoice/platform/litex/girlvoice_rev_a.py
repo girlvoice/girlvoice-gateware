@@ -9,14 +9,16 @@ _io = [
     ("clk12", 0, Pins("11"), IOStandard("LVCMOS18H")),
 
     ("serial", 0,
-        Subsignal("rx", Pins("41"), IOStandard("LVCMOS33")),
+        Subsignal("rx", Pins("41"), IOStandard("LVCMOS33")), ## TEMP should be 41
         Subsignal("tx", Pins("43"), IOStandard("LVCMOS33")),
     ),
-    ("user_led", 0, Pins("13"), IOStandard("LVCMOS18H")),
+    ("led", 0, Pins("13"), IOStandard("LVCMOS18H")),
 
-    ("user_btn", 0, Pins("9"), IOStandard("LVCMOS18H")),
-    ("gsrn", 1, Pins("19"), IOStandard("LVCMOS18H")),
-    ("user_btn", 2, Pins("20"), IOStandard("LVCMOS18")),
+    ("btn_pwr", 0, Pins("27"), IOStandard("LVCMOS18H")),
+    ("btn_up", 0, Pins("19"), IOStandard("LVCMOS18H")),
+    ("btn_down", 0, Pins("20"), IOStandard("LVCMOS18H")),
+
+    ("pwr_en", 0, Pins("28"), IOStandard("LVCMOS18H")),
 
     ("spiflash", 0,
         Subsignal("cs_n", Pins("56")),
@@ -28,10 +30,10 @@ _io = [
         IOStandard("LVCMOS33")
     ),
 
-    ("i2c", 0,
-        Subsignal("scl", Pins("44")),
-        Subsignal("sda", Pins("42")),
-    )
+    # ("i2c", 0,
+    #     Subsignal("scl", Pins("44")),
+    #     Subsignal("sda", Pins("42")),
+    # )
 ]
 
 
