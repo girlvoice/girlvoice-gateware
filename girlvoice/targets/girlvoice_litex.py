@@ -98,7 +98,7 @@ class BaseSoC(SoCCore):
         "sram"     : 0x40000000,
         "main_ram" : 0x60000000,
         "csr"      : 0xf0000000,
-        "lmmi"     : 0x61000000,
+        "lmmi"     : 0x81000000,
     }
 
     def __init__(self, sys_clk_freq=75e6, device="LIFCL-17-8SG72C", toolchain="oxide",
@@ -110,10 +110,7 @@ class BaseSoC(SoCCore):
         # CRG --------------------------------------------------------------------------------------
         self.crg = _CRG(platform, sys_clk_freq)
 
-        platform.add_platform_command("ldc_set_sysconfig {{CONFIGIO_VOLTAGE_BANK0=3.3 CONFIGIO_VOLTAGE_BANK1=3.3}}")
-
-        platform.add_platform_command("ldc_set_sysconfig {{JTAG_PORT=DISABLE SLAVE_I2C_PORT=ENABLE}}")
-
+        platform.add_platform_command("ldc_set_sysconfig {{CONFIGIO_VOLTAGE_BANK0=3.3 CONFIGIO_VOLTAGE_BANK1=3.3 JTAG_PORT=DISABLE MASTER_SPI_PORT=SERIAL}}")
 
         # SoCCore -----------------------------------------_----------------------------------------
         # Disable Integrated SRAM since we want to instantiate LRAM specifically for it
@@ -145,9 +142,12 @@ class BaseSoC(SoCCore):
         # )
 
         # self.power_manager = _PowerManagement(platform)
+        scl_pad = platform.request("sclk")
+        sda_pad = platform.request("sda")
+        self.i2c = NexusI2CMaster(pad_sda=sda_pad, pad_scl=scl_pad ,sys_clk_freq=sys_clk_freq, scl_freq=400e3)
+        self.bus.add_slave("lmmi", self.i2c.bus.wishbone, SoCRegion(origin=self.mem_map["lmmi"], size=kB, cached=False))
+        platform.add_period_constraint(self.i2c.alt_scl_oen, 1/400e6)
 
-        self.i2c = NexusI2CMaster()
-        self.bus.add_slave("lmmi", self.i2c.bus, SoCRegion(origin=self.mem_map["lmmi"], size=32))
         # SPI Flash --------------------------------------------------------------------------------
         # if with_spi_flash:
         #     from litespi.modules import MX25L12833F
