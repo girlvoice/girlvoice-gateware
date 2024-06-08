@@ -30,10 +30,14 @@ _io = [
         IOStandard("LVCMOS33")
     ),
 
-    # ("i2c", 0,
-    #     Subsignal("scl", Pins("44")),
-    #     Subsignal("sda", Pins("42")),
-    # )
+
+    ("i2c", 0,
+        Subsignal("scl", Pins("44")),
+        Subsignal("sda", Pins("42")),
+        IOStandard("LVCMOS33"), Misc("PULLMODE=NONE")
+    ),
+
+    ("aux_mclk", 0, Pins("22"), IOStandard("LVCMOS18H"))
 ]
 
 

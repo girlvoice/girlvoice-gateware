@@ -12,7 +12,7 @@ class NexusI2CMaster(LiteXModule):
         clk_div = (sys_clk_freq / (scl_freq*4)) - 1
 
 
-    def __init__(self, sys_clk_freq, scl_freq, pad_sda, pad_scl, use_hard_io=True):
+    def __init__(self, sys_clk_freq, scl_freq, pads, use_hard_io=True):
 
         NBASE_DELAY = "0b1010"
 
@@ -40,8 +40,8 @@ class NexusI2CMaster(LiteXModule):
                 o_ALTSDAOEN = self.alt_sda_oen,
             )
             self.specials += [
-                Tristate(pad_sda, o=0, oe=(~self.alt_sda_oen), i=self.alt_sda_i),
-                Tristate(pad_scl, o=0, oe=(~self.alt_scl_oen), i=self.alt_scl_i)
+                Tristate(pads.sda, o=0, oe=(~self.alt_sda_oen), i=self.alt_sda_i),
+                Tristate(pads.scl, o=0, oe=(~self.alt_scl_oen))
             ]
         else:
             self.scl_o = Signal()
@@ -62,8 +62,8 @@ class NexusI2CMaster(LiteXModule):
                 o_SDAOE = self.sda_oe,
             )
             self.specials += [
-                Tristate(pad_sda, o=0, oe=self.sda_oe, i=self.sda_i),
-                Tristate(pad_scl, o=0, oe=self.scl_oe, i=self.scl_i)
+                Tristate(pads.sda, o=0, oe=self.sda_oe, i=self.sda_i),
+                Tristate(pads.scl, o=0, oe=self.scl_oe, i=self.scl_i)
             ]
 
         self.i2c_bus_busy = Signal()

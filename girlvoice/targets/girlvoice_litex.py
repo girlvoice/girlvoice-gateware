@@ -31,6 +31,13 @@ from girlvoice.nexus_i2c import NexusI2CMaster
 kB = 1024
 mB = 1024*kB
 
+def add_radiant_constraints(platform):
+    platform.add_platform_command("ldc_set_sysconfig {{CONFIGIO_VOLTAGE_BANK0=3.3 CONFIGIO_VOLTAGE_BANK1=3.3 JTAG_PORT=DISABLE MASTER_SPI_PORT=SERIAL}}")
+    platform.add_platform_command("ldc_set_vcc -bank 0 3.3")
+    platform.add_platform_command("ldc_set_vcc -bank 1 3.3")
+    platform.add_platform_command("ldc_set_vcc -bank 3 1.8")
+    platform.add_platform_command("ldc_set_vcc -bank 5 1.8")
+
 
 class _PowerManagement(LiteXModule):
     def __init__(self, platform):
@@ -106,11 +113,12 @@ class BaseSoC(SoCCore):
         **kwargs):
         platform = girlvoice_rev_a.Platform(device=device, toolchain=toolchain)
 
+        if toolchain == "radiant":
+            add_radiant_constraints(platform)
 
         # CRG --------------------------------------------------------------------------------------
         self.crg = _CRG(platform, sys_clk_freq)
 
-        platform.add_platform_command("ldc_set_sysconfig {{CONFIGIO_VOLTAGE_BANK0=3.3 CONFIGIO_VOLTAGE_BANK1=3.3 JTAG_PORT=DISABLE MASTER_SPI_PORT=SERIAL}}")
 
         # SoCCore -----------------------------------------_----------------------------------------
         # Disable Integrated SRAM since we want to instantiate LRAM specifically for it
@@ -131,23 +139,19 @@ class BaseSoC(SoCCore):
 
         self.comb += led.eq(~btn_up)
 
-        if toolchain == "radiant":
-            platform.add_platform_command("ldc_set_vcc -bank 0 3.3")
-            platform.add_platform_command("ldc_set_vcc -bank 1 3.3")
-            platform.add_platform_command("ldc_set_vcc -bank 3 1.8")
-            platform.add_platform_command("ldc_set_vcc -bank 5 1.8")
-        # self.leds = LedChaser(
-        #     pads         = platform.request("user_led", 0),
-        #     sys_clk_freq = sys_clk_freq
-        # )
-
         # self.power_manager = _PowerManagement(platform)
-        scl_pad = platform.request("sclk")
-        sda_pad = platform.request("sda")
-        self.i2c = NexusI2CMaster(pad_sda=sda_pad, pad_scl=scl_pad ,sys_clk_freq=sys_clk_freq, scl_freq=400e3)
-        self.bus.add_slave("lmmi", self.i2c.bus.wishbone, SoCRegion(origin=self.mem_map["lmmi"], size=kB, cached=False))
-        platform.add_period_constraint(self.i2c.alt_scl_oen, 1/400e6)
 
+        # I2C Hard IP --------------------------------------------------------------------
+
+        pads = platform.request("i2c")
+        self.i2c = NexusI2CMaster(pads=pads, sys_clk_freq=sys_clk_freq, scl_freq=400e3)
+        self.bus.add_slave("lmmi", self.i2c.bus.wishbone, SoCRegion(origin=self.mem_map["lmmi"], size=kB, cached=False))
+        platform.add_period_constraint(self.i2c.alt_scl_oen, period=1e9/400e6)
+
+
+        clk12 = platform.request("clk12")
+        aux_mclk = platform.request("aux_mclk")
+        self.comb += aux_mclk.eq(clk12)
         # SPI Flash --------------------------------------------------------------------------------
         # if with_spi_flash:
         #     from litespi.modules import MX25L12833F
