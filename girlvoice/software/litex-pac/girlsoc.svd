@@ -3,7 +3,7 @@
 <device schemaVersion="1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="CMSIS-SVD.xsd" >
     <vendor>litex</vendor>
     <name>SOC</name>
-    <description><![CDATA[Litex SoC 2024-05-18 16:40:38]]></description>
+    <description><![CDATA[Litex SoC 2024-06-08 14:40:23]]></description>
 
     <addressUnitBits>8</addressUnitBits>
     <width>32</width>
@@ -80,64 +80,8 @@ to the Wishbone/CSR bus are working correctly. The initial reset value of
             </addressBlock>
         </peripheral>
         <peripheral>
-            <name>I2C</name>
-            <baseAddress>0xF0000800</baseAddress>
-            <groupName>I2C</groupName>
-            <registers>
-                <register>
-                    <name>W</name>
-                    <addressOffset>0x0000</addressOffset>
-                    <resetValue>0x05</resetValue>
-                    <size>32</size>
-                    <fields>
-                        <field>
-                            <name>scl</name>
-                            <msb>0</msb>
-                            <bitRange>[0:0]</bitRange>
-                            <lsb>0</lsb>
-                            <description><![CDATA[Drives the state of the SCL pad.]]></description>
-                        </field>
-                        <field>
-                            <name>oe</name>
-                            <msb>1</msb>
-                            <bitRange>[1:1]</bitRange>
-                            <lsb>1</lsb>
-                            <description><![CDATA[Output Enable - if 0, both the SCL and SDA output drivers are disconnected.]]></description>
-                        </field>
-                        <field>
-                            <name>sda</name>
-                            <msb>2</msb>
-                            <bitRange>[2:2]</bitRange>
-                            <lsb>2</lsb>
-                            <description><![CDATA[Drives the state of the SDA pad.]]></description>
-                        </field>
-                    </fields>
-                </register>
-                <register>
-                    <name>R</name>
-                    <addressOffset>0x0004</addressOffset>
-                    <resetValue>0x00</resetValue>
-                    <size>32</size>
-                    <fields>
-                        <field>
-                            <name>sda</name>
-                            <msb>0</msb>
-                            <bitRange>[0:0]</bitRange>
-                            <lsb>0</lsb>
-                            <description><![CDATA[Contains the current state of the SDA pad.]]></description>
-                        </field>
-                    </fields>
-                </register>
-            </registers>
-            <addressBlock>
-                <offset>0</offset>
-                <size>0x8</size>
-                <usage>registers</usage>
-            </addressBlock>
-        </peripheral>
-        <peripheral>
             <name>IDENTIFIER_MEM</name>
-            <baseAddress>0xF0001000</baseAddress>
+            <baseAddress>0xF0000800</baseAddress>
             <groupName>IDENTIFIER_MEM</groupName>
             <registers>
                 <register>
@@ -163,35 +107,8 @@ to the Wishbone/CSR bus are working correctly. The initial reset value of
             </addressBlock>
         </peripheral>
         <peripheral>
-            <name>LED_GPIO</name>
-            <baseAddress>0xF0001800</baseAddress>
-            <groupName>LED_GPIO</groupName>
-            <registers>
-                <register>
-                    <name>OUT</name>
-                    <description><![CDATA[GPIO Output(s) Control.]]></description>
-                    <addressOffset>0x0000</addressOffset>
-                    <resetValue>0x00</resetValue>
-                    <size>32</size>
-                    <fields>
-                        <field>
-                            <name>out</name>
-                            <msb>0</msb>
-                            <bitRange>[0:0]</bitRange>
-                            <lsb>0</lsb>
-                        </field>
-                    </fields>
-                </register>
-            </registers>
-            <addressBlock>
-                <offset>0</offset>
-                <size>0x4</size>
-                <usage>registers</usage>
-            </addressBlock>
-        </peripheral>
-        <peripheral>
             <name>TIMER0</name>
-            <baseAddress>0xF0002000</baseAddress>
+            <baseAddress>0xF0001000</baseAddress>
             <groupName>TIMER0</groupName>
             <registers>
                 <register>
@@ -336,8 +253,172 @@ register to disable individual events.]]></description>
             </interrupt>
         </peripheral>
         <peripheral>
+            <name>I2CFIFO</name>
+            <baseAddress>0x81000000</baseAddress>
+            <groupName>I2CFIFO</groupName>
+            <registers>
+                <register>
+                    <name>I2CC1</name>
+                    <addressOffset>0x0020</addressOffset>
+                    <resetValue>0x9a</resetValue>
+                    <size>8</size>
+                    <fields>
+                        <field>
+                            <name>i2c_en</name>
+                            <msb>7</msb>
+                            <bitRange>[7:7]</bitRange>
+                            <lsb>7</lsb>
+                        </field>
+                    </fields>
+                </register>
+                <register>
+                    <name>I2CTXFIFO_LSB</name>
+                    <addressOffset>0x0120</addressOffset>
+                    <resetValue>0x00</resetValue>
+                    <size>8</size>
+                    <fields>
+                        <field>
+                            <name>txlsb</name>
+                            <msb>7</msb>
+                            <bitRange>[7:0]</bitRange>
+                            <lsb>0</lsb>
+                        </field>
+                    </fields>
+                </register>
+                <register>
+                    <name>I2CTXFIFO_MSB</name>
+                    <addressOffset>0x0130</addressOffset>
+                    <resetValue>0x00</resetValue>
+                    <size>8</size>
+                    <fields>
+                        <field>
+                            <name>cmd</name>
+                            <msb>1</msb>
+                            <bitRange>[1:0]</bitRange>
+                            <lsb>0</lsb>
+                        </field>
+                    </fields>
+                </register>
+                <register>
+                    <name>I2CRXFIFO_LSB</name>
+                    <addressOffset>0x0140</addressOffset>
+                    <resetValue>0x00</resetValue>
+                    <size>8</size>
+                    <fields>
+                        <field>
+                            <name>rx_lsb</name>
+                            <msb>7</msb>
+                            <bitRange>[7:0]</bitRange>
+                            <lsb>0</lsb>
+                        </field>
+                    </fields>
+                </register>
+                <register>
+                    <name>I2CRXFIFO_MSB</name>
+                    <addressOffset>0x0150</addressOffset>
+                    <resetValue>0x00</resetValue>
+                    <size>8</size>
+                    <fields>
+                        <field>
+                            <name>dfirst</name>
+                            <msb>0</msb>
+                            <bitRange>[0:0]</bitRange>
+                            <lsb>0</lsb>
+                        </field>
+                    </fields>
+                </register>
+                <register>
+                    <name>I2CFIFOSR_LSB</name>
+                    <addressOffset>0x0180</addressOffset>
+                    <resetValue>0x00</resetValue>
+                    <size>8</size>
+                    <fields>
+                        <field>
+                            <name>arblost</name>
+                            <msb>1</msb>
+                            <bitRange>[1:1]</bitRange>
+                            <lsb>1</lsb>
+                        </field>
+                        <field>
+                            <name>busy</name>
+                            <msb>3</msb>
+                            <bitRange>[3:3]</bitRange>
+                            <lsb>3</lsb>
+                        </field>
+                        <field>
+                            <name>rnack</name>
+                            <msb>4</msb>
+                            <bitRange>[4:4]</bitRange>
+                            <lsb>4</lsb>
+                        </field>
+                        <field>
+                            <name>rxoverfl</name>
+                            <msb>5</msb>
+                            <bitRange>[5:5]</bitRange>
+                            <lsb>5</lsb>
+                        </field>
+                        <field>
+                            <name>txoverfl</name>
+                            <msb>6</msb>
+                            <bitRange>[6:6]</bitRange>
+                            <lsb>6</lsb>
+                        </field>
+                        <field>
+                            <name>txserr</name>
+                            <msb>7</msb>
+                            <bitRange>[7:7]</bitRange>
+                            <lsb>7</lsb>
+                        </field>
+                    </fields>
+                </register>
+                <register>
+                    <name>I2CFIFOSR_MSB</name>
+                    <addressOffset>0x0190</addressOffset>
+                    <resetValue>0x00</resetValue>
+                    <size>8</size>
+                    <fields>
+                        <field>
+                            <name>rdcmpl</name>
+                            <msb>0</msb>
+                            <bitRange>[0:0]</bitRange>
+                            <lsb>0</lsb>
+                        </field>
+                        <field>
+                            <name>perifrw</name>
+                            <msb>1</msb>
+                            <bitRange>[1:1]</bitRange>
+                            <lsb>1</lsb>
+                        </field>
+                        <field>
+                            <name>txoverfl</name>
+                            <msb>2</msb>
+                            <bitRange>[2:2]</bitRange>
+                            <lsb>2</lsb>
+                        </field>
+                        <field>
+                            <name>rxunderfl</name>
+                            <msb>3</msb>
+                            <bitRange>[3:3]</bitRange>
+                            <lsb>3</lsb>
+                        </field>
+                        <field>
+                            <name>bus_free</name>
+                            <msb>4</msb>
+                            <bitRange>[4:4]</bitRange>
+                            <lsb>4</lsb>
+                        </field>
+                    </fields>
+                </register>
+            </registers>
+            <addressBlock>
+                <offset>0</offset>
+                <size>0x400</size>
+                <usage>registers</usage>
+            </addressBlock>
+        </peripheral>
+        <peripheral>
             <name>UART</name>
-            <baseAddress>0xF0002800</baseAddress>
+            <baseAddress>0xF0001800</baseAddress>
             <groupName>UART</groupName>
             <registers>
                 <register>
@@ -516,13 +597,18 @@ register to disable individual events.]]></description>
                 <size>0x00010000</size>
             </memoryRegion>
             <memoryRegion>
+                <name>LMMI</name>
+                <baseAddress>0x81000000</baseAddress>
+                <size>0x00000400</size>
+            </memoryRegion>
+            <memoryRegion>
                 <name>CSR</name>
                 <baseAddress>0xF0000000</baseAddress>
                 <size>0x00010000</size>
             </memoryRegion>
         </memoryRegions>
         <constants>
-            <constant name="CONFIG_CLOCK_FREQUENCY" value="75000000" />
+            <constant name="CONFIG_CLOCK_FREQUENCY" value="60000000" />
             <constant name="CONFIG_CPU_HAS_INTERRUPT" value="None" />
             <constant name="CONFIG_CPU_RESET_ADDR" value="0" />
             <constant name="CONFIG_CPU_HAS_DCACHE" value="None" />
@@ -540,7 +626,6 @@ register to disable individual events.]]></description>
             <constant name="CONFIG_CPU_INTERRUPTS" value="2" />
             <constant name="TIMER0_INTERRUPT" value="1" />
             <constant name="UART_INTERRUPT" value="0" />
-            <constant name="CONFIG_HAS_I2C" value="None" />
         </constants>
     </vendorExtensions>
 </device>
