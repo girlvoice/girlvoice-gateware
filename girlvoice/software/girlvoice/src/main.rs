@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 
-
+use hex;
 use hal::hal::blocking::serial::Write;
 use litex_pac as pac;
 use riscv_rt::entry;
@@ -35,9 +35,24 @@ fn main() -> ! {
         registers: peripherals.uart,
     };
 
-    serial.bwrite_all(b"Starting I2C read!").unwrap();
+    serial.bwrite_all(b"Starting I2C read!\n").unwrap();
 
-    i2c0.read_u16(0x0a, 0x0000, 2);
+    let max_reg_addr: u16 = 0x013a;
+    let mut hex_bytes = [0_u8; 2 * 2];
+
+    for addr in (0..max_reg_addr + 1).step_by(2){
+        hex::encode_to_slice(addr.to_be_bytes(), &mut hex_bytes).unwrap();
+        serial.bwrite_all(b"0x").unwrap();
+        serial.bwrite_all(&hex_bytes).unwrap();
+        serial.bwrite_all(b": ").unwrap();
+
+        let reg_data = i2c0.read_u16(0x0a, addr);
+        hex::encode_to_slice(reg_data.to_be_bytes(), &mut hex_bytes).unwrap();
+
+        serial.bwrite_all(b"0x").unwrap();
+        serial.bwrite_all(&hex_bytes).unwrap();
+        serial.bwrite_all(b"\n").unwrap();
+    }
 
     loop {
         serial.bwrite_all(b"awaw").unwrap();

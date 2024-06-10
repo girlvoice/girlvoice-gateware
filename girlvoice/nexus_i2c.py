@@ -20,7 +20,6 @@ class NexusI2CMaster(LiteXModule):
 
         self.params = {}
 
-
         if use_hard_io:
             self.alt_scl_o = Signal()
             self.alt_sda_o = Signal()
@@ -69,7 +68,6 @@ class NexusI2CMaster(LiteXModule):
         self.i2c_bus_busy = Signal()
         self.interrupt = Signal()
         self.bus = bus = lmmi.LMMItoWishbone()
-        # self.bus = bus = wishbone.Interface(adr_width=32, data_width=32)
 
         self.request_i = bus.lmmi.request
         self.wr_rdn_i = bus.lmmi.wr_rdn
@@ -132,7 +130,7 @@ class NexusI2CMaster(LiteXModule):
             p_NONUSRTESTSOFTTRIMEN = "DIS",             # Enables soft trimming of the capacitance of the 50ns Filter and 50ns Delay.
             p_NONUSRTSTSOFTTRIMVALUE = "0b000",         # Capacitance trim value for 50ns Filter and 50ns Delay.  Default on power up is 3'b000, after a clock cycle this value with take current hard trim value.
             p_REGI2CBR = "0b0000101110",                     # I2C Clock Pre-Scale Register value FSCL = FSOURCE / (4 * (I2CBR[9:0] + 1))
-            p_TSPTIMERVALUE = "0b10010010111"           # Value that will be loaded into a down counter. This value will ensure I2C timing specification for Start/Repeated Start signal is met.
+            p_TSPTIMERVALUE = "0b10010010111"           # Value that will be loaded into a down counter. This value will ensure I2C timing specification for Start/Repeated Start signal is met. Counted down against the system clock.
         )
 
         self.specials += Instance(
