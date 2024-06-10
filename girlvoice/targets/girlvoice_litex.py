@@ -33,6 +33,7 @@ mB = 1024*kB
 
 def add_radiant_constraints(platform):
     platform.add_platform_command("ldc_set_sysconfig {{CONFIGIO_VOLTAGE_BANK0=3.3 CONFIGIO_VOLTAGE_BANK1=3.3 JTAG_PORT=DISABLE MASTER_SPI_PORT=SERIAL}}")
+    platform.add_platform_command("ldc_set_location -site {{PLL_LRC}} [ get_cells {{PLL_0.PLL_inst}} ]")
     platform.add_platform_command("ldc_set_vcc -bank 0 3.3")
     platform.add_platform_command("ldc_set_vcc -bank 1 3.3")
     platform.add_platform_command("ldc_set_vcc -bank 3 1.8")
@@ -46,8 +47,7 @@ class _PowerManagement(LiteXModule):
         pwr_en = platform.request("pwr_en")
 
         pwr_on = Signal(reset=1)
-        # self.comb += pwr_en.eq(pwr_on)
-        self.comb += platform.request("led").eq(1)
+        self.comb += pwr_en.eq(pwr_on)
 
         btn_last = Signal(reset=1)
         btn_rising = Signal()
@@ -135,11 +135,9 @@ class BaseSoC(SoCCore):
 
         led = platform.request("led")
 
-        btn_up = platform.request("btn_up")
+        self.comb += led.eq(self.crg.sys_pll.locked)
 
-        self.comb += led.eq(~btn_up)
-
-        # self.power_manager = _PowerManagement(platform)
+        self.power_manager = _PowerManagement(platform)
 
         # I2C Hard IP --------------------------------------------------------------------
 
@@ -149,9 +147,9 @@ class BaseSoC(SoCCore):
         platform.add_period_constraint(self.i2c.alt_scl_oen, period=1e9/400e6)
 
 
-        clk12 = platform.request("clk12")
-        aux_mclk = platform.request("aux_mclk")
-        self.comb += aux_mclk.eq(clk12)
+        # clk12 = platform.request("clk12")
+        # aux_mclk = platform.request("aux_mclk")
+        # self.comb += aux_mclk.eq(clk12)
         # SPI Flash --------------------------------------------------------------------------------
         # if with_spi_flash:
         #     from litespi.modules import MX25L12833F
@@ -165,7 +163,7 @@ class BaseSoC(SoCCore):
 def main():
     from litex.build.parser import LiteXArgumentParser
     parser = LiteXArgumentParser(platform=girlvoice_rev_a.Platform, description="LiteX SoC on Crosslink-NX Eval Board.")
-    parser.add_target_argument("--device",        default="LIFCL-17-8SG72C", help="FPGA device.")
+    parser.add_target_argument("--device",        default="LIFCL-40-8SG72C", help="FPGA device.")
     parser.add_target_argument("--sys-clk-freq",  default=60e6, type=float,   help="System clock frequency.")
     parser.add_target_argument("--serial",        default="serial",           help="UART Pins")
     parser.add_target_argument("--programmer",    default="iceprog",          help="Programmer (radiant or iceprog).")

@@ -9,7 +9,7 @@ _io = [
     ("clk12", 0, Pins("11"), IOStandard("LVCMOS18H")),
 
     ("serial", 0,
-        Subsignal("rx", Pins("41"), IOStandard("LVCMOS33")), ## TEMP should be 41
+        Subsignal("rx", Pins("41"), IOStandard("LVCMOS33")),
         Subsignal("tx", Pins("43"), IOStandard("LVCMOS33")),
     ),
     ("led", 0, Pins("13"), IOStandard("LVCMOS18H")),

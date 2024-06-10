@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 embedded-hal = "1.0.0"
 fugit = "0.3.7"
+hex = { version = "0.4.3", default-features = false}
 litex-hal = "0.4.0"
 litex-pac = { path = "../litex-pac", features = ["rt", "critical-section"] }
 panic-halt = "0.2.0"
