@@ -1,109 +1,177 @@
-use core::arch::asm;
-use fugit::{Duration, HertzU32};
-use litex_pac::I2c;
+use core::u8;
 
-use embedded_hal::i2c::{SevenBitAddress};
+use litex_pac::I2cfifo;
+use embedded_hal::i2c::SevenBitAddress;
+use embedded_hal::i2c::{self, I2c, Operation};
 
-pub struct I2C {
-    registers: I2c,
-    sys_clk_per_scl: u32,
-}
 #[allow(dead_code)]
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum Error {
+    TransactionFailed,
+    InvalidState,
+    RxUnderflow,
+}
 
-impl I2C {
-    pub fn new(registers: I2c, freq: HertzU32, sys_clk_freq: HertzU32) -> Self {
-        Self { registers, sys_clk_per_scl: sys_clk_freq / freq}
+pub enum TxCmd {
+    DataByte = 0,
+    LastByte = 1,
+    StartCount = 2,
+    RestartCount = 3,
+}
+
+pub struct I2c0 {
+    registers: I2cfifo,
+}
+
+impl I2c0 {
+    pub fn new(registers: I2cfifo) -> Self {
+        Self { registers}
     }
 
-    // pub fn write(mut self, addr: SevenBitAddress, bytes: &[u8]) -> Result<(), i2c::Error> {
-    // }
-
-    // pub fn read(mut self, addr: SevenBitAddress, buffer: &mut [u8]) {
-    //     self.start();
-
-
-    // }
-
-    pub fn setup(&mut self){
-        self.registers.w().write(|w| w.oe().set_bit());
+    fn is_read_complete(&mut self) -> bool {
+        self.registers.i2cfifosr_msb().read().rdcmpl().bit()
     }
 
-    fn start(&mut self) {
-        self.registers.w().write(|w| w.sda().clear_bit());
-        self.registers.w().write(|w| w.scl().clear_bit());
+    fn is_bus_busy(&mut self) -> bool {
+        self.registers.i2cfifosr_lsb().read().busy().bit()
     }
 
-    pub fn delay(&mut self) {
-        for _ in 0..self.sys_clk_per_scl/2 {
-            unsafe { asm!("nop"); }
+    pub fn recieved_nack(&mut self) -> bool {
+        self.registers.i2cfifosr_lsb().read().rnack().bit()
+    }
+
+    fn check_rx_underflow(&mut self) -> bool {
+        self.registers.i2cfifosr_msb().read().rxunderfl().bit()
+    }
+
+    // TX FIFO can be reset to known-good state by reading from it.
+    fn reset_tx_fifo(&mut self) {
+        self.registers.i2ctxfifo_lsb().read().bits();
+    }
+
+    // RX FIFO can be reset to known-good state by writing anything to it.
+    fn reset_rx_fifo(&mut self) {
+        self.registers.i2crxfifo_lsb().write(|w| unsafe{ w.bits(0) });
+    }
+
+    fn push_tx_byte(&mut self, byte: u8, cmd: TxCmd){
+        self.registers.i2ctxfifo_lsb().write(|w| unsafe{ w.txlsb().bits(byte) });
+        self.registers.i2ctxfifo_msb().write(|w| unsafe{ w.cmd().bits(cmd as u8)} );
+    }
+
+    fn pop_rx_byte(&mut self) -> u8 {
+        let byte = self.registers.i2crxfifo_lsb().read().rx_lsb().bits();
+        let _first = self.registers.i2crxfifo_msb().read().dfirst().bit();
+        byte
+    }
+
+    fn read_internal( &mut self, address: SevenBitAddress, buffer: &mut [u8]) -> Result<(), Error> {
+        let buf_len = buffer.len() as u8;
+        if buf_len > 31 {
+            return Err(Error::RxUnderflow);
         }
-    }
 
-    pub fn set(&mut self) {
-        self.registers.w().write(|w| w.sda().set_bit());
-        self.registers.w().write(|w| w.scl().set_bit());
-    }
+        self.push_tx_byte(buf_len, TxCmd::RestartCount);
+        self.push_tx_byte((address << 1) | 1, TxCmd::DataByte);
 
-    pub fn clear(&mut self) {
-        self.registers.w().write(|w| w.sda().clear_bit());
-        self.registers.w().write(|w| w.scl().clear_bit());
-    }
-    fn read_bit(&mut self) -> bool {
-        self.registers.w().write(|w| w.sda().set_bit());
-        self.registers.w().write(|w| w.scl().set_bit());
-        let bit = self.registers.r().read().sda().bit();
-        self.registers.w().write(|w| w.scl().clear_bit());
-
-        bit
-    }
-
-    fn write_bit(&mut self, bit: bool) {
-        self.registers.w().write(|w| w.scl().clear_bit());
-        if bit {
-            self.registers.w().write(|w| w.sda().set_bit());
-        } else {
-            self.registers.w().write(|w| w.sda().clear_bit());
+        while !self.is_read_complete() {
+            // if self.recieved_nack() {
+            //     return Err(Error::TransactionFailed);
+            // }
         }
-        // self.registers.w().write(|w| w.sda().);
-        self.registers.w().write(|w| w.scl().set_bit());
+
+        for byte in buffer.iter_mut() {
+            *byte = self.pop_rx_byte();
+            // if self.check_rx_underflow() {
+            //     return Err(Error::RxUnderflow);
+            // }
+        }
+        self.reset_rx_fifo();
+        Ok(())
     }
 
-    pub fn setup_bus(&mut self, addr: SevenBitAddress, read: bool){
-        for i in 7..0 {
-            // let bit = ((addr >> i) & 1) == 1;
-            self.write_bit(true);
-            self.write_bit(false);
+    fn write_internal( &mut self, address: SevenBitAddress, bytes: &[u8]) -> Result<(), Error> {
+        let mut bytes = bytes.into_iter().peekable();
+        self.reset_tx_fifo();
+
+        // if self.is_bus_busy() {return Err(Error::InvalidState);}
+
+        self.push_tx_byte(0, TxCmd::RestartCount);
+        self.push_tx_byte(address << 1, TxCmd::DataByte);
+
+        while let Some(byte) = bytes.next() {
+            let last = bytes.peek().is_none();
+            self.push_tx_byte(*byte, if last {TxCmd::LastByte} else {TxCmd::DataByte});
         }
-        self.write_bit(read);
+
+        if self.recieved_nack() { return Err(Error::TransactionFailed) }
+
+        Ok(())
     }
 }
 
+impl i2c::Error for Error {
+    fn kind(&self) -> i2c::ErrorKind {
+        match *self {
+            Error::RxUnderflow => i2c::ErrorKind::Other,
+            Error::TransactionFailed => i2c::ErrorKind::Bus,
+            Error::InvalidState => i2c::ErrorKind::Other
+        }
+    }
+}
 
+impl i2c::ErrorType for I2c0 {
+    type Error = Error;
+}
 
-// macro_rules! hal {
-//     ($($I2CX:ident: ($i2cX:ident),)+) => {
-//         $(
-//             impl<Sda, Scl> I2C<$I2CX, (Sda, Scl)> {
-//                 // Configures the I2C peripheral to work in master mode
-//                 pub fn $i2cX<F, SystemF>(
-//                     i2c: $I2CX,
-//                     sda_pin: Sda,
-//                     scl_pin: Scl,
-//                     freq: F,
-//                     resets: &mut RESETS,
-//                     system_clock: SystemF) -> Self
-//                 where
-//                     F: Into<HertzU32>,
-//                     Sda: ValidPinSda<$I2CX> + AnyPin<Pull = PullUp>,
-//                     Scl: ValidPinScl<$I2CX> + AnyPin<Pull = PullUp>,
-//                     SystemF: Into<HertzU32>,
-//                 {
-//                     let freq = freq.to_Hz();
-//                     assert!(freq <= 1_000_000);
-//                     assert!(freq > 0);
-//                 }
-//             }
-//         )+
-//     }
-// }
+impl I2c<SevenBitAddress> for I2c0 {
+    fn transaction(&mut self, address: SevenBitAddress, operations: &mut [Operation]) -> Result<(), Self::Error> {
+
+        // let operations = operations;
+        for op in operations {
+            match op {
+                Operation::Read(buf) => self.read_internal(address, buf)?,
+                Operation::Write(buf) => self.write_internal(address, buf)?
+            }
+        }
+
+        Ok(())
+    }
+
+    fn write_read(&mut self, address: SevenBitAddress, write: &[u8], read: &mut [u8]) -> Result<(), Self::Error> {
+        let buf_len = read.len() as u8;
+        if buf_len > 31 {
+            return Err(Error::RxUnderflow);
+        }
+
+        self.reset_tx_fifo();
+
+        if self.is_bus_busy() {return Err(Error::InvalidState);}
+
+        self.push_tx_byte(0, TxCmd::RestartCount);
+        self.push_tx_byte(address << 1, TxCmd::DataByte);
+
+        for byte in write {
+            self.push_tx_byte(*byte, TxCmd::DataByte);
+        }
+        self.push_tx_byte(2, TxCmd::RestartCount);
+        self.push_tx_byte((address << 1) | 1, TxCmd::DataByte);
+
+        while !self.is_read_complete() {}
+
+        for byte in read.iter_mut() {
+            *byte = self.pop_rx_byte();
+            if self.check_rx_underflow() {
+                return Err(Error::RxUnderflow);
+            }
+        }
+
+        // // Block until transaction is finished
+        while self.is_bus_busy() {}
+
+        self.reset_rx_fifo();
+
+        Ok(())
+    }
+}

@@ -129,7 +129,7 @@ class NexusI2CMaster(LiteXModule):
             p_NCRSDAOUTDLYEN = "DIS",                   # Enables 50ns Analog SDA Output Delay
             p_NONUSRTESTSOFTTRIMEN = "DIS",             # Enables soft trimming of the capacitance of the 50ns Filter and 50ns Delay.
             p_NONUSRTSTSOFTTRIMVALUE = "0b000",         # Capacitance trim value for 50ns Filter and 50ns Delay.  Default on power up is 3'b000, after a clock cycle this value with take current hard trim value.
-            p_REGI2CBR = "0b0000101110",                     # I2C Clock Pre-Scale Register value FSCL = FSOURCE / (4 * (I2CBR[9:0] + 1))
+            p_REGI2CBR = "0b0000100110",                     # I2C Clock Pre-Scale Register value FSCL = FSOURCE / (4 * (I2CBR[9:0] + 1))
             p_TSPTIMERVALUE = "0b10010010111"           # Value that will be loaded into a down counter. This value will ensure I2C timing specification for Start/Repeated Start signal is met. Counted down against the system clock.
         )
 

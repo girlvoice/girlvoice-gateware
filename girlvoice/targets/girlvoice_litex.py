@@ -146,10 +146,35 @@ class BaseSoC(SoCCore):
         self.bus.add_slave("lmmi", self.i2c.bus.wishbone, SoCRegion(origin=self.mem_map["lmmi"], size=kB, cached=False))
         platform.add_period_constraint(self.i2c.alt_scl_oen, period=1e9/400e6)
 
+        clk12 = platform.request("clk12")
+        # clk12_freq = 12e6
+        # self.cd_clk12 = ClockDomain()
+        # self.comb += self.cd_clk12.clk.eq(clk12)
 
-        # clk12 = platform.request("clk12")
-        # aux_mclk = platform.request("aux_mclk")
-        # self.comb += aux_mclk.eq(clk12)
+        amp = platform.request("amp")
+        self.comb += amp.en.eq(1)
+
+        tp_rstn = platform.request("tp_rstn")
+        self.comb += tp_rstn.eq(1)
+
+        aux_mclk = platform.request("aux_mclk")
+        self.comb += aux_mclk.eq(clk12)
+
+        # bclk_freq = 3072e3
+        # clk_ratio = int(clk12_freq // bclk_freq)
+        # clk_div = Signal(max=clk_ratio)
+
+        # bclk = Signal()
+        # self.sync.clk12 += [
+        #     If(clk_div >= (clk_ratio - 1) // 2,
+        #         clk_div.eq(0),
+        #         bclk.eq(~bclk),
+        #     ).Else(
+        #         clk_div.eq(clk_div + 1)
+        #     )
+        # ]
+
+        # self.comb += amp.bclk.eq(bclk)
         # SPI Flash --------------------------------------------------------------------------------
         # if with_spi_flash:
         #     from litespi.modules import MX25L12833F
@@ -163,7 +188,7 @@ class BaseSoC(SoCCore):
 def main():
     from litex.build.parser import LiteXArgumentParser
     parser = LiteXArgumentParser(platform=girlvoice_rev_a.Platform, description="LiteX SoC on Crosslink-NX Eval Board.")
-    parser.add_target_argument("--device",        default="LIFCL-40-8SG72C", help="FPGA device.")
+    parser.add_target_argument("--device",        default="LIFCL-17-8SG72C", help="FPGA device.")
     parser.add_target_argument("--sys-clk-freq",  default=60e6, type=float,   help="System clock frequency.")
     parser.add_target_argument("--serial",        default="serial",           help="UART Pins")
     parser.add_target_argument("--programmer",    default="iceprog",          help="Programmer (radiant or iceprog).")

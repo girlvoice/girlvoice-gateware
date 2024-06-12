@@ -37,7 +37,15 @@ _io = [
         IOStandard("LVCMOS33"), Misc("PULLMODE=NONE")
     ),
 
-    ("aux_mclk", 0, Pins("22"), IOStandard("LVCMOS18H"))
+    ("aux_mclk", 0, Pins("22"), IOStandard("LVCMOS18H")),
+
+    ("amp", 0,
+        Subsignal("en", Pins("34")),
+        Subsignal("bclk", Pins("31")),
+        IOStandard("LVCMOS18H")
+    ),
+
+    ("tp_rstn", 0, Pins("15"), IOStandard("LVCMOS18H")),
 ]
 
 
