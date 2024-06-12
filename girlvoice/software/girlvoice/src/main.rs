@@ -37,7 +37,6 @@ fn main() -> ! {
     let mut i2c0 = I2c0::new(peripherals.i2cfifo);
 
 
-
     serial.bwrite_all(b"Starting I2C read!\n").unwrap();
 
     let dev_addr: SevenBitAddress = 0x0a;
