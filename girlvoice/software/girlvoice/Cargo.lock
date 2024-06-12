@@ -3,6 +3,13 @@
 version = 3
 
 [[package]]
+name = "aw88395"
+version = "0.1.0"
+dependencies = [
+ "embedded-hal 1.0.0",
+]
+
+[[package]]
 name = "critical-section"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -43,6 +50,7 @@ checksum = "1d758ba1b47b00caf47f24925c0074ecb20d6dfcffe7f6d53395c0465674841a"
 name = "girlvoice"
 version = "0.1.0"
 dependencies = [
+ "aw88395",
  "embedded-hal 1.0.0",
  "fugit",
  "hex",
