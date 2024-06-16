@@ -13,12 +13,25 @@ pub enum Error {
     RxUnderflow,
 }
 
-pub enum TxCmd {
-    DataByte = 0,
-    LastByte = 1,
-    StartCount = 2,
-    RestartCount = 3,
-}
+// #[derive(Debug, Copy, Clone)]
+// pub enum TxCmd {
+//     DataByte = 0x0,
+//     LastByte = 0x1,
+//     StartCount = 0x2,
+//     RestartCount = 0x3,
+// }
+
+
+// impl TxCmd {
+//     const fn value(&self) -> u8 {
+//         match *self {
+//             TxCmd::DataByte => 0x0,
+//             TxCmd::LastByte => 0x1,
+//             TxCmd::StartCount => 0x2,
+//             TxCmd::RestartCount => 0x3,
+//         }
+//     }
+// }
 
 pub struct I2c0 {
     registers: I2cfifo,
@@ -55,9 +68,9 @@ impl I2c0 {
         self.registers.i2crxfifo_lsb().write(|w| unsafe{ w.bits(0) });
     }
 
-    fn push_tx_byte(&mut self, byte: u8, cmd: TxCmd){
+    fn push_tx_byte(&mut self, byte: u8, cmd: u8){
         self.registers.i2ctxfifo_lsb().write(|w| unsafe{ w.txlsb().bits(byte) });
-        self.registers.i2ctxfifo_msb().write(|w| unsafe{ w.cmd().bits(cmd as u8)} );
+        self.registers.i2ctxfifo_msb().write(|w| unsafe{ w.cmd().bits(cmd)} );
     }
 
     fn pop_rx_byte(&mut self) -> u8 {
@@ -66,43 +79,44 @@ impl I2c0 {
         byte
     }
 
-    fn read_internal( &mut self, address: SevenBitAddress, buffer: &mut [u8]) -> Result<(), Error> {
-        let buf_len = buffer.len() as u8;
-        if buf_len > 31 {
-            return Err(Error::RxUnderflow);
-        }
+    // fn read_internal( &mut self, address: SevenBitAddress, buffer: &mut [u8]) -> Result<(), Error> {
+    //     let buf_len = buffer.len() as u8;
+    //     if buf_len > 31 {
+    //         return Err(Error::RxUnderflow);
+    //     }
 
-        self.push_tx_byte(buf_len, TxCmd::RestartCount);
-        self.push_tx_byte((address << 1) | 1, TxCmd::DataByte);
+    //     self.push_tx_byte(buf_len, TxCmd::RestartCount);
+    //     self.push_tx_byte((address << 1) | 1, TxCmd::DataByte);
 
-        while !self.is_read_complete() {
-            // if self.recieved_nack() {
-            //     return Err(Error::TransactionFailed);
-            // }
-        }
+    //     while !self.is_read_complete() {
+    //         // if self.recieved_nack() {
+    //         //     return Err(Error::TransactionFailed);
+    //         // }
+    //     }
 
-        for byte in buffer.iter_mut() {
-            *byte = self.pop_rx_byte();
-            // if self.check_rx_underflow() {
-            //     return Err(Error::RxUnderflow);
-            // }
-        }
-        self.reset_rx_fifo();
-        Ok(())
-    }
+    //     for byte in buffer.iter_mut() {
+    //         *byte = self.pop_rx_byte();
+    //         // if self.check_rx_underflow() {
+    //         //     return Err(Error::RxUnderflow);
+    //         // }
+    //     }
+    //     self.reset_rx_fifo();
+    //     Ok(())
+    // }
 
     fn write_internal( &mut self, address: SevenBitAddress, bytes: &[u8]) -> Result<(), Error> {
-        let mut bytes = bytes.into_iter().peekable();
+        let len = bytes.len();
+        let bytes = bytes.into_iter();
         self.reset_tx_fifo();
 
-        // if self.is_bus_busy() {return Err(Error::InvalidState);}
+        if self.is_bus_busy() {return Err(Error::InvalidState);}
 
-        self.push_tx_byte(0, TxCmd::RestartCount);
-        self.push_tx_byte(address << 1, TxCmd::DataByte);
+        self.push_tx_byte(0, 3);
+        self.push_tx_byte(address << 1, 0);
 
-        while let Some(byte) = bytes.next() {
-            let last = bytes.peek().is_none();
-            self.push_tx_byte(*byte, if last {TxCmd::LastByte} else {TxCmd::DataByte});
+        for (i, byte) in bytes.enumerate() {
+            let last = i == len - 1;
+            self.push_tx_byte(*byte, if last { 1 } else { 0 });
         }
 
         if self.recieved_nack() { return Err(Error::TransactionFailed) }
@@ -131,8 +145,8 @@ impl I2c<SevenBitAddress> for I2c0 {
         // let operations = operations;
         for op in operations {
             match op {
-                Operation::Read(buf) => self.read_internal(address, buf)?,
-                Operation::Write(buf) => self.write_internal(address, buf)?
+                Operation::Read(buf) => continue,
+                Operation::Write(buf) => self.write_internal(address, buf)?,
             }
         }
 
@@ -149,24 +163,25 @@ impl I2c<SevenBitAddress> for I2c0 {
 
         if self.is_bus_busy() {return Err(Error::InvalidState);}
 
-        self.push_tx_byte(0, TxCmd::RestartCount);
-        self.push_tx_byte(address << 1, TxCmd::DataByte);
+        self.push_tx_byte(0, 3);
+        self.push_tx_byte(address << 1, 0);
 
-        for byte in write {
-            self.push_tx_byte(*byte, TxCmd::DataByte);
+        for byte in write.into_iter() {
+            self.push_tx_byte(*byte, 0);
         }
-        self.push_tx_byte(2, TxCmd::RestartCount);
-        self.push_tx_byte((address << 1) | 1, TxCmd::DataByte);
+
+        // For some reason the I2CFIFO seems to always read one more than the number of bytes you tell it to read.
+        self.push_tx_byte(buf_len - 1, 3);
+        self.push_tx_byte((address << 1) | 1, 0);
 
         while !self.is_read_complete() {}
 
         for byte in read.iter_mut() {
             *byte = self.pop_rx_byte();
-            if self.check_rx_underflow() {
-                return Err(Error::RxUnderflow);
-            }
+            // if self.check_rx_underflow() {
+            //     return Err(Error::RxUnderflow);
+            // }
         }
-
         // // Block until transaction is finished
         while self.is_bus_busy() {}
 

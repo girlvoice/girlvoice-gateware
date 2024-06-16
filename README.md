@@ -9,7 +9,7 @@ After creating and entering a new python 3.11 venv do `pdm install` to install a
 
 Run the following command to build the Litex softcore target for the Rev A board:
 ```
-pdm run girlvoice/targets/girlvoice_litex.py --cpu-variant imac --csr-svd girlsoc.svd --build --toolchain=oxide
+pdm run girlvoice/targets/girlvoice_litex.py --cpu-variant imac --toolchain=radiant --synth-mode=lse --csr-svd girlsoc.svd --build
 ```
 
 This will generate a `.svd` file that must then be processed into a Peripheral Access Crate (PAC) for the rust-based firmware.

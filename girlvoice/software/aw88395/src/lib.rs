@@ -20,6 +20,7 @@ pub struct Aw88395<I2C> {
     config: Aw88395Config,
 }
 
+#[derive(Debug, )]
 pub enum Aw88395Error {
     OpFailed,
     OutOfRange,
@@ -95,6 +96,22 @@ impl<I2C: I2c> Aw88395<I2C> {
 
     fn update_status(&mut self) -> Result<(), Aw88395Error> {
         self.read_reg(regmap::Register::SysStat).map(|val| self.config.sys_stat.update(val))
+    }
+
+    pub fn get_status_bits(&mut self) -> Result<u16, Aw88395Error> {
+        self.read_reg(regmap::Register::SysStat)
+    }
+
+    pub fn get_sysctrl_bits(&mut self) -> Result<u16, Aw88395Error> {
+        self.read_reg(regmap::Register::SysCtrl)
+    }
+
+    pub fn get_sysctrl2_bits(&mut self) -> Result<u16, Aw88395Error> {
+        self.read_reg(regmap::Register::SysCtrl2)
+    }
+
+    pub fn soft_reset(&mut self) -> Result<(), Aw88395Error> {
+        self.write_reg(Register::Id, 0x55aa)
     }
 
     fn write_reg(&mut self, reg: Register, value: u16) -> Result<(), Aw88395Error> {

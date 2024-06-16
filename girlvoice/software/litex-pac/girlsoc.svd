@@ -409,6 +409,20 @@ register to disable individual events.]]></description>
                         </field>
                     </fields>
                 </register>
+                <register>
+                    <name>I2CTXFIFOBYTEAVAIL</name>
+                    <addressOffset>0x0270</addressOffset>
+                    <resetValue>0x00</resetValue>
+                    <size>8</size>
+                    <fields>
+                        <field>
+                            <name>dfirst</name>
+                            <msb>0</msb>
+                            <bitRange>[0:0]</bitRange>
+                            <lsb>0</lsb>
+                        </field>
+                    </fields>
+                </register>
             </registers>
             <addressBlock>
                 <offset>0</offset>
