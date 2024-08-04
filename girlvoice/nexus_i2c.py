@@ -14,6 +14,8 @@ class NexusI2CMaster(LiteXModule):
 
     def __init__(self, sys_clk_freq, scl_freq, pads, use_hard_io=True):
 
+        assert scl_freq in [100e3, 400e3], "Invalid I2C frequency"
+
         NBASE_DELAY = "0b1010"
 
         alt_io_en = "IO" if use_hard_io else "FABRIC"
@@ -90,6 +92,7 @@ class NexusI2CMaster(LiteXModule):
         self.tx_fifo_almost_empty = Signal()
         self.tx_fifo_empty = Signal()
 
+        clk_prescale = (sys_clk_freq / (scl_freq*4)) - 1
         self.params.update(
             p_BRNBASEDELAY = NBASE_DELAY,       # The I2CBRMSB [7:4] is utilized for trimming the Base Delay which is combined with I2CC1 [3:2] to achieve the SDA output delay to meet the I2C Specification requirement (300ns).
             # General config registers
@@ -129,7 +132,7 @@ class NexusI2CMaster(LiteXModule):
             p_NCRSDAOUTDLYEN = "DIS",                   # Enables 50ns Analog SDA Output Delay
             p_NONUSRTESTSOFTTRIMEN = "DIS",             # Enables soft trimming of the capacitance of the 50ns Filter and 50ns Delay.
             p_NONUSRTSTSOFTTRIMVALUE = "0b000",         # Capacitance trim value for 50ns Filter and 50ns Delay.  Default on power up is 3'b000, after a clock cycle this value with take current hard trim value.
-            p_REGI2CBR = "0b0000100110",                     # I2C Clock Pre-Scale Register value FSCL = FSOURCE / (4 * (I2CBR[9:0] + 1))
+            p_REGI2CBR = "0b0010010110",                     # I2C Clock Pre-Scale Register value FSCL = FSOURCE / (4 * (I2CBR[9:0] + 1))
             p_TSPTIMERVALUE = "0b10010010111"           # Value that will be loaded into a down counter. This value will ensure I2C timing specification for Start/Repeated Start signal is met. Counted down against the system clock.
         )
 

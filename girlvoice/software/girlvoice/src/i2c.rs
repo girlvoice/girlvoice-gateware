@@ -121,6 +121,8 @@ impl I2c0 {
 
         if self.recieved_nack() { return Err(Error::TransactionFailed) }
 
+        while self.is_bus_busy() {}
+
         Ok(())
     }
 }
@@ -155,13 +157,13 @@ impl I2c<SevenBitAddress> for I2c0 {
 
     fn write_read(&mut self, address: SevenBitAddress, write: &[u8], read: &mut [u8]) -> Result<(), Self::Error> {
         let buf_len = read.len() as u8;
-        if buf_len > 31 {
-            return Err(Error::RxUnderflow);
-        }
+        // if buf_len > 31 {
+        //     return Err(Error::RxUnderflow);
+        // }
 
         self.reset_tx_fifo();
 
-        if self.is_bus_busy() {return Err(Error::InvalidState);}
+        // if self.is_bus_busy() {return Err(Error::InvalidState);}
 
         self.push_tx_byte(0, 3);
         self.push_tx_byte(address << 1, 0);
@@ -171,7 +173,7 @@ impl I2c<SevenBitAddress> for I2c0 {
         }
 
         // For some reason the I2CFIFO seems to always read one more than the number of bytes you tell it to read.
-        self.push_tx_byte(buf_len - 1, 3);
+        self.push_tx_byte(buf_len, 3);
         self.push_tx_byte((address << 1) | 1, 0);
 
         while !self.is_read_complete() {}
@@ -183,7 +185,8 @@ impl I2c<SevenBitAddress> for I2c0 {
             // }
         }
         // // Block until transaction is finished
-        while self.is_bus_busy() {}
+        while self.is_bus_busy() {
+        }
 
         self.reset_rx_fifo();
 
