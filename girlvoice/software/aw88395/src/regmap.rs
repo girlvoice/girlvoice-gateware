@@ -23,7 +23,25 @@ pub enum Register {
 impl Register {
     /// return register address as u8
     pub fn addr(self) -> u8 {
-        self as u8
+        match self {
+            Register::Id => 0x00,
+            Register::SysStat => 0x01,
+            Register::SysInt => 0x02,
+            Register::SysIntMask => 0x03,
+            Register::SysCtrl => 0x04,
+            Register::SysCtrl2 => 0x05,
+            Register::I2SCtrl => 0x06,
+            Register::I2SCfg1 => 0x07,
+            Register::I2SCfg2 => 0x08,
+            Register::HAGCCfg1 => 0x09,
+            Register::HAGCCfg2 => 0x0a,
+            Register::HAGCCfg3 => 0x0b,
+            Register::VBat => 0x21,
+            Register::Temp => 0x22,
+            Register::PVdd => 0x23,
+            Register::BstCtrl1 => 0x60,
+            Register::BstCtrl2 => 0x61,
+        }
     }
 }
 

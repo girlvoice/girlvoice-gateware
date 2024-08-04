@@ -116,7 +116,7 @@ impl<I2C: I2c> Aw88395<I2C> {
 
     fn write_reg(&mut self, reg: Register, value: u16) -> Result<(), Aw88395Error> {
         let value_bytes = value.to_be_bytes();
-        let regbuf = [reg.addr(), value_bytes[1], value_bytes[0]];
+        let regbuf = [reg.addr(), value_bytes[0], value_bytes[1]];
         match self.i2c.write(AW88395_ADDR, &regbuf) {
             Err(e) => match e.kind() {
                 ErrorKind::NoAcknowledge(_) => Err(Aw88395Error::OpFailed),
@@ -134,7 +134,7 @@ impl<I2C: I2c> Aw88395<I2C> {
                 ErrorKind::NoAcknowledge(_) => Err(Aw88395Error::OpFailed),
                 _ => Err(Aw88395Error::OpFailed),
             },
-            Ok(_) => Ok(((regbuf[0] as u16) << 1) | (regbuf[1] as u16))
+            Ok(_) => Ok(((regbuf[0] as u16) << 8) | (regbuf[1] as u16))
         }
 
     }

@@ -72,18 +72,17 @@ class i2s_tx(wiring.Component):
         return m
 
 class i2s_rx(wiring.Component):
-    # To fabric IO
-    source: Out(StreamSignature(32))
 
-    # I2S IO
-    lrclk: Out(1)
-    sclk: Out(1)
-    sdin: In(1)
 
     def __init__(self, sys_clk_freq, sclk_freq, sample_width=18):
         self.clk_ratio = int(sys_clk_freq // sclk_freq)
         self.sample_width = sample_width
-        super().__init__()
+        super().__init__({
+            "source": Out(StreamSignature(sample_width)),
+            "lrclk": Out(1),
+            "sclk": Out(1),
+            "sdin": In(1),
+        })
 
     def elaborate(self, platform):
         m = Module()
