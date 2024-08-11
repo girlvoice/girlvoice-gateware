@@ -26,7 +26,7 @@ from litex.soc.integration.soc import SoCRegion, SoCIORegion
 from litex.soc.integration.builder import *
 from litex.soc.cores.bitbang import I2CMaster
 
-from girlvoice.nexus_i2c import NexusI2CMaster
+from girlvoice.io.nexus_i2c import NexusI2CMaster
 
 kB = 1024
 mB = 1024*kB
@@ -54,6 +54,7 @@ class _PowerManagement(LiteXModule):
         self.sync += btn_last.eq(pwr_button)
         self.sync += btn_rising.eq(pwr_button & ~btn_last)
 
+        fsm = FSM(reset_state="PWR_ON")
         self.sync += [
             If(btn_rising,
                 pwr_on.eq(0)
@@ -79,7 +80,7 @@ class _CRG(LiteXModule):
         self.comb += por_done.eq(por_count == 0)
         self.sync.por += If(~por_done, por_count.eq(por_count - 1))
 
-        # self.rst_n = platform.request("btn_down")
+        self.rst_n = platform.request("btn_down")
         # self.specials += AsyncResetSynchronizer(self.cd_por, ~self.rst_n)
 
         # PLL
@@ -108,7 +109,7 @@ class BaseSoC(SoCCore):
         "lmmi"     : 0x81000000,
     }
 
-    def __init__(self, sys_clk_freq=75e6, device="LIFCL-17-8SG72C", toolchain="oxide",
+    def __init__(self, sys_clk_freq=60e6, device="LIFCL-17-8SG72C", toolchain="oxide",
         with_spi_flash  = False,
         **kwargs):
         platform = girlvoice_rev_a.Platform(device=device, toolchain=toolchain)
@@ -135,7 +136,7 @@ class BaseSoC(SoCCore):
 
         led = platform.request("led")
 
-        self.comb += led.eq(self.crg.sys_pll.locked)
+        self.comb += led.eq(self.crg.rst_n)
 
         self.power_manager = _PowerManagement(platform)
 
@@ -147,9 +148,9 @@ class BaseSoC(SoCCore):
         platform.add_period_constraint(self.i2c.alt_scl_oen, period=1e9/400e6)
 
         clk12 = platform.request("clk12")
-        # clk12_freq = 12e6
-        # self.cd_clk12 = ClockDomain()
-        # self.comb += self.cd_clk12.clk.eq(clk12)
+        clk12_freq = 12e6
+        self.cd_clk12 = ClockDomain()
+        self.comb += self.cd_clk12.clk.eq(clk12)
 
         amp = platform.request("amp")
         self.comb += amp.en.eq(1)
@@ -160,21 +161,41 @@ class BaseSoC(SoCCore):
         aux_mclk = platform.request("aux_mclk")
         self.comb += aux_mclk.eq(clk12)
 
-        # bclk_freq = 3072e3
-        # clk_ratio = int(clk12_freq // bclk_freq)
-        # clk_div = Signal(max=clk_ratio)
+        bclk_freq = 3072e3
+        clk_ratio = int(clk12_freq // bclk_freq)
+        clk_div = Signal(max=clk_ratio)
 
-        # bclk = Signal()
-        # self.sync.clk12 += [
-        #     If(clk_div >= (clk_ratio - 1) // 2,
-        #         clk_div.eq(0),
-        #         bclk.eq(~bclk),
-        #     ).Else(
-        #         clk_div.eq(clk_div + 1)
-        #     )
-        # ]
+        bclk = Signal()
+        self.sync.clk12 += [
+            If(clk_div >= (clk_ratio - 1) // 2,
+                clk_div.eq(0),
+                bclk.eq(~bclk),
+            ).Else(
+                clk_div.eq(clk_div + 1)
+            )
+        ]
 
-        # self.comb += amp.bclk.eq(bclk)
+        self.comb += amp.bclk.eq(bclk)
+
+
+        wclk = Signal()
+
+        bclk_negedge = Signal()
+        bclk_last = Signal()
+        self.sync += bclk_last.eq(bclk)
+        self.comb += bclk_negedge.eq(~bclk & bclk_last)
+
+        count = Signal(max=32)
+        self.sync += [
+            If(bclk_negedge,
+                count.eq(count + 1)
+            ),
+            If(count == 0,
+                wclk.eq(~wclk)
+            )
+        ]
+
+        self.comb += amp.wclk.eq(wclk)
         # SPI Flash --------------------------------------------------------------------------------
         # if with_spi_flash:
         #     from litespi.modules import MX25L12833F
