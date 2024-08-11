@@ -1,0 +1,80 @@
+[*]
+[*] GTKWave Analyzer v3.3.120 (w)1999-2024 BSI
+[*] Sun Aug 11 04:38:53 2024
+[*]
+[dumpfile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/gtkw/EnvelopeFollower.vcd"
+[dumpfile_mtime] "Sun Aug 11 04:38:53 2024"
+[dumpfile_size] 7953096
+[savefile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/gtkw/EnvelopeFollower.gtkw"
+[timestart] 1872000000
+[size] 1324 757
+[pos] -183 -107
+*-28.000000 2160000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] bench.
+[sst_width] 209
+[signals_width] 325
+[sst_expanded] 1
+[sst_vpaned_height] 209
+@28
+bench.top.clk
+@40000420
+[fpshift_count] 31
+bench.top.sink__payload[31:0]
+@28
+bench.top.sink__ready
+bench.top.sink__valid
+@40c00420
+[fpshift_count] 31
+bench.top.source__payload[31:0]
+@28
+(0)bench.top.source__payload[31:0]
+(1)bench.top.source__payload[31:0]
+(2)bench.top.source__payload[31:0]
+(3)bench.top.source__payload[31:0]
+(4)bench.top.source__payload[31:0]
+(5)bench.top.source__payload[31:0]
+(6)bench.top.source__payload[31:0]
+(7)bench.top.source__payload[31:0]
+(8)bench.top.source__payload[31:0]
+(9)bench.top.source__payload[31:0]
+(10)bench.top.source__payload[31:0]
+(11)bench.top.source__payload[31:0]
+(12)bench.top.source__payload[31:0]
+(13)bench.top.source__payload[31:0]
+(14)bench.top.source__payload[31:0]
+(15)bench.top.source__payload[31:0]
+(16)bench.top.source__payload[31:0]
+(17)bench.top.source__payload[31:0]
+(18)bench.top.source__payload[31:0]
+(19)bench.top.source__payload[31:0]
+(20)bench.top.source__payload[31:0]
+(21)bench.top.source__payload[31:0]
+(22)bench.top.source__payload[31:0]
+(23)bench.top.source__payload[31:0]
+(24)bench.top.source__payload[31:0]
+(25)bench.top.source__payload[31:0]
+(26)bench.top.source__payload[31:0]
+(27)bench.top.source__payload[31:0]
+(28)bench.top.source__payload[31:0]
+(29)bench.top.source__payload[31:0]
+(30)bench.top.source__payload[31:0]
+(31)bench.top.source__payload[31:0]
+@41401600
+-group_end
+@28
+bench.top.source__ready
+bench.top.source__valid
+@40000420
+[fpshift_count] 31
+bench.top.x[31:0]
+[fpshift_count] 31
+bench.top.y[31:0]
+@40000421
+[fpshift_count] 62
+bench.top.mult_x[63:0]
+[fpshift_count] 62
+bench.top.mult_y[63:0]
+[fpshift_count] 62
+bench.top.acc[63:0]
+[pattern_trace] 1
+[pattern_trace] 0
