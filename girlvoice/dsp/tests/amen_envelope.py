@@ -32,8 +32,8 @@ def run_sim():
     async def tb(ctx):
         samples_processed = 0
         for sample in input_samples:
-            output_samples.append(await stream_get(ctx, dut.source))
             await stream_put(ctx, dut.sink, int(sample))
+            output_samples.append(await stream_get(ctx, dut.source))
             await ctx.tick()
             samples_processed += 1
             if samples_processed % 10000 == 0:
