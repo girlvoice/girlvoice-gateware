@@ -42,6 +42,7 @@ class BandpassFIR(wiring.Component):
             with m.FSM():
                 with m.State("LOAD"):
                     m.d.comb += self.sink.ready.eq(1)
+                    m.d.sync += self.source.valid.eq(0)
                     with m.If(self.sink.valid):
                         m.d.sync += [ring_buf[i + 1].eq(ring_buf[i]) for i in range(len(self.taps) - 1)]
                         m.d.sync += ring_buf[0].eq(self.sink.data)
