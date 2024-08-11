@@ -37,54 +37,32 @@ class EnvelopeFollower(wiring.Component):
         m = Module()
 
         mac_width = self.sample_width*2
-
-        mult_x = Signal(signed(mac_width))
-        mult_y = Signal(signed(mac_width))
         acc = Signal(signed(mac_width))
 
         x = Signal(signed(self.sample_width))
         y = Signal(signed(self.sample_width))
-        y_prev = Signal(signed(self.sample_width))
 
         param = Signal(signed(self.sample_width))
         param_comp = Signal(signed(self.sample_width))
         m.d.comb += param.eq(Mux(abs(x) > y, self.attack_fp, self.decay_fp))
         m.d.comb += param_comp.eq(Mux(abs(x) > y, self.attack_comp, self.decay_comp))
 
-
-        # m.d.comb += [mult_x.eq(param_comp * abs(x)),
-        #              mult_y.eq(param * y),
-        #              acc.eq(mult_x + mult_y)]
-        # with m.If(self.sink.valid):
-        #     m.d.sync += x.eq(self.sink.payload)
-        #     m.d.sync += self.sink.ready.eq(0)
-        # with m.Else():
-        #     m.d.sync += self.sink.ready.eq(1)
-        #     m.d.sync += y.eq(acc >> self.fraction_width)
-        #     m.d.sync += self.source.valid.eq(1)
-
-        # with m.If(self.source.ready):
         m.d.comb += self.source.payload.eq(y)
-        # m.d.comb += acc.eq(mult_x + mult_y)
+        m.d.comb += x.eq(self.sink.payload)
 
         with m.FSM():
             with m.State("LOAD"):
                 m.d.sync += self.source.valid.eq(0)
                 m.d.comb += self.sink.ready.eq(1)
                 with m.If(self.sink.valid):
-                    m.d.sync += x.eq(abs(self.sink.payload))
-                    m.next = "MULT_X"
-            with m.State("MULT_X"):
-                m.d.sync += acc.eq(param_comp * abs(x))
-                m.next = "MULT_Y"
+                    m.d.sync += acc.eq(abs(x) * param_comp)
+                    m.next = "MULT_Y"
             with m.State("MULT_Y"):
-
-                # m.d.sync += mult_y.eq(param * y)
                 m.d.sync += acc.eq(acc + (param * y))
                 m.next = "READY"
             with m.State("READY"):
+                m.d.sync += self.source.valid.eq(1)
                 with m.If(self.source.ready):
-                    m.d.sync += self.source.valid.eq(1)
                     m.d.sync += y.eq(acc >> self.fraction_width)
                     m.next = "LOAD"
         return m
