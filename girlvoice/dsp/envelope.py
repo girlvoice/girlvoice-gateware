@@ -10,24 +10,31 @@ from amaranth.lib.wiring import In, Out
 from amaranth.lib import stream
 
 from amaranth.sim import Simulator
+from girlvoice.stream import stream_get, stream_put
 
 
 '''
 An Envelope follower is essentially a special kind of low-pass filter
 Its purpose is to trace the "envelope" of a signal. In a channel vocoder, this "envelope"
 can be used to vary the amplification of one of the carrier signals.
+
+This filter is implemented as an IIR low-pass filter with parameterized options for attack and decay
+Largely inspired by the implementation described here:
+https://kferg.dev/posts/2020/audio-reactive-programming-envelope-followers
+
 '''
 class EnvelopeFollower(wiring.Component):
 
     def __init__(self, sample_width=24, attack=0.75, decay=0.99):
+        self.sample_width = sample_width
         self.fraction_width = sample_width - 1
+
         self.attack_fp = C(int(attack * (2**(self.fraction_width))), signed(sample_width))
         self.attack_comp = C(int((1 - attack) * (2**(self.fraction_width))), signed(sample_width))
 
         self.decay_fp = C(int(decay * (2**(self.fraction_width))), signed(sample_width))
         self.decay_comp = C(int((1 - decay) * (2**(self.fraction_width))), signed(sample_width))
-        print(bin(self.attack_fp.value))
-        self.sample_width = sample_width
+
         super().__init__({
             "sink": In(stream.Signature(signed(sample_width))),
             "source": Out(stream.Signature(signed(sample_width)))
@@ -69,19 +76,6 @@ class EnvelopeFollower(wiring.Component):
 
 
 # Testbench ----------------------------------------
-
-async def stream_get(ctx, stream):
-    ctx.set(stream.ready, 1)
-    payload, = await ctx.tick().sample(stream.payload).until(stream.valid)
-    ctx.set(stream.ready, 0)
-    return payload
-
-async def stream_put(ctx, stream, payload):
-    ctx.set(stream.valid, 1)
-    ctx.set(stream.payload, payload)
-    await ctx.tick().until(stream.ready)
-    ctx.set(stream.valid, 0)
-
 
 def generate_ramp(freq, duration, fs, sample_width):
     num_samples = duration * fs
@@ -132,10 +126,6 @@ def run_sim():
     (t, input_samples) = generate_ramp(test_sig_freq, duration, fs, bit_width)
     # (t, input_samples) = generate_chirp(duration, fs, start_freq, end_freq, bit_width)
 
-    # freq = np.linspace(1, end_freq, duration*fs)
-    # fft_in = np.fft.fft(input_samples)
-    # plt.plot(freq, np.abs(fft_in))
-    # plt.show()
     output_samples = []
     async def tb(ctx):
         for sample in input_samples:
@@ -158,7 +148,7 @@ def run_sim():
         ax2.set_xlabel('time (s)')
         plt.title('Envelope Follower')
         plt.grid(True)
-        # # plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
         plt.legend()
         # plt.savefig(f"{type(dut).__name__}.png")
         plt.show()

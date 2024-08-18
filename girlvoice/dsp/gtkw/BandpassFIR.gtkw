@@ -1,0 +1,39 @@
+[*]
+[*] GTKWave Analyzer v3.3.120 (w)1999-2024 BSI
+[*] Sat Aug 17 20:50:46 2024
+[*]
+[dumpfile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/gtkw/BandpassFIR.vcd"
+[dumpfile_mtime] "Sat Aug 17 20:50:15 2024"
+[dumpfile_size] 181836589
+[savefile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/gtkw/BandpassFIR.gtkw"
+[timestart] 123260000000
+[size] 1204 629
+[pos] -1 -1
+*-31.000000 73824997047 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] bench.
+[sst_width] 209
+[signals_width] 198
+[sst_expanded] 1
+[sst_vpaned_height] 165
+@28
+bench.top.clk
+bench.top.fsm_state
+@40000420
+[fpshift_count] 0
+bench.top.sink__payload[15:0]
+@28
+bench.top.sink__ready
+bench.top.sink__valid
+@421
+bench.top.source__payload[15:0]
+@28
+bench.top.source__valid
+@40000420
+[fpshift_count] 16
+bench.top.acc[31:0]
+@28
+bench.top.rst
+@22
+bench.top.idx[4:0]
+[pattern_trace] 1
+[pattern_trace] 0
