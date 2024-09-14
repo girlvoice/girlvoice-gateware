@@ -1,0 +1,48 @@
+[*]
+[*] GTKWave Analyzer v3.3.120 (w)1999-2024 BSI
+[*] Sat Sep 14 10:09:17 2024
+[*]
+[dumpfile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/gtkw/BandpassIIR.vcd"
+[dumpfile_mtime] "Sat Sep 14 10:08:56 2024"
+[dumpfile_size] 69158994
+[savefile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/gtkw/BandpassIIR.gtkw"
+[timestart] 41367120000
+[size] 1324 544
+[pos] -1 -1
+*-24.000000 40112920000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] bench.
+[sst_width] 209
+[signals_width] 231
+[sst_expanded] 1
+[sst_vpaned_height] 132
+@28
+bench.top.clk
+bench.top.fsm_state
+@40000420
+[fpshift_count] 28
+bench.top.sink__payload[31:0]
+@28
+bench.top.sink__ready
+bench.top.sink__valid
+@40000420
+[fpshift_count] 28
+bench.top.source__payload[31:0]
+@28
+bench.top.source__ready
+bench.top.source__valid
+@40000420
+[fpshift_count] 28
+bench.top.a_i[31:0]
+[fpshift_count] 28
+bench.top.y_i[31:0]
+[fpshift_count] 28
+bench.top.b_i[31:0]
+[fpshift_count] 28
+bench.top.x_i[31:0]
+@40000421
+[fpshift_count] 56
+bench.top.acc[63:0]
+@24
+bench.top.idx[2:0]
+[pattern_trace] 1
+[pattern_trace] 0
