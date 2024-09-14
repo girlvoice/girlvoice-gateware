@@ -14,6 +14,7 @@ from amaranth.sim import Simulator
 
 from girlvoice.stream import stream_get, stream_put
 
+from girlvoice.dsp.utils import generate_chirp
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyq = 0.5 * fs
@@ -39,7 +40,7 @@ class BandpassFIR(wiring.Component):
             "source": Out(stream.Signature(signed(integer_width)))
         })
 
-        taps = signal.firwin(filter_order+1, cutoff=band_edges, fs=samplerate, pass_zero=False, window='hamming')
+        taps = signal.firwin(filter_order+1, cutoff=band_edges[0], fs=samplerate, pass_zero="highpass", window='hamming')
         self.taps_raw = taps
         self.integer_width = integer_width
         self.fraction_width = fraction_width
@@ -107,15 +108,6 @@ class BandpassFIR(wiring.Component):
 
 # Testbench ----------------------------------------
 
-def generate_chirp(duration, fs, start_freq, end_freq, sample_width):
-    num_samples = duration * fs
-    t = np.linspace(0, duration, num_samples)
-
-    x = signal.chirp(t, f0 = start_freq, f1=end_freq, t1=duration)
-    x = x * signal.windows.tukey(num_samples, 0.05)
-    x *= 2**(sample_width-1)
-    return (t, x)
-
 def bode_plot(fs, duration, end_freq, input, output, taps):
     fft_out = np.fft.fft(output)
 
@@ -125,11 +117,11 @@ def bode_plot(fs, duration, end_freq, input, output, taps):
 
     half = math.floor(len(h)/2)
     resp = h[0:half]
-    gain = 10 * np.log10(np.abs(resp))
+    gain = 20 * np.log10(np.abs(resp))
     #phase = np.angle(h, deg=True)
     subplt = plt.subplot(122)
     # subplt.plot(freq[0:half], gain, label="Gain")
-    # subplt.set_xscale("log")
+    subplt.set_xscale("log")
     subplt.set_xlabel("Frequency log(Hz)")
     subplt.set_ylabel("Gain (dB)")
 
@@ -141,7 +133,7 @@ def run_sim():
     clk_freq = 60e6
     sample_width = 16 # Number of 2s complement bits
     fs = 48000
-    dut = BandpassFIR(cutoff_freq=10, passband_width=5, samplerate=fs, integer_width=sample_width, filter_order=128)
+    dut = BandpassFIR(cutoff_freq=200, passband_width=5, samplerate=fs, integer_width=sample_width, filter_order=128)
 
     duration = 5
     start_freq = 1
