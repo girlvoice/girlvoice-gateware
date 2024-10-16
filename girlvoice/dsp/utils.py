@@ -1,5 +1,7 @@
+import math
 import numpy as np
 import scipy.signal as signal
+import matplotlib.pyplot as plt
 
 def generate_chirp(duration, fs, start_freq, end_freq, sample_width):
     num_samples = duration * fs
@@ -9,3 +11,24 @@ def generate_chirp(duration, fs, start_freq, end_freq, sample_width):
     x = x * signal.windows.tukey(num_samples, 0.05)
     x *= 2**(sample_width-1)
     return (t, x)
+
+def bode_plot(fs, duration, end_freq, input, output, taps):
+    fft_out = np.fft.fft(output)
+
+    freq = np.linspace(1, end_freq, (fs*duration)//2)
+    fft_in = np.fft.fft(input)
+    h = fft_out / fft_in
+
+    half = math.floor(len(h)/2)
+    resp = h[0:half]
+    gain = 20 * np.log10(np.abs(resp))
+
+    w_ideal, h_ideal = signal.freqz(b=taps[0], a=taps[1], worN=freq, fs=fs)
+    #phase = np.angle(h, deg=True)
+    subplt = plt.subplot(122)
+    subplt.plot(w_ideal, gain, label="Simulated Gain")
+    # subplt.set_xscale("log")
+    subplt.set_xlabel("Frequency log(Hz)")
+    subplt.set_ylabel("Gain (dB)")
+
+    subplt.plot(w_ideal, 20*np.log10(np.abs(h_ideal)), label="Ideal Gain")

@@ -11,25 +11,26 @@ from amaranth.lib import stream
 from amaranth.sim import Simulator
 
 from girlvoice.stream import stream_get, stream_put
-from girlvoice.dsp.utils import generate_chirp
+from girlvoice.dsp.utils import generate_chirp, bode_plot
 
 class BandpassIIR(wiring.Component):
-    def __init__(self, cutoff_freq, passband_width, filter_order=24, sample_width=32, samplerate=48e3):
+    def __init__(self, center_freq, passband_width, filter_order=24, sample_width=32, samplerate=48e3):
         self.order = filter_order
         self.sample_width = sample_width
         self.fs = samplerate
-        self.int_width = 3
+        self.int_width = 3 # Assign number of bits for whole-number portion of FP number
         self.fraction_width = sample_width - self.int_width - 1
 
 
-        band_edges = [cutoff_freq - passband_width/2, cutoff_freq + passband_width / 2]
-        # a, b = signal.iirfilter(N=filter_order, btype="bandpass", analog=False, fs=samplerate, Wn=band_edges)
+        band_edges = [center_freq - passband_width/2, center_freq + passband_width / 2]
+        print(f"Band edges: {band_edges}")
         b, a = signal.butter(N=filter_order, btype="bandpass", analog=False, fs=samplerate, output="ba", Wn=band_edges)
+
+        self.taps_raw = [b, a]
         print(f"Numerator coeffs {b}")
         print(f"Denom: {a}")
         self.a_fp = Array([C(int(a_i * 2**self.fraction_width), signed(sample_width)) for a_i in a])
         self.b_fp = Array([C(int(b_i * 2**self.fraction_width), signed(sample_width)) for b_i in b])
-
 
 
         super().__init__({
@@ -82,7 +83,7 @@ class BandpassIIR(wiring.Component):
                     m.next = "READY"
 
             with m.State("MAC_FEEDBACK"):
-                m.d.sync += acc.eq(acc + (y_i * a_i))
+                m.d.sync += acc.eq(acc - (y_i * a_i))
                 m.next = "MAC_FORWARD"
 
             with m.State("READY"):
@@ -94,16 +95,17 @@ class BandpassIIR(wiring.Component):
 
         return m
 
+# Testbench ----------------------------------------
+
 def run_sim():
     clk_freq = 60e6
     sample_width = 32 # Number of 2s complement bits
-    fs = 32000
-    dut = BandpassIIR(cutoff_freq=1000, passband_width=1000, samplerate=fs, sample_width=sample_width, filter_order=2)
+    fs = 10000
+    dut = BandpassIIR(center_freq=3000, passband_width=2000, samplerate=fs, sample_width=sample_width, filter_order=2)
 
     duration = 1
     start_freq = 1
     end_freq = 5000
-    test_sig_freq = 5000
     (t, input_samples) = generate_chirp(duration, fs, start_freq, end_freq, sample_width)
 
     output_samples = np.zeros(duration * fs)
@@ -127,7 +129,7 @@ def run_sim():
     with sim.write_vcd(dutname + f".vcd"):
         sim.run()
         ax2 = plt.subplot(121)
-        # bode_plot(fs, duration, end_freq, input_samples, output_samples, dut.taps_raw)
+        bode_plot(fs, duration, end_freq, input_samples, output_samples, dut.taps_raw)
         ax2.plot(t, input_samples, alpha=0.5, label="Input")
         ax2.plot(t, output_samples, alpha=0.5, label="Output")
         ax2.set_xlabel('Time (s)')
