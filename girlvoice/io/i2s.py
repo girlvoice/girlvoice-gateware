@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 from amaranth import *
-from amaranth.lib import wiring
+from amaranth.lib import wiring, stream
 from amaranth.lib.wiring import Out, In
 
 from amaranth.sim import Simulator, Tick
@@ -15,7 +15,7 @@ class i2s_tx(wiring.Component):
         self.sample_width = sample_width
         self.clk_div = Signal(range(self.clk_ratio))
         super().__init__({
-            "sink": In(StreamSignature(sample_width)),
+            "sink": In(stream.Signature(sample_width)),
             "lrclk": Out(1),
             "sclk": Out(1),
             "sdout": Out(1),
@@ -53,7 +53,7 @@ class i2s_tx(wiring.Component):
                 with m.If(bit_count == 0):
                     m.d.comb += self.sink.ready.eq(1)
                 with m.If(self.sink.valid & self.sink.ready):
-                    m.d.sync += shift_out.eq(self.sink.data)
+                    m.d.sync += shift_out.eq(self.sink.payload)
                     m.next = "WRITE"
             with m.State("WRITE"):
                 with m.If(sclk_negedge):
@@ -78,7 +78,7 @@ class i2s_rx(wiring.Component):
         self.clk_ratio = int(sys_clk_freq // sclk_freq)
         self.sample_width = sample_width
         super().__init__({
-            "source": Out(StreamSignature(sample_width)),
+            "source": Out(stream.Signature(sample_width)),
             "lrclk": Out(1),
             "sclk": Out(1),
             "sdin": In(1),
@@ -123,7 +123,7 @@ class i2s_rx(wiring.Component):
                     m.d.sync += shift_reg.eq(Cat(self.sdin, shift_reg[:-1]))
 
                 with m.If(bit_count >= self.sample_width):
-                    m.d.sync += self.source.data.eq(shift_reg)
+                    m.d.sync += self.source.payload.eq(shift_reg)
                     m.d.sync += self.source.valid.eq(1)
                     m.next = "IDLE"
 
@@ -134,8 +134,8 @@ class i2s_rx(wiring.Component):
 
 
 class i2s(wiring.Component):
-    source: Out(StreamSignature(32))
-    sink: In(StreamSignature(32))
+    source: Out(stream.Signature(32))
+    sink: In(stream.Signature(32))
 
     sclk: Out(1)
 
@@ -183,7 +183,7 @@ def tx_tb():
                 yield Tick()
 
         for i in range(len(samples)):
-            yield dut.sink.data.eq(samples[i])
+            yield dut.sink.payload.eq(samples[i])
             yield dut.sink.valid.eq(1)
             yield Tick()
             # yield dut.sink.valid.eq(0)
