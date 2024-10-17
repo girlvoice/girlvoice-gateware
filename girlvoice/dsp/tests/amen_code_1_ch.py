@@ -8,26 +8,15 @@ from amaranth import *
 from amaranth.sim import Simulator
 from girlvoice.stream import stream_get, stream_put
 
-from girlvoice.dsp.envelope import EnvelopeFollower
-
-def import_wav(path):
-    # Load the WAV file
-    sample_rate, data = wavfile.read(path)
-    n = data.shape[0]
-    t = np.linspace(0, n/sample_rate, n)
-    # Print the sample rate and the shape of the data array
-    print(f'Sample rate: {sample_rate}')
-    print(f'Data shape: {data.shape}')
-    print(f"Data type: {type(data[0][0])}")
-
-    return (t, data[:, 0])
+from girlvoice.dsp.tests.amen_envelope import import_wav
+from girlvoice.dsp.vocoder import StaticVocoderChannel
 
 def run_sim():
     clk_freq = 60e6
     bit_width = 16
-    dut = EnvelopeFollower(sample_width=bit_width, attack=0.75, decay=0.9999)
-
     fs = 44100
+    dut = StaticVocoderChannel(channel_freq=10e3, channel_width=15e3, fs=fs, sample_width=bit_width)
+
     (t, input_samples) = import_wav('./amen_break_441khz_16bit.wav')
 
     output_samples = []
@@ -50,15 +39,17 @@ def run_sim():
     with sim.write_vcd(dutname + f".vcd"):
         sim.run()
         # bode_plot(fs, duration, end_freq, input_samples, output_samples)
-        plt.plot(t, input_samples, alpha=0.5, label="Input")
-        plt.plot(t, output_samples, alpha=0.5, label="Output")
-        plt.xlabel('time (s)')
-        plt.title('Envelope Follower')
-        plt.grid(True)
-        # # plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
-        plt.legend()
-        # plt.savefig(f"{type(dut).__name__}.png")
-        plt.show()
+
+    wavfile.write("amen_1_ch.wav", rate=fs, data=output_samples)
+    plt.plot(t, input_samples, alpha=0.5, label="Input")
+    plt.plot(t, output_samples, alpha=0.5, label="Output")
+    plt.xlabel('time (s)')
+    plt.title('Envelope Follower')
+    plt.grid(True)
+    # # plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+    plt.legend()
+    # plt.savefig(f"{type(dut).__name__}.png")
+    plt.show()
 
 
 
