@@ -14,17 +14,17 @@ from girlvoice.stream import stream_get, stream_put
 from girlvoice.dsp.utils import generate_chirp, bode_plot
 
 class BandpassIIR(wiring.Component):
-    def __init__(self, center_freq, passband_width, filter_order=24, sample_width=32, samplerate=48e3):
+    def __init__(self, center_freq, passband_width, filter_order=24, sample_width=32, fs=48e3):
         self.order = filter_order
         self.sample_width = sample_width
-        self.fs = samplerate
+        self.fs = fs
         self.int_width = 3 # Assign number of bits for whole-number portion of FP number
         self.fraction_width = sample_width - self.int_width - 1
 
 
         band_edges = [center_freq - passband_width/2, center_freq + passband_width / 2]
         print(f"Band edges: {band_edges}")
-        b, a = signal.butter(N=filter_order, btype="bandpass", analog=False, fs=samplerate, output="ba", Wn=band_edges)
+        b, a = signal.butter(N=filter_order, btype="bandpass", analog=False, fs=fs, output="ba", Wn=band_edges)
 
         self.taps_raw = [b, a]
         print(f"Numerator coeffs {b}")
@@ -101,7 +101,7 @@ def run_sim():
     clk_freq = 60e6
     sample_width = 32 # Number of 2s complement bits
     fs = 10000
-    dut = BandpassIIR(center_freq=3000, passband_width=2000, samplerate=fs, sample_width=sample_width, filter_order=2)
+    dut = BandpassIIR(center_freq=3000, passband_width=2000, fs=fs, sample_width=sample_width, filter_order=2)
 
     duration = 1
     start_freq = 1
