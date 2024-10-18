@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from math import ceil, log2
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,26 +14,52 @@ from amaranth.sim import Simulator
 from girlvoice.stream import stream_get, stream_put
 from girlvoice.dsp.utils import generate_chirp, bode_plot
 
+"""
+IIR Bandpass filter using a Direct From I implementation
+This module uses fixed point representation for sample data and filter coefficients
+Incoming and outgoing samples are treated as Q(N-1) format where N is the bit width of the samples
+The fixed point format for filter coefficients is determined on the fly by calculating how many
+    integer bits are needed for the largest/smallest coeff
+If M is the number of coefficient fraction bits then the result of multiplication of a coefficient and sample is Q(M+N-1)
+To quantize the accumulator back to N-1 fraction bits we must divide by 2**((M+N-1) - (N-1)) = 2**M
+This is achieved by adding 2**(M-1) to the accumulator and then right shifting by M bits
+"""
 class BandpassIIR(wiring.Component):
     def __init__(self, center_freq, passband_width, filter_order=24, sample_width=32, fs=48e3):
         self.order = filter_order
         self.sample_width = sample_width
         self.fs = fs
-        self.int_width = 3 # Assign number of bits for whole-number portion of FP number
-        self.fraction_width = sample_width - self.int_width - 1
 
 
         band_edges = [center_freq - passband_width/2, center_freq + passband_width / 2]
         print(f"Band edges: {band_edges}")
-        b, a = signal.butter(N=filter_order, btype="bandpass", analog=False, fs=fs, output="ba", Wn=band_edges)
+        btype = "bandpass"
+        if band_edges[0] < 0:
+            band_edges = band_edges[1]
+            btype = "lowpass"
+        b, a = signal.butter(N=filter_order, btype=btype, analog=False, fs=fs, output="ba", Wn=band_edges)
 
         self.taps_raw = [b, a]
         print(f"Numerator coeffs {b}")
         print(f"Denom: {a}")
+
+        max_tap = np.max(np.abs(np.concatenate([b, a])))
+        self.int_width = ceil(log2(max_tap) + 1)
+
+        self.fraction_width = sample_width - self.int_width - 1
+
+        print(f"Using {self.fraction_width} fraction bits and {self.int_width} integer bits")
+
+        acc_frac = self.fraction_width * 2
+
         self.a_fp = Array([C(int(a_i * 2**self.fraction_width), signed(sample_width)) for a_i in a])
         self.b_fp = Array([C(int(b_i * 2**self.fraction_width), signed(sample_width)) for b_i in b])
 
+        self.a_quant = [a.value / (2**self.fraction_width) for a in self.a_fp]
+        self.b_quant = [b.value / (2**self.fraction_width) for b in self.b_fp]
 
+        print(f"Numerator quantized: {self.b_quant}")
+        print(f"Denom quantized: {self.a_quant}")
         super().__init__({
             "sink": In(stream.Signature(signed(sample_width))),
             "source": Out(stream.Signature(signed(sample_width)))
@@ -59,8 +86,11 @@ class BandpassIIR(wiring.Component):
         m.d.comb += a_i.eq(self.a_fp[idx])
         m.d.comb += b_i.eq(self.b_fp[idx])
 
-        acc_width = self.sample_width * 2
+        acc_width = (self.sample_width * 2) + (num_taps * 2) + 1
         acc = Signal(signed(acc_width))
+
+        acc_round = Signal(signed(acc_width))
+        m.d.comb += acc_round.eq(acc + 2**(self.fraction_width-1))
 
         with m.FSM():
             with m.State("LOAD"):
@@ -87,9 +117,10 @@ class BandpassIIR(wiring.Component):
                 m.next = "MAC_FORWARD"
 
             with m.State("READY"):
-                m.d.comb += self.source.payload.eq(acc >> (self.fraction_width))
+                m.d.comb += self.source.payload.eq(acc_round >> (self.fraction_width))
                 m.d.comb += self.source.valid.eq(1)
                 with m.If(self.source.ready):
+                    # m.d.sync += Assert(((self.source.payload >= 0) & (acc >= 0)) | ((self.source.payload < 0) & (acc < 0)), "IIR Bandpass Accumulator and output sign mismatch!")
                     m.d.sync += y_buf[0].eq(self.source.payload)
                     m.next = "LOAD"
 
@@ -99,14 +130,14 @@ class BandpassIIR(wiring.Component):
 
 def run_sim():
     clk_freq = 60e6
-    sample_width = 32 # Number of 2s complement bits
+    sample_width = 16 # Number of 2s complement bits
     fs = 10000
     dut = BandpassIIR(center_freq=3000, passband_width=2000, fs=fs, sample_width=sample_width, filter_order=2)
 
     duration = 1
     start_freq = 1
     end_freq = 5000
-    (t, input_samples) = generate_chirp(duration, fs, start_freq, end_freq, sample_width)
+    (t, input_samples) = generate_chirp(duration, fs, start_freq, end_freq, sample_width, amp=0.5)
 
     output_samples = np.zeros(duration * fs)
     async def tb(ctx):
@@ -129,7 +160,7 @@ def run_sim():
     with sim.write_vcd(dutname + f".vcd"):
         sim.run()
         ax2 = plt.subplot(121)
-        bode_plot(fs, duration, end_freq, input_samples, output_samples, dut.taps_raw)
+        bode_plot(fs, duration, end_freq, input_samples, output_samples, dut.taps_raw, [dut.b_quant, dut.a_quant])
         ax2.plot(t, input_samples, alpha=0.5, label="Input")
         ax2.plot(t, output_samples, alpha=0.5, label="Output")
         ax2.set_xlabel('Time (s)')

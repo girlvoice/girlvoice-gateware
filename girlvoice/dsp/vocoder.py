@@ -1,3 +1,4 @@
+import numpy as np
 from amaranth import *
 import amaranth.lib.wiring as wiring
 from amaranth.lib.wiring import In, Out
@@ -20,7 +21,7 @@ class StaticVocoderChannel(wiring.Component):
         self.bandpass = BandpassIIR(
             channel_freq,
             passband_width=channel_width,
-            filter_order=4,
+            filter_order=2,
             sample_width=sample_width,
             fs=fs
         )
@@ -57,14 +58,13 @@ class StaticVocoder(wiring.Component):
         self.num_channels = num_channels
         self.fs = fs
 
-        channel_space = (end_freq - start_freq) / num_channels
-        self.ch_freq = range(start_freq, end_freq, channel_space)
+        self.ch_freq, channel_space = np.linspace(start_freq, end_freq, num_channels, retstep=True)
 
         print(f"Generating vocoder channels at {self.ch_freq} Hz")
 
         self.channels = [channel_class(freq, channel_space, fs=fs, sample_width=sample_width) for freq in self.ch_freq]
 
-        super.__init__({
+        super().__init__({
             "sink": In(stream.Signature(signed(sample_width))),
             "source": Out(stream.Signature(signed(sample_width)))
         })
@@ -79,8 +79,9 @@ class StaticVocoder(wiring.Component):
         ch_readys = Signal(self.num_channels)
         for i in range(self.num_channels):
             ch = self.channels[i]
+            m.submodules += ch
             m.d.comb += ch.sink.payload.eq(self.sink.payload)
-            m.d.comb += ch.sink.valid.eq(self.sink.valid)
+            m.d.comb += ch.sink.valid.eq(self.sink.valid & self.sink.ready)
             m.d.comb += ch_readys.bit_select(i, 1).eq(ch.sink.ready)
 
         m.d.comb += self.sink.ready.eq(ch_readys.all())
@@ -91,24 +92,21 @@ class StaticVocoder(wiring.Component):
 
         with m.FSM():
             with m.State("SUM"):
+                m.d.comb += self.source.valid.eq(0)
                 with m.If(source_mux[idx].valid):
                     m.d.comb += source_mux[idx].ready.eq(1)
                     m.d.sync += acc.eq(acc + source_mux[idx].payload)
 
                     with m.If(idx >= self.num_channels - 1):
                         m.d.sync += idx.eq(0)
-                        m.d.sync += self.source.valid.eq(1)
                         m.next = "WAIT"
                     with m.Else():
                         m.d.sync += idx.eq(idx + 1)
 
             with m.State("WAIT"):
-                with m.If(self.source.ready):
+                m.d.comb += self.source.valid.eq(1)
+                with m.If(self.source.ready == 1):
                     m.d.sync += acc.eq(0)
-                    m.d.sync += self.source.valid.eq(0)
                     m.next = "SUM"
-
-
-
 
         return m
