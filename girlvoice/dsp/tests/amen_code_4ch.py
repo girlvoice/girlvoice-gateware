@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import os
+import time
+from tracemalloc import start
 import numpy as np
 from scipy.io import wavfile
 import matplotlib.pyplot as plt
@@ -9,18 +11,17 @@ from amaranth.sim import Simulator
 from girlvoice.stream import stream_get, stream_put
 
 from girlvoice.dsp.tests.amen_envelope import import_wav
-from girlvoice.dsp.vocoder import StaticVocoderChannel
-from girlvoice.dsp.bandpass_iir import BandpassIIR
+from girlvoice.dsp.vocoder import StaticVocoder
 
 def run_sim():
     clk_freq = 60e6
     bit_width = 16
     fs = 44100
-    dut = StaticVocoderChannel(channel_freq=10e3, channel_width=20e3, fs=fs, sample_width=bit_width)
-    # dut = BandpassIIR(10e3, 20e3, filter_order=4, sample_width=bit_width, fs=fs)
+    dut = StaticVocoder(start_freq=100, end_freq=5e3, num_channels=16, fs=fs, sample_width=bit_width)
     (t, input_samples) = import_wav('./amen_break_441khz_16bit.wav')
-
+    input_samples = input_samples * 0.8
     output_samples = []
+    start_time = time.time()
     async def tb(ctx):
         samples_processed = 0
         for sample in input_samples:
@@ -29,7 +30,8 @@ def run_sim():
             await ctx.tick()
             samples_processed += 1
             if samples_processed % 10000 == 0:
-                print(f"{samples_processed}/{len(t)} Samples processed")
+                elapsed = time.time() - start_time
+                print(f"{samples_processed}/{len(t)} Samples processed in {elapsed} sec")
 
     sim = Simulator(dut)
     sim.add_clock(1/clk_freq)
@@ -41,7 +43,7 @@ def run_sim():
         sim.run()
         # bode_plot(fs, duration, end_freq, input_samples, output_samples)
 
-    wavfile.write("amen_1_ch.wav", rate=fs, data=np.array(output_samples, dtype=np.int16))
+    wavfile.write("amen_4_ch.wav", rate=fs, data=np.array(output_samples, dtype=np.int16))
     plt.plot(t, input_samples, alpha=0.5, label="Input")
     plt.plot(t, output_samples, alpha=0.5, label="Output")
     plt.xlabel('time (s)')
