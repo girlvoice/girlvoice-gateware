@@ -22,12 +22,23 @@ This filter is implemented as an IIR low-pass filter with parameterized options 
 Largely inspired by the implementation described here:
 https://kferg.dev/posts/2020/audio-reactive-programming-envelope-followers
 
+Attack and decay input parameters represent the time to decay halfway (halflife) in milliseconds
+
 '''
 class EnvelopeFollower(wiring.Component):
 
-    def __init__(self, sample_width=24, attack=0.75, decay=0.99):
+    def __init__(self, sample_width=24, fs=48000, attack_halflife=10, decay_halflife=20):
         self.sample_width = sample_width
         self.fraction_width = sample_width - 1
+
+        attack_hl_samples = fs * attack_halflife / 1000.0
+        attack = math.exp(math.log(0.5) / attack_hl_samples)
+
+        decay_hl_samples = fs * decay_halflife / 1000.0
+        decay = math.exp(math.log(0.5) / decay_hl_samples)
+
+        print(f"Envelope Decay parameter: {decay}")
+        print(f"Envelope Attack parameter: {attack}")
 
         self.attack_fp = C(int(attack * (2**(self.fraction_width))), signed(sample_width))
         self.attack_comp = C(int((1 - attack) * (2**(self.fraction_width))), signed(sample_width))
@@ -45,7 +56,9 @@ class EnvelopeFollower(wiring.Component):
 
         mac_width = self.sample_width*2
         acc = Signal(signed(mac_width))
+        acc_quant = Signal(signed(self.sample_width))
         m.d.sync += Assert(acc >= 0, "Envelope accumulator overflow")
+        m.d.comb += acc_quant.eq((acc+2**(self.fraction_width-1)) >> (self.fraction_width))
 
         x = Signal(signed(self.sample_width))
         y = Signal(signed(self.sample_width))
@@ -69,7 +82,11 @@ class EnvelopeFollower(wiring.Component):
                 m.next = "READY"
             with m.State("READY"):
                 m.d.comb += self.source.valid.eq(1)
-                m.d.comb += self.source.payload.eq((acc+2**(self.fraction_width-1)) >> (self.fraction_width))
+                # Saturation logic:
+                with m.If(acc_quant >= 0):
+                    m.d.comb += self.source.payload.eq(acc_quant)
+                with m.Else():
+                    m.d.comb += self.source.payload.eq(2**(self.sample_width - 1) - 1)
                 with m.If(self.source.ready):
                     m.d.sync += y.eq(self.source.payload)
                     m.d.sync += Assert(self.source.payload >= 0, "Envelope follower gave negative output")
@@ -112,8 +129,6 @@ def bode_plot(fs, duration, end_freq, input, output):
     subplt = plt.subplot(122)
     subplt.plot(freq[0:half], gain, label="Gain")
     subplt.set_xscale("log")
-
-
 
 def run_sim():
     clk_freq = 60e6

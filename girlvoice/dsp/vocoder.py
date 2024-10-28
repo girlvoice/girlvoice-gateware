@@ -21,12 +21,12 @@ class StaticVocoderChannel(wiring.Component):
         self.bandpass = BandpassIIR(
             channel_freq,
             passband_width=channel_width,
-            filter_order=2,
+            filter_order=1,
             sample_width=sample_width,
             fs=fs
         )
 
-        self.envelope = EnvelopeFollower(sample_width)
+        self.envelope = EnvelopeFollower(sample_width, attack_halflife=1, decay_halflife=20)
 
         super().__init__({
             "sink": In(stream.Signature(signed(sample_width))),
@@ -47,6 +47,8 @@ class StaticVocoderChannel(wiring.Component):
         wiring.connect(m, self.synth.source, self.vga.carrier)
 
         wiring.connect(m, wiring.flipped(self.source), self.vga.source)
+        # wiring.connect(m, wiring.flipped(self.source), self.envelope.source)
+        # wiring.connect(m, wiring.flipped(self.source), self.bandpass.source)
 
         m.d.comb += self.synth.en.eq(1)
 
@@ -66,7 +68,7 @@ class StaticVocoder(wiring.Component):
 
         super().__init__({
             "sink": In(stream.Signature(signed(sample_width))),
-            "source": Out(stream.Signature(signed(sample_width)))
+            "source": Out(stream.Signature(signed(sample_width + self.num_channels)))
         })
 
     def elaborate(self, platform):
@@ -74,7 +76,7 @@ class StaticVocoder(wiring.Component):
 
         acc_width = self.sample_width + self.num_channels
         acc = Signal(signed(acc_width))
-        m.d.comb += self.source.payload.eq(acc >> self.num_channels)
+        m.d.comb += self.source.payload.eq(acc)
 
         ch_readys = Signal(self.num_channels)
         for i in range(self.num_channels):

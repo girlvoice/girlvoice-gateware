@@ -88,9 +88,6 @@ def run_sim():
         # plt.savefig(f"{type(dut).__name__}.png")
         plt.show()
 
-
-
-
 if __name__ == "__main__":
     run_sim()
 

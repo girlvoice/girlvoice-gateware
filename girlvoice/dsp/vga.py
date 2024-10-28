@@ -17,13 +17,12 @@ class VariableGainAmp(wiring.Component):
     def elaborate(self, platform):
         m = Module()
 
-
         i_valid = Signal()
         m.d.comb += i_valid.eq(self.modulator.valid & self.carrier.valid)
         with m.If(i_valid & (~self.source.valid | self.source.ready)):
             m.d.sync += self.source.payload.eq(
                 (self.carrier.payload * self.modulator.payload)
-                    >> self.modulator_width
+                    >> (self.modulator_width - 1)
             )
             m.d.sync += self.source.valid.eq(1)
             m.d.comb += self.carrier.ready.eq(1)

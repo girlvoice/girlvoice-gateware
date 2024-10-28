@@ -25,7 +25,7 @@ To quantize the accumulator back to N-1 fraction bits we must divide by 2**((M+N
 This is achieved by adding 2**(M-1) to the accumulator and then right shifting by M bits
 """
 class BandpassIIR(wiring.Component):
-    def __init__(self, center_freq, passband_width, filter_order=24, sample_width=32, fs=48e3):
+    def __init__(self, center_freq, passband_width, filter_order=2, sample_width=32, fs=48e3):
         self.order = filter_order
         self.sample_width = sample_width
         self.fs = fs
@@ -131,12 +131,12 @@ class BandpassIIR(wiring.Component):
 def run_sim():
     clk_freq = 60e6
     sample_width = 16 # Number of 2s complement bits
-    fs = 10000
-    dut = BandpassIIR(center_freq=3000, passband_width=2000, fs=fs, sample_width=sample_width, filter_order=2)
+    fs = 48000
+    dut = BandpassIIR(center_freq=200, passband_width=50, fs=fs, sample_width=sample_width, filter_order=1)
 
     duration = 1
     start_freq = 1
-    end_freq = 5000
+    end_freq = fs / 2
     (t, input_samples) = generate_chirp(duration, fs, start_freq, end_freq, sample_width, amp=0.5)
 
     output_samples = np.zeros(duration * fs)
