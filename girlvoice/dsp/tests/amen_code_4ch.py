@@ -13,6 +13,8 @@ from girlvoice.stream import stream_get, stream_put
 from girlvoice.dsp.tests.amen_envelope import import_wav
 from girlvoice.dsp.vocoder import StaticVocoder
 
+
+
 def run_sim():
     clk_freq = 60e6
     bit_width = 16
@@ -32,6 +34,8 @@ def run_sim():
             if samples_processed % 10000 == 0:
                 elapsed = time.time() - start_time
                 print(f"{samples_processed}/{len(t)} Samples processed in {elapsed} sec")
+
+
 
     sim = Simulator(dut)
     sim.add_clock(1/clk_freq)

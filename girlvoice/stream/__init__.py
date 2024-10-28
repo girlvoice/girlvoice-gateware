@@ -21,3 +21,13 @@ async def stream_put(ctx, stream, payload):
     ctx.set(stream.payload, payload)
     await ctx.tick().until(stream.ready)
     ctx.set(stream.valid, 0)
+
+async def stream_watch(ctx, stream):
+    payload = await ctx.tick().sample(stream.payload).until(stream.valid & stream.ready)
+    return payload
+
+def new_observer(stream, output_arr):
+    async def observe(ctx):
+        while True:
+            output_arr.append(await stream_watch(ctx, stream))
+    return observe
