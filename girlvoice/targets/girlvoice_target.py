@@ -1,17 +1,18 @@
 from os import sync
 from amaranth import *
+import amaranth.lib.wiring as wiring
 from amaranth.build import *
 from amaranth.build.plat import Platform
 
 from girlvoice.platform.girlvoice_rev_a import GirlvoiceRevAPlatform
 from girlvoice.platform.nexus_utils.pll import NXPLL
 from girlvoice.io.i2s import i2s_rx, i2s_tx
+from girlvoice.dsp.bandpass_iir import BandpassIIR
 
 class GirlTop(Elaboratable):
 
     def elaborate(self, platform:Platform):
         m = Module()
-
 
         ## Clock Defs
 
@@ -47,7 +48,7 @@ class GirlTop(Elaboratable):
             m.d.sync += clk_div.eq(clk_div + 1)
 
         ## RX from ADC
-        m.submodules.i2s_rx = rx = i2s_rx(sys_clk_freq=sync_freq, sclk_freq=bclk_freq, sample_width=24)
+        m.submodules.i2s_rx = rx = i2s_rx(sys_clk_freq=sync_freq, sclk_freq=bclk_freq, sample_width=18)
 
         adc = platform.request("mic", 0)
 
@@ -66,7 +67,7 @@ class GirlTop(Elaboratable):
         # m.d.comb += sclk_i.o.eq(adc_sclk.clk)
 
         ## TX to DAC
-        m.submodules.i2s_tx = tx = i2s_tx(sys_clk_freq=sync_freq, sclk_freq=bclk_freq, sample_width=24)
+        m.submodules.i2s_tx = tx = i2s_tx(sys_clk_freq=sync_freq, sclk_freq=bclk_freq, sample_width=18)
 
         amp = platform.request("amp", 0)
         amp_lr_clk = amp.lrclk
@@ -80,11 +81,13 @@ class GirlTop(Elaboratable):
         m.d.comb += dac_din.o.eq(tx.sdout)
 
 
-        m.d.comb += tx.sink.data.eq(rx.source.data)
-        m.d.comb += rx.source.ready.eq(tx.sink.ready)
-        m.d.comb += tx.sink.valid.eq(rx.source.valid)
+        # m.d.comb += tx.sink.data.eq(rx.source.data)
+        # m.d.comb += rx.source.ready.eq(tx.sink.ready)
+        # m.d.comb += tx.sink.valid.eq(rx.source.valid)
 
-
+        m.submodules.band = band = BandpassIIR(2.5e3, 1000, sample_width=18, filter_order=4, fs=48e3)
+        wiring.connect(m, rx.source, band.sink)
+        wiring.connect(m, band.source, tx.sink)
 
         ## Power On/Off
         pwr_button = platform.request("btn_pwr", 0).i
@@ -106,6 +109,6 @@ class GirlTop(Elaboratable):
         return m
 
 if __name__ == "__main__":
-    p = GirlvoiceRevAPlatform(toolchain="Radiant")
+    p = GirlvoiceRevAPlatform(toolchain="Oxide")
 
-    p.build(GirlTop(), do_program=False, use_radiant_docker=True)
+    p.build(GirlTop(), do_program=False, use_radiant_docker=False)

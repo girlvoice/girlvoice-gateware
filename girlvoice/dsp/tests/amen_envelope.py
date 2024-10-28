@@ -10,11 +10,12 @@ from girlvoice.stream import stream_get, stream_put
 
 from girlvoice.dsp.envelope import EnvelopeFollower
 
-def import_wav(path):
+def import_wav(path, bit_shift=0):
     # Load the WAV file
     sample_rate, data = wavfile.read(path)
     n = data.shape[0]
     t = np.linspace(0, n/sample_rate, n)
+    n = np.left_shift(n, bit_shift)
     # Print the sample rate and the shape of the data array
     print(f'Sample rate: {sample_rate}')
     print(f'Data shape: {data.shape}')
@@ -25,7 +26,7 @@ def import_wav(path):
 def run_sim():
     clk_freq = 60e6
     bit_width = 16
-    dut = EnvelopeFollower(sample_width=bit_width, attack=0.75, decay=0.9999)
+    dut = EnvelopeFollower(sample_width=bit_width, attack_halflife=1, decay_halflife=20)
 
     fs = 44100
     (t, input_samples) = import_wav('./amen_break_441khz_16bit.wav')
