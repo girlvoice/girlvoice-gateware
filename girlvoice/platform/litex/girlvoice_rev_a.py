@@ -43,6 +43,13 @@ _io = [
         Subsignal("en", Pins("34")),
         Subsignal("bclk", Pins("31")),
         Subsignal("wclk", Pins("30")),
+        Subsignal("data", Pins("33")),
+        IOStandard("LVCMOS18H")
+    ),
+    ("mic_i2s", 0,
+        Subsignal("bclk", Pins("24")),
+        Subsignal("lrclk", Pins("23")),
+        Subsignal("data", Pins("25")),
         IOStandard("LVCMOS18H")
     ),
 
