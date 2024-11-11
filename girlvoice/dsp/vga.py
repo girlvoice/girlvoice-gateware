@@ -18,12 +18,15 @@ class VariableGainAmp(wiring.Component):
         m = Module()
 
         i_valid = Signal()
+
+        product = Signal(signed(self.carrier_width + self.modulator_width))
+        # product.attrs["syn_multstyle"] = "block_mult"
+
+        m.d.comb += product.eq(self.carrier.payload * self.modulator.payload)
         m.d.comb += i_valid.eq(self.modulator.valid & self.carrier.valid)
+
         with m.If(i_valid & (~self.source.valid | self.source.ready)):
-            m.d.sync += self.source.payload.eq(
-                (self.carrier.payload * self.modulator.payload)
-                    >> (self.modulator_width - 1)
-            )
+            m.d.sync += self.source.payload.eq(product >> (self.modulator_width - 1))
             m.d.sync += self.source.valid.eq(1)
             m.d.comb += self.carrier.ready.eq(1)
             m.d.comb += self.modulator.ready.eq(1)

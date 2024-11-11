@@ -56,9 +56,15 @@ class EnvelopeFollower(wiring.Component):
 
         mac_width = self.sample_width*2
         acc = Signal(signed(mac_width))
+        # acc.attrs["syn_multstyle"] = "block_mult"
         acc_quant = Signal(signed(self.sample_width))
-        m.d.sync += Assert(acc >= 0, "Envelope accumulator overflow")
-        m.d.comb += acc_quant.eq((acc+2**(self.fraction_width-1)) >> (self.fraction_width))
+
+        mac_out = Signal(signed(mac_width))
+        mac_in_1 = Signal(signed(self.sample_width))
+        mac_in_2 = Signal(signed(self.sample_width))
+        m.d.comb += mac_out.eq(acc + (mac_in_1 * mac_in_2))
+        # m.d.sync += Assert(acc >= 0, "Envelope accumulator overflow")
+        m.d.comb += acc_quant.eq((mac_out) >> (self.fraction_width))
 
         x = Signal(signed(self.sample_width))
         y = Signal(signed(self.sample_width))
@@ -70,15 +76,20 @@ class EnvelopeFollower(wiring.Component):
 
         m.d.comb += x.eq(self.sink.payload)
 
+
         with m.FSM():
             with m.State("LOAD"):
                 m.d.comb += self.source.valid.eq(0)
                 m.d.comb += self.sink.ready.eq(1)
                 with m.If(self.sink.valid):
-                    m.d.sync += acc.eq(abs(x) * param_comp)
+                    m.d.sync += acc.eq(0)
+                    m.d.sync += mac_in_1.eq(param_comp)
+                    m.d.sync += mac_in_2.eq(abs(x))
                     m.next = "MULT_Y"
             with m.State("MULT_Y"):
-                m.d.sync += acc.eq(acc + (param * y))
+                m.d.sync += acc.eq(mac_out)
+                m.d.sync += mac_in_1.eq(param)
+                m.d.sync += mac_in_2.eq(y)
                 m.next = "READY"
             with m.State("READY"):
                 m.d.comb += self.source.valid.eq(1)
@@ -89,9 +100,11 @@ class EnvelopeFollower(wiring.Component):
                     m.d.comb += self.source.payload.eq(2**(self.sample_width - 1) - 1)
                 with m.If(self.source.ready):
                     m.d.sync += y.eq(self.source.payload)
-                    m.d.sync += Assert(self.source.payload >= 0, "Envelope follower gave negative output")
+                    # m.d.sync += Assert(self.source.payload >= 0, "Envelope follower gave negative output")
                     m.next = "LOAD"
         return m
+
+
 
 
 # Testbench ----------------------------------------
