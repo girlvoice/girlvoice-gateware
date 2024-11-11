@@ -25,13 +25,18 @@ To quantize the accumulator back to N-1 fraction bits we must divide by 2**((M+N
 This is achieved by adding 2**(M-1) to the accumulator and then right shifting by M bits
 """
 class BandpassIIR(wiring.Component):
-    def __init__(self, center_freq, passband_width, filter_order=2, sample_width=32, fs=48e3):
+    def __init__(self, band_edges = None, center_freq = None, passband_width = None, filter_order=2, sample_width=32, fs=48e3):
         self.order = filter_order
         self.sample_width = sample_width
         self.fs = fs
 
+        if band_edges is not None:
+            band_edges = band_edges
+        elif center_freq is not None and passband_width is not None:
+            band_edges = [center_freq - passband_width/2, center_freq + passband_width / 2]
+        else:
+            raise ValueError("Must provide the bandpass filter width as band_edges or as center_freq and passband_width")
 
-        band_edges = [center_freq - passband_width/2, center_freq + passband_width / 2]
         print(f"Band edges: {band_edges}")
         btype = "bandpass"
         if band_edges[0] < 0:
@@ -89,8 +94,16 @@ class BandpassIIR(wiring.Component):
         acc_width = (self.sample_width * 2) + (num_taps * 2) + 1
         acc = Signal(signed(acc_width))
 
+        mac_out = Signal(signed(acc_width))
+        mac_i_1 = Signal(signed(self.sample_width))
+        mac_i_2 = Signal(signed(self.sample_width))
+
+        m.d.comb += mac_out.eq(acc + (mac_i_1 * mac_i_2))
+
         acc_round = Signal(signed(acc_width))
         m.d.comb += acc_round.eq(acc + 2**(self.fraction_width-1))
+
+
 
         with m.FSM():
             with m.State("LOAD"):
@@ -105,7 +118,9 @@ class BandpassIIR(wiring.Component):
                     m.next = "MAC_FORWARD"
 
             with m.State("MAC_FORWARD"):
-                m.d.sync += acc.eq(acc + (x_i * b_i))
+                m.d.comb += mac_i_1.eq(x_i)
+                m.d.comb += mac_i_2.eq(b_i)
+                m.d.sync += acc.eq(mac_out)
                 m.d.sync += idx.eq(idx + 1)
                 m.next = "MAC_FEEDBACK"
                 with m.If(idx == num_taps - 1):
@@ -113,7 +128,9 @@ class BandpassIIR(wiring.Component):
                     m.next = "READY"
 
             with m.State("MAC_FEEDBACK"):
-                m.d.sync += acc.eq(acc - (y_i * a_i))
+                m.d.comb += mac_i_1.eq(-y_i)
+                m.d.comb += mac_i_2.eq(a_i)
+                m.d.sync += acc.eq(mac_out)
                 m.next = "MAC_FORWARD"
 
             with m.State("READY"):
