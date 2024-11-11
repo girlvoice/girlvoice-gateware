@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from os import sync
 from amaranth import *
 import amaranth.lib.wiring as wiring
@@ -8,6 +9,7 @@ from girlvoice.platform.girlvoice_rev_a import GirlvoiceRevAPlatform
 from girlvoice.platform.nexus_utils.pll import NXPLL
 from girlvoice.io.i2s import i2s_rx, i2s_tx
 from girlvoice.dsp.bandpass_iir import BandpassIIR
+import girlvoice.dsp.vocoder as vocoder
 
 class GirlTop(Elaboratable):
 
@@ -40,12 +42,12 @@ class GirlTop(Elaboratable):
         clk_ratio = int(sync_freq // bclk_freq)
         clk_div = Signal(range(clk_ratio))
 
-        bclk = Signal()
-        with m.If(clk_div >= (clk_ratio - 1) // 2):
-            m.d.sync += clk_div.eq(0)
-            m.d.sync += bclk.eq(~bclk)
-        with m.Else():
-            m.d.sync += clk_div.eq(clk_div + 1)
+        # bclk = Signal()
+        # with m.If(clk_div >= (clk_ratio - 1) // 2):
+        #     m.d.sync += clk_div.eq(0)
+        #     m.d.sync += bclk.eq(~bclk)
+        # with m.Else():
+            # m.d.sync += clk_div.eq(clk_div + 1)
 
         ## RX from ADC
         m.submodules.i2s_rx = rx = i2s_rx(sys_clk_freq=sync_freq, sclk_freq=bclk_freq, sample_width=18)
@@ -84,10 +86,11 @@ class GirlTop(Elaboratable):
         # m.d.comb += tx.sink.data.eq(rx.source.data)
         # m.d.comb += rx.source.ready.eq(tx.sink.ready)
         # m.d.comb += tx.sink.valid.eq(rx.source.valid)
-
-        m.submodules.band = band = BandpassIIR(2.5e3, 1000, sample_width=18, filter_order=4, fs=48e3)
-        wiring.connect(m, rx.source, band.sink)
-        wiring.connect(m, band.source, tx.sink)
+        sample_rate = 48e3
+        m.submodules.vocoder = v = vocoder.StaticVocoder(500, 3000, clk_sync_freq=sync_freq, num_channels=10, fs=sample_rate, sample_width=18)
+        # m.submodules.band = band = BandpassIIR(2.5e3, 1000, sample_width=18, filter_order=4, fs=48e3)
+        wiring.connect(m, rx.source, v.sink)
+        wiring.connect(m, v.source, tx.sink)
 
         ## Power On/Off
         pwr_button = platform.request("btn_pwr", 0).i

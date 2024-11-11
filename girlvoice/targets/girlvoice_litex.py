@@ -6,12 +6,15 @@
 # Copyright (c) 2020 David Corrigan <davidcorrigan714@gmail.com>
 # Copyright (c) 2020 Alan Green <avg@google.com>
 # SPDX-License-Identifier: BSD-2-Clause
+import numpy as np
 
+import amaranth
 from migen import *
 from migen.genlib.resetsync import AsyncResetSynchronizer
 
 from litex.gen import *
 
+from girlvoice.dsp.sine_synth import StaticSineSynth
 from girlvoice.platform.litex import girlvoice_rev_a
 
 from litex.soc.cores.ram import NXLRAM
@@ -26,7 +29,10 @@ from litex.soc.integration.soc import SoCRegion, SoCIORegion
 from litex.soc.integration.builder import *
 from litex.soc.cores.bitbang import I2CMaster
 
+from amaranth.back import verilog
 from girlvoice.io.nexus_i2c import NexusI2CMaster
+from girlvoice.dsp.vocoder import StaticVocoder
+from girlvoice.io.i2s import i2s_tx, i2s_rx
 
 kB = 1024
 mB = 1024*kB
@@ -152,6 +158,143 @@ class BaseSoC(SoCCore):
         self.cd_clk12 = ClockDomain()
         self.comb += self.cd_clk12.clk.eq(clk12)
 
+        sample_width = 16
+
+        # bclk_freq = 4e6
+        bclk_freq = 3072e3
+        bclk = Signal()
+        wclk = Signal()
+        i2s_sdout = Signal()
+        am_i2s_tx = i2s_tx(sys_clk_freq, bclk_freq, sample_width=sample_width)
+        mod_name = type(am_i2s_tx).__name__
+        with open(f"{type(am_i2s_tx).__name__}.v", "w") as f:
+            f.write(verilog.convert(
+                am_i2s_tx,
+                name=mod_name,
+                ports=[
+                    am_i2s_tx.sink.ready,
+                    am_i2s_tx.sink.valid,
+                    am_i2s_tx.sink.payload,
+                    am_i2s_tx.lrclk,
+                    am_i2s_tx.sclk,
+                    am_i2s_tx.sdout
+                ],
+                emit_src=False
+            ))
+
+        platform.add_source(f"{type(am_i2s_tx).__name__}.v")
+
+        i2s_valid = Signal()
+        i2s_ready = Signal()
+        i2s_payload = Signal(sample_width)
+        self.specials += Instance(
+            "i2s_tx",
+            i_sink__valid = 1,
+            i_sink__payload = i2s_payload,
+            i_clk = ClockSignal(),
+            i_rst = ResetSignal(),
+            o_sink__ready = i2s_ready,
+            o_sclk = bclk,
+            o_lrclk = wclk,
+            o_sdout = i2s_sdout
+        )
+
+        am_i2s_rx = i2s_rx(sys_clk_freq, bclk_freq, sample_width=sample_width)
+        i2s_rx_name = type(am_i2s_rx).__name__
+        i2s_rx_src = f"{i2s_rx_name}.v"
+        with open(i2s_rx_src, "w") as f:
+            f.write(verilog.convert(
+                am_i2s_rx,
+                name=i2s_rx_name,
+                ports = [
+                    am_i2s_rx.source.ready,
+                    am_i2s_rx.source.valid,
+                    am_i2s_rx.source.payload,
+                    am_i2s_rx.lrclk,
+                    am_i2s_rx.sclk,
+                    am_i2s_rx.sdin
+                ],
+                emit_src=False
+            ))
+
+        platform.add_source(i2s_rx_src)
+
+        mic_payload = Signal(sample_width)
+        mic_valid = Signal()
+        mic_ready = Signal()
+        mic = platform.request("mic_i2s")
+        self.specials += Instance(
+            i2s_rx_name,
+            o_sclk = mic.bclk,
+            o_lrclk = mic.lrclk,
+            i_sdin = mic.data,
+            i_clk = ClockSignal(),
+            i_rst = ResetSignal(),
+            i_source__ready = mic_ready,
+            o_source__valid = mic_valid,
+            o_source__payload = mic_payload
+        )
+
+        vocoder = StaticVocoder(300, 1000, 16, clk_sync_freq=sys_clk_freq, fs=48e3, sample_width=sample_width)
+        voc_name = type(vocoder).__name__
+        with open(f"{voc_name}.v", "w") as f:
+            f.write(verilog.convert(
+                vocoder,
+                name=voc_name,
+                ports=[
+                    vocoder.sink.ready,
+                    vocoder.sink.valid,
+                    vocoder.sink.payload,
+                    vocoder.source.ready,
+                    vocoder.source.valid,
+                    vocoder.source.payload
+                ],
+                emit_src=False
+            ))
+
+        platform.add_source(f"{voc_name}.v")
+
+        self.specials += Instance(
+            voc_name,
+            i_clk = ClockSignal(),
+            i_rst = ResetSignal(),
+            i_source__ready = i2s_ready,
+            o_source__valid = i2s_valid,
+            o_source__payload = i2s_payload,
+            i_sink__valid = mic_valid,
+            i_sink__payload = mic_payload,
+            o_sink__ready = mic_ready
+        )
+
+        # phase_bit_width = 8
+        # sample_width = 18
+        # t = np.linspace(0, 2*np.pi, 2**phase_bit_width)
+        # y = np.sin(t)
+        # lut = amaranth.Array(amaranth.Const(int(y_i*(2**(sample_width-1))), amaranth.signed(sample_width)) for y_i in y)
+        # sine_synth = StaticSineSynth(432, 48e3, sys_clk_freq, 18, lut)
+        # mod_name = type(sine_synth).__name__
+        # with open(f"{type(sine_synth).__name__}.v", "w") as f:
+        #     f.write(verilog.convert(
+        #         sine_synth,
+        #         name=mod_name,
+        #         ports=[
+        #             sine_synth.source.ready,
+        #             sine_synth.source.payload,
+        #             sine_synth.en
+        #         ],
+        #         emit_src=False
+        #     ))
+
+        # platform.add_source(f"{type(sine_synth).__name__}.v")
+        # self.specials += Instance(
+        #     "StaticSineSynth",
+        #     o_source__payload = i2s_payload,
+        #     i_clk = ClockSignal(),
+        #     i_rst = ResetSignal(),
+        #     i_source__ready = i2s_ready,
+        #     i_en = 1
+        # )
+
         amp = platform.request("amp")
         self.comb += amp.en.eq(1)
 
@@ -161,39 +304,35 @@ class BaseSoC(SoCCore):
         aux_mclk = platform.request("aux_mclk")
         self.comb += aux_mclk.eq(clk12)
 
-        bclk_freq = 3072e3
-        clk_ratio = int(clk12_freq // bclk_freq)
-        clk_div = Signal(max=clk_ratio)
+        # clk_ratio = int(clk12_freq // bclk_freq)
+        # clk_div = Signal(max=clk_ratio)
 
-        bclk = Signal()
-        self.sync.clk12 += [
-            If(clk_div >= (clk_ratio - 1) // 2,
-                clk_div.eq(0),
-                bclk.eq(~bclk),
-            ).Else(
-                clk_div.eq(clk_div + 1)
-            )
-        ]
+        # self.sync.clk12 += [
+        #     If(clk_div >= (clk_ratio - 1) // 2,
+        #         clk_div.eq(0),
+        #         bclk.eq(~bclk),
+        #     ).Else(
+        #         clk_div.eq(clk_div + 1)
+        #     )
+        # ]
 
         self.comb += amp.bclk.eq(bclk)
+        self.comb += amp.data.eq(i2s_sdout)
 
+        # bclk_negedge = Signal()
+        # bclk_last = Signal()
+        # self.sync += bclk_last.eq(bclk)
+        # self.comb += bclk_negedge.eq(~bclk & bclk_last)
 
-        wclk = Signal()
-
-        bclk_negedge = Signal()
-        bclk_last = Signal()
-        self.sync += bclk_last.eq(bclk)
-        self.comb += bclk_negedge.eq(~bclk & bclk_last)
-
-        count = Signal(max=32)
-        self.sync += [
-            If(bclk_negedge,
-                count.eq(count + 1)
-            ),
-            If(count == 0,
-                wclk.eq(~wclk)
-            )
-        ]
+        # count = Signal(max=32)
+        # self.sync += [
+        #     If(bclk_negedge,
+        #         count.eq(count + 1)
+        #     ),
+        #     If(count == 0,
+        #         wclk.eq(~wclk)
+        #     )
+        # ]
 
         self.comb += amp.wclk.eq(wclk)
         # SPI Flash --------------------------------------------------------------------------------
@@ -209,7 +348,7 @@ class BaseSoC(SoCCore):
 def main():
     from litex.build.parser import LiteXArgumentParser
     parser = LiteXArgumentParser(platform=girlvoice_rev_a.Platform, description="LiteX SoC on Crosslink-NX Eval Board.")
-    parser.add_target_argument("--device",        default="LIFCL-17-8SG72C", help="FPGA device.")
+    parser.add_target_argument("--device",        default="LIFCL-40-8SG72C", help="FPGA device.")
     parser.add_target_argument("--sys-clk-freq",  default=60e6, type=float,   help="System clock frequency.")
     parser.add_target_argument("--serial",        default="serial",           help="UART Pins")
     parser.add_target_argument("--programmer",    default="iceprog",          help="Programmer (radiant or iceprog).")
