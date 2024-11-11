@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from amaranth import *
 from amaranth.sim import Simulator
-from girlvoice.stream import stream_get, stream_put
+from girlvoice.stream import stream_get, stream_put, new_observer
 
 from girlvoice.dsp.tests.amen_envelope import import_wav
 from girlvoice.dsp.vocoder import StaticVocoderChannel
@@ -23,6 +23,8 @@ def run_sim():
     input_samples = input_samples * .8
 
     output_samples = []
+    envelope_samples = []
+    bp_samples = []
     async def tb(ctx):
         samples_processed = 0
         for sample in input_samples:
@@ -36,18 +38,24 @@ def run_sim():
     sim = Simulator(dut)
     sim.add_clock(1/clk_freq)
     sim.add_testbench(tb)
+    sim.add_testbench(new_observer(dut.envelope.source, envelope_samples), background=True)
+    sim.add_testbench(new_observer(dut.bandpass.source, bp_samples), background=True)
 
     os.makedirs("gtkw", exist_ok=True)
     dutname = f"gtkw/{type(dut).__name__}"
     with sim.write_vcd(dutname + f".vcd"):
         sim.run()
-        # bode_plot(fs, duration, end_freq, input_samples, output_samples)
 
     wavfile.write("amen_1_ch.wav", rate=fs, data=np.array(output_samples, dtype=np.int16))
-    plt.plot(t, input_samples, alpha=0.5, label="Input")
-    plt.plot(t, output_samples, alpha=0.5, label="Output")
+    ax1 = plt.subplot(121)
+    ax2 = plt.subplot(122)
+    ax1.plot(t, input_samples, alpha=0.5, label="Input")
+    ax1.plot(t, output_samples, alpha=0.5, label="Output")
+    ax2.plot(t, envelope_samples, alpha=0.5, label="Envelope Output")
+    ax2.plot(t, bp_samples, alpha=0.5, label="Bandpass Output")
+
     plt.xlabel('time (s)')
-    plt.title('Envelope Follower')
+    plt.title('Single Vocoder Channel')
     plt.grid(True)
     # # plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
     plt.legend()
