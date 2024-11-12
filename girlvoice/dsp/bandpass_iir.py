@@ -94,11 +94,13 @@ class BandpassIIR(wiring.Component):
         acc_width = (self.sample_width * 2) + (num_taps * 2) + 1
         acc = Signal(signed(acc_width))
 
-        mac_out = Signal(signed(acc_width))
+        # mac_out = Signal(signed(acc_width))
+        mult_node = Signal(signed(acc_width))
         mac_i_1 = Signal(signed(self.sample_width))
         mac_i_2 = Signal(signed(self.sample_width))
 
-        m.d.comb += mac_out.eq(acc + (mac_i_1 * mac_i_2))
+        m.d.comb += mult_node.eq(mac_i_1 * mac_i_2)
+        # m.d.comb += mac_out.eq(acc + (mac_i_1 * mac_i_2))
 
         acc_round = Signal(signed(acc_width))
         m.d.comb += acc_round.eq(acc + 2**(self.fraction_width-1))
@@ -114,23 +116,28 @@ class BandpassIIR(wiring.Component):
                     m.d.sync += [y_buf[i + 1].eq(y_buf[i]) for i in range(num_taps - 1)]
                     m.d.sync += x_buf[0].eq(self.sink.payload)
                     m.d.sync += acc.eq(0)
-                    m.d.sync += idx.eq(0)
+                    m.d.sync += idx.eq(idx + 1)
+                    m.d.sync += mac_i_1.eq(x_i)
+                    m.d.sync += mac_i_2.eq(b_i)
                     m.next = "MAC_FORWARD"
 
             with m.State("MAC_FORWARD"):
-                m.d.comb += mac_i_1.eq(x_i)
-                m.d.comb += mac_i_2.eq(b_i)
-                m.d.sync += acc.eq(mac_out)
-                m.d.sync += idx.eq(idx + 1)
+                # m.d.comb += mac_i_1.eq(x_i)
+                # m.d.comb += mac_i_2.eq(b_i)
+                m.d.sync += acc.eq(acc + mult_node)
+
+                m.d.sync += mac_i_1.eq(-y_i)
+                m.d.sync += mac_i_2.eq(a_i)
                 m.next = "MAC_FEEDBACK"
                 with m.If(idx == num_taps - 1):
                     # m.d.sync += self.source.payload.eq(acc >> (self.sample_width))
                     m.next = "READY"
 
             with m.State("MAC_FEEDBACK"):
-                m.d.comb += mac_i_1.eq(-y_i)
-                m.d.comb += mac_i_2.eq(a_i)
-                m.d.sync += acc.eq(mac_out)
+                m.d.sync += mac_i_1.eq(x_i)
+                m.d.sync += mac_i_2.eq(b_i)
+                m.d.sync += idx.eq(idx + 1)
+                m.d.sync += acc.eq(acc + mult_node)
                 m.next = "MAC_FORWARD"
 
             with m.State("READY"):
@@ -138,6 +145,7 @@ class BandpassIIR(wiring.Component):
                 m.d.comb += self.source.valid.eq(1)
                 with m.If(self.source.ready):
                     # m.d.sync += Assert(((self.source.payload >= 0) & (acc >= 0)) | ((self.source.payload < 0) & (acc < 0)), "IIR Bandpass Accumulator and output sign mismatch!")
+                    m.d.sync += idx.eq(0)
                     m.d.sync += y_buf[0].eq(self.source.payload)
                     m.next = "LOAD"
 

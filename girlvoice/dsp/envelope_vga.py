@@ -16,7 +16,7 @@ from girlvoice.stream import stream_get, stream_put
 '''
 Combined Envelope follower and VGA. Saves a multiplication by combining the two components
 '''
-class EnvelopeFollower(wiring.Component):
+class EnvelopeVGA(wiring.Component):
 
     def __init__(self, sample_width=24, fs=48000, attack_halflife=10, decay_halflife=20):
         self.sample_width = sample_width
@@ -48,15 +48,14 @@ class EnvelopeFollower(wiring.Component):
 
         mac_width = self.sample_width*2
         acc = Signal(signed(mac_width))
-        # acc.attrs["syn_multstyle"] = "block_mult"
         acc_quant = Signal(signed(self.sample_width))
 
-        mac_out = Signal(signed(mac_width))
+        mult_node = Signal(signed(mac_width))
         mac_in_1 = Signal(signed(self.sample_width))
         mac_in_2 = Signal(signed(self.sample_width))
-        m.d.comb += mac_out.eq(acc + (mac_in_1 * mac_in_2))
+        m.d.comb += mult_node.eq(mac_in_1 * mac_in_2)
         # m.d.sync += Assert(acc >= 0, "Envelope accumulator overflow")
-        m.d.comb += acc_quant.eq((mac_out) >> (self.fraction_width))
+        m.d.comb += acc_quant.eq(mult_node >> (self.fraction_width))
 
         x = Signal(signed(self.sample_width))
         y = Signal(signed(self.sample_width))
@@ -76,23 +75,29 @@ class EnvelopeFollower(wiring.Component):
 
         with m.FSM():
             with m.State("LOAD"):
-                m.d.comb += self.source.valid.eq(0)
+                # m.d.comb += self.source.valid.eq(0)
                 m.d.comb += self.sink.ready.eq(1)
                 with m.If(self.sink.valid):
                     m.d.sync += acc.eq(0)
                     m.d.sync += mac_in_1.eq(param_comp)
                     m.d.sync += mac_in_2.eq(abs(x))
                     m.next = "MULT_Y"
+
             with m.State("MULT_Y"):
-                m.d.sync += acc.eq(mac_out)
+                m.d.sync += acc.eq(mult_node)
                 m.d.sync += mac_in_1.eq(param)
                 m.d.sync += mac_in_2.eq(y)
+                m.next = "ACC_Y"
+
+            with m.State("ACC_Y"):
+                m.d.sync += acc.eq(acc + mult_node)
                 m.d.sync += self.carrier.ready.eq(1)
-                m.next = "READY"
+                m.next = "MULT_CARRIER"
+
+            # ACC reg now contains the output of the envelope follower
             with m.State("MULT_CARRIER"):
+                m.d.sync += mac_in_1.eq(acc_quant)
                 with m.If(self.carrier.valid):
-                    m.d.sync += acc.eq(0)
-                    m.d.sync += mac_in_1.eq(acc_quant)
                     m.d.sync += mac_in_2.eq(self.carrier.payload)
                     m.d.sync += self.carrier.ready.eq(0)
                     m.d.sync += self.source.valid.eq(1)

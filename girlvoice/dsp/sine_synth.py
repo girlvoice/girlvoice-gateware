@@ -5,7 +5,7 @@ import numpy as np
 from amaranth import *
 import amaranth.lib.wiring as wiring
 from amaranth.lib.wiring import In, Out
-from amaranth.lib import stream
+from amaranth.lib import stream, memory
 from amaranth.sim import Simulator
 
 from girlvoice.stream import stream_get
@@ -50,6 +50,72 @@ class StaticSineSynth(wiring.Component):
         with m.If(self.en):
             with m.If(self.source.ready & self.source.valid):
                 m.d.sync += idx.eq(idx + self.delta_f)
+
+
+        return m
+
+class ParallelSineSynth(wiring.Component):
+    def __init__(self, target_frequencies, fs, sample_width, phase_bits=8):
+        super().__init__({
+            "en": In(1),
+            "source": Out(stream.Signature(signed(sample_width)))
+        })
+
+        self.sample_width = sample_width
+        self.fs = fs
+
+        phase_bit_width = phase_bits
+
+        # Generate Sine LUT, use symmetry of sine function to reduce LUT size
+        t = np.linspace(0, np.pi, 2**(phase_bit_width-1))
+        y = np.sin(t)
+
+
+        self.lut = [C(int(y_i*(2**(sample_width-1))), signed(sample_width)) for y_i in y]
+
+        self.oversampling = 8
+
+        # N = Total number of bits for phase accumulator
+        self.N = N = phase_bit_width + self.oversampling
+
+        self.del_f = [int((2**N * f) / fs) for f in target_frequencies]
+
+
+    def elaborate(self, platform):
+        m = Module()
+
+        m.submodules.rom = rom = memory.Memory(shape=signed(self.sample_width), depth=len(self.lut), init=self.lut)
+        r_port: memory.ReadPort = rom.read_port()
+        m.d.comb += r_port.en.eq(1)
+
+        N = self.N
+        idx = Signal(len(self.del_f), reset=0)
+
+        phase_delta = Array([C(df, N) for df in self.del_f])
+        phase_array = Array([Signal(N, reset=0) for _ in range(len(self.del_f))])
+        phase_i = Signal(N)
+
+        with m.If(self.source.ready & self.source.valid):
+            with m.If(idx == len(self.del_f) - 1):
+                m.d.sync += idx.eq(0)
+            with m.Else():
+                m.d.sync += idx.eq(idx + 1)
+
+        m.d.comb += r_port.addr.eq(phase_i[:-1])
+        with m.FSM():
+            with m.State("LOAD_PHASE"):
+                # with m.If(self.source.ready):
+                m.d.sync += phase_i.eq(phase_array[idx] >> self.oversampling)
+                m.next = "READ_AMP"
+            with m.State("READ_AMP"):
+                m.d.sync += self.source.valid.eq(1)
+                m.next = "READY"
+            with m.State("READY"):
+                m.d.sync += self.source.payload.eq(Mux(phase_i.bit_select(N-1, 1), r_port.data, -r_port.data))
+                with m.If(self.source.ready & self.source.valid):
+                    m.d.sync += self.source.valid.eq(0)
+                    m.d.sync += phase_array[idx].eq(phase_array[idx] + phase_delta[idx])
+                    m.next = "LOAD_PHASE"
 
 
         return m
