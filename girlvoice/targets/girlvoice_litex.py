@@ -14,6 +14,7 @@ from migen.genlib.resetsync import AsyncResetSynchronizer
 
 from litex.gen import *
 
+from girlvoice.dsp import sine_synth
 from girlvoice.dsp.sine_synth import StaticSineSynth
 from girlvoice.platform.litex import girlvoice_rev_a
 
@@ -32,6 +33,7 @@ from litex.soc.cores.bitbang import I2CMaster
 from amaranth.back import verilog
 from girlvoice.io.nexus_i2c import NexusI2CMaster
 from girlvoice.dsp.vocoder import StaticVocoder
+from girlvoice.dsp.sine_synth import StaticSineSynth
 from girlvoice.io.i2s import i2s_tx, i2s_rx
 
 kB = 1024
@@ -44,6 +46,7 @@ def add_radiant_constraints(platform):
     platform.add_platform_command("ldc_set_vcc -bank 1 3.3")
     platform.add_platform_command("ldc_set_vcc -bank 3 1.8")
     platform.add_platform_command("ldc_set_vcc -bank 5 1.8")
+
 
 
 class _PowerManagement(LiteXModule):
@@ -60,7 +63,6 @@ class _PowerManagement(LiteXModule):
         self.sync += btn_last.eq(pwr_button)
         self.sync += btn_rising.eq(pwr_button & ~btn_last)
 
-        fsm = FSM(reset_state="PWR_ON")
         self.sync += [
             If(btn_rising,
                 pwr_on.eq(0)
@@ -75,10 +77,12 @@ class _CRG(LiteXModule):
         self.cd_sys = ClockDomain()
 
         # Built in OSC
-        self.hf_clk = NXOSCA()
-        hf_clk_freq = 25e6
-        self.hf_clk.create_hf_clk(self.cd_por, hf_clk_freq)
-        # self.cd_por.clk = platform.request("clk12")
+        # self.hf_clk = NXOSCA()
+        # hf_clk_freq = 25e6
+        # self.hf_clk.create_hf_clk(self.cd_por, hf_clk_freq)
+
+        clk12_freq = 12e6
+        self.cd_por.clk = platform.request("clk12")
 
         # Power on reset
         por_count = Signal(16, reset=2**16-1)
@@ -86,13 +90,13 @@ class _CRG(LiteXModule):
         self.comb += por_done.eq(por_count == 0)
         self.sync.por += If(~por_done, por_count.eq(por_count - 1))
 
-        self.rst_n = platform.request("btn_down")
+        # self.rst_n = platform.re
         # self.specials += AsyncResetSynchronizer(self.cd_por, ~self.rst_n)
 
         # PLL
         self.sys_pll = sys_pll = NXPLL(platform=platform, create_output_port_clocks=True)
         self.comb += sys_pll.reset.eq(self.rst)
-        sys_pll.register_clkin(self.cd_por.clk, hf_clk_freq)
+        sys_pll.register_clkin(self.cd_por.clk, clk12_freq)
         sys_pll.create_clkout(self.cd_sys, sys_clk_freq)
         self.specials += AsyncResetSynchronizer(self.cd_sys, ~self.sys_pll.locked | ~por_done )
 
@@ -131,6 +135,7 @@ class BaseSoC(SoCCore):
         # Disable Integrated SRAM since we want to instantiate LRAM specifically for it
         kwargs["integrated_sram_size"] = 0
         # Make serial_pmods available
+        # kwargs["with_uart"] = False
         SoCCore.__init__(self, platform, sys_clk_freq, ident="LiteX SoC on girlvoice rev A :3", **kwargs)
 
         # 128KB LRAM (used as SRAM) ---------------------------------------------------------------
@@ -140,9 +145,6 @@ class BaseSoC(SoCCore):
         self.main_ram = NXLRAM(32, 64*kB)
         self.bus.add_slave("main_ram", self.main_ram.bus, SoCRegion(origin=self.mem_map["main_ram"], size=64*kB))
 
-        led = platform.request("led")
-
-        self.comb += led.eq(self.crg.rst_n)
 
         self.power_manager = _PowerManagement(platform)
 
@@ -153,15 +155,16 @@ class BaseSoC(SoCCore):
         self.bus.add_slave("lmmi", self.i2c.bus.wishbone, SoCRegion(origin=self.mem_map["lmmi"], size=kB, cached=False))
         platform.add_period_constraint(self.i2c.alt_scl_oen, period=1e9/400e6)
 
-        clk12 = platform.request("clk12")
-        clk12_freq = 12e6
-        self.cd_clk12 = ClockDomain()
-        self.comb += self.cd_clk12.clk.eq(clk12)
+        # clk12 = platform.request("clk12")
+        # clk12_freq = 12e6
+        # self.cd_clk12 = ClockDomain()
+        # self.comb += self.cd_clk12.clk.eq(clk12)
 
-        sample_width = 16
+        sample_width = 18
 
-        # bclk_freq = 4e6
-        bclk_freq = 3072e3
+        bclk_freq = 4e6
+        fs = 32e3
+        # bclk_freq = 3072e3
         bclk = Signal()
         wclk = Signal()
         i2s_sdout = Signal()
@@ -189,16 +192,46 @@ class BaseSoC(SoCCore):
         i2s_payload = Signal(sample_width)
         self.specials += Instance(
             "i2s_tx",
-            i_sink__valid = 1,
+            i_sink__valid = i2s_valid,
             i_sink__payload = i2s_payload,
+            o_sink__ready = i2s_ready,
             i_clk = ClockSignal(),
             i_rst = ResetSignal(),
-            o_sink__ready = i2s_ready,
             o_sclk = bclk,
             o_lrclk = wclk,
             o_sdout = i2s_sdout
         )
 
+        amp = platform.request("amp")
+        self.comb += amp.bclk.eq(bclk)
+        self.comb += amp.data.eq(i2s_sdout)
+        self.comb += amp.wclk.eq(wclk)
+
+        # am_sine_synth = StaticSineSynth(432, fs=fs, clk_sync_freq=sys_clk_freq, sample_width=sample_width)
+
+        # mod_name = type(am_sine_synth).__name__
+        # with open(f"{type(am_sine_synth).__name__}.v", "w") as f:
+        #     f.write(verilog.convert(
+        #         am_sine_synth,
+        #         name=mod_name,
+        #         ports=[
+        #             am_sine_synth.source.ready,
+        #             am_sine_synth.source.payload,
+        #             am_sine_synth.en,
+        #         ],
+        #         emit_src=False
+        #     ))
+
+        # platform.add_source(f"{type(am_sine_synth).__name__}.v")
+        # self.specials += Instance(
+        #     "StaticSineSynth",
+        #     # o_source__valid = i2s_valid,
+        #     i_clk = ClockSignal(),
+        #     i_rst = ResetSignal(),
+        #     o_source__payload = i2s_payload,
+        #     i_source__ready = i2s_ready,
+        #     i_en = 1,
+        # )
         am_i2s_rx = i2s_rx(sys_clk_freq, bclk_freq, sample_width=sample_width)
         i2s_rx_name = type(am_i2s_rx).__name__
         i2s_rx_src = f"{i2s_rx_name}.v"
@@ -222,12 +255,16 @@ class BaseSoC(SoCCore):
         mic_payload = Signal(sample_width)
         mic_valid = Signal()
         mic_ready = Signal()
+
+        mic_lrclk = Signal()
+        mic_bclk = Signal()
+        mic_sdata = Signal()
         mic = platform.request("mic_i2s")
         self.specials += Instance(
             i2s_rx_name,
-            o_sclk = mic.bclk,
-            o_lrclk = mic.lrclk,
-            i_sdin = mic.data,
+            o_sclk = mic_bclk,
+            o_lrclk = mic_lrclk,
+            i_sdin = mic_sdata,
             i_clk = ClockSignal(),
             i_rst = ResetSignal(),
             i_source__ready = mic_ready,
@@ -235,89 +272,61 @@ class BaseSoC(SoCCore):
             o_source__payload = mic_payload
         )
 
-        vocoder = StaticVocoder(300, 1000, 16, clk_sync_freq=sys_clk_freq, fs=48e3, sample_width=sample_width)
-        voc_name = type(vocoder).__name__
-        with open(f"{voc_name}.v", "w") as f:
-            f.write(verilog.convert(
-                vocoder,
-                name=voc_name,
-                ports=[
-                    vocoder.sink.ready,
-                    vocoder.sink.valid,
-                    vocoder.sink.payload,
-                    vocoder.source.ready,
-                    vocoder.source.valid,
-                    vocoder.source.payload
-                ],
-                emit_src=False
-            ))
+        self.comb += i2s_valid.eq(mic_valid)
+        self.comb += i2s_payload.eq(mic_payload)
+        self.comb += mic_ready.eq(i2s_ready)
 
-        platform.add_source(f"{voc_name}.v")
-
-        self.specials += Instance(
-            voc_name,
-            i_clk = ClockSignal(),
-            i_rst = ResetSignal(),
-            i_source__ready = i2s_ready,
-            o_source__valid = i2s_valid,
-            o_source__payload = i2s_payload,
-            i_sink__valid = mic_valid,
-            i_sink__payload = mic_payload,
-            o_sink__ready = mic_ready
-        )
-
-        # phase_bit_width = 8
-        # sample_width = 18
-        # t = np.linspace(0, 2*np.pi, 2**phase_bit_width)
-        # y = np.sin(t)
-        # lut = amaranth.Array(amaranth.Const(int(y_i*(2**(sample_width-1))), amaranth.signed(sample_width)) for y_i in y)
-        # sine_synth = StaticSineSynth(432, 48e3, sys_clk_freq, 18, lut)
-        # mod_name = type(sine_synth).__name__
-        # with open(f"{type(sine_synth).__name__}.v", "w") as f:
+        self.comb += mic.lrclk.eq(mic_lrclk)
+        self.comb += mic.bclk.eq(mic_bclk)
+        self.comb += mic_sdata.eq(mic.data)
+        # vocoder = StaticVocoder(300, 3000, 8, clk_sync_freq=sys_clk_freq, fs=32e3, sample_width=sample_width)
+        # voc_name = type(vocoder).__name__
+        # with open(f"{voc_name}.v", "w") as f:
         #     f.write(verilog.convert(
-        #         sine_synth,
-        #         name=mod_name,
+        #         vocoder,
+        #         name=voc_name,
         #         ports=[
-        #             sine_synth.source.ready,
-        #             sine_synth.source.payload,
-        #             sine_synth.en
+        #             vocoder.sink.ready,
+        #             vocoder.sink.valid,
+        #             vocoder.sink.payload,
+        #             vocoder.source.ready,
+        #             vocoder.source.valid,
+        #             vocoder.source.payload
         #         ],
         #         emit_src=False
         #     ))
 
-        # platform.add_source(f"{type(sine_synth).__name__}.v")
+        # platform.add_source(f"{voc_name}.v")
+
         # self.specials += Instance(
-        #     "StaticSineSynth",
-        #     o_source__payload = i2s_payload,
+        #     voc_name,
         #     i_clk = ClockSignal(),
         #     i_rst = ResetSignal(),
         #     i_source__ready = i2s_ready,
-        #     i_en = 1
+        #     o_source__valid = i2s_valid,
+        #     o_source__payload = i2s_payload,
+        #     i_sink__valid = mic_valid,
+        #     i_sink__payload = mic_payload,
+        #     o_sink__ready = mic_ready
         # )
 
-        amp = platform.request("amp")
         self.comb += amp.en.eq(1)
 
         tp_rstn = platform.request("tp_rstn")
         self.comb += tp_rstn.eq(1)
 
-        aux_mclk = platform.request("aux_mclk")
-        self.comb += aux_mclk.eq(clk12)
+        led = platform.request("led")
+        btn_down = platform.request("btn_down")
+        btn_up = platform.request("btn_up")
 
-        # clk_ratio = int(clk12_freq // bclk_freq)
-        # clk_div = Signal(max=clk_ratio)
+        btn = Signal()
+        self.comb += btn.eq(~btn_down)
+        self.comb += led.eq(1)
 
-        # self.sync.clk12 += [
-        #     If(clk_div >= (clk_ratio - 1) // 2,
-        #         clk_div.eq(0),
-        #         bclk.eq(~bclk),
-        #     ).Else(
-        #         clk_div.eq(clk_div + 1)
-        #     )
-        # ]
+        # serial = platform.request("uart")
 
-        self.comb += amp.bclk.eq(bclk)
-        self.comb += amp.data.eq(i2s_sdout)
+        # self.comb += serial.rx.eq(mic_valid)
+        # self.comb += serial.tx.eq(mic_ready)
 
         # bclk_negedge = Signal()
         # bclk_last = Signal()
@@ -334,7 +343,6 @@ class BaseSoC(SoCCore):
         #     )
         # ]
 
-        self.comb += amp.wclk.eq(wclk)
         # SPI Flash --------------------------------------------------------------------------------
         # if with_spi_flash:
         #     from litespi.modules import MX25L12833F
@@ -342,18 +350,20 @@ class BaseSoC(SoCCore):
         #     self.add_spi_flash(mode="4x", clk_freq=100_000, module=MX25L12833F(Codes.READ_4_4_4), with_master=True)
 
 
+    # def add_amaranth_sources(self, platform):
 
 # Build --------------------------------------------------------------------------------------------
 
 def main():
     from litex.build.parser import LiteXArgumentParser
     parser = LiteXArgumentParser(platform=girlvoice_rev_a.Platform, description="LiteX SoC on Crosslink-NX Eval Board.")
-    parser.add_target_argument("--device",        default="LIFCL-40-8SG72C", help="FPGA device.")
+    parser.add_target_argument("--device",        default="LIFCL-17-8SG72C", help="FPGA device.")
     parser.add_target_argument("--sys-clk-freq",  default=60e6, type=float,   help="System clock frequency.")
-    parser.add_target_argument("--serial",        default="serial",           help="UART Pins")
+    # parser.add_target_argument("--serial",        default=False,           help="UART Pins")
     parser.add_target_argument("--programmer",    default="iceprog",          help="Programmer (radiant or iceprog).")
     parser.add_target_argument("--address",       default=0x0,                help="Flash address to program bitstream at.")
     parser.add_target_argument("--prog-target",   default="flash",           help="Programming Target (direct or flash).")
+    # parser.add_target_argument("--with-uart", default=False)
     # parser.add_target_argument("--with-spi-flash", action="store_true",       help="Enable SPI Flash (MMAPed).")
     args = parser.parse_args()
 
