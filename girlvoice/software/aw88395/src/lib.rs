@@ -68,6 +68,16 @@ impl<I2C: I2c> Aw88395<I2C> {
         self.update_config(Register::SysCtrl)
     }
 
+    pub fn enable_i2s(&mut self) -> Result<(), Aw88395Error> {
+        self.config.sys_ctrl.i2sen = true;
+        self.update_config(Register::SysCtrl)
+    }
+
+    pub fn disable_i2s(&mut self) -> Result<(), Aw88395Error> {
+        self.config.sys_ctrl.i2sen = false;
+        self.update_config(Register::SysCtrl)
+    }
+
     pub fn set_volume(&mut self, volume: u16) -> Result<(), Aw88395Error> {
         if volume > 0x3ff {
             return Err(Aw88395Error::OutOfRange);

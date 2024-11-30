@@ -239,10 +239,67 @@ impl Default for SysStat {
 
 }
 
+pub struct I2SCtrl {
+    pub i2ssr: u8,
+    pub i2sbck: u8,
+    pub i2sfs: u8,
+    pub i2smd: u8,
+    pub chsel: u8,
+    pub slot_num: u8,
+}
+
+pub enum SampleRate {
+    SR8kHz = 0x0,
+    SR11kHz = 0x1,
+    SR12kHz = 0x2,
+    SR16kHz = 0x3,
+    SR22kHz = 0x4,
+    SR24kHz = 0x5,
+    SR32kHz = 0x6,
+    SR44kHz = 0x7,
+    SR48kHz = 0x8,
+    SR96kHz = 0x9
+}
+
+impl MappedRegister for I2SCtrl {
+    fn update(&mut self, val: u16) {
+        self.i2ssr = (val & 0xf) as u8;
+        self.i2sbck = ((val >> 4) & 0x3) as u8;
+        self.i2sfs = ((val >> 6) & 0x3) as u8;
+        self.i2smd = ((val >> 8) & 0x3) as u8;
+        self.chsel = ((val >> 10) & 0x3) as u8;
+        self.slot_num = ((val >> 12) & 0x7) as u8;
+    }
+
+    fn value(&self) -> u16 {
+        let mut val: u16 = self.slot_num as u16;
+        val = (val << 2) | self.chsel as u16;
+        val = (val << 2) | self.i2smd as u16;
+        val = (val << 2) | self.i2sfs as u16;
+        val = (val << 2) | self.i2sbck as u16;
+        val = (val << 4) | self.i2ssr as u16;
+        val
+    }
+}
+
+impl Default for I2SCtrl {
+    fn default() -> Self {
+        Self {
+            i2ssr: 0x8,
+            i2sbck: 0x2,
+            i2sfs: 0x3,
+            i2smd: 0,
+            chsel: 1,
+            slot_num: 0,
+        }
+    }
+}
+
 pub struct Aw88395Config {
     pub sys_stat: SysStat,
     pub sys_ctrl: SysCtrl,
     pub sys_ctrl2: SysCtrl2,
+    pub i2s_ctrl: I2SCtrl,
 }
 
 impl Default for Aw88395Config {
@@ -251,6 +308,7 @@ impl Default for Aw88395Config {
             sys_stat: SysStat::default(),
             sys_ctrl: SysCtrl::default(),
             sys_ctrl2: SysCtrl2::default(),
+            i2s_ctrl: I2SCtrl::default(),
         }
     }
 }
@@ -260,6 +318,7 @@ impl Aw88395Config {
         match reg {
             Register::SysCtrl => self.sys_ctrl.value(),
             Register::SysCtrl2 => self.sys_ctrl2.value(),
+            Register::I2SCtrl => self.i2s_ctrl.value(),
             _ => 0,
         }
     }
@@ -268,6 +327,7 @@ impl Aw88395Config {
         match reg {
             Register::SysCtrl => self.sys_ctrl.update(val),
             Register::SysCtrl2 => self.sys_ctrl2.update(val),
+            Register::I2SCtrl => self.i2s_ctrl.update(val),
             _ => (),
         }
     }
