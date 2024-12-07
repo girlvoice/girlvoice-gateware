@@ -9,7 +9,6 @@
 
 mod regmap;
 use regmap::{Aw88395Config, MappedRegister, Register};
-
 use embedded_hal::i2c::{Error, ErrorKind, I2c};
 
 
@@ -24,6 +23,30 @@ pub struct Aw88395<I2C> {
 pub enum Aw88395Error {
     OpFailed,
     OutOfRange,
+}
+
+pub enum ChannelSetting {
+    Left  = 0x1,
+    Right = 0x2,
+    Mono  = 0x3,
+}
+
+pub enum I2SDataFmt {
+    Philip   = 0x0,
+    MSBFirst = 0x1,
+    LSBFirst = 0x2,
+}
+pub enum SampleRate {
+    SR8kHz  = 0x0,
+    SR11kHz = 0x1,
+    SR12kHz = 0x2,
+    SR16kHz = 0x3,
+    SR22kHz = 0x4,
+    SR24kHz = 0x5,
+    SR32kHz = 0x6,
+    SR44kHz = 0x7,
+    SR48kHz = 0x8,
+    SR96kHz = 0x9
 }
 
 
@@ -76,6 +99,26 @@ impl<I2C: I2c> Aw88395<I2C> {
     pub fn disable_i2s(&mut self) -> Result<(), Aw88395Error> {
         self.config.sys_ctrl.i2sen = false;
         self.update_config(Register::SysCtrl)
+    }
+
+    pub fn set_i2s_channel(&mut self, channel_setting: u8) -> Result<(), Aw88395Error> {
+        self.config.i2s_ctrl.chsel = channel_setting;
+        self.update_config(Register::I2SCtrl)
+    }
+
+    pub fn set_i2s_samplerate(&mut self, sample_rate: u8) -> Result<(), Aw88395Error> {
+        self.config.i2s_ctrl.i2ssr = sample_rate;
+        self.update_config(Register::I2SCtrl)
+    }
+
+    pub fn set_i2s_data_fmt(&mut self, fmt: I2SDataFmt) -> Result<(), Aw88395Error> {
+        self.config.i2s_ctrl.i2smd = fmt as u8;
+        self.update_config(Register::I2SCtrl)
+    }
+
+    pub fn set_i2s_data_width(&mut self, bit_width: u8) -> Result<(), Aw88395Error>{
+        self.config.i2s_ctrl.i2sfs = bit_width;
+        self.update_config(Register::I2SCtrl)
     }
 
     pub fn set_volume(&mut self, volume: u16) -> Result<(), Aw88395Error> {

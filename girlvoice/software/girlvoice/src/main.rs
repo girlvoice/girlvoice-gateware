@@ -33,9 +33,8 @@ fn main() -> ! {
     };
 
     // let i2c_freq = HertzU32::from_raw(400_000);
-    let  i2c0 = I2c0::new(peripherals.i2cfifo);
+    let mut i2c0 = I2c0::new(peripherals.i2cfifo);
 
-    let mut amp = Aw88395::new(i2c0);
 
     serial.bwrite_all(b"Starting I2C read!\n").unwrap();
 
@@ -46,14 +45,14 @@ fn main() -> ! {
     // serial.bwrite_all(&test_hex).unwrap();
     // serial.bwrite_all(b"\n").unwrap();
 
-    // let dev_addr: SevenBitAddress = 0x34;
-    // let max_reg_addr: u8 = 0x61;
-    // const BYTES_TO_READ: usize = 2;
-    // const REG_WIDTH: usize = 1;
-    // let mut read_buf = [0_u8; BYTES_TO_READ];
-    // let mut hex_bytes = [0_u8; BYTES_TO_READ * 2];
+    let dev_addr: SevenBitAddress = 0x34;
+    let max_reg_addr: u8 = 0x61;
+    const BYTES_TO_READ: usize = 2;
+    const REG_WIDTH: usize = 1;
+    let mut read_buf = [0_u8; BYTES_TO_READ];
+    let mut hex_bytes = [0_u8; BYTES_TO_READ * 2];
 
-    // let mut reg_hex = [0_u8; REG_WIDTH * 2];
+    let mut reg_hex = [0_u8; REG_WIDTH * 2];
 
     // i2c0.write(dev_addr, &[0x00, 0x55, 0xaa]).unwrap();
 
@@ -84,23 +83,6 @@ fn main() -> ! {
     // msleep(&mut timer, 2000);
 
 
-    // for reg_addr in (0..max_reg_addr+1).step_by(1) {
-
-    //     hex::encode_to_slice(reg_addr.to_be_bytes(), &mut reg_hex).unwrap();
-    //     serial.bwrite_all(b"0x").unwrap();
-    //     serial.bwrite_all(&reg_hex).unwrap();
-    //     serial.bwrite_all(b": ").unwrap();
-
-    //     i2c0.write_read(dev_addr, &reg_addr.to_be_bytes(), &mut read_buf).unwrap();
-
-    //     serial.bwrite_all(b"0x").unwrap();
-    //     hex::encode_to_slice(read_buf, &mut hex_bytes).unwrap();
-
-    //     serial.bwrite_all(&hex_bytes).unwrap();
-    //     serial.bwrite_all(b"\n").unwrap();
-
-    //     msleep(&mut timer, 1)
-    // }
 
     // hex::encode_to_slice(reg_addr.to_be_bytes(), &mut reg_hex).unwrap();
     // serial.bwrite_all(b"0x").unwrap();
@@ -120,6 +102,7 @@ fn main() -> ! {
     // serial.bwrite_all(&hex_bytes).unwrap();
     // serial.bwrite_all(b"\n").unwrap();
 
+    let mut amp = Aw88395::new(i2c0);
 
     let mut config_hex = [0u8; 4];
 
@@ -132,11 +115,12 @@ fn main() -> ! {
     serial.bwrite_all(b"\n").unwrap();
 
     serial.bwrite_all(b"Starting amp power-up sequence\n").unwrap();
+    serial.bwrite_all(b"Enabling I2S Interface\n").unwrap();
     serial.bwrite_all(b"Powering on\n").unwrap();
     amp.power_on().unwrap();
     serial.bwrite_all(b"Power on success\n").unwrap();
 
-    msleep(&mut timer, 500);
+    msleep(&mut timer, 1000);
 
     config = amp.get_sysctrl_bits().unwrap();
     hex::encode_to_slice(config.to_be_bytes(), &mut config_hex).unwrap();
@@ -147,14 +131,17 @@ fn main() -> ! {
 
     while !amp.pll_locked().unwrap() {
         serial.bwrite_all(b"Waiting for PLL lock...\n").unwrap();
-
-
         msleep(&mut timer, 2000);
     }
     serial.bwrite_all(b"PLL Locked\n").unwrap();
 
     serial.bwrite_all(b"Setting volume to 500 i guess\n").unwrap();
-    amp.set_volume(500).unwrap();
+    amp.set_volume(400).unwrap();
+    // amp.set_i2s_channel(aw88395::ChannelSetting::Left).unwrap();
+    amp.enable_i2s().unwrap();
+    amp.set_i2s_data_fmt(aw88395::I2SDataFmt::MSBFirst).unwrap();
+    amp.set_i2s_samplerate(0x6).unwrap();
+    amp.set_i2s_data_width(0x0).unwrap();
 
     serial.bwrite_all(b"Enabling class D amplifier and boost converter\n").unwrap();
     amp.enable_amp().unwrap();
@@ -166,10 +153,29 @@ fn main() -> ! {
     }
     serial.bwrite_all(b"Amplifier power-on complete\n").unwrap();
 
-    // serial.bwrite_all(b"Unmuting\n").unwrap();
-    // amp.unmute().unwrap();
+    serial.bwrite_all(b"Unmuting\n").unwrap();
+    amp.unmute().unwrap();
 
-    // serial.bwrite_all(b"Welcome to girlvoice\n").unwrap();
+    i2c0 = amp.release();
+
+    for reg_addr in (0..max_reg_addr+1).step_by(1) {
+
+        hex::encode_to_slice(reg_addr.to_be_bytes(), &mut reg_hex).unwrap();
+        serial.bwrite_all(b"0x").unwrap();
+        serial.bwrite_all(&reg_hex).unwrap();
+        serial.bwrite_all(b": ").unwrap();
+
+        i2c0.write_read(dev_addr, &reg_addr.to_be_bytes(), &mut read_buf).unwrap();
+
+        serial.bwrite_all(b"0x").unwrap();
+        hex::encode_to_slice(read_buf, &mut hex_bytes).unwrap();
+
+        serial.bwrite_all(&hex_bytes).unwrap();
+        serial.bwrite_all(b"\n").unwrap();
+
+        msleep(&mut timer, 1)
+    }
+    serial.bwrite_all(b"Welcome to girlvoice\n").unwrap();
     loop {
         serial.bwrite_all(b"awaw").unwrap();
         // led.toggle();

@@ -15,8 +15,7 @@ fn main() {
 
     let mut f = File::create(&dest_path.join("regions.ld"))
         .expect("Could not create file");
-    f.write_all(include_bytes!(concat!(env!("LITEX_BUILD_DIR"), "/software/include/generated/regions.ld")))
-        .expect("Could not write file");
+    f.write_all(include_bytes!("generated/regions.ld")).expect("Could not write file");
 
     println!("cargo:rustc-link-search={}", dest_path.display());
 
