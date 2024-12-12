@@ -16,3 +16,4 @@ riscv = {version = "0.11.1" }
 riscv-rt = "0.12.2"
 
 aw88395 = { path = "../aw88395" }
+gc9a01-rs = "0.4.2"

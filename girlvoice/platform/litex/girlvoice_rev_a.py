@@ -15,8 +15,8 @@ _io = [
     ("led", 0, Pins("13"), IOStandard("LVCMOS18H")),
 
     ("btn_pwr", 0, Pins("27"), IOStandard("LVCMOS18H")),
-    ("btn_up", 0, Pins("19"), IOStandard("LVCMOS18H"), Misc("PULLMODE=UP")),
-    ("btn_down", 0, Pins("20"), IOStandard("LVCMOS18H"), Misc("PULLMODE=UP")),
+    ("btn_up", 0, Pins("19"), IOStandard("LVCMOS18H"), Misc("PULLMODE=NONE")),
+    ("btn_down", 0, Pins("20"), IOStandard("LVCMOS18H"), Misc("PULLMODE=NONE")),
 
     ("pwr_en", 0, Pins("28"), IOStandard("LVCMOS18H")),
 
@@ -54,6 +54,17 @@ _io = [
     ),
 
     ("tp_rstn", 0, Pins("15"), IOStandard("LVCMOS18H")),
+
+    ("lcd_spi", 0,
+        Subsignal("sck", Pins("48")),
+        Subsignal("cs_n", Pins("53")),
+        Subsignal("mosi", Pins("45")),
+        IOStandard("LVCMOS33")
+    ),
+    ("lcd_ctl", 0,
+        Subsignal("dc", Pins("46")),
+        IOStandard("LVCMOS33")
+    ),
 ]
 
 

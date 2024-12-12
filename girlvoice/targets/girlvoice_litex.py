@@ -28,7 +28,7 @@ from litex.soc.cores.clock import *
 from litex.soc.integration.soc_core import *
 from litex.soc.integration.soc import SoCRegion, SoCIORegion
 from litex.soc.integration.builder import *
-from litex.soc.cores.bitbang import I2CMaster
+from litex.soc.cores.spi import SPIMaster
 
 from amaranth.back import verilog
 from girlvoice.io.nexus_i2c import NexusI2CMaster
@@ -90,8 +90,8 @@ class _CRG(LiteXModule):
         self.comb += por_done.eq(por_count == 0)
         self.sync.por += If(~por_done, por_count.eq(por_count - 1))
 
-        # self.rst_n = platform.re
-        # self.specials += AsyncResetSynchronizer(self.cd_por, ~self.rst_n)
+        self.rst_n = platform.request("btn_down")
+        self.specials += AsyncResetSynchronizer(self.cd_por, ~self.rst_n)
 
         # PLL
         self.sys_pll = sys_pll = NXPLL(platform=platform, create_output_port_clocks=True)
@@ -155,12 +155,31 @@ class BaseSoC(SoCCore):
         self.bus.add_slave("lmmi", self.i2c.bus.wishbone, SoCRegion(origin=self.mem_map["lmmi"], size=kB, cached=False))
         platform.add_period_constraint(self.i2c.alt_scl_oen, period=1e9/400e6)
 
+        # Display SPI ---------------------------------------------------------------------
+
+        spi_clk_freq = 1e6
+        spi_pads = platform.request("lcd_spi")
+        spi_pads.miso = Signal()
+        self.submodules.lcd_spi = SPIMaster(
+            spi_pads,
+            data_width=8,
+            sys_clk_freq=sys_clk_freq,
+            spi_clk_freq=spi_clk_freq,
+            with_csr=True
+        )
+
+        spi_ctl_pads = platform.request("lcd_ctl")
+        self.submodules.lcd_ctl = GPIOOut(spi_ctl_pads)
+        self.add_csr("oled_csr")
+
+        # Vocoder Junk --------------------------------------------------------------------
+
         # clk12 = platform.request("clk12")
         # clk12_freq = 12e6
         # self.cd_clk12 = ClockDomain()
         # self.comb += self.cd_clk12.clk.eq(clk12)
 
-        sample_width = 18
+        sample_width = 16
 
         bclk_freq = 4e6
         fs = 32e3
@@ -316,11 +335,11 @@ class BaseSoC(SoCCore):
         self.comb += tp_rstn.eq(1)
 
         led = platform.request("led")
-        btn_down = platform.request("btn_down")
-        btn_up = platform.request("btn_up")
+        # btn_down = platform.request("btn_down")
+        # btn_up = platform.request("btn_up")
 
         btn = Signal()
-        self.comb += btn.eq(~btn_down)
+        # self.comb += btn.eq(~btn_down)
         self.comb += led.eq(1)
 
         # serial = platform.request("uart")
