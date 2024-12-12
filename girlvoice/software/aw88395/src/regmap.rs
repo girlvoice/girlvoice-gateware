@@ -248,19 +248,6 @@ pub struct I2SCtrl {
     pub slot_num: u8,
 }
 
-pub enum SampleRate {
-    SR8kHz = 0x0,
-    SR11kHz = 0x1,
-    SR12kHz = 0x2,
-    SR16kHz = 0x3,
-    SR22kHz = 0x4,
-    SR24kHz = 0x5,
-    SR32kHz = 0x6,
-    SR44kHz = 0x7,
-    SR48kHz = 0x8,
-    SR96kHz = 0x9
-}
-
 impl MappedRegister for I2SCtrl {
     fn update(&mut self, val: u16) {
         self.i2ssr = (val & 0xf) as u8;
