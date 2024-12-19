@@ -56,7 +56,7 @@ _io = [
     ("tp_rstn", 0, Pins("15"), IOStandard("LVCMOS18H")),
 
     ("lcd_spi", 0,
-        Subsignal("sck", Pins("48")),
+        Subsignal("clk", Pins("48")),
         Subsignal("cs_n", Pins("53")),
         Subsignal("mosi", Pins("45")),
         IOStandard("LVCMOS33")

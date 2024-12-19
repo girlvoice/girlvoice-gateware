@@ -32,7 +32,7 @@ from litex.soc.cores.spi import SPIMaster
 
 from amaranth.back import verilog
 from girlvoice.io.nexus_i2c import NexusI2CMaster
-from girlvoice.dsp.vocoder import StaticVocoder
+from girlvoice.dsp.litex.vocoder import StaticVocoder
 from girlvoice.dsp.sine_synth import StaticSineSynth
 from girlvoice.io.i2s import i2s_tx, i2s_rx
 
@@ -40,7 +40,7 @@ kB = 1024
 mB = 1024*kB
 
 def add_radiant_constraints(platform):
-    platform.add_platform_command("ldc_set_sysconfig {{CONFIGIO_VOLTAGE_BANK0=3.3 CONFIGIO_VOLTAGE_BANK1=3.3 JTAG_PORT=DISABLE MASTER_SPI_PORT=SERIAL}}")
+    platform.add_platform_command("ldc_set_sysconfig {{CONFIGIO_VOLTAGE_BANK0=3.3 CONFIGIO_VOLTAGE_BANK1=3.3 SLAVE_SPI_PORT=SERIAL JTAG_PORT=DISABLE MASTER_SPI_PORT=DISABLE}}")
     platform.add_platform_command("ldc_set_location -site {{PLL_LRC}} [ get_cells {{PLL_0.PLL_inst}} ]")
     platform.add_platform_command("ldc_set_vcc -bank 0 3.3")
     platform.add_platform_command("ldc_set_vcc -bank 1 3.3")
@@ -170,7 +170,7 @@ class BaseSoC(SoCCore):
 
         spi_ctl_pads = platform.request("lcd_ctl")
         self.submodules.lcd_ctl = GPIOOut(spi_ctl_pads)
-        self.add_csr("oled_csr")
+        self.add_csr("lcd_csr")
 
         # Vocoder Junk --------------------------------------------------------------------
 
@@ -298,36 +298,8 @@ class BaseSoC(SoCCore):
         self.comb += mic.lrclk.eq(mic_lrclk)
         self.comb += mic.bclk.eq(mic_bclk)
         self.comb += mic_sdata.eq(mic.data)
-        # vocoder = StaticVocoder(300, 3000, 8, clk_sync_freq=sys_clk_freq, fs=32e3, sample_width=sample_width)
-        # voc_name = type(vocoder).__name__
-        # with open(f"{voc_name}.v", "w") as f:
-        #     f.write(verilog.convert(
-        #         vocoder,
-        #         name=voc_name,
-        #         ports=[
-        #             vocoder.sink.ready,
-        #             vocoder.sink.valid,
-        #             vocoder.sink.payload,
-        #             vocoder.source.ready,
-        #             vocoder.source.valid,
-        #             vocoder.source.payload
-        #         ],
-        #         emit_src=False
-        #     ))
 
-        # platform.add_source(f"{voc_name}.v")
-
-        # self.specials += Instance(
-        #     voc_name,
-        #     i_clk = ClockSignal(),
-        #     i_rst = ResetSignal(),
-        #     i_source__ready = i2s_ready,
-        #     o_source__valid = i2s_valid,
-        #     o_source__payload = i2s_payload,
-        #     i_sink__valid = mic_valid,
-        #     i_sink__payload = mic_payload,
-        #     o_sink__ready = mic_ready
-        # )
+        self.vocoder = StaticVocoder(platform, 300, 3000, 8, clk_sync_freq=sys_clk_freq, fs=32e3, sample_width=sample_width)
 
         self.comb += amp.en.eq(1)
 

@@ -32,7 +32,6 @@ class i2s_tx(wiring.Component):
         m.d.comb += self.sclk.eq(clk_div[-1])
         with m.If(clk_div >= (self.clk_ratio - 1)):
             m.d.sync += clk_div.eq(0)
-
         with m.Else():
             m.d.sync += clk_div.eq(clk_div + 1)
 
@@ -66,8 +65,6 @@ class i2s_tx(wiring.Component):
         with m.If(bit_count == 31):
             with m.If(sclk_negedge):
                 m.d.sync += self.lrclk.eq(~self.lrclk)
-
-
 
         return m
 
