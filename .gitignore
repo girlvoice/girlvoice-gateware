@@ -46,3 +46,6 @@ MANIFEST
 *.vcd
 
 webhelp/
+
+# Verilog exported from Amaranth modules
+girlvoice/targets/*.v
