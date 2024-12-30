@@ -13,9 +13,8 @@ pdm run girlvoice/targets/girlvoice_litex.py --cpu-variant imac --toolchain=radi
 ```
 
 This will generate a `.svd` file that must then be processed into a Peripheral Access Crate (PAC) for the rust-based firmware.
+run: `svd2rust -i girlsoc.svd --target riscv` to create the PAC `lib.rs` file.
 
-
-`pdm run girlvoice/lifcl_evn_top.py` to build for the CrossLinkNX evaluation board.
 
 `pdm run girlvoice/girlvoice_rev_a.py` to build for the girlvoice rev A PCB.
 

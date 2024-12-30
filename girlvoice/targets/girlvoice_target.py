@@ -18,16 +18,13 @@ class GirlTop(Elaboratable):
 
         ## Clock Defs
 
-        sync_freq = 32e6
+        sync_freq = 60e6
         bclk_freq = 4e6
 
-
         clkin = platform.request("clk12", dir="i").i
-
         m.domains.clk12 = cd_clk12 = ClockDomain("clk12")
         m.d.comb += cd_clk12.clk.eq(clkin)
         platform.add_clock_constraint(cd_clk12.clk, 12e6)
-
 
         m.domains.sync = cd_sync = ClockDomain("sync")
 
@@ -39,15 +36,6 @@ class GirlTop(Elaboratable):
             clkout_freq=sync_freq)
         platform.add_clock_constraint(cd_sync.clk, sync_freq)
 
-        clk_ratio = int(sync_freq // bclk_freq)
-        clk_div = Signal(range(clk_ratio))
-
-        # bclk = Signal()
-        # with m.If(clk_div >= (clk_ratio - 1) // 2):
-        #     m.d.sync += clk_div.eq(0)
-        #     m.d.sync += bclk.eq(~bclk)
-        # with m.Else():
-            # m.d.sync += clk_div.eq(clk_div + 1)
 
         ## RX from ADC
         m.submodules.i2s_rx = rx = i2s_rx(sys_clk_freq=sync_freq, sclk_freq=bclk_freq, sample_width=18)
@@ -83,9 +71,6 @@ class GirlTop(Elaboratable):
         m.d.comb += dac_din.o.eq(tx.sdout)
 
 
-        # m.d.comb += tx.sink.data.eq(rx.source.data)
-        # m.d.comb += rx.source.ready.eq(tx.sink.ready)
-        # m.d.comb += tx.sink.valid.eq(rx.source.valid)
         sample_rate = 48e3
         m.submodules.vocoder = v = vocoder.StaticVocoder(500, 3000, clk_sync_freq=sync_freq, num_channels=10, fs=sample_rate, sample_width=18)
         # m.submodules.band = band = BandpassIIR(2.5e3, 1000, sample_width=18, filter_order=4, fs=48e3)
