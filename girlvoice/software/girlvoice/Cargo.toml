@@ -9,11 +9,15 @@ edition = "2021"
 embedded-hal = "1.0.0"
 fugit = "0.3.7"
 hex = { version = "0.4.3", default-features = false}
-litex-hal = "0.4.0"
+# litex-hal = { version = "0.4.0", features = ["gpio"] }
+litex-hal = { path = "/home/sage/programming_stuff/sage/rust-litex-hal" }
 litex-pac = { path = "../litex-pac", features = ["rt", "critical-section"] }
-panic-halt = "0.2.0"
+panic-halt = "1.0.0"
 riscv = {version = "0.11.1" }
 riscv-rt = "0.12.2"
 
 aw88395 = { path = "../aw88395" }
 gc9a01-rs = "0.4.2"
+display-interface-spi = "0.5.0"
+embedded-io = "0.6.1"
+embedded-graphics = "0.8.1"
