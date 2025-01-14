@@ -3,7 +3,7 @@
 <device schemaVersion="1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="CMSIS-SVD.xsd" >
     <vendor>litex</vendor>
     <name>SOC</name>
-    <description><![CDATA[Litex SoC 2024-06-08 14:40:23]]></description>
+    <description><![CDATA[Litex SoC 2024-12-27 01:05:14]]></description>
 
     <addressUnitBits>8</addressUnitBits>
     <width>32</width>
@@ -14,8 +14,35 @@
 
     <peripherals>
         <peripheral>
+            <name>LCD_BL</name>
+            <baseAddress>0xF0000800</baseAddress>
+            <groupName>LCD_BL</groupName>
+            <registers>
+                <register>
+                    <name>OUT</name>
+                    <description><![CDATA[GPIO Output(s) Control.]]></description>
+                    <addressOffset>0x0000</addressOffset>
+                    <resetValue>0x00</resetValue>
+                    <size>32</size>
+                    <fields>
+                        <field>
+                            <name>out</name>
+                            <msb>0</msb>
+                            <bitRange>[0:0]</bitRange>
+                            <lsb>0</lsb>
+                        </field>
+                    </fields>
+                </register>
+            </registers>
+            <addressBlock>
+                <offset>0</offset>
+                <size>0x4</size>
+                <usage>registers</usage>
+            </addressBlock>
+        </peripheral>
+        <peripheral>
             <name>CTRL</name>
-            <baseAddress>0xF0000000</baseAddress>
+            <baseAddress>0xF0001000</baseAddress>
             <groupName>CTRL</groupName>
             <registers>
                 <register>
@@ -81,7 +108,7 @@ to the Wishbone/CSR bus are working correctly. The initial reset value of
         </peripheral>
         <peripheral>
             <name>IDENTIFIER_MEM</name>
-            <baseAddress>0xF0000800</baseAddress>
+            <baseAddress>0xF0001800</baseAddress>
             <groupName>IDENTIFIER_MEM</groupName>
             <registers>
                 <register>
@@ -107,8 +134,162 @@ to the Wishbone/CSR bus are working correctly. The initial reset value of
             </addressBlock>
         </peripheral>
         <peripheral>
+            <name>LCD_CTL</name>
+            <baseAddress>0xF0002000</baseAddress>
+            <groupName>LCD_CTL</groupName>
+            <registers>
+                <register>
+                    <name>OUT</name>
+                    <description><![CDATA[GPIO Output(s) Control.]]></description>
+                    <addressOffset>0x0000</addressOffset>
+                    <resetValue>0x00</resetValue>
+                    <size>32</size>
+                    <fields>
+                        <field>
+                            <name>out</name>
+                            <msb>0</msb>
+                            <bitRange>[0:0]</bitRange>
+                            <lsb>0</lsb>
+                        </field>
+                    </fields>
+                </register>
+            </registers>
+            <addressBlock>
+                <offset>0</offset>
+                <size>0x4</size>
+                <usage>registers</usage>
+            </addressBlock>
+        </peripheral>
+        <peripheral>
+            <name>LCD_SPI</name>
+            <baseAddress>0xF0002800</baseAddress>
+            <groupName>LCD_SPI</groupName>
+            <registers>
+                <register>
+                    <name>CONTROL</name>
+                    <description><![CDATA[SPI Control.]]></description>
+                    <addressOffset>0x0000</addressOffset>
+                    <resetValue>0x00</resetValue>
+                    <size>32</size>
+                    <fields>
+                        <field>
+                            <name>start</name>
+                            <msb>0</msb>
+                            <bitRange>[0:0]</bitRange>
+                            <lsb>0</lsb>
+                            <description><![CDATA[SPI Xfer Start (Write ``1`` to start Xfer).]]></description>
+                        </field>
+                        <field>
+                            <name>length</name>
+                            <msb>15</msb>
+                            <bitRange>[15:8]</bitRange>
+                            <lsb>8</lsb>
+                            <description><![CDATA[SPI Xfer Length (in bits).]]></description>
+                        </field>
+                    </fields>
+                </register>
+                <register>
+                    <name>STATUS</name>
+                    <description><![CDATA[SPI Status.]]></description>
+                    <addressOffset>0x0004</addressOffset>
+                    <resetValue>0x00</resetValue>
+                    <size>32</size>
+                    <fields>
+                        <field>
+                            <name>done</name>
+                            <msb>0</msb>
+                            <bitRange>[0:0]</bitRange>
+                            <lsb>0</lsb>
+                            <description><![CDATA[SPI Xfer Done (when read as ``1``).]]></description>
+                        </field>
+                        <field>
+                            <name>mode</name>
+                            <msb>1</msb>
+                            <bitRange>[1:1]</bitRange>
+                            <lsb>1</lsb>
+                            <description><![CDATA[SPI mode]]></description>
+                        </field>
+                    </fields>
+                </register>
+                <register>
+                    <name>MOSI</name>
+                    <description><![CDATA[SPI MOSI data (MSB-first serialization).]]></description>
+                    <addressOffset>0x0008</addressOffset>
+                    <resetValue>0x00</resetValue>
+                    <size>32</size>
+                    <fields>
+                        <field>
+                            <name>mosi</name>
+                            <msb>7</msb>
+                            <bitRange>[7:0]</bitRange>
+                            <lsb>0</lsb>
+                        </field>
+                    </fields>
+                </register>
+                <register>
+                    <name>MISO</name>
+                    <description><![CDATA[SPI MISO data (MSB-first de-serialization).]]></description>
+                    <addressOffset>0x000c</addressOffset>
+                    <resetValue>0x00</resetValue>
+                    <size>32</size>
+                    <fields>
+                        <field>
+                            <name>miso</name>
+                            <msb>7</msb>
+                            <bitRange>[7:0]</bitRange>
+                            <lsb>0</lsb>
+                        </field>
+                    </fields>
+                </register>
+                <register>
+                    <name>CS</name>
+                    <description><![CDATA[SPI CS Chip-Select and Mode.]]></description>
+                    <addressOffset>0x0010</addressOffset>
+                    <resetValue>0x01</resetValue>
+                    <size>32</size>
+                    <fields>
+                        <field>
+                            <name>sel</name>
+                            <msb>0</msb>
+                            <bitRange>[0:0]</bitRange>
+                            <lsb>0</lsb>
+                            <description><![CDATA[None]]></description>
+                        </field>
+                        <field>
+                            <name>mode</name>
+                            <msb>16</msb>
+                            <bitRange>[16:16]</bitRange>
+                            <lsb>16</lsb>
+                            <description><![CDATA[None]]></description>
+                        </field>
+                    </fields>
+                </register>
+                <register>
+                    <name>LOOPBACK</name>
+                    <description><![CDATA[SPI Loopback Mode.]]></description>
+                    <addressOffset>0x0014</addressOffset>
+                    <resetValue>0x00</resetValue>
+                    <size>32</size>
+                    <fields>
+                        <field>
+                            <name>mode</name>
+                            <msb>0</msb>
+                            <bitRange>[0:0]</bitRange>
+                            <lsb>0</lsb>
+                            <description><![CDATA[None]]></description>
+                        </field>
+                    </fields>
+                </register>
+            </registers>
+            <addressBlock>
+                <offset>0</offset>
+                <size>0x18</size>
+                <usage>registers</usage>
+            </addressBlock>
+        </peripheral>
+        <peripheral>
             <name>TIMER0</name>
-            <baseAddress>0xF0001000</baseAddress>
+            <baseAddress>0xF0003000</baseAddress>
             <groupName>TIMER0</groupName>
             <registers>
                 <register>
@@ -432,7 +613,7 @@ register to disable individual events.]]></description>
         </peripheral>
         <peripheral>
             <name>UART</name>
-            <baseAddress>0xF0001800</baseAddress>
+            <baseAddress>0xF0003800</baseAddress>
             <groupName>UART</groupName>
             <registers>
                 <register>
@@ -591,6 +772,48 @@ register to disable individual events.]]></description>
                 <name>uart</name>
                 <value>0</value>
             </interrupt>
+        </peripheral>
+        <peripheral>
+            <name>VOCODER</name>
+            <baseAddress>0xF0004000</baseAddress>
+            <groupName>VOCODER</groupName>
+            <registers>
+                <register>
+                    <name>ATTACK</name>
+                    <description><![CDATA[Vocoder Attack Constant]]></description>
+                    <addressOffset>0x0000</addressOffset>
+                    <resetValue>0x00</resetValue>
+                    <size>32</size>
+                    <fields>
+                        <field>
+                            <name>attack</name>
+                            <msb>31</msb>
+                            <bitRange>[31:0]</bitRange>
+                            <lsb>0</lsb>
+                        </field>
+                    </fields>
+                </register>
+                <register>
+                    <name>DECAY</name>
+                    <description><![CDATA[Vocoder Decay Constant]]></description>
+                    <addressOffset>0x0004</addressOffset>
+                    <resetValue>0x00</resetValue>
+                    <size>32</size>
+                    <fields>
+                        <field>
+                            <name>decay</name>
+                            <msb>31</msb>
+                            <bitRange>[31:0]</bitRange>
+                            <lsb>0</lsb>
+                        </field>
+                    </fields>
+                </register>
+            </registers>
+            <addressBlock>
+                <offset>0</offset>
+                <size>0x8</size>
+                <usage>registers</usage>
+            </addressBlock>
         </peripheral>
     </peripherals>
     <vendorExtensions>

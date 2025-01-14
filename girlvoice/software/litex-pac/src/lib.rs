@@ -808,6 +808,112 @@ pub extern "C" fn $ NAME () { let _ = $ crate :: interrupt :: Interrupt :: $ NAM
 pub extern "C" fn $ NAME () { let _ = $ crate :: interrupt :: Interrupt :: $ NAME ; let f : fn () = $ path ; f () ; } } }
 }
 pub use self::interrupt::Interrupt;
+#[doc = "LCD_BL"]
+pub struct LcdBl {
+    _marker: PhantomData<*const ()>,
+}
+unsafe impl Send for LcdBl {}
+impl LcdBl {
+    #[doc = r"Pointer to the register block"]
+    pub const PTR: *const lcd_bl::RegisterBlock = 0xf000_0800 as *const _;
+    #[doc = r"Return the pointer to the register block"]
+    #[inline(always)]
+    pub const fn ptr() -> *const lcd_bl::RegisterBlock {
+        Self::PTR
+    }
+    #[doc = r" Steal an instance of this peripheral"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" Ensure that the new instance of the peripheral cannot be used in a way"]
+    #[doc = r" that may race with any existing instances, for example by only"]
+    #[doc = r" accessing read-only or write-only registers, or by consuming the"]
+    #[doc = r" original peripheral and using critical sections to coordinate"]
+    #[doc = r" access between multiple new instances."]
+    #[doc = r""]
+    #[doc = r" Additionally, other software such as HALs may rely on only one"]
+    #[doc = r" peripheral instance existing to ensure memory safety; ensure"]
+    #[doc = r" no stolen instances are passed to such software."]
+    pub unsafe fn steal() -> Self {
+        Self {
+            _marker: PhantomData,
+        }
+    }
+}
+impl Deref for LcdBl {
+    type Target = lcd_bl::RegisterBlock;
+    #[inline(always)]
+    fn deref(&self) -> &Self::Target {
+        unsafe { &*Self::PTR }
+    }
+}
+impl core::fmt::Debug for LcdBl {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("LcdBl").finish()
+    }
+}
+#[doc = "LCD_BL"]
+pub mod lcd_bl {
+    #[repr(C)]
+    #[doc = "Register block"]
+    pub struct RegisterBlock {
+        out: Out,
+    }
+    impl RegisterBlock {
+        #[doc = "0x00 - GPIO Output(s) Control."]
+        #[inline(always)]
+        pub const fn out(&self) -> &Out {
+            &self.out
+        }
+    }
+    #[doc = "OUT (rw) register accessor: GPIO Output(s) Control.\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`out::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`out::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@out`]
+module"]
+    #[doc(alias = "OUT")]
+    pub type Out = crate::Reg<out::OutSpec>;
+    #[doc = "GPIO Output(s) Control."]
+    pub mod out {
+        #[doc = "Register `OUT` reader"]
+        pub type R = crate::R<OutSpec>;
+        #[doc = "Register `OUT` writer"]
+        pub type W = crate::W<OutSpec>;
+        #[doc = "Field `out` reader - "]
+        pub type OutR = crate::BitReader;
+        #[doc = "Field `out` writer - "]
+        pub type OutW<'a, REG> = crate::BitWriter<'a, REG>;
+        impl R {
+            #[doc = "Bit 0"]
+            #[inline(always)]
+            pub fn out(&self) -> OutR {
+                OutR::new((self.bits & 1) != 0)
+            }
+        }
+        impl W {
+            #[doc = "Bit 0"]
+            #[inline(always)]
+            #[must_use]
+            pub fn out(&mut self) -> OutW<OutSpec> {
+                OutW::new(self, 0)
+            }
+        }
+        #[doc = "GPIO Output(s) Control.\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`out::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`out::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
+        pub struct OutSpec;
+        impl crate::RegisterSpec for OutSpec {
+            type Ux = u32;
+        }
+        #[doc = "`read()` method returns [`out::R`](R) reader structure"]
+        impl crate::Readable for OutSpec {}
+        #[doc = "`write(|w| ..)` method takes [`out::W`](W) writer structure"]
+        impl crate::Writable for OutSpec {
+            type Safety = crate::Unsafe;
+            const ZERO_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+            const ONE_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+        }
+        #[doc = "`reset()` method sets OUT to value 0"]
+        impl crate::Resettable for OutSpec {
+            const RESET_VALUE: u32 = 0;
+        }
+    }
+}
 #[doc = "CTRL"]
 pub struct Ctrl {
     _marker: PhantomData<*const ()>,
@@ -815,7 +921,7 @@ pub struct Ctrl {
 unsafe impl Send for Ctrl {}
 impl Ctrl {
     #[doc = r"Pointer to the register block"]
-    pub const PTR: *const ctrl::RegisterBlock = 0xf000_0000 as *const _;
+    pub const PTR: *const ctrl::RegisterBlock = 0xf000_1000 as *const _;
     #[doc = r"Return the pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const ctrl::RegisterBlock {
@@ -1042,7 +1148,7 @@ pub struct IdentifierMem {
 unsafe impl Send for IdentifierMem {}
 impl IdentifierMem {
     #[doc = r"Pointer to the register block"]
-    pub const PTR: *const identifier_mem::RegisterBlock = 0xf000_0800 as *const _;
+    pub const PTR: *const identifier_mem::RegisterBlock = 0xf000_1800 as *const _;
     #[doc = r"Return the pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const identifier_mem::RegisterBlock {
@@ -1141,6 +1247,528 @@ module"]
         }
     }
 }
+#[doc = "LCD_CTL"]
+pub struct LcdCtl {
+    _marker: PhantomData<*const ()>,
+}
+unsafe impl Send for LcdCtl {}
+impl LcdCtl {
+    #[doc = r"Pointer to the register block"]
+    pub const PTR: *const lcd_ctl::RegisterBlock = 0xf000_2000 as *const _;
+    #[doc = r"Return the pointer to the register block"]
+    #[inline(always)]
+    pub const fn ptr() -> *const lcd_ctl::RegisterBlock {
+        Self::PTR
+    }
+    #[doc = r" Steal an instance of this peripheral"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" Ensure that the new instance of the peripheral cannot be used in a way"]
+    #[doc = r" that may race with any existing instances, for example by only"]
+    #[doc = r" accessing read-only or write-only registers, or by consuming the"]
+    #[doc = r" original peripheral and using critical sections to coordinate"]
+    #[doc = r" access between multiple new instances."]
+    #[doc = r""]
+    #[doc = r" Additionally, other software such as HALs may rely on only one"]
+    #[doc = r" peripheral instance existing to ensure memory safety; ensure"]
+    #[doc = r" no stolen instances are passed to such software."]
+    pub unsafe fn steal() -> Self {
+        Self {
+            _marker: PhantomData,
+        }
+    }
+}
+impl Deref for LcdCtl {
+    type Target = lcd_ctl::RegisterBlock;
+    #[inline(always)]
+    fn deref(&self) -> &Self::Target {
+        unsafe { &*Self::PTR }
+    }
+}
+impl core::fmt::Debug for LcdCtl {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("LcdCtl").finish()
+    }
+}
+#[doc = "LCD_CTL"]
+pub mod lcd_ctl {
+    #[repr(C)]
+    #[doc = "Register block"]
+    pub struct RegisterBlock {
+        out: Out,
+    }
+    impl RegisterBlock {
+        #[doc = "0x00 - GPIO Output(s) Control."]
+        #[inline(always)]
+        pub const fn out(&self) -> &Out {
+            &self.out
+        }
+    }
+    #[doc = "OUT (rw) register accessor: GPIO Output(s) Control.\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`out::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`out::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@out`]
+module"]
+    #[doc(alias = "OUT")]
+    pub type Out = crate::Reg<out::OutSpec>;
+    #[doc = "GPIO Output(s) Control."]
+    pub mod out {
+        #[doc = "Register `OUT` reader"]
+        pub type R = crate::R<OutSpec>;
+        #[doc = "Register `OUT` writer"]
+        pub type W = crate::W<OutSpec>;
+        #[doc = "Field `out` reader - "]
+        pub type OutR = crate::BitReader;
+        #[doc = "Field `out` writer - "]
+        pub type OutW<'a, REG> = crate::BitWriter<'a, REG>;
+        impl R {
+            #[doc = "Bit 0"]
+            #[inline(always)]
+            pub fn out(&self) -> OutR {
+                OutR::new((self.bits & 1) != 0)
+            }
+        }
+        impl W {
+            #[doc = "Bit 0"]
+            #[inline(always)]
+            #[must_use]
+            pub fn out(&mut self) -> OutW<OutSpec> {
+                OutW::new(self, 0)
+            }
+        }
+        #[doc = "GPIO Output(s) Control.\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`out::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`out::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
+        pub struct OutSpec;
+        impl crate::RegisterSpec for OutSpec {
+            type Ux = u32;
+        }
+        #[doc = "`read()` method returns [`out::R`](R) reader structure"]
+        impl crate::Readable for OutSpec {}
+        #[doc = "`write(|w| ..)` method takes [`out::W`](W) writer structure"]
+        impl crate::Writable for OutSpec {
+            type Safety = crate::Unsafe;
+            const ZERO_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+            const ONE_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+        }
+        #[doc = "`reset()` method sets OUT to value 0"]
+        impl crate::Resettable for OutSpec {
+            const RESET_VALUE: u32 = 0;
+        }
+    }
+}
+#[doc = "LCD_SPI"]
+pub struct LcdSpi {
+    _marker: PhantomData<*const ()>,
+}
+unsafe impl Send for LcdSpi {}
+impl LcdSpi {
+    #[doc = r"Pointer to the register block"]
+    pub const PTR: *const lcd_spi::RegisterBlock = 0xf000_2800 as *const _;
+    #[doc = r"Return the pointer to the register block"]
+    #[inline(always)]
+    pub const fn ptr() -> *const lcd_spi::RegisterBlock {
+        Self::PTR
+    }
+    #[doc = r" Steal an instance of this peripheral"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" Ensure that the new instance of the peripheral cannot be used in a way"]
+    #[doc = r" that may race with any existing instances, for example by only"]
+    #[doc = r" accessing read-only or write-only registers, or by consuming the"]
+    #[doc = r" original peripheral and using critical sections to coordinate"]
+    #[doc = r" access between multiple new instances."]
+    #[doc = r""]
+    #[doc = r" Additionally, other software such as HALs may rely on only one"]
+    #[doc = r" peripheral instance existing to ensure memory safety; ensure"]
+    #[doc = r" no stolen instances are passed to such software."]
+    pub unsafe fn steal() -> Self {
+        Self {
+            _marker: PhantomData,
+        }
+    }
+}
+impl Deref for LcdSpi {
+    type Target = lcd_spi::RegisterBlock;
+    #[inline(always)]
+    fn deref(&self) -> &Self::Target {
+        unsafe { &*Self::PTR }
+    }
+}
+impl core::fmt::Debug for LcdSpi {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("LcdSpi").finish()
+    }
+}
+#[doc = "LCD_SPI"]
+pub mod lcd_spi {
+    #[repr(C)]
+    #[doc = "Register block"]
+    pub struct RegisterBlock {
+        control: Control,
+        status: Status,
+        mosi: Mosi,
+        miso: Miso,
+        cs: Cs,
+        loopback: Loopback,
+    }
+    impl RegisterBlock {
+        #[doc = "0x00 - SPI Control."]
+        #[inline(always)]
+        pub const fn control(&self) -> &Control {
+            &self.control
+        }
+        #[doc = "0x04 - SPI Status."]
+        #[inline(always)]
+        pub const fn status(&self) -> &Status {
+            &self.status
+        }
+        #[doc = "0x08 - SPI MOSI data (MSB-first serialization)."]
+        #[inline(always)]
+        pub const fn mosi(&self) -> &Mosi {
+            &self.mosi
+        }
+        #[doc = "0x0c - SPI MISO data (MSB-first de-serialization)."]
+        #[inline(always)]
+        pub const fn miso(&self) -> &Miso {
+            &self.miso
+        }
+        #[doc = "0x10 - SPI CS Chip-Select and Mode."]
+        #[inline(always)]
+        pub const fn cs(&self) -> &Cs {
+            &self.cs
+        }
+        #[doc = "0x14 - SPI Loopback Mode."]
+        #[inline(always)]
+        pub const fn loopback(&self) -> &Loopback {
+            &self.loopback
+        }
+    }
+    #[doc = "CONTROL (rw) register accessor: SPI Control.\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`control::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`control::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@control`]
+module"]
+    #[doc(alias = "CONTROL")]
+    pub type Control = crate::Reg<control::ControlSpec>;
+    #[doc = "SPI Control."]
+    pub mod control {
+        #[doc = "Register `CONTROL` reader"]
+        pub type R = crate::R<ControlSpec>;
+        #[doc = "Register `CONTROL` writer"]
+        pub type W = crate::W<ControlSpec>;
+        #[doc = "Field `start` reader - SPI Xfer Start (Write ``1`` to start Xfer)."]
+        pub type StartR = crate::BitReader;
+        #[doc = "Field `start` writer - SPI Xfer Start (Write ``1`` to start Xfer)."]
+        pub type StartW<'a, REG> = crate::BitWriter<'a, REG>;
+        #[doc = "Field `length` reader - SPI Xfer Length (in bits)."]
+        pub type LengthR = crate::FieldReader;
+        #[doc = "Field `length` writer - SPI Xfer Length (in bits)."]
+        pub type LengthW<'a, REG> = crate::FieldWriter<'a, REG, 8>;
+        impl R {
+            #[doc = "Bit 0 - SPI Xfer Start (Write ``1`` to start Xfer)."]
+            #[inline(always)]
+            pub fn start(&self) -> StartR {
+                StartR::new((self.bits & 1) != 0)
+            }
+            #[doc = "Bits 8:15 - SPI Xfer Length (in bits)."]
+            #[inline(always)]
+            pub fn length(&self) -> LengthR {
+                LengthR::new(((self.bits >> 8) & 0xff) as u8)
+            }
+        }
+        impl W {
+            #[doc = "Bit 0 - SPI Xfer Start (Write ``1`` to start Xfer)."]
+            #[inline(always)]
+            #[must_use]
+            pub fn start(&mut self) -> StartW<ControlSpec> {
+                StartW::new(self, 0)
+            }
+            #[doc = "Bits 8:15 - SPI Xfer Length (in bits)."]
+            #[inline(always)]
+            #[must_use]
+            pub fn length(&mut self) -> LengthW<ControlSpec> {
+                LengthW::new(self, 8)
+            }
+        }
+        #[doc = "SPI Control.\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`control::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`control::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
+        pub struct ControlSpec;
+        impl crate::RegisterSpec for ControlSpec {
+            type Ux = u32;
+        }
+        #[doc = "`read()` method returns [`control::R`](R) reader structure"]
+        impl crate::Readable for ControlSpec {}
+        #[doc = "`write(|w| ..)` method takes [`control::W`](W) writer structure"]
+        impl crate::Writable for ControlSpec {
+            type Safety = crate::Unsafe;
+            const ZERO_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+            const ONE_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+        }
+        #[doc = "`reset()` method sets CONTROL to value 0"]
+        impl crate::Resettable for ControlSpec {
+            const RESET_VALUE: u32 = 0;
+        }
+    }
+    #[doc = "STATUS (rw) register accessor: SPI Status.\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`status::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`status::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@status`]
+module"]
+    #[doc(alias = "STATUS")]
+    pub type Status = crate::Reg<status::StatusSpec>;
+    #[doc = "SPI Status."]
+    pub mod status {
+        #[doc = "Register `STATUS` reader"]
+        pub type R = crate::R<StatusSpec>;
+        #[doc = "Register `STATUS` writer"]
+        pub type W = crate::W<StatusSpec>;
+        #[doc = "Field `done` reader - SPI Xfer Done (when read as ``1``)."]
+        pub type DoneR = crate::BitReader;
+        #[doc = "Field `done` writer - SPI Xfer Done (when read as ``1``)."]
+        pub type DoneW<'a, REG> = crate::BitWriter<'a, REG>;
+        #[doc = "Field `mode` reader - SPI mode"]
+        pub type ModeR = crate::BitReader;
+        #[doc = "Field `mode` writer - SPI mode"]
+        pub type ModeW<'a, REG> = crate::BitWriter<'a, REG>;
+        impl R {
+            #[doc = "Bit 0 - SPI Xfer Done (when read as ``1``)."]
+            #[inline(always)]
+            pub fn done(&self) -> DoneR {
+                DoneR::new((self.bits & 1) != 0)
+            }
+            #[doc = "Bit 1 - SPI mode"]
+            #[inline(always)]
+            pub fn mode(&self) -> ModeR {
+                ModeR::new(((self.bits >> 1) & 1) != 0)
+            }
+        }
+        impl W {
+            #[doc = "Bit 0 - SPI Xfer Done (when read as ``1``)."]
+            #[inline(always)]
+            #[must_use]
+            pub fn done(&mut self) -> DoneW<StatusSpec> {
+                DoneW::new(self, 0)
+            }
+            #[doc = "Bit 1 - SPI mode"]
+            #[inline(always)]
+            #[must_use]
+            pub fn mode(&mut self) -> ModeW<StatusSpec> {
+                ModeW::new(self, 1)
+            }
+        }
+        #[doc = "SPI Status.\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`status::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`status::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
+        pub struct StatusSpec;
+        impl crate::RegisterSpec for StatusSpec {
+            type Ux = u32;
+        }
+        #[doc = "`read()` method returns [`status::R`](R) reader structure"]
+        impl crate::Readable for StatusSpec {}
+        #[doc = "`write(|w| ..)` method takes [`status::W`](W) writer structure"]
+        impl crate::Writable for StatusSpec {
+            type Safety = crate::Unsafe;
+            const ZERO_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+            const ONE_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+        }
+        #[doc = "`reset()` method sets STATUS to value 0"]
+        impl crate::Resettable for StatusSpec {
+            const RESET_VALUE: u32 = 0;
+        }
+    }
+    #[doc = "MOSI (rw) register accessor: SPI MOSI data (MSB-first serialization).\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`mosi::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`mosi::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@mosi`]
+module"]
+    #[doc(alias = "MOSI")]
+    pub type Mosi = crate::Reg<mosi::MosiSpec>;
+    #[doc = "SPI MOSI data (MSB-first serialization)."]
+    pub mod mosi {
+        #[doc = "Register `MOSI` reader"]
+        pub type R = crate::R<MosiSpec>;
+        #[doc = "Register `MOSI` writer"]
+        pub type W = crate::W<MosiSpec>;
+        #[doc = "Field `mosi` reader - "]
+        pub type MosiR = crate::FieldReader;
+        #[doc = "Field `mosi` writer - "]
+        pub type MosiW<'a, REG> = crate::FieldWriter<'a, REG, 8>;
+        impl R {
+            #[doc = "Bits 0:7"]
+            #[inline(always)]
+            pub fn mosi(&self) -> MosiR {
+                MosiR::new((self.bits & 0xff) as u8)
+            }
+        }
+        impl W {
+            #[doc = "Bits 0:7"]
+            #[inline(always)]
+            #[must_use]
+            pub fn mosi(&mut self) -> MosiW<MosiSpec> {
+                MosiW::new(self, 0)
+            }
+        }
+        #[doc = "SPI MOSI data (MSB-first serialization).\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`mosi::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`mosi::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
+        pub struct MosiSpec;
+        impl crate::RegisterSpec for MosiSpec {
+            type Ux = u32;
+        }
+        #[doc = "`read()` method returns [`mosi::R`](R) reader structure"]
+        impl crate::Readable for MosiSpec {}
+        #[doc = "`write(|w| ..)` method takes [`mosi::W`](W) writer structure"]
+        impl crate::Writable for MosiSpec {
+            type Safety = crate::Unsafe;
+            const ZERO_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+            const ONE_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+        }
+        #[doc = "`reset()` method sets MOSI to value 0"]
+        impl crate::Resettable for MosiSpec {
+            const RESET_VALUE: u32 = 0;
+        }
+    }
+    #[doc = "MISO (rw) register accessor: SPI MISO data (MSB-first de-serialization).\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`miso::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`miso::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@miso`]
+module"]
+    #[doc(alias = "MISO")]
+    pub type Miso = crate::Reg<miso::MisoSpec>;
+    #[doc = "SPI MISO data (MSB-first de-serialization)."]
+    pub mod miso {
+        #[doc = "Register `MISO` reader"]
+        pub type R = crate::R<MisoSpec>;
+        #[doc = "Register `MISO` writer"]
+        pub type W = crate::W<MisoSpec>;
+        #[doc = "Field `miso` reader - "]
+        pub type MisoR = crate::FieldReader;
+        #[doc = "Field `miso` writer - "]
+        pub type MisoW<'a, REG> = crate::FieldWriter<'a, REG, 8>;
+        impl R {
+            #[doc = "Bits 0:7"]
+            #[inline(always)]
+            pub fn miso(&self) -> MisoR {
+                MisoR::new((self.bits & 0xff) as u8)
+            }
+        }
+        impl W {
+            #[doc = "Bits 0:7"]
+            #[inline(always)]
+            #[must_use]
+            pub fn miso(&mut self) -> MisoW<MisoSpec> {
+                MisoW::new(self, 0)
+            }
+        }
+        #[doc = "SPI MISO data (MSB-first de-serialization).\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`miso::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`miso::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
+        pub struct MisoSpec;
+        impl crate::RegisterSpec for MisoSpec {
+            type Ux = u32;
+        }
+        #[doc = "`read()` method returns [`miso::R`](R) reader structure"]
+        impl crate::Readable for MisoSpec {}
+        #[doc = "`write(|w| ..)` method takes [`miso::W`](W) writer structure"]
+        impl crate::Writable for MisoSpec {
+            type Safety = crate::Unsafe;
+            const ZERO_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+            const ONE_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+        }
+        #[doc = "`reset()` method sets MISO to value 0"]
+        impl crate::Resettable for MisoSpec {
+            const RESET_VALUE: u32 = 0;
+        }
+    }
+    #[doc = "CS (rw) register accessor: SPI CS Chip-Select and Mode.\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`cs::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`cs::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@cs`]
+module"]
+    #[doc(alias = "CS")]
+    pub type Cs = crate::Reg<cs::CsSpec>;
+    #[doc = "SPI CS Chip-Select and Mode."]
+    pub mod cs {
+        #[doc = "Register `CS` reader"]
+        pub type R = crate::R<CsSpec>;
+        #[doc = "Register `CS` writer"]
+        pub type W = crate::W<CsSpec>;
+        #[doc = "Field `sel` reader - None"]
+        pub type SelR = crate::BitReader;
+        #[doc = "Field `sel` writer - None"]
+        pub type SelW<'a, REG> = crate::BitWriter<'a, REG>;
+        #[doc = "Field `mode` reader - None"]
+        pub type ModeR = crate::BitReader;
+        #[doc = "Field `mode` writer - None"]
+        pub type ModeW<'a, REG> = crate::BitWriter<'a, REG>;
+        impl R {
+            #[doc = "Bit 0 - None"]
+            #[inline(always)]
+            pub fn sel(&self) -> SelR {
+                SelR::new((self.bits & 1) != 0)
+            }
+            #[doc = "Bit 16 - None"]
+            #[inline(always)]
+            pub fn mode(&self) -> ModeR {
+                ModeR::new(((self.bits >> 16) & 1) != 0)
+            }
+        }
+        impl W {
+            #[doc = "Bit 0 - None"]
+            #[inline(always)]
+            #[must_use]
+            pub fn sel(&mut self) -> SelW<CsSpec> {
+                SelW::new(self, 0)
+            }
+            #[doc = "Bit 16 - None"]
+            #[inline(always)]
+            #[must_use]
+            pub fn mode(&mut self) -> ModeW<CsSpec> {
+                ModeW::new(self, 16)
+            }
+        }
+        #[doc = "SPI CS Chip-Select and Mode.\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`cs::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`cs::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
+        pub struct CsSpec;
+        impl crate::RegisterSpec for CsSpec {
+            type Ux = u32;
+        }
+        #[doc = "`read()` method returns [`cs::R`](R) reader structure"]
+        impl crate::Readable for CsSpec {}
+        #[doc = "`write(|w| ..)` method takes [`cs::W`](W) writer structure"]
+        impl crate::Writable for CsSpec {
+            type Safety = crate::Unsafe;
+            const ZERO_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+            const ONE_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+        }
+        #[doc = "`reset()` method sets CS to value 0x01"]
+        impl crate::Resettable for CsSpec {
+            const RESET_VALUE: u32 = 0x01;
+        }
+    }
+    #[doc = "LOOPBACK (rw) register accessor: SPI Loopback Mode.\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`loopback::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`loopback::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@loopback`]
+module"]
+    #[doc(alias = "LOOPBACK")]
+    pub type Loopback = crate::Reg<loopback::LoopbackSpec>;
+    #[doc = "SPI Loopback Mode."]
+    pub mod loopback {
+        #[doc = "Register `LOOPBACK` reader"]
+        pub type R = crate::R<LoopbackSpec>;
+        #[doc = "Register `LOOPBACK` writer"]
+        pub type W = crate::W<LoopbackSpec>;
+        #[doc = "Field `mode` reader - None"]
+        pub type ModeR = crate::BitReader;
+        #[doc = "Field `mode` writer - None"]
+        pub type ModeW<'a, REG> = crate::BitWriter<'a, REG>;
+        impl R {
+            #[doc = "Bit 0 - None"]
+            #[inline(always)]
+            pub fn mode(&self) -> ModeR {
+                ModeR::new((self.bits & 1) != 0)
+            }
+        }
+        impl W {
+            #[doc = "Bit 0 - None"]
+            #[inline(always)]
+            #[must_use]
+            pub fn mode(&mut self) -> ModeW<LoopbackSpec> {
+                ModeW::new(self, 0)
+            }
+        }
+        #[doc = "SPI Loopback Mode.\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`loopback::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`loopback::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
+        pub struct LoopbackSpec;
+        impl crate::RegisterSpec for LoopbackSpec {
+            type Ux = u32;
+        }
+        #[doc = "`read()` method returns [`loopback::R`](R) reader structure"]
+        impl crate::Readable for LoopbackSpec {}
+        #[doc = "`write(|w| ..)` method takes [`loopback::W`](W) writer structure"]
+        impl crate::Writable for LoopbackSpec {
+            type Safety = crate::Unsafe;
+            const ZERO_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+            const ONE_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+        }
+        #[doc = "`reset()` method sets LOOPBACK to value 0"]
+        impl crate::Resettable for LoopbackSpec {
+            const RESET_VALUE: u32 = 0;
+        }
+    }
+}
 #[doc = "TIMER0"]
 pub struct Timer0 {
     _marker: PhantomData<*const ()>,
@@ -1148,7 +1776,7 @@ pub struct Timer0 {
 unsafe impl Send for Timer0 {}
 impl Timer0 {
     #[doc = r"Pointer to the register block"]
-    pub const PTR: *const timer0::RegisterBlock = 0xf000_1000 as *const _;
+    pub const PTR: *const timer0::RegisterBlock = 0xf000_3000 as *const _;
     #[doc = r"Return the pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const timer0::RegisterBlock {
@@ -1681,6 +2309,8 @@ pub mod i2cfifo {
         i2cfifosr_lsb: I2cfifosrLsb,
         _reserved6: [u8; 0x0f],
         i2cfifosr_msb: I2cfifosrMsb,
+        _reserved7: [u8; 0xdf],
+        i2ctxfifobyteavail: I2ctxfifobyteavail,
     }
     impl RegisterBlock {
         #[doc = "0x20 - "]
@@ -1717,6 +2347,11 @@ pub mod i2cfifo {
         #[inline(always)]
         pub const fn i2cfifosr_msb(&self) -> &I2cfifosrMsb {
             &self.i2cfifosr_msb
+        }
+        #[doc = "0x270 - "]
+        #[inline(always)]
+        pub const fn i2ctxfifobyteavail(&self) -> &I2ctxfifobyteavail {
+            &self.i2ctxfifobyteavail
         }
     }
     #[doc = "I2CC1 (rw) register accessor: \n\nYou can [`read`](crate::generic::Reg::read) this register and get [`i2cc1::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`i2cc1::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@i2cc1`]
@@ -2183,6 +2818,53 @@ module"]
             const RESET_VALUE: u8 = 0;
         }
     }
+    #[doc = "I2CTXFIFOBYTEAVAIL (rw) register accessor: \n\nYou can [`read`](crate::generic::Reg::read) this register and get [`i2ctxfifobyteavail::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`i2ctxfifobyteavail::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@i2ctxfifobyteavail`]
+module"]
+    #[doc(alias = "I2CTXFIFOBYTEAVAIL")]
+    pub type I2ctxfifobyteavail = crate::Reg<i2ctxfifobyteavail::I2ctxfifobyteavailSpec>;
+    #[doc = ""]
+    pub mod i2ctxfifobyteavail {
+        #[doc = "Register `I2CTXFIFOBYTEAVAIL` reader"]
+        pub type R = crate::R<I2ctxfifobyteavailSpec>;
+        #[doc = "Register `I2CTXFIFOBYTEAVAIL` writer"]
+        pub type W = crate::W<I2ctxfifobyteavailSpec>;
+        #[doc = "Field `dfirst` reader - "]
+        pub type DfirstR = crate::BitReader;
+        #[doc = "Field `dfirst` writer - "]
+        pub type DfirstW<'a, REG> = crate::BitWriter<'a, REG>;
+        impl R {
+            #[doc = "Bit 0"]
+            #[inline(always)]
+            pub fn dfirst(&self) -> DfirstR {
+                DfirstR::new((self.bits & 1) != 0)
+            }
+        }
+        impl W {
+            #[doc = "Bit 0"]
+            #[inline(always)]
+            #[must_use]
+            pub fn dfirst(&mut self) -> DfirstW<I2ctxfifobyteavailSpec> {
+                DfirstW::new(self, 0)
+            }
+        }
+        #[doc = "\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`i2ctxfifobyteavail::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`i2ctxfifobyteavail::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
+        pub struct I2ctxfifobyteavailSpec;
+        impl crate::RegisterSpec for I2ctxfifobyteavailSpec {
+            type Ux = u8;
+        }
+        #[doc = "`read()` method returns [`i2ctxfifobyteavail::R`](R) reader structure"]
+        impl crate::Readable for I2ctxfifobyteavailSpec {}
+        #[doc = "`write(|w| ..)` method takes [`i2ctxfifobyteavail::W`](W) writer structure"]
+        impl crate::Writable for I2ctxfifobyteavailSpec {
+            type Safety = crate::Unsafe;
+            const ZERO_TO_MODIFY_FIELDS_BITMAP: u8 = 0;
+            const ONE_TO_MODIFY_FIELDS_BITMAP: u8 = 0;
+        }
+        #[doc = "`reset()` method sets I2CTXFIFOBYTEAVAIL to value 0"]
+        impl crate::Resettable for I2ctxfifobyteavailSpec {
+            const RESET_VALUE: u8 = 0;
+        }
+    }
 }
 #[doc = "UART"]
 pub struct Uart {
@@ -2191,7 +2873,7 @@ pub struct Uart {
 unsafe impl Send for Uart {}
 impl Uart {
     #[doc = r"Pointer to the register block"]
-    pub const PTR: *const uart::RegisterBlock = 0xf000_1800 as *const _;
+    pub const PTR: *const uart::RegisterBlock = 0xf000_3800 as *const _;
     #[doc = r"Return the pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const uart::RegisterBlock {
@@ -2706,21 +3388,188 @@ module"]
         }
     }
 }
+#[doc = "VOCODER"]
+pub struct Vocoder {
+    _marker: PhantomData<*const ()>,
+}
+unsafe impl Send for Vocoder {}
+impl Vocoder {
+    #[doc = r"Pointer to the register block"]
+    pub const PTR: *const vocoder::RegisterBlock = 0xf000_4000 as *const _;
+    #[doc = r"Return the pointer to the register block"]
+    #[inline(always)]
+    pub const fn ptr() -> *const vocoder::RegisterBlock {
+        Self::PTR
+    }
+    #[doc = r" Steal an instance of this peripheral"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" Ensure that the new instance of the peripheral cannot be used in a way"]
+    #[doc = r" that may race with any existing instances, for example by only"]
+    #[doc = r" accessing read-only or write-only registers, or by consuming the"]
+    #[doc = r" original peripheral and using critical sections to coordinate"]
+    #[doc = r" access between multiple new instances."]
+    #[doc = r""]
+    #[doc = r" Additionally, other software such as HALs may rely on only one"]
+    #[doc = r" peripheral instance existing to ensure memory safety; ensure"]
+    #[doc = r" no stolen instances are passed to such software."]
+    pub unsafe fn steal() -> Self {
+        Self {
+            _marker: PhantomData,
+        }
+    }
+}
+impl Deref for Vocoder {
+    type Target = vocoder::RegisterBlock;
+    #[inline(always)]
+    fn deref(&self) -> &Self::Target {
+        unsafe { &*Self::PTR }
+    }
+}
+impl core::fmt::Debug for Vocoder {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("Vocoder").finish()
+    }
+}
+#[doc = "VOCODER"]
+pub mod vocoder {
+    #[repr(C)]
+    #[doc = "Register block"]
+    pub struct RegisterBlock {
+        attack: Attack,
+        decay: Decay,
+    }
+    impl RegisterBlock {
+        #[doc = "0x00 - Vocoder Attack Constant"]
+        #[inline(always)]
+        pub const fn attack(&self) -> &Attack {
+            &self.attack
+        }
+        #[doc = "0x04 - Vocoder Decay Constant"]
+        #[inline(always)]
+        pub const fn decay(&self) -> &Decay {
+            &self.decay
+        }
+    }
+    #[doc = "ATTACK (rw) register accessor: Vocoder Attack Constant\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`attack::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`attack::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@attack`]
+module"]
+    #[doc(alias = "ATTACK")]
+    pub type Attack = crate::Reg<attack::AttackSpec>;
+    #[doc = "Vocoder Attack Constant"]
+    pub mod attack {
+        #[doc = "Register `ATTACK` reader"]
+        pub type R = crate::R<AttackSpec>;
+        #[doc = "Register `ATTACK` writer"]
+        pub type W = crate::W<AttackSpec>;
+        #[doc = "Field `attack` reader - "]
+        pub type AttackR = crate::FieldReader<u32>;
+        #[doc = "Field `attack` writer - "]
+        pub type AttackW<'a, REG> = crate::FieldWriter<'a, REG, 32, u32>;
+        impl R {
+            #[doc = "Bits 0:31"]
+            #[inline(always)]
+            pub fn attack(&self) -> AttackR {
+                AttackR::new(self.bits)
+            }
+        }
+        impl W {
+            #[doc = "Bits 0:31"]
+            #[inline(always)]
+            #[must_use]
+            pub fn attack(&mut self) -> AttackW<AttackSpec> {
+                AttackW::new(self, 0)
+            }
+        }
+        #[doc = "Vocoder Attack Constant\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`attack::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`attack::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
+        pub struct AttackSpec;
+        impl crate::RegisterSpec for AttackSpec {
+            type Ux = u32;
+        }
+        #[doc = "`read()` method returns [`attack::R`](R) reader structure"]
+        impl crate::Readable for AttackSpec {}
+        #[doc = "`write(|w| ..)` method takes [`attack::W`](W) writer structure"]
+        impl crate::Writable for AttackSpec {
+            type Safety = crate::Unsafe;
+            const ZERO_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+            const ONE_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+        }
+        #[doc = "`reset()` method sets ATTACK to value 0"]
+        impl crate::Resettable for AttackSpec {
+            const RESET_VALUE: u32 = 0;
+        }
+    }
+    #[doc = "DECAY (rw) register accessor: Vocoder Decay Constant\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`decay::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`decay::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@decay`]
+module"]
+    #[doc(alias = "DECAY")]
+    pub type Decay = crate::Reg<decay::DecaySpec>;
+    #[doc = "Vocoder Decay Constant"]
+    pub mod decay {
+        #[doc = "Register `DECAY` reader"]
+        pub type R = crate::R<DecaySpec>;
+        #[doc = "Register `DECAY` writer"]
+        pub type W = crate::W<DecaySpec>;
+        #[doc = "Field `decay` reader - "]
+        pub type DecayR = crate::FieldReader<u32>;
+        #[doc = "Field `decay` writer - "]
+        pub type DecayW<'a, REG> = crate::FieldWriter<'a, REG, 32, u32>;
+        impl R {
+            #[doc = "Bits 0:31"]
+            #[inline(always)]
+            pub fn decay(&self) -> DecayR {
+                DecayR::new(self.bits)
+            }
+        }
+        impl W {
+            #[doc = "Bits 0:31"]
+            #[inline(always)]
+            #[must_use]
+            pub fn decay(&mut self) -> DecayW<DecaySpec> {
+                DecayW::new(self, 0)
+            }
+        }
+        #[doc = "Vocoder Decay Constant\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`decay::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`decay::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
+        pub struct DecaySpec;
+        impl crate::RegisterSpec for DecaySpec {
+            type Ux = u32;
+        }
+        #[doc = "`read()` method returns [`decay::R`](R) reader structure"]
+        impl crate::Readable for DecaySpec {}
+        #[doc = "`write(|w| ..)` method takes [`decay::W`](W) writer structure"]
+        impl crate::Writable for DecaySpec {
+            type Safety = crate::Unsafe;
+            const ZERO_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+            const ONE_TO_MODIFY_FIELDS_BITMAP: u32 = 0;
+        }
+        #[doc = "`reset()` method sets DECAY to value 0"]
+        impl crate::Resettable for DecaySpec {
+            const RESET_VALUE: u32 = 0;
+        }
+    }
+}
 #[no_mangle]
 static mut DEVICE_PERIPHERALS: bool = false;
 #[doc = r" All the peripherals."]
 #[allow(non_snake_case)]
 pub struct Peripherals {
+    #[doc = "LCD_BL"]
+    pub lcd_bl: LcdBl,
     #[doc = "CTRL"]
     pub ctrl: Ctrl,
     #[doc = "IDENTIFIER_MEM"]
     pub identifier_mem: IdentifierMem,
+    #[doc = "LCD_CTL"]
+    pub lcd_ctl: LcdCtl,
+    #[doc = "LCD_SPI"]
+    pub lcd_spi: LcdSpi,
     #[doc = "TIMER0"]
     pub timer0: Timer0,
     #[doc = "I2CFIFO"]
     pub i2cfifo: I2cfifo,
     #[doc = "UART"]
     pub uart: Uart,
+    #[doc = "VOCODER"]
+    pub vocoder: Vocoder,
 }
 impl Peripherals {
     #[doc = r" Returns all the peripherals *once*."]
@@ -2743,10 +3592,19 @@ impl Peripherals {
     pub unsafe fn steal() -> Self {
         DEVICE_PERIPHERALS = true;
         Peripherals {
+            lcd_bl: LcdBl {
+                _marker: PhantomData,
+            },
             ctrl: Ctrl {
                 _marker: PhantomData,
             },
             identifier_mem: IdentifierMem {
+                _marker: PhantomData,
+            },
+            lcd_ctl: LcdCtl {
+                _marker: PhantomData,
+            },
+            lcd_spi: LcdSpi {
                 _marker: PhantomData,
             },
             timer0: Timer0 {
@@ -2756,6 +3614,9 @@ impl Peripherals {
                 _marker: PhantomData,
             },
             uart: Uart {
+                _marker: PhantomData,
+            },
+            vocoder: Vocoder {
                 _marker: PhantomData,
             },
         }
