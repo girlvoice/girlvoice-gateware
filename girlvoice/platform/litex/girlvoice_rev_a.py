@@ -65,6 +65,10 @@ _io = [
         Subsignal("dc", Pins("46")),
         IOStandard("LVCMOS33")
     ),
+    ("lcd_bl", 0,
+        Subsignal("bl", Pins("36")),
+        IOStandard("LVCMOS18H")
+    )
 ]
 
 
