@@ -12,7 +12,7 @@ from girlvoice.stream import stream_get
 
 class StaticSineSynth(wiring.Component):
 
-    def __init__(self, target_frequency, fs, clk_sync_freq, sample_width):
+    def __init__(self, target_frequency, fs, sample_width):
 
         assert target_frequency <= fs/2
 
@@ -41,16 +41,12 @@ class StaticSineSynth(wiring.Component):
         m = Module()
 
         N = self.N
-        sign = Signal()
-        idx = Signal(N, reset=0)
-
+        idx = Signal(N, reset=1)
         m.d.comb += self.source.payload.eq(self.lut[idx >> self.oversampling])
-
 
         with m.If(self.en):
             with m.If(self.source.ready & self.source.valid):
                 m.d.sync += idx.eq(idx + self.delta_f)
-
 
         return m
 
@@ -104,7 +100,6 @@ class ParallelSineSynth(wiring.Component):
         m.d.comb += r_port.addr.eq(phase_i[:-1])
         with m.FSM():
             with m.State("LOAD_PHASE"):
-                # with m.If(self.source.ready):
                 m.d.sync += phase_i.eq(phase_array[idx] >> self.oversampling)
                 m.next = "READ_AMP"
             with m.State("READ_AMP"):
@@ -116,7 +111,6 @@ class ParallelSineSynth(wiring.Component):
                     m.d.sync += self.source.valid.eq(0)
                     m.d.sync += phase_array[idx].eq(phase_array[idx] + phase_delta[idx])
                     m.next = "LOAD_PHASE"
-
 
         return m
 

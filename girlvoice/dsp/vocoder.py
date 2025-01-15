@@ -14,7 +14,6 @@ from girlvoice.dsp.bandpass_iir import BandpassIIR
 from girlvoice.dsp.envelope import EnvelopeFollower
 from girlvoice.dsp.envelope_vga import EnvelopeVGA
 
-
 class StaticVocoderChannel(wiring.Component):
     def __init__(self, channel_edges, clk_sync_freq, fs=48000, sample_width=18):
         self.fs = fs
