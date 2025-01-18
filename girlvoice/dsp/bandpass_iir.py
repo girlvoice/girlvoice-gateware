@@ -85,8 +85,8 @@ class BandpassIIR(wiring.Component):
         num_taps = len(self.a_fp)
 
         # Direct form I implementation
-        x_buf = Array([Signal(signed(self.sample_width)) for _ in range(len(self.b_fp))])
-        y_buf = Array([Signal(signed(self.sample_width)) for _ in range(len(self.a_fp))])
+        x_buf = Array([Signal(signed(self.sample_width), name=f"x_{i}") for i in range(len(self.b_fp))])
+        y_buf = Array([Signal(signed(self.sample_width), name=f"y_{i}") for i in range(len(self.a_fp))])
         idx = Signal(range(num_taps))
 
         x_i = Signal(signed(self.sample_width))
@@ -123,7 +123,7 @@ class BandpassIIR(wiring.Component):
                         m.d.sync += x_buf[0].eq(self.sink.payload)
                         m.d.sync += acc.eq(0)
                         m.d.sync += idx.eq(idx + 1)
-                        m.d.sync += mac_i_1.eq(x_i)
+                        m.d.sync += mac_i_1.eq(self.sink.payload)
                         m.d.sync += mac_i_2.eq(b_i)
                         m.next = "MAC_FORWARD"
 
@@ -178,7 +178,7 @@ class BandpassIIR(wiring.Component):
                         m.d.sync += x_buf[0].eq(self.sink.payload)
                         m.d.sync += acc.eq(0)
                         m.d.sync += idx.eq(idx + 1)
-                        m.d.sync += mac_i_1.eq(x_i)
+                        m.d.sync += mac_i_1.eq(self.sink.payload)
                         m.d.sync += mac_i_2.eq(b_i)
                         m.next = "MAC_FORWARD"
 
