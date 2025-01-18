@@ -4,7 +4,7 @@ import scipy.signal as signal
 import matplotlib.pyplot as plt
 
 def generate_chirp(duration, fs, start_freq, end_freq, sample_width, amp=1.0):
-    num_samples = duration * fs
+    num_samples = int(duration * fs)
     t = np.linspace(0, duration, num_samples)
 
     x = amp * signal.chirp(t, f0 = start_freq, f1=end_freq, t1=duration)
@@ -15,7 +15,7 @@ def generate_chirp(duration, fs, start_freq, end_freq, sample_width, amp=1.0):
 def bode_plot(fs, duration, end_freq, input, output, taps, taps_quant):
     fft_out = np.fft.fft(output)
 
-    freq = np.linspace(1, end_freq, (fs*duration)//2)
+    freq = np.linspace(1, end_freq, (int(fs*duration))//2)
     fft_in = np.fft.fft(input)
     h = fft_out / fft_in
 
