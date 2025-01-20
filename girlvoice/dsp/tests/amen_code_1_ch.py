@@ -16,6 +16,9 @@ def run_sim():
     clk_freq = 60e6
     bit_width = 16
     fs = 44100
+    duration = 2.0
+
+    num_samples = int(duration * fs)
     # dut = StaticVocoderChannel(
     #     channel_freq=150,
     #     channel_width=50,
@@ -33,11 +36,10 @@ def run_sim():
         sample_width=16
     )
 
-    # dut = BandpassIIR(10e3, 20e3, filter_order=4, sample_width=bit_width, fs=fs)
     (t, input_samples) = import_wav('./amen_break_441khz_16bit.wav')
 
-    input_samples = input_samples * .8
-
+    input_samples = input_samples[:num_samples] * .8
+    t = t[:num_samples]
     output_samples = []
     envelope_samples = []
     bp_samples = []

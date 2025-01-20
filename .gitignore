@@ -49,3 +49,6 @@ webhelp/
 
 # Verilog exported from Amaranth modules
 girlvoice/targets/*.v
+
+# Test bench audio outputs
+*.wav

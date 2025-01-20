@@ -103,7 +103,7 @@ class BandpassIIR(wiring.Component):
             mult_node = self.mult.source
             mac_i_1, mac_i_2, mult_ready, mult_valid = self.mult.get_next_thread_ports()
 
-            with m.FSM():
+            with m.FSM() as fsm:
                 with m.State("LOAD"):
                     m.d.comb += self.sink.ready.eq(mult_ready)
                     with m.If(self.sink.valid & self.sink.ready):
@@ -144,6 +144,7 @@ class BandpassIIR(wiring.Component):
                         m.d.sync += idx.eq(0)
                         m.d.sync += y_buf[0].eq(self.source.payload)
                         m.next = "LOAD"
+            self.fsm = fsm
         else:
             mult_node = Signal(signed(acc_width))
             mac_i_1 = Signal(signed(self.sample_width))
@@ -187,8 +188,7 @@ class BandpassIIR(wiring.Component):
                         m.d.sync += idx.eq(0)
                         m.d.sync += y_buf[0].eq(self.source.payload)
                         m.next = "LOAD"
-
-        self.fsm = fsm
+            self.fsm = fsm
         return m
 
 # Testbench ----------------------------------------

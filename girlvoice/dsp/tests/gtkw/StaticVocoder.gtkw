@@ -1,0 +1,91 @@
+[*]
+[*] GTKWave Analyzer v3.3.120 (w)1999-2024 BSI
+[*] Mon Jan 20 10:36:28 2025
+[*]
+[dumpfile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/tests/gtkw/StaticVocoder.vcd"
+[dumpfile_mtime] "Mon Jan 20 10:17:56 2025"
+[dumpfile_size] 2716595043
+[savefile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/tests/gtkw/StaticVocoder.gtkw"
+[timestart] 44007837800000
+[size] 1920 988
+[pos] -1 -1
+*-26.000000 22699898600000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] bench.
+[treeopen] bench.top.
+[treeopen] bench.top.U$1.
+[sst_width] 307
+[signals_width] 222
+[sst_expanded] 1
+[sst_vpaned_height] 546
+@28
+bench.top.clk
+bench.top.fsm_state
+bench.top.idx
+@c00200
+-Filter
+@28
+bench.top.U$1.bandpass.fsm_state
+@22
+bench.top.U$1.bandpass.sink__payload[15:0]
+@28
+bench.top.U$1.bandpass.sink__ready
+bench.top.U$1.bandpass.sink__valid
+@22
+bench.top.U$1.bandpass.source__payload[15:0]
+@28
+bench.top.U$1.bandpass.source__ready
+bench.top.U$1.bandpass.source__valid
+@1401200
+-Filter
+@c00200
+-Envelope
+@28
+bench.top.U$1.envelope.fsm_state
+@22
+bench.top.U$1.envelope.sink__payload[15:0]
+@28
+bench.top.U$1.envelope.sink__ready
+bench.top.U$1.envelope.sink__valid
+@22
+bench.top.U$1.envelope.source__payload[15:0]
+@28
+bench.top.U$1.envelope.source__ready
+bench.top.U$1.envelope.source__valid
+@1401200
+-Envelope
+@800200
+-VGA
+@28
+bench.top.U$1.vga.fsm_state
+@40000420
+[fpshift_count] 15
+bench.top.U$1.vga.carrier__payload[15:0]
+@28
+bench.top.U$1.vga.carrier__ready
+bench.top.U$1.vga.carrier__valid
+@40000420
+[fpshift_count] 15
+bench.top.U$1.vga.modulator__payload[15:0]
+@28
+bench.top.U$1.vga.modulator__ready
+bench.top.U$1.vga.modulator__valid
+@40000420
+[fpshift_count] 15
+bench.top.U$1.vga.source__payload[15:0]
+@28
+bench.top.U$1.vga.source__ready
+bench.top.U$1.vga.source__valid
+@1000200
+-VGA
+@40000421
+[fpshift_count] 15
+bench.top.source__payload[15:0]
+@28
+bench.top.source__ready
+bench.top.source__valid
+bench.top.source__ready$23
+bench.top.source__ready$21
+bench.top.source__valid$19
+bench.top.source__valid$20
+[pattern_trace] 1
+[pattern_trace] 0
