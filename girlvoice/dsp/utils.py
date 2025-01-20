@@ -34,3 +34,11 @@ def bode_plot(fs, duration, end_freq, input, output, taps, taps_quant):
 
     subplt.plot(w_ideal, 20*np.log10(np.abs(h_ideal)), label="Ideal Gain")
     subplt.plot(w_q, 20*np.log10(np.abs(h_q)), label="Quantized Coeff Gain")
+
+def generate_sine(duration, fs, freq, sample_width, amp=1):
+    num_samples = int(duration * fs)
+    t = np.linspace(0, duration, num_samples)
+
+    x = amp * np.sin(freq * t * (2*np.pi))
+    x *= 2**(sample_width-1)
+    return (t,x)
