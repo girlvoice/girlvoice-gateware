@@ -56,10 +56,13 @@ class TDMMultiply(wiring.Component):
         self.sink_a = Signal(signed(self.sample_width))
         self.sink_b = Signal(signed(self.sample_width))
 
-        sink_idx = Signal(range(self.num_threads))
+        sink_idx = Signal(range(self.num_threads), init=self.num_threads-1)
         sink_a_mux = Array([self.__dict__[f"sink_a_{i}"] for i in range(self.num_threads)])
         sink_b_mux = Array([self.__dict__[f"sink_b_{i}"] for i in range(self.num_threads)])
-        m.d.sync += sink_idx.eq(sink_idx + 1)
+        with m.If(sink_idx == self.num_threads-1):
+            m.d.sync += sink_idx.eq(0)
+        with m.Else():
+            m.d.sync += sink_idx.eq(sink_idx + 1)
         m.d.comb += self.sink_a.eq(sink_a_mux[sink_idx])
         m.d.comb += self.sink_b.eq(sink_b_mux[sink_idx])
 

@@ -48,6 +48,7 @@ class ThreadedVocoderChannel(wiring.Component):
         m.submodules.envelope = self.envelope
 
         wiring.connect(m, wiring.flipped(self.sink), self.bandpass.sink)
+        wiring.connect(m, self.bandpass.source, self.envelope.sink)
         wiring.connect(m, self.envelope.source, self.vga.modulator)
         wiring.connect(m, wiring.flipped(self.carrier), self.vga.carrier)
 

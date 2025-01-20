@@ -7,9 +7,7 @@ import amaranth.back.verilog as verilog
 
 import girlvoice.dsp.vocoder as vocoder
 
-
 class StaticVocoder(LiteXModule):
-
     def __init__(self, platform, start_freq, end_freq, num_channels, clk_sync_freq, channel_class=vocoder.StaticVocoderChannel, fs=48000, sample_width=18):
         self.sink = sink = Endpoint([("data", sample_width)])
         self.source = source = Endpoint([("data", sample_width)])

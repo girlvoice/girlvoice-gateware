@@ -213,8 +213,8 @@ def run_sim():
     sample_width = 16 # Number of 2s complement bits
     fs = 48000
     mod = Module()
-    mod.mult = mult = TDMMultiply(sample_width=sample_width, num_threads=2)
-    mod.filt = dut = BandpassIIR(
+    mod.submodules.mult = mult = TDMMultiply(sample_width=sample_width, num_threads=3)
+    mod.submodules.filt = dut = BandpassIIR(
         center_freq=5000,
         passband_width=1000,
         fs=fs,
@@ -241,7 +241,7 @@ def run_sim():
                 print(f"{samples_processed}/{len(t)} Samples processed")
 
 
-    sim = Simulator(dut)
+    sim = Simulator(mod)
     sim.add_clock(1/clk_freq)
     sim.add_testbench(tb)
 

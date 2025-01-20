@@ -9,14 +9,30 @@ from amaranth.sim import Simulator
 from girlvoice.stream import stream_get, stream_put, new_observer
 
 from girlvoice.dsp.tests.amen_envelope import import_wav
-from girlvoice.dsp.vocoder import StaticVocoderChannel
+from girlvoice.dsp.vocoder import StaticVocoder, StaticVocoderChannel, ThreadedVocoderChannel
 from girlvoice.dsp.bandpass_iir import BandpassIIR
 
 def run_sim():
     clk_freq = 60e6
     bit_width = 16
     fs = 44100
-    dut = StaticVocoderChannel(channel_freq=150, channel_width=50, fs=fs, sample_width=bit_width)
+    # dut = StaticVocoderChannel(
+    #     channel_freq=150,
+    #     channel_width=50,
+    #     fs=fs,
+    #     sample_width=bit_width,
+    # )
+
+    dut = StaticVocoder(
+        100,
+        500,
+        num_channels=1,
+        clk_sync_freq=clk_freq,
+        channel_class=ThreadedVocoderChannel,
+        fs=fs,
+        sample_width=16
+    )
+
     # dut = BandpassIIR(10e3, 20e3, filter_order=4, sample_width=bit_width, fs=fs)
     (t, input_samples) = import_wav('./amen_break_441khz_16bit.wav')
 
@@ -38,8 +54,8 @@ def run_sim():
     sim = Simulator(dut)
     sim.add_clock(1/clk_freq)
     sim.add_testbench(tb)
-    sim.add_testbench(new_observer(dut.envelope.source, envelope_samples), background=True)
-    sim.add_testbench(new_observer(dut.bandpass.source, bp_samples), background=True)
+    sim.add_testbench(new_observer(dut.channels[0].envelope.source, envelope_samples), background=True)
+    sim.add_testbench(new_observer(dut.channels[0].bandpass.source, bp_samples), background=True)
 
     os.makedirs("gtkw", exist_ok=True)
     dutname = f"gtkw/{type(dut).__name__}"

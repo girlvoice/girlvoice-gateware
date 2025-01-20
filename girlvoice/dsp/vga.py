@@ -57,7 +57,7 @@ class VariableGainAmp(wiring.Component):
             with m.FSM():
                 with m.State("LOAD"):
                     with m.If(self.source.ready):
-                        m.d.sync += self.source.valid.eq(1)
+                        m.d.sync += self.source.valid.eq(0)
 
                     with m.If(self.modulator.valid & self.carrier.valid
                               & mult_ready & ~self.source.ready):
