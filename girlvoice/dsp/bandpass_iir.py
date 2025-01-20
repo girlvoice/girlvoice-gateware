@@ -8,7 +8,6 @@ from amaranth import *
 import amaranth.lib.wiring as wiring
 from amaranth.lib.wiring import In, Out
 from amaranth.lib import stream
-
 from amaranth.sim import Simulator
 
 from girlvoice.stream import stream_get, stream_put
@@ -103,21 +102,19 @@ class BandpassIIR(wiring.Component):
         # acc_width = (self.sample_width * 2) + 3
         acc = Signal(signed(acc_width))
 
-        if self.multithreaded_mult:
-            m.submodules.mult = self.mult
+        if self.multithreaded_mult is not None:
+            # m.submodules.mult = self.mult
             mult_node = self.mult.source
-            mac_i_1 = self.mult.sink_a
-            mac_i_2 = self.mult.sink_b
 
-            mult_ready, mult_valid = self.mult.get_next_thread_ports()
+            mac_i_1, mac_i_2, mult_ready, mult_valid = self.mult.get_next_thread_ports()
 
             acc_round = Signal(signed(acc_width))
             m.d.comb += acc_round.eq(acc + 2**(self.fraction_width-1))
 
             with m.FSM():
                 with m.State("LOAD"):
-                    with m.If(self.sink.valid & mult_ready):
-                        m.d.comb += self.sink.ready.eq(1)
+                    m.d.comb += self.sink.ready.eq(mult_ready)
+                    with m.If(self.sink.valid & self.sink.ready):
                         m.d.sync += [x_buf[i + 1].eq(x_buf[i]) for i in range(num_taps - 1)]
                         m.d.sync += [y_buf[i + 1].eq(y_buf[i]) for i in range(num_taps - 1)]
                         m.d.sync += x_buf[0].eq(self.sink.payload)

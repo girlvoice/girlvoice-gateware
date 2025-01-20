@@ -72,8 +72,15 @@ class GirlTop(Elaboratable):
 
 
         sample_rate = 48e3
-        m.submodules.vocoder = v = vocoder.StaticVocoder(500, 3000, clk_sync_freq=sync_freq, num_channels=10, fs=sample_rate, sample_width=18)
-        # m.submodules.band = band = BandpassIIR(2.5e3, 1000, sample_width=18, filter_order=4, fs=48e3)
+        m.submodules.vocoder = v = vocoder.StaticVocoder(
+            start_freq=500,
+            end_freq=3000,
+            clk_sync_freq=sync_freq,
+            num_channels=10,
+            fs=sample_rate,
+            sample_width=18,
+            channel_class=vocoder.ThreadedVocoderChannel
+        )
         wiring.connect(m, rx.source, v.sink)
         wiring.connect(m, v.source, tx.sink)
 

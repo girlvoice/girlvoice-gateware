@@ -1,0 +1,79 @@
+[*]
+[*] GTKWave Analyzer v3.3.120 (w)1999-2024 BSI
+[*] Sat Jan 18 04:59:18 2025
+[*]
+[dumpfile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/gtkw/BandpassIIR.vcd"
+[dumpfile_mtime] "Sat Jan 18 04:58:33 2025"
+[dumpfile_size] 28935762
+[savefile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/gtkw/BandpassIIR_TDMMult.gtkw"
+[timestart] 85079820000
+[size] 1920 988
+[pos] -1 -1
+*-24.000000 67699490000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] bench.
+[treeopen] bench.top.
+[sst_width] 209
+[signals_width] 231
+[sst_expanded] 1
+[sst_vpaned_height] 244
+@28
+bench.top.clk
+bench.top.fsm_state
+@40000420
+[fpshift_count] 15
+bench.top.sink__payload[15:0]
+@28
+bench.top.sink__ready
+bench.top.sink__valid
+@40000420
+[fpshift_count] 15
+bench.top.source__payload[15:0]
+@28
+bench.top.source__ready
+bench.top.source__valid
+bench.top.mult.ready_0
+bench.top.mult.valid_0
+bench.top.idx[1:0]
+@40000420
+[fpshift_count] 13
+bench.top.a_i[15:0]
+[fpshift_count] 13
+bench.top.b_i[15:0]
+[fpshift_count] 15
+bench.top.x_i[15:0]
+[fpshift_count] 15
+bench.top.y_i[15:0]
+[fpshift_count] 28
+bench.top.acc[37:0]
+[fpshift_count] 28
+bench.top.acc_round[37:0]
+@800200
+-Multiplier inputs
+@40000420
+[fpshift_count] 15
+bench.top.sink_a[15:0]
+[fpshift_count] 13
+bench.top.sink_b[15:0]
+[fpshift_count] 28
+bench.top.source[31:0]
+@1000200
+-Multiplier inputs
+@800200
+-Multiplier internal
+@40000420
+[fpshift_count] 15
+bench.top.mult.input_a_ring0[15:0]
+[fpshift_count] 15
+bench.top.mult.input_b_ring0[15:0]
+[fpshift_count] 15
+bench.top.mult.mult_in_node_a[15:0]
+[fpshift_count] 15
+bench.top.mult.mult_in_node_b[15:0]
+[fpshift_count] 30
+bench.top.mult.mult_out_node[31:0]
+[fpshift_count] 30
+bench.top.mult.source[31:0]
+@1000200
+-Multiplier internal
+[pattern_trace] 1
+[pattern_trace] 0

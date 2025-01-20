@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import random
+from typing import List
 from amaranth import *
 import amaranth.lib.wiring as wiring
 from amaranth.lib.wiring import In, Out
@@ -20,8 +21,10 @@ class TDMMultiply(wiring.Component):
         }
         self.thread_ids = range(self.num_threads)
         for i in self.thread_ids:
-           signature[f"ready_{i}"] = Out(1)
-           signature[f"valid_{i}"] = In(1)
+            signature[f"sink_a_{i}"]  = In(signed(sample_width))
+            signature[f"sink_b_{i}"]  = In(signed(sample_width))
+            signature[f"ready_{i}"] = Out(1)
+            signature[f"valid_{i}"] = In(1)
 
         self.utilized_threads = []
         super().__init__(signature)
@@ -33,27 +36,41 @@ class TDMMultiply(wiring.Component):
                 return tid
         return tid
 
-    def get_next_thread_ports(self) -> Signal:
+    def get_next_thread_ports(self) -> List[Signal]:
         tid = self._get_next_thread_id()
         if tid == -1:
             raise AttributeError("TDMMultiply has no threads remaining")
         self.utilized_threads.append(tid)
-        return self.__dict__[f"ready_{tid}"], self.__dict__[f"valid_{tid}"]
+        sink_a = self.__dict__[f"sink_a_{tid}"]
+        sink_b = self.__dict__[f"sink_b_{tid}"]
+        ready = self.__dict__[f"ready_{tid}"]
+        valid = self.__dict__[f"valid_{tid}"]
+        return sink_a, sink_b, ready, valid
 
     def elaborate(self, platform):
         m = Module()
 
+        # Sink input multiplexing
+        self.sink_a = Signal(signed(self.sample_width))
+        self.sink_b = Signal(signed(self.sample_width))
+
+        sink_idx = Signal(range(self.num_threads))
+        sink_a_mux = Array([self.__dict__[f"sink_a_{i}"] for i in range(self.num_threads)])
+        sink_b_mux = Array([self.__dict__[f"sink_b_{i}"] for i in range(self.num_threads)])
+        m.d.sync += sink_idx.eq(sink_idx + 1)
+        m.d.comb += self.sink_a.eq(sink_a_mux[sink_idx])
+        m.d.comb += self.sink_b.eq(sink_b_mux[sink_idx])
+
+        # Input delay registers
         input_a_ring = [Signal(self.sample_width, name=f"input_a_ring{i}") for i in range(self.num_threads - 1)]
         input_b_ring = [Signal(self.sample_width, name=f"input_b_ring{i}") for i in range(self.num_threads - 1)]
-        for i in range(self.num_threads - 2):
-            m.d.sync += [
-                input_a_ring[i + 1].eq(input_a_ring[i]),
-                input_b_ring[i + 1].eq(input_b_ring[i]),
-            ]
+        m.d.sync += [input_a_ring[i+1].eq(input_a_ring[i]) for i in range(self.num_threads - 2)]
+        m.d.sync += [input_b_ring[i+1].eq(input_b_ring[i]) for i in range(self.num_threads - 2)]
 
         m.d.sync += input_a_ring[0].eq(self.sink_a)
         m.d.sync += input_b_ring[0].eq(self.sink_b)
 
+        # Multiplier slice I/O
         mult_out_node = Signal(signed(2 * self.sample_width))
         mult_in_node_a = Signal(signed(self.sample_width))
         mult_in_node_b = Signal(signed(self.sample_width))
@@ -63,6 +80,7 @@ class TDMMultiply(wiring.Component):
         m.d.comb += mult_in_node_b.eq(input_b_ring[-1])
         m.d.comb += self.source.eq(mult_out_node)
 
+        # Valid/Ready round robin
         input_readys = Signal(self.num_threads, init=1)
         output_valids = Signal(self.num_threads, init=1)
         for i in range(self.num_threads):

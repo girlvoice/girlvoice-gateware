@@ -1,4 +1,5 @@
 from cmath import phase
+from concurrent.futures import thread
 from math import exp, log
 from click import BadArgumentUsage
 import numpy as np
@@ -13,9 +14,49 @@ from girlvoice.dsp.vga import VariableGainAmp
 from girlvoice.dsp.bandpass_iir import BandpassIIR
 from girlvoice.dsp.envelope import EnvelopeFollower
 from girlvoice.dsp.envelope_vga import EnvelopeVGA
+from girlvoice.dsp.tdm_slice import TDMMultiply
+
+class ThreadedVocoderChannel(wiring.Component):
+    def __init__(self, channel_edges, fs=48000, sample_width=18):
+        self.fs = fs
+        self.sample_width = sample_width
+
+        self.mult = TDMMultiply(sample_width=sample_width, num_threads=3)
+
+        self.vga = VariableGainAmp(sample_width, sample_width, mult_slice=self.mult)
+        self.bandpass = BandpassIIR(
+            band_edges=channel_edges,
+            filter_order=1,
+            sample_width=sample_width,
+            fs=fs,
+            mult_slice=self.mult
+        )
+        self.envelope = EnvelopeFollower(sample_width, attack_halflife=1, decay_halflife=20, mult_slice=self.mult)
+
+        super().__init__({
+            "sink": In(stream.Signature(signed(sample_width))),
+            "carrier": In(stream.Signature(signed(sample_width))),
+            "source": Out(stream.Signature(signed(sample_width)))
+        })
+
+    def elaborate(self, platform):
+        m = Module()
+
+        m.submodules.mult = self.mult
+        m.submodules.vga = self.vga
+        m.submodules.bandpass = self.bandpass
+        m.submodules.envelope = self.envelope
+
+        wiring.connect(m, wiring.flipped(self.sink), self.bandpass.sink)
+        wiring.connect(m, self.envelope.source, self.vga.modulator)
+        wiring.connect(m, wiring.flipped(self.carrier), self.vga.carrier)
+
+        wiring.connect(m, wiring.flipped(self.source), self.vga.source)
+
+        return m
 
 class StaticVocoderChannel(wiring.Component):
-    def __init__(self, channel_edges, clk_sync_freq, fs=48000, sample_width=18):
+    def __init__(self, channel_edges, fs=48000, sample_width=18):
         self.fs = fs
         self.channel_freq = channel_edges[0] + (channel_edges[1] - channel_edges[0])/2
         self.sample_width = sample_width
@@ -96,7 +137,7 @@ class StaticVocoder(wiring.Component):
 
         self.synth = ParallelSineSynth(self.ch_freq, fs, sample_width)
 
-        self.channels = [channel_class(channel_edges=edges, fs=fs, sample_width=sample_width, clk_sync_freq=clk_sync_freq) for edges in self.ch_edges]
+        self.channels = [channel_class(channel_edges=edges, fs=fs, sample_width=sample_width) for edges in self.ch_edges]
 
         freqs = np.linspace(0, int(self.ch_freq[-1]), int(fs))
         for ch in self.channels:

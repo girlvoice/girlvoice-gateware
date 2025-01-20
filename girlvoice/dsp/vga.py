@@ -50,9 +50,9 @@ class VariableGainAmp(wiring.Component):
             with m.Elif(self.source.ready):
                 m.d.sync += self.source.valid.eq(0)
         else:
-            m.submodules.mult = self.mult
+            # m.submodules.mult = self.mult
             product = self.mult.source
-            mult_ready, mult_valid = self.mult.get_next_thread_ports()
+            mult_i_a, mult_i_b, mult_ready, mult_valid = self.mult.get_next_thread_ports()
 
             with m.FSM():
                 with m.State("LOAD"):
@@ -64,8 +64,8 @@ class VariableGainAmp(wiring.Component):
                         m.d.comb += self.modulator.ready.eq(1)
                         m.d.comb += self.carrier.ready.eq(1)
 
-                        m.d.sync += self.mult.sink_a.eq(self.modulator.payload)
-                        m.d.sync += self.mult.sink_b.eq(self.carrier.payload)
+                        m.d.sync += mult_i_a.eq(self.modulator.payload)
+                        m.d.sync += mult_i_b.eq(self.carrier.payload)
 
                         m.next = "WAIT"
                 with m.State("WAIT"):
