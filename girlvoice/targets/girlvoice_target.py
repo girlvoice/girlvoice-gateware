@@ -76,7 +76,7 @@ class GirlTop(Elaboratable):
             start_freq=500,
             end_freq=3000,
             clk_sync_freq=sync_freq,
-            num_channels=10,
+            num_channels=20,
             fs=sample_rate,
             sample_width=18,
             channel_class=vocoder.ThreadedVocoderChannel

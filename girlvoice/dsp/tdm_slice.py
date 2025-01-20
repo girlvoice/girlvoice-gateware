@@ -36,6 +36,8 @@ class TDMMultiply(wiring.Component):
                 return tid
         return tid
 
+    # Returns a new unique set of IO ports for a client module to use
+    # Ensures that modules sharing the slice dont have to guess which ports of the interface to use
     def get_next_thread_ports(self) -> List[Signal]:
         tid = self._get_next_thread_id()
         if tid == -1:

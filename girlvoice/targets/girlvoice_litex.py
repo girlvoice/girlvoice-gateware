@@ -197,7 +197,6 @@ class BaseSoC(SoCCore):
 
         bclk_freq = 4e6
         fs = 32e3
-        # bclk_freq = 3072e3
         bclk = Signal()
         wclk = Signal()
         i2s_sdout = Signal()
@@ -220,14 +219,14 @@ class BaseSoC(SoCCore):
 
         platform.add_source(f"{type(am_i2s_tx).__name__}.v")
 
-        i2s_valid = Signal()
-        i2s_ready = Signal()
-        i2s_payload = Signal(sample_width)
+        i2s_tx_valid = Signal()
+        i2s_tx_ready = Signal()
+        i2s_tx_payload = Signal(sample_width)
         self.specials += Instance(
             "i2s_tx",
-            i_sink__valid = i2s_valid,
-            i_sink__payload = i2s_payload,
-            o_sink__ready = i2s_ready,
+            i_sink__valid = i2s_tx_valid,
+            i_sink__payload = i2s_tx_payload,
+            o_sink__ready = i2s_tx_ready,
             i_clk = ClockSignal(),
             i_rst = ResetSignal(),
             o_sclk = bclk,
@@ -260,9 +259,9 @@ class BaseSoC(SoCCore):
 
         platform.add_source(i2s_rx_src)
 
-        mic_payload = Signal(sample_width)
-        mic_valid = Signal()
-        mic_ready = Signal()
+        i2s_rx_payload = Signal(sample_width)
+        i2s_rx_valid = Signal()
+        i2s_rx_ready = Signal()
 
         mic_lrclk = Signal()
         mic_bclk = Signal()
@@ -275,14 +274,14 @@ class BaseSoC(SoCCore):
             i_sdin = mic_sdata,
             i_clk = ClockSignal(),
             i_rst = ResetSignal(),
-            i_source__ready = mic_ready,
-            o_source__valid = mic_valid,
-            o_source__payload = mic_payload
+            i_source__ready = i2s_rx_ready,
+            o_source__valid = i2s_rx_valid,
+            o_source__payload = i2s_rx_payload
         )
 
-        self.comb += i2s_valid.eq(mic_valid)
-        self.comb += i2s_payload.eq(mic_payload)
-        self.comb += mic_ready.eq(i2s_ready)
+        # self.comb += i2s_tx_valid.eq(i2s_rx_valid)
+        # self.comb += i2s_tx_payload.eq(i2s_rx_payload)
+        # self.comb += i2s_rx_ready.eq(i2s_tx_ready)
 
         self.comb += mic.lrclk.eq(mic_lrclk)
         self.comb += mic.bclk.eq(mic_bclk)
@@ -292,12 +291,20 @@ class BaseSoC(SoCCore):
             platform,
             start_freq = 300,
             end_freq= 3000,
-            num_channels=8,
+            num_channels=20,
             clk_sync_freq=sys_clk_freq,
             fs=fs,
             sample_width=sample_width,
             channel_class=ThreadedVocoderChannel
         )
+
+        self.comb += self.vocoder.sink.data.eq(i2s_rx_payload)
+        self.comb += self.vocoder.sink.valid.eq(i2s_rx_valid)
+        self.comb += i2s_rx_ready.eq(self.vocoder.sink.ready)
+
+        self.comb += i2s_tx_payload.eq(self.vocoder.source.data)
+        self.comb += i2s_tx_valid.eq(self.vocoder.source.valid)
+        self.comb += self.vocoder.source.ready.eq(i2s_tx_ready)
 
         self.comb += amp.en.eq(1)
 

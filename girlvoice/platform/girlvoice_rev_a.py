@@ -9,7 +9,7 @@ from amaranth_boards.resources import *
 __all__ = ["GirlvoiceRevAPlatform"]
 
 class GirlvoiceRevAPlatform(LatticePlatform):
-    device = "LIFCL-40"
+    device = "LIFCL-17"
     package = "SG72"
     speed = "8"
     default_clk = "clk12"

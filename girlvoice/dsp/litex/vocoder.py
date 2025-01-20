@@ -24,7 +24,7 @@ class StaticVocoder(LiteXModule):
             clk_sync_freq=clk_sync_freq,
             channel_class=channel_class,
             fs=fs,
-            sample_width=sample_width
+            sample_width=sample_width,
         )
 
         mod_name = type(self.am_vocoder).__name__

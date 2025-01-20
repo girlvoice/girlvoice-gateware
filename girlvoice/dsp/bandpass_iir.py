@@ -212,10 +212,9 @@ def run_sim():
     clk_freq = 60e6
     sample_width = 16 # Number of 2s complement bits
     fs = 48000
-
-    mult = TDMMultiply(sample_width=sample_width, num_threads=2)
-
-    dut = BandpassIIR(
+    mod = Module()
+    mod.mult = mult = TDMMultiply(sample_width=sample_width, num_threads=2)
+    mod.filt = dut = BandpassIIR(
         center_freq=5000,
         passband_width=1000,
         fs=fs,
