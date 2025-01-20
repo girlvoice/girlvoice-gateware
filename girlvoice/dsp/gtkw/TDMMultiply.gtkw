@@ -1,0 +1,36 @@
+[*]
+[*] GTKWave Analyzer v3.3.120 (w)1999-2024 BSI
+[*] Fri Jan 17 06:58:38 2025
+[*]
+[dumpfile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/gtkw/TDMMultiply.vcd"
+[dumpfile_mtime] "Wed Jan 15 09:43:22 2025"
+[dumpfile_size] 16780
+[savefile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/gtkw/TDMMultiply.gtkw"
+[timestart] 0
+[size] 1121 679
+[pos] -1 -1
+*-25.000000 75600000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] bench.
+[sst_width] 209
+[signals_width] 209
+[sst_expanded] 1
+[sst_vpaned_height] 181
+@28
+bench.top.clk
+@24
+bench.top.sink_a[15:0]
+bench.top.sink_b[15:0]
+bench.top.source[31:0]
+bench.top.mac_in_1[15:0]
+bench.top.mac_in_2[15:0]
+@28
+bench.top.valid_0
+@29
+bench.top.ready_0
+@28
+bench.top.valid_1
+bench.top.ready_1
+@24
+bench.top.mult_node[31:0]
+[pattern_trace] 1
+[pattern_trace] 0

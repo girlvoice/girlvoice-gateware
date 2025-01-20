@@ -50,7 +50,6 @@ class VariableGainAmp(wiring.Component):
             with m.Elif(self.source.ready):
                 m.d.sync += self.source.valid.eq(0)
         else:
-            # m.submodules.mult = self.mult
             product = self.mult.source
             mult_i_a, mult_i_b, mult_ready, mult_valid = self.mult.get_next_thread_ports()
 

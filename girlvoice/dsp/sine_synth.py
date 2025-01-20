@@ -35,7 +35,7 @@ class StaticSineSynth(wiring.Component):
         self.delta_f = int((2**N * target_frequency) / fs)
 
         actual_freq = self.delta_f * fs / 2**N
-        print(f"Target synth freq: {self.frequency} Hz, achieved {actual_freq} Hz, phase resulution {N} bits, increment: {self.delta_f}")
+        print(f"target synth freq: {self.frequency} hz, achieved {actual_freq} hz, phase resulution {n} bits, increment: {self.delta_f}")
 
     def elaborate(self, platform):
         m = Module()
@@ -60,7 +60,7 @@ class ParallelSineSynth(wiring.Component):
         self.sample_width = sample_width
         self.fs = fs
 
-        phase_bit_width = phase_bits
+        self.phase_bit_width = phase_bit_width = phase_bits
 
         # Generate Sine LUT, use symmetry of sine function to reduce LUT size
         t = np.linspace(0, np.pi, 2**(phase_bit_width-1))
@@ -76,6 +76,12 @@ class ParallelSineSynth(wiring.Component):
 
         self.del_f = [int((2**N * f) / fs) for f in target_frequencies]
 
+        for i in range(len(target_frequencies)):
+            del_f = self.del_f[i]
+            target_freq = target_frequencies[i]
+            actual_freq = del_f * (fs / 2**N)
+
+            print(f"target synth freq: {target_freq} hz, achieved {actual_freq} hz, increment: {del_f}")
 
     def elaborate(self, platform):
         m = Module()
@@ -88,8 +94,8 @@ class ParallelSineSynth(wiring.Component):
         idx = Signal(len(self.del_f), reset=0)
 
         phase_delta = Array([C(df, N) for df in self.del_f])
-        phase_array = Array([Signal(N, reset=0) for _ in range(len(self.del_f))])
-        phase_i = Signal(N)
+        phase_array = Array([Signal(N, reset=0, name=f"cur_phase_offset_{i}") for i in range(len(self.del_f))])
+        phase_i = Signal(self.phase_bit_width)
 
         with m.If(self.source.ready & self.source.valid):
             with m.If(idx == len(self.del_f) - 1):
@@ -106,7 +112,7 @@ class ParallelSineSynth(wiring.Component):
                 m.d.sync += self.source.valid.eq(1)
                 m.next = "READY"
             with m.State("READY"):
-                m.d.sync += self.source.payload.eq(Mux(phase_i.bit_select(N-1, 1), r_port.data, -r_port.data))
+                m.d.comb += self.source.payload.eq(Mux(phase_i[-1], r_port.data, -r_port.data))
                 with m.If(self.source.ready & self.source.valid):
                     m.d.sync += self.source.valid.eq(0)
                     m.d.sync += phase_array[idx].eq(phase_array[idx] + phase_delta[idx])
@@ -114,7 +120,65 @@ class ParallelSineSynth(wiring.Component):
 
         return m
 
-def run_sim():
+def run_parallel_sim():
+    from scipy.io import wavfile
+    import matplotlib.pyplot as plt
+    from girlvoice.stream import stream_get
+    clk_freq = 1e6
+    bit_width = 16
+    target_freqs = [100, 200, 300, 400]
+    fs = 48000
+    duration = 0.1
+
+    dut = ParallelSineSynth(
+        target_frequencies=target_freqs,
+        fs=fs,
+        sample_width=bit_width,
+        phase_bits=8,
+    )
+
+    num_samples = int(fs * duration)
+
+    sim_steps = int(duration * clk_freq)
+    t = np.linspace(0, 1, num_samples)
+    t = t * duration
+    output_samples = [[] for _ in range(len(target_freqs))]
+    async def tb(ctx):
+        print(f"beginning sim, samples: {num_samples}")
+        samples_processed = 0
+        for i in range(num_samples * len(target_freqs)):
+            output_samples[i%len(target_freqs)].append(await stream_get(ctx, dut.source))
+            samples_processed += 1
+            if samples_processed % 1000 == 0:
+                print(f"{samples_processed}/{len(t)} Samples processed")
+
+    sim = Simulator(dut)
+    sim.add_clock(1/clk_freq)
+    sim.add_testbench(tb)
+
+    os.makedirs("gtkw", exist_ok=True)
+    dutname = f"gtkw/{type(dut).__name__}"
+    with sim.write_vcd(dutname + f".vcd"):
+        sim.run()
+
+    ax1 = plt.subplot(122)
+    ax2 = plt.subplot(121)
+    fft_freqs = np.fft.fftfreq(len(output_samples[0]), 1/fs)
+    for i in range(len(target_freqs)):
+        wavfile.write(f"sine_synth_test_{target_freqs[i]}hz.wav", rate=fs, data=np.array(output_samples[i], dtype=np.int16))
+        fft = np.fft.fft(output_samples[i])
+        ax1.plot(fft_freqs[:len(fft)//2], fft[:len(fft)//2], label=f"FFT of Output @ {target_freqs[i]}")
+        ax2.plot(t, output_samples[i], alpha=0.5, label=f"Output @ {target_freqs[i]}")
+    ax1.legend()
+
+    ax2.set_xlabel('time (s)')
+    plt.title('Sine Synth')
+    plt.grid(True)
+    plt.legend()
+    # plt.savefig(f"{type(dut).__name__}.png")
+    plt.show()
+
+def run_static_sim():
     from scipy.io import wavfile
     import matplotlib.pyplot as plt
     clk_freq = 1e6
@@ -173,5 +237,5 @@ def run_sim():
     plt.show()
 
 if __name__ == "__main__":
-    run_sim()
+    run_parallel_sim()
 

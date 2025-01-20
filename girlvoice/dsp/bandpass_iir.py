@@ -8,10 +8,6 @@ from amaranth import *
 import amaranth.lib.wiring as wiring
 from amaranth.lib.wiring import In, Out
 from amaranth.lib import stream
-from amaranth.sim import Simulator
-
-from girlvoice.stream import stream_get, stream_put
-from girlvoice.dsp.utils import generate_chirp, bode_plot
 from girlvoice.dsp.tdm_slice import TDMMultiply
 
 """
@@ -99,17 +95,13 @@ class BandpassIIR(wiring.Component):
         m.d.comb += b_i.eq(self.b_fp[idx])
 
         acc_width = (self.sample_width * 2) + (num_taps * 2)
-        # acc_width = (self.sample_width * 2) + 3
         acc = Signal(signed(acc_width))
+        self.acc_round = acc_round = Signal(signed(acc_width))
+        m.d.comb += acc_round.eq(acc + 2**(self.fraction_width-1))
 
         if self.multithreaded_mult is not None:
-            # m.submodules.mult = self.mult
             mult_node = self.mult.source
-
             mac_i_1, mac_i_2, mult_ready, mult_valid = self.mult.get_next_thread_ports()
-
-            acc_round = Signal(signed(acc_width))
-            m.d.comb += acc_round.eq(acc + 2**(self.fraction_width-1))
 
             with m.FSM():
                 with m.State("LOAD"):
@@ -133,7 +125,6 @@ class BandpassIIR(wiring.Component):
                         m.d.sync += mac_i_2.eq(a_i)
                         m.next = "MAC_FEEDBACK"
                         with m.If(idx == num_taps):
-                            # m.d.sync += self.source.payload.eq(acc >> (self.sample_width))
                             m.next = "READY"
 
                 with m.State("MAC_FEEDBACK"):
@@ -150,23 +141,17 @@ class BandpassIIR(wiring.Component):
                     m.d.comb += self.source.payload.eq(acc_round >> (self.fraction_width))
                     m.d.comb += self.source.valid.eq(1)
                     with m.If(self.source.ready):
-                        m.d.sync += Assert(((self.source.payload >= 0) & (acc_round >= 0)) | ((self.source.payload < 0) & (acc_round < 0)), "IIR Bandpass Accumulator and output sign mismatch!")
                         m.d.sync += idx.eq(0)
                         m.d.sync += y_buf[0].eq(self.source.payload)
                         m.next = "LOAD"
         else:
-            # mac_out = Signal(signed(acc_width))
             mult_node = Signal(signed(acc_width))
             mac_i_1 = Signal(signed(self.sample_width))
             mac_i_2 = Signal(signed(self.sample_width))
 
             m.d.comb += mult_node.eq(mac_i_1 * mac_i_2)
-            # m.d.comb += mac_out.eq(acc + (mac_i_1 * mac_i_2))
 
-            acc_round = Signal(signed(acc_width))
-            m.d.comb += acc_round.eq(acc + 2**(self.fraction_width-1))
-
-            with m.FSM():
+            with m.FSM() as fsm:
                 with m.State("LOAD"):
                     m.d.comb += self.sink.ready.eq(1)
                     with m.If(self.sink.valid):
@@ -199,22 +184,26 @@ class BandpassIIR(wiring.Component):
                     m.d.comb += self.source.payload.eq(acc_round >> (self.fraction_width))
                     m.d.comb += self.source.valid.eq(1)
                     with m.If(self.source.ready):
-                        m.d.sync += Assert(((self.source.payload >= 0) & (acc_round >= 0)) | ((self.source.payload < 0) & (acc_round < 0)), "IIR Bandpass Accumulator and output sign mismatch!")
                         m.d.sync += idx.eq(0)
                         m.d.sync += y_buf[0].eq(self.source.payload)
                         m.next = "LOAD"
 
+        self.fsm = fsm
         return m
 
 # Testbench ----------------------------------------
 
 def run_sim():
+    from amaranth.sim import Simulator
+    from girlvoice.stream import stream_get, stream_put
+    from girlvoice.dsp.utils import generate_chirp, bode_plot
+
     clk_freq = 60e6
     sample_width = 16 # Number of 2s complement bits
     fs = 48000
-    mod = Module()
-    mod.submodules.mult = mult = TDMMultiply(sample_width=sample_width, num_threads=3)
-    mod.submodules.filt = dut = BandpassIIR(
+    m = Module()
+    m.submodules.mult = mult = TDMMultiply(sample_width=sample_width, num_threads=3)
+    m.submodules.filt = dut = BandpassIIR(
         center_freq=5000,
         passband_width=1000,
         fs=fs,
@@ -222,6 +211,12 @@ def run_sim():
         filter_order=1,
         mult_slice=mult
     )
+
+    with m.If(dut.fsm.ongoing("READY") & dut.source.ready):
+        m.d.sync += Assert(
+            ((dut.source.payload >= 0) & (dut.acc_round >= 0))
+            | ((dut.source.payload < 0) & (dut.acc_round < 0)),
+            "IIR Bandpass Accumulator and output sign mismatch!")
 
     duration = .25
     start_freq = 1
@@ -241,7 +236,7 @@ def run_sim():
                 print(f"{samples_processed}/{len(t)} Samples processed")
 
 
-    sim = Simulator(mod)
+    sim = Simulator(m)
     sim.add_clock(1/clk_freq)
     sim.add_testbench(tb)
 

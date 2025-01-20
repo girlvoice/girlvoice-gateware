@@ -1,0 +1,41 @@
+[*]
+[*] GTKWave Analyzer v3.3.120 (w)1999-2024 BSI
+[*] Mon Jan 20 11:23:53 2025
+[*]
+[dumpfile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/gtkw/ParallelSineSynth.vcd"
+[dumpfile_mtime] "Mon Jan 20 11:21:30 2025"
+[dumpfile_size] 4863238
+[savefile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/gtkw/ParallelSineSynth.gtkw"
+[timestart] 68140000000
+[size] 1000 600
+[pos] -1 -1
+*-31.000000 70740000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] bench.
+[treeopen] bench.top.
+[sst_width] 209
+[signals_width] 222
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@28
+bench.top.clk
+bench.top.fsm_state
+@40000420
+[fpshift_count] 15
+bench.top.source__payload[15:0]
+@28
+bench.top.source__ready
+bench.top.source__valid
+@22
+bench.top.r_port__addr[6:0]
+@23
+bench.top.phase_i[7:0]
+@22
+bench.top.r_port__data[15:0]
+bench.top.idx[3:0]
+@24
+bench.top.cur_phase_offset_0[15:0]
+bench.top.cur_phase_offset_1[15:0]
+bench.top.cur_phase_offset_2[15:0]
+bench.top.cur_phase_offset_3[15:0]
+[pattern_trace] 1
+[pattern_trace] 0
