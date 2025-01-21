@@ -81,6 +81,7 @@ class _CRG(LiteXModule):
         hf_clk_freq = 25e6
         self.hf_clk.create_hf_clk(self.cd_por, hf_clk_freq)
 
+        platform.add_platform_command(f"create_clock -period {1/hf_clk_freq*1e9} -name por_clk [get_pins OSCA.OSCA_inst/HFCLKOUT]")
         # clk12_freq = 12e6
         # self.cd_por.clk = platform.request("clk12")
 
@@ -291,7 +292,7 @@ class BaseSoC(SoCCore):
             platform,
             start_freq = 300,
             end_freq= 3000,
-            num_channels=20,
+            num_channels=10,
             clk_sync_freq=sys_clk_freq,
             fs=fs,
             sample_width=sample_width,

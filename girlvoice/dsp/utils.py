@@ -44,7 +44,7 @@ def generate_sine(duration, fs, freq, sample_width, amp=1):
     return (t,x)
 
 def generate_ramp(freq, duration, fs, sample_width):
-    num_samples = duration * fs
+    num_samples = int(duration * fs)
     t = np.linspace(0, duration, num_samples)
     input_samples = signal.sawtooth(2 * np.pi * freq * t) * t
     input_samples *= (2**(sample_width - 1))

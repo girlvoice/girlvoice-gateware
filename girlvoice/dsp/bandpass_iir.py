@@ -22,10 +22,13 @@ To quantize the accumulator back to N-1 fraction bits we must divide by 2**((M+N
 This is achieved by adding 2**(M-1) to the accumulator and then right shifting by M bits
 """
 class BandpassIIR(wiring.Component):
-    def __init__(self, band_edges = None, center_freq = None, passband_width = None, filter_order=2, sample_width=32, fs=48e3, mult_slice:TDMMultiply =None):
+    def __init__(self, band_edges = None, center_freq = None, passband_width = None,
+                 filter_order=2, sample_width=32, fs=48e3, mult_slice:TDMMultiply =None,
+                 formal=False):
         self.order = filter_order
         self.sample_width = sample_width
         self.fs = fs
+        self.formal=formal
 
         if mult_slice is not None:
             assert mult_slice.sample_width == self.sample_width

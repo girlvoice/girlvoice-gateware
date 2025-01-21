@@ -62,11 +62,21 @@ class EnvelopeFollower(wiring.Component):
     def elaborate(self, platform):
         m = Module()
 
+        mac_width = self.sample_width*2
+        acc = Signal(signed(mac_width))
+        acc_quant = Signal(signed(self.sample_width))
+        x = Signal(signed(self.sample_width))
+        y = Signal(signed(self.sample_width))
+
+        param = Signal(signed(self.sample_width))
+        param_comp = Signal(signed(self.sample_width))
+        m.d.comb += param.eq(Mux(abs(x) > y, self.attack_fp, self.decay_fp))
+        m.d.comb += param_comp.eq(Mux(abs(x) > y, self.attack_comp, self.decay_comp))
+
+        m.d.comb += x.eq(self.sink.payload)
+
         if self.mult is None:
-            mac_width = self.sample_width*2
-            acc = Signal(signed(mac_width))
             # acc.attrs["syn_multstyle"] = "block_mult"
-            acc_quant = Signal(signed(self.sample_width))
 
             mac_out = Signal(signed(mac_width))
             mac_in_1 = Signal(signed(self.sample_width))
@@ -74,17 +84,6 @@ class EnvelopeFollower(wiring.Component):
             m.d.comb += mac_out.eq(acc + (mac_in_1 * mac_in_2))
             # m.d.sync += Assert(acc >= 0, "Envelope accumulator overflow")
             m.d.comb += acc_quant.eq((mac_out) >> (self.fraction_width))
-
-            x = Signal(signed(self.sample_width))
-            y = Signal(signed(self.sample_width))
-
-            param = Signal(signed(self.sample_width))
-            param_comp = Signal(signed(self.sample_width))
-            m.d.comb += param.eq(Mux(abs(x) > y, self.attack_fp, self.decay_fp))
-            m.d.comb += param_comp.eq(Mux(abs(x) > y, self.attack_comp, self.decay_comp))
-
-            m.d.comb += x.eq(self.sink.payload)
-
 
             with m.FSM():
                 with m.State("LOAD"):
@@ -113,25 +112,11 @@ class EnvelopeFollower(wiring.Component):
                         m.next = "LOAD"
 
         else:
-            # m.submodules.mult = self.mult
-            mac_width = self.sample_width*2
-            acc = Signal(signed(mac_width))
-            acc_quant = Signal(signed(self.sample_width))
 
             mac_out = self.mult.source
             mac_in_1, mac_in_2, mult_ready, mult_valid = self.mult.get_next_thread_ports()
 
             m.d.comb += acc_quant.eq(acc >> self.fraction_width)
-
-            x = Signal(signed(self.sample_width))
-            y = Signal(signed(self.sample_width))
-
-            param = Signal(signed(self.sample_width))
-            param_comp = Signal(signed(self.sample_width))
-            m.d.comb += param.eq(Mux(abs(x) > y, self.attack_fp, self.decay_fp))
-            m.d.comb += param_comp.eq(Mux(abs(x) > y, self.attack_comp, self.decay_comp))
-
-            m.d.comb += x.eq(self.sink.payload)
 
             with m.FSM():
                 with m.State("LOAD"):
