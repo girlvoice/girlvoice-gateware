@@ -31,7 +31,7 @@ class BandpassIIR(wiring.Component):
         self.formal=formal
 
         if mult_slice is not None:
-            assert mult_slice.sample_width == self.sample_width
+            assert mult_slice.sample_width >= self.sample_width
         self.mult = mult_slice
 
         if band_edges is not None:
@@ -61,7 +61,10 @@ class BandpassIIR(wiring.Component):
 
         acc_frac = self.fraction_width * 2
 
-        self.a_fp = Array([C(int(a_i * 2**self.fraction_width), signed(sample_width)) for a_i in a])
+        # The first coefficient for the denominator will always be 1.
+        # In practice this means that we dont ever do anything with the first sample in the
+        # feedback delay line. So we drop the first coefficient here and save a register in the delay line
+        self.a_fp = Array([C(int(a_i * 2**self.fraction_width), signed(sample_width)) for a_i in a[1:]])
         self.b_fp = Array([C(int(b_i * 2**self.fraction_width), signed(sample_width)) for b_i in b])
 
         self.a_quant = [a.value / (2**self.fraction_width) for a in self.a_fp]
@@ -80,7 +83,7 @@ class BandpassIIR(wiring.Component):
 
         self.multithreaded_mult = self.mult is not None
 
-        num_taps = len(self.a_fp)
+        num_taps = len(self.b_fp)
 
         # Direct form I implementation
         x_buf = Array([Signal(signed(self.sample_width), name=f"x_{i}") for i in range(len(self.b_fp))])
@@ -104,50 +107,44 @@ class BandpassIIR(wiring.Component):
 
         if self.multithreaded_mult is not None:
             mult_node = self.mult.source
-            mac_i_1, mac_i_2, mult_ready, mult_valid = self.mult.get_next_thread_ports()
+            mac_i_1, mac_i_2, mult_valid = self.mult.get_next_thread_ports()
 
+            m.d.comb += self.source.payload.eq(acc_round >> (self.fraction_width))
+
+            with m.If(self.source.ready & self.source.valid):
+                m.d.sync += idx.eq(0)
             with m.FSM() as fsm:
                 with m.State("LOAD"):
-                    m.d.comb += self.sink.ready.eq(mult_ready)
-                    with m.If(self.sink.valid & self.sink.ready):
+                    m.d.comb += self.sink.ready.eq(1)
+                    with m.If(self.sink.valid):
                         m.d.sync += [x_buf[i + 1].eq(x_buf[i]) for i in range(num_taps - 1)]
-                        m.d.sync += [y_buf[i + 1].eq(y_buf[i]) for i in range(num_taps - 1)]
                         m.d.sync += x_buf[0].eq(self.sink.payload)
                         m.d.sync += acc.eq(0)
-                        m.d.sync += idx.eq(idx + 1)
-                        m.d.sync += mac_i_1.eq(self.sink.payload)
-                        m.d.sync += mac_i_2.eq(b_i)
-                        m.next = "MAC_FORWARD"
-
+                        m.next = "MAC_FEEDBACK"
                 with m.State("MAC_FORWARD"):
                     with m.If(mult_valid):
                         m.d.sync += acc.eq(acc + mult_node)
-
-                    with m.If(mult_ready):
                         m.d.sync += mac_i_1.eq(-y_i)
                         m.d.sync += mac_i_2.eq(a_i)
+                        m.d.sync += idx.eq(idx + 1)
                         m.next = "MAC_FEEDBACK"
-                        with m.If(idx == num_taps):
+                        with m.If(idx == (num_taps - 1)):
                             m.next = "READY"
 
                 with m.State("MAC_FEEDBACK"):
-                    with m.If(mult_ready):
+                    with m.If(mult_valid):
                         m.d.sync += mac_i_1.eq(x_i)
                         m.d.sync += mac_i_2.eq(b_i)
-
-                    with m.If(mult_valid):
-                        m.d.sync += idx.eq(idx + 1)
                         m.d.sync += acc.eq(acc + mult_node)
                         m.next = "MAC_FORWARD"
 
                 with m.State("READY"):
-                    m.d.comb += self.source.payload.eq(acc_round >> (self.fraction_width))
                     m.d.comb += self.source.valid.eq(1)
                     with m.If(self.source.ready):
-                        m.d.sync += idx.eq(0)
+                        m.d.sync += [y_buf[i + 1].eq(y_buf[i]) for i in range(len(y_buf) - 1)]
                         m.d.sync += y_buf[0].eq(self.source.payload)
                         m.next = "LOAD"
-            self.fsm = fsm
+            # self.fsm = fsm
         else:
             mult_node = Signal(signed(acc_width))
             mac_i_1 = Signal(signed(self.sample_width))
@@ -191,8 +188,20 @@ class BandpassIIR(wiring.Component):
                         m.d.sync += idx.eq(0)
                         m.d.sync += y_buf[0].eq(self.source.payload)
                         m.next = "LOAD"
-            self.fsm = fsm
+            # self.fsm = fsm
+
+        self.fsm = fsm
+
+        if self.formal:
+            self.add_asserts(m)
         return m
+
+    def add_asserts(self, m):
+        with m.If(self.fsm.ongoing("READY") & self.source.ready):
+            m.d.sync += Assert(
+                ((self.source.payload >= 0) & (self.acc_round >= 0))
+                | ((self.source.payload < 0) & (self.acc_round < 0)),
+                "IIR Bandpass Accumulator and output sign mismatch!")
 
 # Testbench ----------------------------------------
 
@@ -215,11 +224,6 @@ def run_sim():
         mult_slice=mult
     )
 
-    with m.If(dut.fsm.ongoing("READY") & dut.source.ready):
-        m.d.sync += Assert(
-            ((dut.source.payload >= 0) & (dut.acc_round >= 0))
-            | ((dut.source.payload < 0) & (dut.acc_round < 0)),
-            "IIR Bandpass Accumulator and output sign mismatch!")
 
     duration = .25
     start_freq = 1
@@ -249,7 +253,9 @@ def run_sim():
         sim.run()
         print(output_samples[-50:])
         ax2 = plt.subplot(121)
-        bode_plot(fs, duration, end_freq, input_samples, output_samples, dut.taps_raw, [dut.b_quant, dut.a_quant])
+        dut_a = dut.a_quant.copy() # The implicit 1 coefficient is removed to save LUTS, add it back in here
+        dut_a.insert(0, 1.0)
+        bode_plot(fs, duration, end_freq, input_samples, output_samples, dut.taps_raw, [dut.b_quant, dut_a])
         ax2.plot(t, input_samples, alpha=0.5, label="Input")
         ax2.plot(t, output_samples, alpha=0.5, label="Output")
         ax2.set_xlabel('Time (s)')

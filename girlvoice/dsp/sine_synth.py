@@ -98,12 +98,15 @@ class ParallelSineSynth(wiring.Component):
         phase_i = Signal(self.phase_bit_width)
 
         with m.If(self.source.ready & self.source.valid):
+            m.d.sync += self.source.valid.eq(0)
+            m.d.sync += phase_array[idx].eq(phase_array[idx] + phase_delta[idx])
             with m.If(idx == len(self.del_f) - 1):
                 m.d.sync += idx.eq(0)
             with m.Else():
                 m.d.sync += idx.eq(idx + 1)
 
         m.d.comb += r_port.addr.eq(phase_i[:-1])
+        m.d.comb += self.source.payload.eq(Mux(phase_i[-1], r_port.data, -r_port.data))
         with m.FSM():
             with m.State("LOAD_PHASE"):
                 m.d.sync += phase_i.eq(phase_array[idx] >> self.oversampling)
@@ -112,10 +115,7 @@ class ParallelSineSynth(wiring.Component):
                 m.d.sync += self.source.valid.eq(1)
                 m.next = "READY"
             with m.State("READY"):
-                m.d.comb += self.source.payload.eq(Mux(phase_i[-1], r_port.data, -r_port.data))
                 with m.If(self.source.ready & self.source.valid):
-                    m.d.sync += self.source.valid.eq(0)
-                    m.d.sync += phase_array[idx].eq(phase_array[idx] + phase_delta[idx])
                     m.next = "LOAD_PHASE"
 
         return m

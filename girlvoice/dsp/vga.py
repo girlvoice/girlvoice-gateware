@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+from xml.sax.xmlreader import InputSource
 import numpy as np
 import matplotlib.pyplot as plt
 import numpy as np
@@ -19,8 +20,8 @@ class VariableGainAmp(wiring.Component):
         self.carrier_width = carrier_width
 
         if mult_slice is not None:
-            assert mult_slice.sample_width == self.modulator_width
-            assert mult_slice.sample_width == self.carrier_width
+            assert mult_slice.sample_width >= self.modulator_width
+            assert mult_slice.sample_width >= self.carrier_width
             self.mult = mult_slice
         else:
             self.mult = None
@@ -51,15 +52,18 @@ class VariableGainAmp(wiring.Component):
                 m.d.sync += self.source.valid.eq(0)
         else:
             product = self.mult.source
-            mult_i_a, mult_i_b, mult_ready, mult_valid = self.mult.get_next_thread_ports()
+            mult_i_a, mult_i_b, mult_valid = self.mult.get_next_thread_ports()
+            m.d.sync += self.source.payload.eq(product >> (self.modulator_width - 1))
+
+            inputs_valid = Signal()
+            m.d.comb += inputs_valid.eq(self.modulator.valid & self.carrier.valid)
 
             with m.FSM():
                 with m.State("LOAD"):
                     with m.If(self.source.ready):
                         m.d.sync += self.source.valid.eq(0)
 
-                    with m.If(self.modulator.valid & self.carrier.valid
-                              & mult_ready & ~self.source.ready):
+                    with m.If(inputs_valid & mult_valid & ~self.source.valid):
                         m.d.comb += self.modulator.ready.eq(1)
                         m.d.comb += self.carrier.ready.eq(1)
 
@@ -69,7 +73,6 @@ class VariableGainAmp(wiring.Component):
                         m.next = "WAIT"
                 with m.State("WAIT"):
                     with m.If(mult_valid):
-                        m.d.sync += self.source.payload.eq(product >> (self.modulator_width - 1))
                         m.d.sync += self.source.valid.eq(1)
                         m.next = "LOAD"
 

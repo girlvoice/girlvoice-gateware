@@ -23,8 +23,8 @@ class TDMMultiply(wiring.Component):
         for i in self.thread_ids:
             signature[f"sink_a_{i}"]  = In(signed(sample_width))
             signature[f"sink_b_{i}"]  = In(signed(sample_width))
-            signature[f"ready_{i}"] = Out(1)
-            signature[f"valid_{i}"] = In(1)
+            valid_init = 1 if i == 0 else 0
+            signature[f"valid_{i}"] = Out(1, init=valid_init)
 
         self.utilized_threads = []
         super().__init__(signature)
@@ -45,9 +45,8 @@ class TDMMultiply(wiring.Component):
         self.utilized_threads.append(tid)
         sink_a = self.__dict__[f"sink_a_{tid}"]
         sink_b = self.__dict__[f"sink_b_{tid}"]
-        ready = self.__dict__[f"ready_{tid}"]
         valid = self.__dict__[f"valid_{tid}"]
-        return sink_a, sink_b, ready, valid
+        return sink_a, sink_b, valid
 
     def elaborate(self, platform):
         m = Module()
@@ -86,21 +85,10 @@ class TDMMultiply(wiring.Component):
         m.d.comb += self.source.eq(mult_out_node)
 
         # Valid/Ready round robin
-        input_readys = Signal(self.num_threads, init=1)
-        output_valids = Signal(self.num_threads, init=1)
-        for i in range(self.num_threads):
-            m.d.comb += self.__dict__[f"ready_{i}"].eq(input_readys.bit_select(i, 1))
-            m.d.comb += self.__dict__[f"valid_{i}"].eq(output_valids.bit_select(i, 1))
+        for i in range(self.num_threads - 1):
+            m.d.sync += self.__dict__[f"valid_{i+1}"].eq(self.__dict__[f"valid_{i}"])
 
-        with m.If(input_readys == (1 << (self.num_threads - 1))):
-            m.d.sync += input_readys.eq(1)
-        with m.Else():
-            m.d.sync += input_readys.eq(input_readys << 1)
-
-        with m.If(output_valids == (1 << (self.num_threads - 1))):
-            m.d.sync += output_valids.eq(1)
-        with m.Else():
-            m.d.sync += output_valids.eq(output_valids << 1)
+        m.d.sync += self.__dict__[f"valid_0"].eq(self.__dict__[f"valid_{self.num_threads - 1}"])
 
         return m
 

@@ -12,8 +12,8 @@ class StaticVocoder(LiteXModule):
         self.sink = sink = Endpoint([("data", sample_width)])
         self.source = source = Endpoint([("data", sample_width)])
 
-        self.attack = CSRStorage(size=32, description="Vocoder Attack Constant")
-        self.decay = CSRStorage(size=32, description="Vocoder Decay Constant")
+        # self.attack = CSRStorage(size=32, description="Vocoder Attack Constant")
+        # self.decay = CSRStorage(size=32, description="Vocoder Decay Constant")
 
         self.am_vocoder = vocoder.StaticVocoder(
             start_freq=start_freq,
@@ -49,7 +49,7 @@ class StaticVocoder(LiteXModule):
         self.specials += Instance(
             mod_name,
             i_clk = ClockSignal(),
-            i_rst = ResetSignal(),
+            # i_rst = ResetSignal(),
             i_source__ready = source.ready,
             o_source__valid = source.valid,
             o_source__payload = source.data,

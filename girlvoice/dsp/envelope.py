@@ -49,7 +49,7 @@ class EnvelopeFollower(wiring.Component):
         self.decay_comp = C(int((1 - decay) * (2**(self.fraction_width))), signed(sample_width))
 
         if mult_slice is not None:
-            assert mult_slice.sample_width == self.sample_width
+            assert mult_slice.sample_width >= self.sample_width
             self.mult = mult_slice
         else:
             self.mult = None
@@ -114,37 +114,32 @@ class EnvelopeFollower(wiring.Component):
         else:
 
             mac_out = self.mult.source
-            mac_in_1, mac_in_2, mult_ready, mult_valid = self.mult.get_next_thread_ports()
+            mac_in_1, mac_in_2, mult_valid = self.mult.get_next_thread_ports()
 
             m.d.comb += acc_quant.eq(acc >> self.fraction_width)
 
+            m.d.comb += self.source.payload.eq(acc_quant)
+            with m.If(self.sink.valid & self.sink.ready):
+                m.d.sync += mac_in_1.eq(param_comp)
+                m.d.sync += mac_in_2.eq(abs(x))
+            with m.If(self.source.valid & self.source.ready):
+                m.d.sync += self.source.valid.eq(0)
+                m.d.sync += y.eq(self.source.payload)
+
             with m.FSM():
                 with m.State("LOAD"):
+                    m.d.comb += self.sink.ready.eq(~self.source.valid & mult_valid)
 
-                    # Output Saturation logic
-                    with m.If(acc_quant >= 0):
-                        m.d.comb += self.source.payload.eq(acc_quant)
-                    with m.Else():
-                        m.d.comb += self.source.payload.eq(2**(self.sample_width - 1) - 1)
-
-                    with m.If(self.source.ready):
-                        m.d.sync += self.source.valid.eq(0)
-                        m.d.sync += y.eq(self.source.payload)
-
-                    m.d.comb += self.sink.ready.eq(~self.source.valid & mult_ready)
                     with m.If(self.sink.valid & self.sink.ready):
                         m.d.sync += acc.eq(0)
-                        m.d.sync += mac_in_1.eq(param_comp)
-                        m.d.sync += mac_in_2.eq(abs(x))
                         m.next = "MULT_Y"
 
                 with m.State("MULT_Y"):
                     with m.If(mult_valid):
                         m.d.sync += acc.eq(mac_out)
-                        m.next = "WAIT"
-                    with m.If(mult_ready):
                         m.d.sync += mac_in_1.eq(param)
                         m.d.sync += mac_in_2.eq(y)
+                        m.next = "WAIT"
 
                 with m.State("WAIT"):
                     with m.If(mult_valid):

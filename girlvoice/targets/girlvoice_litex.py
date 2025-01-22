@@ -139,7 +139,8 @@ class BaseSoC(SoCCore):
         kwargs["uart_baudrate"] = 115200
         # Make serial_pmods available
         # kwargs["with_uart"] = False
-        SoCCore.__init__(self, platform, sys_clk_freq, ident="LiteX SoC on girlvoice rev A :3", **kwargs)
+        kwargs["ident_version"] = False
+        SoCCore.__init__(self, platform, sys_clk_freq, **kwargs)
 
         # 128KB LRAM (used as SRAM) ---------------------------------------------------------------
         self.spram = NXLRAM(32, 64*kB)
@@ -292,7 +293,7 @@ class BaseSoC(SoCCore):
             platform,
             start_freq = 300,
             end_freq= 3000,
-            num_channels=10,
+            num_channels=16,
             clk_sync_freq=sys_clk_freq,
             fs=fs,
             sample_width=sample_width,
