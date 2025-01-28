@@ -56,11 +56,11 @@ class EnvelopeVGA(wiring.Component):
         m.d.comb += x.eq(self.sink.payload)
 
         if self.mult is None:
-            mult_node = Signal(signed(mac_width))
+            product = Signal(signed(mac_width))
             mac_in_1 = Signal(signed(self.sample_width))
             mac_in_2 = Signal(signed(self.sample_width))
-            m.d.comb += mult_node.eq(mac_in_1 * mac_in_2)
-            m.d.comb += acc_quant.eq(mult_node >> (self.fraction_width))
+            m.d.comb += product.eq(mac_in_1 * mac_in_2)
+            m.d.comb += acc_quant.eq(product >> (self.fraction_width))
 
             # Saturation logic:
             with m.If(acc_quant >= 0):
@@ -79,13 +79,13 @@ class EnvelopeVGA(wiring.Component):
                         m.next = "MULT_Y"
 
                 with m.State("MULT_Y"):
-                    m.d.sync += acc.eq(mult_node)
+                    m.d.sync += acc.eq(product)
                     m.d.sync += mac_in_1.eq(param)
                     m.d.sync += mac_in_2.eq(y)
                     m.next = "ACC_Y"
 
                 with m.State("ACC_Y"):
-                    m.d.sync += acc.eq(acc + mult_node)
+                    m.d.sync += acc.eq(acc + product)
                     m.d.sync += self.carrier.ready.eq(1)
                     m.next = "MULT_CARRIER"
 
@@ -104,53 +104,60 @@ class EnvelopeVGA(wiring.Component):
                         m.d.sync += self.source.valid.eq(0)
                         m.next = "LOAD"
         else:
-            mac_in_1, mac_in_2, mult_ready, mult_valid = self.mult.get_next_thread_ports()
-            mult_node = self.mult.source
+            mac_in_1, mac_in_2, mult_valid = self.mult.get_next_thread_ports()
+            product = self.mult.source
+            m.d.comb += self.source.payload.eq(acc_quant)
             m.d.comb += acc_quant.eq(acc >> (self.fraction_width))
+
+            with m.If(self.sink.valid & self.sink.ready):
+                m.d.sync += mac_in_1.eq(param_comp)
+                m.d.sync += mac_in_2.eq(abs(x))
+
+            load_carrier = Signal()
+            m.d.comb += load_carrier.eq(self.carrier.valid & self.carrier.ready)
+
+            with m.If(load_carrier):
+                m.d.sync += y.eq(acc_quant)
+
+            with m.If(self.source.valid & self.source.ready):
+                m.d.sync += self.source.valid.eq(0)
 
             with m.FSM():
                 with m.State("LOAD"):
-                    with m.If(self.source.ready):
-                        m.d.sync += self.source.valid.eq(0)
-
-                    m.d.comb += self.sink.ready.eq(~self.source.valid & mult_ready)
+                    m.d.comb += self.sink.ready.eq(~self.source.valid & mult_valid)
                     with m.If(self.sink.valid & self.sink.ready):
                         m.d.sync += acc.eq(0)
-                        m.d.sync += mac_in_1.eq(param_comp)
-                        m.d.sync += mac_in_2.eq(abs(x))
                         m.next = "MULT_Y"
 
                 with m.State("MULT_Y"):
                     if self.formal:
                         m.d.sync += Assert(self.source.valid == 0)
                     with m.If(mult_valid):
-                        m.d.sync += acc.eq(mult_node)
-                        m.next = "ACC_Y"
-                    with m.If(mult_ready):
+                        m.d.sync += acc.eq(product)
                         m.d.sync += mac_in_1.eq(param)
                         m.d.sync += mac_in_2.eq(y)
+                        m.next = "ACC_Y"
 
                 with m.State("ACC_Y"):
                     with m.If(mult_valid):
-                        m.d.sync += acc.eq(acc + mult_node)
+                        m.d.sync += acc.eq(acc + product)
                         m.next = "MULT_CARRIER"
 
                 # ACC reg now contains the output of the envelope follower
                 with m.State("MULT_CARRIER"):
                     if self.formal:
                         m.d.sync += Assert(acc_quant >= 0)
-                    m.d.comb += self.carrier.ready.eq(mult_ready)
-                    with m.If(self.carrier.valid & self.carrier.ready):
+                    m.d.comb += self.carrier.ready.eq(mult_valid)
+                    with m.If(self.carrier.valid & mult_valid):
                         m.d.sync += [
                             mac_in_1.eq(acc_quant),
                             mac_in_2.eq(self.carrier.payload),
-                            y.eq(acc_quant),
                         ]
                         m.next = "WAIT_VGA"
 
                 with m.State("WAIT_VGA"):
                     with m.If(mult_valid):
-                        m.d.sync += self.source.payload.eq(mult_node >> self.fraction_width)
+                        m.d.sync += acc.eq(product)
                         m.d.sync += self.source.valid.eq(1)
                         m.next = "LOAD"
 

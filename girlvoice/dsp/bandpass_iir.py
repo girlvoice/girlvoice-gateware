@@ -23,7 +23,7 @@ This is achieved by adding 2**(M-1) to the accumulator and then right shifting b
 """
 class BandpassIIR(wiring.Component):
     def __init__(self, band_edges = None, center_freq = None, passband_width = None,
-                 filter_order=2, sample_width=32, fs=48e3, mult_slice:TDMMultiply =None,
+                 filter_order=1, sample_width=32, fs=48e3, mult_slice:TDMMultiply =None,
                  formal=False):
         self.order = filter_order
         self.sample_width = sample_width
@@ -83,10 +83,11 @@ class BandpassIIR(wiring.Component):
 
         self.multithreaded_mult = self.mult is not None
 
+        # TODO: actually calculate this from provided filter order
         num_taps = len(self.b_fp)
 
         # Direct form I implementation
-        x_buf = Array([Signal(signed(self.sample_width), name=f"x_{i}") for i in range(len(self.b_fp))])
+        x_buf = Array([Signal(signed(self.sample_width), name=f"x_{i}") for i in range(num_taps)])
         y_buf = Array([Signal(signed(self.sample_width), name=f"y_{i}") for i in range(len(self.a_fp))])
         idx = Signal(range(num_taps))
 
@@ -103,9 +104,10 @@ class BandpassIIR(wiring.Component):
         acc_width = (self.sample_width * 2) + (num_taps * 2)
         acc = Signal(signed(acc_width))
         self.acc_round = acc_round = Signal(signed(acc_width))
-        m.d.comb += acc_round.eq(acc + 2**(self.fraction_width-1))
+        # m.d.comb += acc_round.eq(acc + 2**(self.fraction_width-1))
+        m.d.comb += acc_round.eq(acc)
 
-        if self.multithreaded_mult is not None:
+        if self.multithreaded_mult:
             mult_node = self.mult.source
             mac_i_1, mac_i_2, mult_valid = self.mult.get_next_thread_ports()
 

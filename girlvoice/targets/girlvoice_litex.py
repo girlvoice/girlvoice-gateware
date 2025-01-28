@@ -105,7 +105,7 @@ class _CRG(LiteXModule):
 
     # We have to add this platform command here to ensure that it comes after the PLL clock port has been created
     def do_finalize(self):
-        self.platform.add_platform_command("set_clock_groups -asynchronous -group [get_clocks por_clk] -group [get_clocks PLL_0_P]")
+        # self.platform.add_platform_command("set_clock_groups -asynchronous -group [get_clocks por_clk] -group [get_clocks PLL_0_P]")
         if self.platform.toolchain == "radiant":
             self.platform.add_platform_command("set_clock_groups -asynchronous -group [get_clocks crg_clkout] -group [get_clocks PLL_0_P]")
 
@@ -132,14 +132,12 @@ class BaseSoC(SoCCore):
         # CRG --------------------------------------------------------------------------------------
         self.crg = _CRG(platform, sys_clk_freq)
 
-
         # SoCCore -----------------------------------------_----------------------------------------
         # Disable Integrated SRAM since we want to instantiate LRAM specifically for it
         kwargs["integrated_sram_size"] = 0
         kwargs["uart_baudrate"] = 115200
         # Make serial_pmods available
-        # kwargs["with_uart"] = False
-        kwargs["ident_version"] = False
+        # kwargs["ident_version"] = False
         SoCCore.__init__(self, platform, sys_clk_freq, **kwargs)
 
         # 128KB LRAM (used as SRAM) ---------------------------------------------------------------
@@ -149,7 +147,6 @@ class BaseSoC(SoCCore):
         main_ram_size_kb = 64
         self.main_ram = NXLRAM(32, main_ram_size_kb*kB)
         self.bus.add_slave("main_ram", self.main_ram.bus, SoCRegion(origin=self.mem_map["main_ram"], size=main_ram_size_kb*kB))
-
 
         self.power_manager = _PowerManagement(platform)
 
@@ -189,11 +186,6 @@ class BaseSoC(SoCCore):
         # self.add_csr("lcd_bl")
 
         # Vocoder Junk --------------------------------------------------------------------
-
-        # clk12 = platform.request("clk12")
-        # clk12_freq = 12e6
-        # self.cd_clk12 = ClockDomain()
-        # self.comb += self.cd_clk12.clk.eq(clk12)
 
         sample_width = 16
 
@@ -281,9 +273,6 @@ class BaseSoC(SoCCore):
             o_source__payload = i2s_rx_payload
         )
 
-        # self.comb += i2s_tx_valid.eq(i2s_rx_valid)
-        # self.comb += i2s_tx_payload.eq(i2s_rx_payload)
-        # self.comb += i2s_rx_ready.eq(i2s_tx_ready)
 
         self.comb += mic.lrclk.eq(mic_lrclk)
         self.comb += mic.bclk.eq(mic_bclk)
@@ -292,13 +281,15 @@ class BaseSoC(SoCCore):
         self.vocoder = StaticVocoder(
             platform,
             start_freq = 300,
-            end_freq= 3000,
+            end_freq= 5000,
             num_channels=16,
             clk_sync_freq=sys_clk_freq,
             fs=fs,
             sample_width=sample_width,
             channel_class=ThreadedVocoderChannel
         )
+
+        # Connect I2S IO to Vocoder pipeline ----------------------------------------
 
         self.comb += self.vocoder.sink.data.eq(i2s_rx_payload)
         self.comb += self.vocoder.sink.valid.eq(i2s_rx_valid)
@@ -308,38 +299,19 @@ class BaseSoC(SoCCore):
         self.comb += i2s_tx_valid.eq(self.vocoder.source.valid)
         self.comb += self.vocoder.source.ready.eq(i2s_tx_ready)
 
+        # Connect Mic directly to Amp ------------------------------------------------
+
+        # self.comb += i2s_tx_valid.eq(i2s_rx_valid)
+        # self.comb += i2s_tx_payload.eq(i2s_rx_payload)
+        # self.comb += i2s_rx_ready.eq(i2s_tx_ready)
+
         self.comb += amp.en.eq(1)
 
-        tp_rstn = platform.request("tp_rstn")
-        self.comb += tp_rstn.eq(1)
-
-        led = platform.request("led")
         # btn_down = platform.request("btn_down")
         # btn_up = platform.request("btn_up")
 
-        btn = Signal()
-        # self.comb += btn.eq(~btn_down)
+        led = platform.request("led")
         self.comb += led.eq(self.crg.sys_pll.locked)
-
-        # serial = platform.request("uart")
-
-        # self.comb += serial.rx.eq(mic_valid)
-        # self.comb += serial.tx.eq(mic_ready)
-
-        # bclk_negedge = Signal()
-        # bclk_last = Signal()
-        # self.sync += bclk_last.eq(bclk)
-        # self.comb += bclk_negedge.eq(~bclk & bclk_last)
-
-        # count = Signal(max=32)
-        # self.sync += [
-        #     If(bclk_negedge,
-        #         count.eq(count + 1)
-        #     ),
-        #     If(count == 0,
-        #         wclk.eq(~wclk)
-        #     )
-        # ]
 
         # SPI Flash --------------------------------------------------------------------------------
         # if with_spi_flash:

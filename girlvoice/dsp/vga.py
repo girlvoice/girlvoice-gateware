@@ -53,6 +53,7 @@ class VariableGainAmp(wiring.Component):
         else:
             product = self.mult.source
             mult_i_a, mult_i_b, mult_valid = self.mult.get_next_thread_ports()
+
             m.d.sync += self.source.payload.eq(product >> (self.modulator_width - 1))
 
             inputs_valid = Signal()

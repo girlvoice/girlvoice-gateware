@@ -41,7 +41,8 @@ class StaticVocoder(LiteXModule):
                     self.am_vocoder.source.valid,
                     self.am_vocoder.source.payload
                 ],
-                emit_src=False
+                emit_src=False,
+                strip_internal_attrs=True
             ))
 
         platform.add_source(f"{mod_name}.v")
@@ -49,7 +50,7 @@ class StaticVocoder(LiteXModule):
         self.specials += Instance(
             mod_name,
             i_clk = ClockSignal(),
-            # i_rst = ResetSignal(),
+            i_rst = ResetSignal(),
             i_source__ready = source.ready,
             o_source__valid = source.valid,
             o_source__payload = source.data,

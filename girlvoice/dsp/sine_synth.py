@@ -52,11 +52,7 @@ class StaticSineSynth(wiring.Component):
 
 class ParallelSineSynth(wiring.Component):
     def __init__(self, target_frequencies, fs, sample_width, phase_bits=8):
-        super().__init__({
-            "en": In(1),
-            "source": Out(stream.Signature(signed(sample_width)))
-        })
-
+        self.num_outputs = len(target_frequencies)
         self.sample_width = sample_width
         self.fs = fs
 
@@ -65,7 +61,6 @@ class ParallelSineSynth(wiring.Component):
         # Generate Sine LUT, use symmetry of sine function to reduce LUT size
         t = np.linspace(0, np.pi, 2**(phase_bit_width-1))
         y = np.sin(t)
-
 
         self.lut = [C(int(y_i*(2**(sample_width-1))), signed(sample_width)) for y_i in y]
 
@@ -76,47 +71,102 @@ class ParallelSineSynth(wiring.Component):
 
         self.del_f = [int((2**N * f) / fs) for f in target_frequencies]
 
-        for i in range(len(target_frequencies)):
+        signature = {}
+        for i in range(self.num_outputs):
             del_f = self.del_f[i]
             target_freq = target_frequencies[i]
             actual_freq = del_f * (fs / 2**N)
 
             print(f"target synth freq: {target_freq} hz, achieved {actual_freq} hz, increment: {del_f}")
 
+            signature[f"source_{i}"] = Out(stream.Signature(signed(sample_width)))
+
+        super().__init__(signature=signature)
+
+    def source(self, i):
+        return self.__dict__[f"source_{i}"]
+
     def elaborate(self, platform):
         m = Module()
 
-        m.submodules.rom = rom = memory.Memory(shape=signed(self.sample_width), depth=len(self.lut), init=self.lut)
-        r_port: memory.ReadPort = rom.read_port()
-        m.d.comb += r_port.en.eq(1)
+        m.submodules.rom = wavetable_rom = memory.Memory(shape=signed(self.sample_width), depth=len(self.lut), init=self.lut)
+        rd_port_wavetable: memory.ReadPort = wavetable_rom.read_port()
+        m.d.comb += rd_port_wavetable.en.eq(1)
 
         N = self.N
         idx = Signal(len(self.del_f), reset=0)
 
         phase_delta = Array([C(df, N) for df in self.del_f])
-        phase_array = Array([Signal(N, reset=0, name=f"cur_phase_offset_{i}") for i in range(len(self.del_f))])
-        phase_i = Signal(self.phase_bit_width)
+        m.submodules.phase_delta_rom = delta_rom = memory.Memory(
+            shape=N,
+            depth=len(self.del_f),
+            init=self.del_f
+        )
+        delta_rd_port: memory.ReadPort = delta_rom.read_port()
+        delta_i = Signal(N)
+        m.d.comb += delta_rd_port.en.eq(1)
+        m.d.comb += delta_rd_port.addr.eq(idx)
+        m.d.comb += delta_i.eq(delta_rd_port.data)
 
-        with m.If(self.source.ready & self.source.valid):
-            m.d.sync += self.source.valid.eq(0)
-            m.d.sync += phase_array[idx].eq(phase_array[idx] + phase_delta[idx])
+        m.submodules.phase_offset_mem = phase_mem = memory.Memory(shape=N, depth=self.num_outputs, init=[0] * self.num_outputs)
+        rd_port_phase: memory.ReadPort = phase_mem.read_port()
+        cur_phase = Signal(N)
+        m.d.comb += rd_port_phase.en.eq(1)
+        m.d.comb += rd_port_phase.addr.eq(idx)
+        m.d.comb += cur_phase.eq(rd_port_phase.data)
+
+        wr_port_phase: memory.WritePort = phase_mem.write_port()
+        next_phase = Signal(N)
+        m.d.comb += wr_port_phase.data.eq(next_phase)
+        prev_phase = Signal(N)
+        m.d.comb += next_phase.eq(prev_phase + delta_i)
+
+        phase_i = Signal(self.phase_bit_width)
+        wav_sample = Signal(self.sample_width)
+        m.d.comb += rd_port_wavetable.addr.eq(phase_i[:-1])
+        m.d.comb += wav_sample.eq(Mux(phase_i[-1], rd_port_wavetable.data, -rd_port_wavetable.data))
+
+        # The global valid signal, all individual output valids are masked by this
+        samp_valid = Signal()
+
+        cur_ready = Signal()
+
+        # Barrel shifter for individual output valids.
+        valid_regs = [Signal() if i != 0 else Signal(init=1) for i in range(self.num_outputs)]
+
+        for i in range(self.num_outputs):
+            out = self.source(i)
+            m.d.comb += out.payload.eq(wav_sample)
+            m.d.comb += out.valid.eq(valid_regs[i] & samp_valid)
+            m.d.comb += cur_ready.eq(Mux(idx == i, out.ready, 0))
+
+        with m.If(cur_ready & samp_valid):
+            m.d.sync += samp_valid.eq(0)
+            m.d.comb += wr_port_phase.en.eq(1)
             with m.If(idx == len(self.del_f) - 1):
                 m.d.sync += idx.eq(0)
             with m.Else():
                 m.d.sync += idx.eq(idx + 1)
 
-        m.d.comb += r_port.addr.eq(phase_i[:-1])
-        m.d.comb += self.source.payload.eq(Mux(phase_i[-1], r_port.data, -r_port.data))
+            for i in range(self.num_outputs - 1):
+                m.d.sync += valid_regs[i+1].eq(valid_regs[i])
+
+            m.d.sync += valid_regs[0].eq(valid_regs[-1])
+
+
         with m.FSM():
             with m.State("LOAD_PHASE"):
-                m.d.sync += phase_i.eq(phase_array[idx] >> self.oversampling)
+                m.d.sync += phase_i.eq(cur_phase >> self.oversampling)
+                m.d.sync += prev_phase.eq(cur_phase)
                 m.next = "READ_AMP"
             with m.State("READ_AMP"):
-                m.d.sync += self.source.valid.eq(1)
+                m.d.sync += samp_valid.eq(1)
                 m.next = "READY"
             with m.State("READY"):
-                with m.If(self.source.ready & self.source.valid):
-                    m.next = "LOAD_PHASE"
+                with m.If(cur_ready & samp_valid):
+                    m.next = "WAIT"
+            with m.State("WAIT"):
+                m.next = "LOAD_PHASE"
 
         return m
 

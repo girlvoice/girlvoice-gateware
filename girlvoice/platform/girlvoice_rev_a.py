@@ -26,10 +26,8 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             cs_n="56", clk="59", copi="57", cipo="51", wp_n="55", hold_n="52",
             attrs=Attrs(IO_TYPE="LVCMOS33")
         ),
-        # SPIResource(0,
-        #     cs_n="5", clk="6", copi="7", reset="8", conn=("ips", 0),
-        #     attrs=Attrs(IO_TYPE="LVCMOS33")
-        # ),
+        Resource("usbn", 0, Pins("USB_DN", dir="io", conn=("usb", 0)), Attrs(IO_TYPE="LVCMOS33")),
+        Resource("usbp", 0, Pins("USB_DP", dir="io", conn=("usb", 0)), Attrs(IO_TYPE="LVCMOS33")),
 
         Resource("pwr_en", 0, Pins("28", dir="o"), Attrs(IO_TYPE="LVCMOS18H")),
 
@@ -55,7 +53,6 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             Subsignal("lrclk", Pins("LRCLK", dir="o", conn=("amp_i2s", 0)), Attrs(IO_TYPE="LVCMOS18H")),
             Subsignal("en", Pins("ENABLE", dir="o", conn=("amp_i2s", 0)), Attrs(IO_TYPE="LVCMOS18H")),
         ),
-
     ]
 
     connectors = [

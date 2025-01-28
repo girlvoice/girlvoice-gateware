@@ -1,7 +1,4 @@
-from cmath import phase
-from concurrent.futures import thread
 from math import exp, log
-from click import BadArgumentUsage
 import numpy as np
 from amaranth import *
 import amaranth.lib.wiring as wiring
@@ -25,7 +22,6 @@ class ThreadedVocoderChannel(wiring.Component):
             self.mult = TDMMultiply(sample_width=sample_width, num_threads=3)
         else:
             self.mult = mult_slice
-        self.vga = VariableGainAmp(sample_width, sample_width, mult_slice=self.mult)
         self.bandpass = BandpassIIR(
             band_edges=channel_edges,
             filter_order=1,
@@ -33,6 +29,7 @@ class ThreadedVocoderChannel(wiring.Component):
             fs=fs,
             mult_slice=self.mult
         )
+        self.vga = VariableGainAmp(sample_width, sample_width, mult_slice=self.mult)
         self.envelope = EnvelopeFollower(sample_width, attack_halflife=1, decay_halflife=20, mult_slice=self.mult)
         # self.env_vga = EnvelopeVGA(sample_width, fs=fs, attack_halflife=1, decay_halflife=20, mult_slice=self.mult)
 
@@ -46,9 +43,9 @@ class ThreadedVocoderChannel(wiring.Component):
         m = Module()
 
         m.submodules.mult = self.mult
-        m.submodules.vga = self.vga
         m.submodules.bandpass = self.bandpass
         # m.submodules.env_vga = self.env_vga
+        m.submodules.vga = self.vga
         m.submodules.envelope = self.envelope
 
         wiring.connect(m, wiring.flipped(self.sink), self.bandpass.sink)
@@ -57,6 +54,11 @@ class ThreadedVocoderChannel(wiring.Component):
         wiring.connect(m, wiring.flipped(self.carrier), self.vga.carrier)
 
         wiring.connect(m, wiring.flipped(self.source), self.vga.source)
+
+        # wiring.connect(m, self.bandpass.source, self.env_vga.sink)
+        # wiring.connect(m, wiring.flipped(self.carrier), self.env_vga.carrier)
+
+        # wiring.connect(m, wiring.flipped(self.source), self.env_vga.source)
 
         return m
 
@@ -98,6 +100,105 @@ class StaticVocoderChannel(wiring.Component):
 
         wiring.connect(m, wiring.flipped(self.source), self.env_vga.source)
 
+
+        return m
+
+class ChannelDemux(wiring.Component):
+    def __init__(self, num_channels, sample_width):
+        self.sample_width = sample_width
+        self.num_channels = num_channels
+
+        signature = {
+            "sink": In(stream.Signature(signed(sample_width)))
+        }
+        for i in range(num_channels):
+            signature[f"ch_source_{i}"] = Out(stream.Signature(signed(sample_width)))
+
+        super().__init__(signature=signature)
+
+    def source(self, i):
+        return self.__dict__[f"ch_source_{i}"]
+
+    def elaborate(self, platform):
+        m = Module()
+
+        ch_readys = Signal(self.num_channels)
+
+        # The module sink is ready when all channel sinks are ready
+        m.d.comb += self.sink.ready.eq(ch_readys.all())
+        for i in range(self.num_channels):
+            ch_source = self.source(i)
+            m.d.comb += [
+                # Connect the module sink to all channel sinks,
+                # channel inputs are valid when the module sink is valid and all channels are ready
+                ch_source.payload.eq(self.sink.payload),
+                ch_source.valid.eq(self.sink.valid & self.sink.ready),
+                ch_readys.bit_select(i, 1).eq(ch_source.ready),
+            ]
+
+        return m
+
+class ChannelMux(wiring.Component):
+    def __init__(self, num_channels, sample_width):
+        self.sample_width = sample_width
+        self.num_channels = num_channels
+
+        signature = {
+            "source": Out(stream.Signature(signed(sample_width)))
+        }
+        for i in range(num_channels):
+            signature[f"ch_sink_{i}"] = In(stream.Signature(signed(sample_width)))
+
+        super().__init__(signature=signature)
+
+    def sink(self, i):
+        return self.__dict__[f"ch_sink_{i}"]
+
+    def elaborate(self, platform):
+        m = Module()
+
+        acc_width = self.sample_width + self.num_channels
+        acc = Signal(signed(acc_width))
+        m.d.comb += self.source.payload.eq(acc)
+
+        idx = Signal(range(self.num_channels))
+
+        ch_sink_mux = Array([self.sink(i) for i in range(self.num_channels)])
+        cur_sample = Signal(self.sample_width)
+        next_sample = Signal(self.sample_width)
+
+        ch_valids = Signal(self.num_channels)
+        m.d.comb += [ch_valids.bit_select(i, 1).eq(self.sink(i).valid) for i in range(self.num_channels)]
+        all_ch_valid = Signal()
+        m.d.comb += all_ch_valid.eq(ch_valids.all())
+
+        m.d.comb += next_sample.eq(ch_sink_mux[idx].payload)
+
+        cur_ready = Signal()
+        m.d.comb += ch_sink_mux[idx].ready.eq(cur_ready)
+        with m.FSM():
+            with m.State("GET_NEXT_SAMPLE"):
+                m.d.comb += self.source.valid.eq(0)
+                with m.If(all_ch_valid):
+                    m.d.sync += cur_sample.eq(next_sample)
+                    m.d.comb += cur_ready.eq(1)
+                    m.next = "SUM"
+            with m.State("SUM"):
+                m.d.comb += self.source.valid.eq(0)
+                m.d.sync += acc.eq(acc + cur_sample)
+
+                with m.If(idx >= self.num_channels - 1):
+                    m.d.sync += idx.eq(0)
+                    m.next = "WAIT"
+                with m.Else():
+                    m.d.sync += idx.eq(idx + 1)
+                    m.next = "GET_NEXT_SAMPLE"
+
+            with m.State("WAIT"):
+                m.d.comb += self.source.valid.eq(1)
+                with m.If(self.source.ready == 1):
+                    m.d.sync += acc.eq(0)
+                    m.next = "SUM"
 
         return m
 
@@ -152,6 +253,8 @@ class StaticVocoder(wiring.Component):
                 # mult_slice=slice
             ))
 
+        self.demux = ChannelDemux(num_channels=num_channels, sample_width=sample_width)
+        self.mux = ChannelMux(num_channels=num_channels, sample_width=sample_width)
 
         freqs = np.linspace(0, int(self.ch_freq[-1]), int(fs))
         for ch in self.channels:
@@ -167,53 +270,18 @@ class StaticVocoder(wiring.Component):
     def elaborate(self, platform):
         m = Module()
         m.submodules.synth = self.synth
+        m.submodules.mux = self.mux
+        m.submodules.demux = self.demux
 
-        acc_width = self.sample_width + self.num_channels
-        acc = Signal(signed(acc_width))
-        m.d.comb += self.source.payload.eq(acc)
+        wiring.connect(m, wiring.flipped(self.sink), self.demux.sink)
+        wiring.connect(m, wiring.flipped(self.source), self.mux.source)
 
-        ch_readys = Signal(self.num_channels)
-        idx = Signal(range(self.num_channels))
-
-        # m.submodules += self.slices
-        # The module sink is ready when all channel sinks are ready
-        m.d.comb += self.sink.ready.eq(ch_readys.all())
         for i in range(self.num_channels):
             ch = self.channels[i]
             m.submodules += ch
-            m.d.comb += [
-                # Connect the module sink to all channel sinks,
-                # channel inputs are valid when the module sink is valid and all channels are ready
-                ch.sink.payload.eq(self.sink.payload),
-                ch.sink.valid.eq(self.sink.valid & self.sink.ready),
-                ch_readys.bit_select(i, 1).eq(ch.sink.ready),
 
-                # Connect channel carrier inputs to the synth source
-                # Synth output is multiplexed to the channel carrier inputs
-                ch.carrier.payload.eq(self.synth.source.payload),
-                ch.carrier.valid.eq(Mux(idx == i, self.synth.source.valid, 0)),
-                self.synth.source.ready.eq(Mux(idx == i, ch.carrier.ready, 0))
-            ]
-
-        source_mux = Array([ch.source for ch in self.channels])
-
-        with m.FSM():
-            with m.State("SUM"):
-                m.d.comb += self.source.valid.eq(0)
-                with m.If(source_mux[idx].valid):
-                    m.d.comb += source_mux[idx].ready.eq(1)
-                    m.d.sync += acc.eq(acc + source_mux[idx].payload)
-
-                    with m.If(idx >= self.num_channels - 1):
-                        m.d.sync += idx.eq(0)
-                        m.next = "WAIT"
-                    with m.Else():
-                        m.d.sync += idx.eq(idx + 1)
-
-            with m.State("WAIT"):
-                m.d.comb += self.source.valid.eq(1)
-                with m.If(self.source.ready == 1):
-                    m.d.sync += acc.eq(0)
-                    m.next = "SUM"
+            wiring.connect(m, self.demux.source(i), ch.sink)
+            wiring.connect(m, self.mux.sink(i), ch.source)
+            wiring.connect(m, self.synth.source(i), ch.carrier)
 
         return m
