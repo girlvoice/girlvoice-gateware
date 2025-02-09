@@ -41,7 +41,6 @@ mB = 1024*kB
 
 def add_radiant_constraints(platform):
     platform.add_platform_command("ldc_set_sysconfig {{CONFIGIO_VOLTAGE_BANK0=3.3 CONFIGIO_VOLTAGE_BANK1=3.3 JTAG_PORT=DISABLE SLAVE_SPI_PORT=DISABLE MASTER_SPI_PORT=SERIAL}}")
-    # platform.add_platform_command("ldc_set_location -site {{PLL_LRC}} [ get_cells {{PLL_0.PLL_inst}} ]")
     platform.add_platform_command("ldc_set_vcc -bank 0 3.3")
     platform.add_platform_command("ldc_set_vcc -bank 1 3.3")
     platform.add_platform_command("ldc_set_vcc -bank 3 1.8")
@@ -81,7 +80,7 @@ class _CRG(LiteXModule):
         hf_clk_freq = 25e6
         self.hf_clk.create_hf_clk(self.cd_por, hf_clk_freq)
 
-        platform.add_platform_command(f"create_clock -period {1/hf_clk_freq*1e9} -name por_clk [get_pins OSCA.OSCA_inst/HFCLKOUT]")
+        platform.add_period_constraint(self.cd_por.clk, (1/hf_clk_freq)*1e9)
         # clk12_freq = 12e6
         # self.cd_por.clk = platform.request("clk12")
 
@@ -91,8 +90,8 @@ class _CRG(LiteXModule):
         self.comb += por_done.eq(por_count == 0)
         self.sync.por += If(~por_done, por_count.eq(por_count - 1))
 
-        # self.rst_n = platform.request("btn_down")
-        # self.specials += AsyncResetSynchronizer(self.cd_por, ~self.rst_n)
+        self.rst_n = platform.request("btn_down")
+        self.specials += AsyncResetSynchronizer(self.cd_por, ~self.rst_n)
 
         # PLL
         self.sys_pll = sys_pll = NXPLL(platform=platform, create_output_port_clocks=True)
@@ -126,6 +125,7 @@ class BaseSoC(SoCCore):
         **kwargs):
         platform = girlvoice_rev_a.Platform(device=device, toolchain=toolchain)
 
+        use_lcd = False
         if toolchain == "radiant":
             add_radiant_constraints(platform)
 
@@ -135,9 +135,6 @@ class BaseSoC(SoCCore):
         # SoCCore -----------------------------------------_----------------------------------------
         # Disable Integrated SRAM since we want to instantiate LRAM specifically for it
         kwargs["integrated_sram_size"] = 0
-        kwargs["uart_baudrate"] = 115200
-        # Make serial_pmods available
-        # kwargs["ident_version"] = False
         SoCCore.__init__(self, platform, sys_clk_freq, **kwargs)
 
         # 128KB LRAM (used as SRAM) ---------------------------------------------------------------
@@ -157,33 +154,35 @@ class BaseSoC(SoCCore):
         self.bus.add_slave("lmmi", self.i2c.bus.wishbone, SoCRegion(origin=self.mem_map["lmmi"], size=kB, cached=False))
         platform.add_period_constraint(self.i2c.alt_scl_oen, period=1e9/400e6)
 
-        # self.specials += Instance(
-        #     "MULTIBOOT",
-        #     p_SOURCESEL="EN",
-        #     i_AUTOREBOOT=0,
-        #     i_MSPIMADDR=0
-        # )
 
         # Display SPI ---------------------------------------------------------------------
 
-        # spi_clk_freq = 1e6
-        # spi_pads = platform.request("lcd_spi")
-        # spi_pads.miso = Signal()
-        # self.submodules.lcd_spi = SPIMaster(
-        #     spi_pads,
-        #     data_width=8,
-        #     sys_clk_freq=sys_clk_freq,
-        #     spi_clk_freq=spi_clk_freq,
-        #     with_csr=True
-        # )
+        if use_lcd:
+            spi_clk_freq = 1e6
+            spi_pads = platform.request("lcd_spi")
+            spi_pads.miso = Signal()
+            self.submodules.lcd_spi = SPIMaster(
+                spi_pads,
+                data_width=8,
+                sys_clk_freq=sys_clk_freq,
+                spi_clk_freq=spi_clk_freq,
+                with_csr=True
+            )
 
-        # spi_ctl_pads = platform.request("lcd_ctl")
-        # self.submodules.lcd_ctl = GPIOOut(spi_ctl_pads)
-        # self.add_csr("lcd_csr")
+            spi_ctl_pads = platform.request("lcd_ctl")
+            self.submodules.lcd_ctl = GPIOOut(spi_ctl_pads)
+            self.add_csr("lcd_csr")
 
-        # lcd_bl = platform.request("lcd_bl")
-        # self.submodules.lcd_bl = GPIOOut(lcd_bl)
-        # self.add_csr("lcd_bl")
+            lcd_bl = platform.request("lcd_bl")
+            self.submodules.lcd_bl = GPIOOut(lcd_bl)
+            self.add_csr("lcd_bl")
+
+            self.specials += Instance(
+                "MULTIBOOT",
+                p_SOURCESEL="EN",
+                i_AUTOREBOOT=0,
+                i_MSPIMADDR=0
+            )
 
         # Vocoder Junk --------------------------------------------------------------------
 
@@ -273,54 +272,42 @@ class BaseSoC(SoCCore):
             o_source__payload = i2s_rx_payload
         )
 
-
         self.comb += mic.lrclk.eq(mic_lrclk)
         self.comb += mic.bclk.eq(mic_bclk)
         self.comb += mic_sdata.eq(mic.data)
 
-        self.vocoder = StaticVocoder(
-            platform,
-            start_freq = 300,
-            end_freq= 5000,
-            num_channels=16,
-            clk_sync_freq=sys_clk_freq,
-            fs=fs,
-            sample_width=sample_width,
-            channel_class=ThreadedVocoderChannel
-        )
+        # self.vocoder = StaticVocoder(
+        #     platform,
+        #     start_freq = 300,
+        #     end_freq= 5000,
+        #     num_channels=16,
+        #     clk_sync_freq=sys_clk_freq,
+        #     fs=fs,
+        #     sample_width=sample_width,
+        #     channel_class=ThreadedVocoderChannel
+        # )
 
         # Connect I2S IO to Vocoder pipeline ----------------------------------------
 
-        self.comb += self.vocoder.sink.data.eq(i2s_rx_payload)
-        self.comb += self.vocoder.sink.valid.eq(i2s_rx_valid)
-        self.comb += i2s_rx_ready.eq(self.vocoder.sink.ready)
+        # self.comb += self.vocoder.sink.data.eq(i2s_rx_payload)
+        # self.comb += self.vocoder.sink.valid.eq(i2s_rx_valid)
+        # self.comb += i2s_rx_ready.eq(self.vocoder.sink.ready)
 
-        self.comb += i2s_tx_payload.eq(self.vocoder.source.data)
-        self.comb += i2s_tx_valid.eq(self.vocoder.source.valid)
-        self.comb += self.vocoder.source.ready.eq(i2s_tx_ready)
+        # self.comb += i2s_tx_payload.eq(self.vocoder.source.data)
+        # self.comb += i2s_tx_valid.eq(self.vocoder.source.valid)
+        # self.comb += self.vocoder.source.ready.eq(i2s_tx_ready)
 
         # Connect Mic directly to Amp ------------------------------------------------
 
-        # self.comb += i2s_tx_valid.eq(i2s_rx_valid)
-        # self.comb += i2s_tx_payload.eq(i2s_rx_payload)
-        # self.comb += i2s_rx_ready.eq(i2s_tx_ready)
+        self.comb += i2s_tx_valid.eq(i2s_rx_valid)
+        self.comb += i2s_tx_payload.eq(i2s_rx_payload)
+        self.comb += i2s_rx_ready.eq(i2s_tx_ready)
 
         self.comb += amp.en.eq(1)
-
-        # btn_down = platform.request("btn_down")
-        # btn_up = platform.request("btn_up")
 
         led = platform.request("led")
         self.comb += led.eq(self.crg.sys_pll.locked)
 
-        # SPI Flash --------------------------------------------------------------------------------
-        # if with_spi_flash:
-        #     from litespi.modules import MX25L12833F
-        #     from litespi.opcodes import SpiNorFlashOpCodes as Codes
-        #     self.add_spi_flash(mode="4x", clk_freq=100_000, module=MX25L12833F(Codes.READ_4_4_4), with_master=True)
-
-
-    # def add_amaranth_sources(self, platform):
 
 # Build --------------------------------------------------------------------------------------------
 
@@ -333,22 +320,18 @@ def main():
     parser.add_target_argument("--programmer",    default="iceprog",          help="Programmer (radiant or iceprog).")
     parser.add_target_argument("--address",       default=0x0,                help="Flash address to program bitstream at.")
     parser.add_target_argument("--prog-target",   default="flash",           help="Programming Target (direct or flash).")
-    # parser.add_target_argument("--with-uart", default=False)
-    # parser.add_target_argument("--with-spi-flash", action="store_true",       help="Enable SPI Flash (MMAPed).")
     args = parser.parse_args()
 
     soc = BaseSoC(
         sys_clk_freq = args.sys_clk_freq,
         device       = args.device,
         toolchain    = args.toolchain,
-        # with_spi_flash = args.with_spi_flash,
         **parser.soc_argdict
     )
     builder = Builder(soc, **parser.builder_argdict)
     if args.build:
         if args.toolchain == "radiant":
             builder.build(**parser.toolchain_argdict)
-        builder.build(**parser.toolchain_argdict)
 
     if args.load:
         prog = soc.platform.create_programmer(args.prog_target, args.programmer)
