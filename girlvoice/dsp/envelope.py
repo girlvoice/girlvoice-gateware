@@ -165,8 +165,10 @@ def run_sim():
     clk_freq = 60e6
     bit_width = 16
     fs = 48000
-    mult = TDMMultiply(bit_width, num_threads=2)
-    dut = EnvelopeFollower(sample_width=bit_width, fs=fs, mult_slice=mult)
+
+    m = Module()
+    m.submodules.mult = mult = TDMMultiply(bit_width, num_threads=2)
+    m.submodules.dut = env = EnvelopeFollower(sample_width=bit_width, fs=fs, mult_slice=mult)
 
     duration = 1
     start_freq = 1
@@ -179,19 +181,19 @@ def run_sim():
     async def tb(ctx):
         samples_processed = 0
         for sample in input_samples:
-            await stream_put(ctx, dut.sink, int(sample))
-            output_samples.append(await stream_get(ctx, dut.source))
+            await stream_put(ctx, env.sink, int(sample))
+            output_samples.append(await stream_get(ctx, env.source))
             await ctx.tick()
             samples_processed += 1
             if samples_processed % 1000 == 0:
                 print(f"{samples_processed}/{len(t)} Samples processed")
 
-    sim = Simulator(dut)
+    sim = Simulator(m)
     sim.add_clock(1/clk_freq)
     sim.add_testbench(tb)
 
     os.makedirs("gtkw", exist_ok=True)
-    dutname = f"gtkw/{type(dut).__name__}"
+    dutname = f"gtkw/{type(env).__name__}"
     with sim.write_vcd(dutname + f".vcd"):
         sim.run()
         # bode_plot(fs, duration, end_freq, input_samples, output_samples)
