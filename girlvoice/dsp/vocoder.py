@@ -1,17 +1,20 @@
-from math import exp, log
+#!/usr/bin/env python
+from math import log
 import numpy as np
+from scipy import signal
 from amaranth import *
 import amaranth.lib.wiring as wiring
 from amaranth.lib.wiring import In, Out
 from amaranth.lib import stream
-from scipy import signal
+from amaranth.sim import Simulator
 
-from girlvoice.dsp.sine_synth import ParallelSineSynth, StaticSineSynth
+from girlvoice.dsp.sine_synth import ParallelSineSynth
 from girlvoice.dsp.vga import VariableGainAmp
 from girlvoice.dsp.bandpass_iir import BandpassIIR
 from girlvoice.dsp.envelope import EnvelopeFollower
 from girlvoice.dsp.envelope_vga import EnvelopeVGA
 from girlvoice.dsp.tdm_slice import TDMMultiply
+from girlvoice.stream import stream_get, stream_put
 
 class ThreadedVocoderChannel(wiring.Component):
     def __init__(self, channel_edges, fs=48000, sample_width=18, mult_slice: TDMMultiply = None):
@@ -161,7 +164,7 @@ class ChannelMux(wiring.Component):
         acc = Signal(signed(acc_width))
         m.d.comb += self.source.payload.eq(acc)
 
-        idx = Signal(range(self.num_channels))
+        idx = Signal(range(self.num_channels + 1))
 
         ch_sink_mux = Array([self.sink(i) for i in range(self.num_channels)])
         cur_sample = Signal(self.sample_width)
@@ -178,27 +181,27 @@ class ChannelMux(wiring.Component):
         m.d.comb += ch_sink_mux[idx].ready.eq(cur_ready)
         with m.FSM():
             with m.State("GET_NEXT_SAMPLE"):
-                m.d.comb += self.source.valid.eq(0)
                 with m.If(all_ch_valid):
+                    m.d.sync += cur_ready.eq(1)
                     m.d.sync += cur_sample.eq(next_sample)
-                    m.d.comb += cur_ready.eq(1)
                     m.next = "SUM"
             with m.State("SUM"):
-                m.d.comb += self.source.valid.eq(0)
                 m.d.sync += acc.eq(acc + cur_sample)
-
-                with m.If(idx >= self.num_channels - 1):
+                m.d.sync += cur_sample.eq(ch_sink_mux[idx + 1].payload)
+                with m.If(idx == self.num_channels):
+                    m.d.sync += cur_ready.eq(0)
                     m.d.sync += idx.eq(0)
+                    m.d.sync += self.source.valid.eq(1)
                     m.next = "WAIT"
                 with m.Else():
                     m.d.sync += idx.eq(idx + 1)
-                    m.next = "GET_NEXT_SAMPLE"
+                    # m.next = "GET_NEXT_SAMPLE"
 
             with m.State("WAIT"):
-                m.d.comb += self.source.valid.eq(1)
                 with m.If(self.source.ready == 1):
                     m.d.sync += acc.eq(0)
-                    m.next = "SUM"
+                    m.d.sync += self.source.valid.eq(0)
+                    m.next = "GET_NEXT_SAMPLE"
 
         return m
 
@@ -285,3 +288,23 @@ class StaticVocoder(wiring.Component):
             wiring.connect(m, self.synth.source(i), ch.carrier)
 
         return m
+
+def demux_sim():
+    clk_freq = 60e6
+    bit_width = 16
+    num_channels = 16
+    dut = ChannelDemux(num_channels=num_channels, bit_width=bit_width)
+
+    test_samples = [1, 2, 3, 4, 5]
+
+    async def tb(ctx):
+        for sample in test_samples:
+            await stream_put(ctx, dut.sink, sample)
+
+
+    sim = Simulator()
+    sim.add_clock(1/clk_freq)
+    sim.add_testbench(tb)
+
+if __name__ == "__main__":
+    demux_sim()

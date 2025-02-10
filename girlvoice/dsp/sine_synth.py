@@ -118,6 +118,7 @@ class ParallelSineSynth(wiring.Component):
         wr_port_phase: memory.WritePort = phase_mem.write_port()
         next_phase = Signal(N)
         m.d.comb += wr_port_phase.data.eq(next_phase)
+        m.d.comb += wr_port_phase.addr.eq(idx)
         prev_phase = Signal(N)
         m.d.comb += next_phase.eq(prev_phase + delta_i)
 
@@ -132,13 +133,16 @@ class ParallelSineSynth(wiring.Component):
         cur_ready = Signal()
 
         # Barrel shifter for individual output valids.
-        valid_regs = [Signal() if i != 0 else Signal(init=1) for i in range(self.num_outputs)]
+        # valid_regs = [Signal() if i != 0 else Signal(init=1) for i in range(self.num_outputs)]
+        valid_regs = Signal(self.num_outputs, init=1)
 
+        ready_vec = Signal(self.num_outputs)
         for i in range(self.num_outputs):
             out = self.source(i)
             m.d.comb += out.payload.eq(wav_sample)
             m.d.comb += out.valid.eq(valid_regs[i] & samp_valid)
-            m.d.comb += cur_ready.eq(Mux(idx == i, out.ready, 0))
+            m.d.comb += ready_vec.bit_select(i, 1).eq(out.ready)
+        m.d.comb += cur_ready.eq((ready_vec & valid_regs).any())
 
         with m.If(cur_ready & samp_valid):
             m.d.sync += samp_valid.eq(0)
@@ -148,11 +152,10 @@ class ParallelSineSynth(wiring.Component):
             with m.Else():
                 m.d.sync += idx.eq(idx + 1)
 
-            for i in range(self.num_outputs - 1):
-                m.d.sync += valid_regs[i+1].eq(valid_regs[i])
-
-            m.d.sync += valid_regs[0].eq(valid_regs[-1])
-
+            with m.If(valid_regs[-1] == 1):
+                m.d.sync += valid_regs.eq(1)
+            with m.Else():
+                m.d.sync += valid_regs.eq(valid_regs << 1)
 
         with m.FSM():
             with m.State("LOAD_PHASE"):
@@ -163,7 +166,7 @@ class ParallelSineSynth(wiring.Component):
                 m.d.sync += samp_valid.eq(1)
                 m.next = "READY"
             with m.State("READY"):
-                with m.If(cur_ready & samp_valid):
+                with m.If(cur_ready):
                     m.next = "WAIT"
             with m.State("WAIT"):
                 m.next = "LOAD_PHASE"
@@ -197,7 +200,8 @@ def run_parallel_sim():
         print(f"beginning sim, samples: {num_samples}")
         samples_processed = 0
         for i in range(num_samples * len(target_freqs)):
-            output_samples[i%len(target_freqs)].append(await stream_get(ctx, dut.source))
+            output_idx = i % len(target_freqs)
+            output_samples[output_idx].append(await stream_get(ctx, dut.source(output_idx)))
             samples_processed += 1
             if samples_processed % 1000 == 0:
                 print(f"{samples_processed}/{len(t)} Samples processed")

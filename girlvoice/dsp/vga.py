@@ -54,7 +54,6 @@ class VariableGainAmp(wiring.Component):
             product = self.mult.source
             mult_i_a, mult_i_b, mult_valid = self.mult.get_next_thread_ports()
 
-            m.d.sync += self.source.payload.eq(product >> (self.modulator_width - 1))
 
             inputs_valid = Signal()
             m.d.comb += inputs_valid.eq(self.modulator.valid & self.carrier.valid)
@@ -74,6 +73,7 @@ class VariableGainAmp(wiring.Component):
                         m.next = "WAIT"
                 with m.State("WAIT"):
                     with m.If(mult_valid):
+                        m.d.sync += self.source.payload.eq(product >> (self.modulator_width - 1))
                         m.d.sync += self.source.valid.eq(1)
                         m.next = "LOAD"
 
