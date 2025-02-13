@@ -33,7 +33,7 @@ class ThreadedVocoderChannel(wiring.Component):
             mult_slice=self.mult
         )
         self.vga = VariableGainAmp(sample_width, sample_width, mult_slice=self.mult)
-        self.envelope = EnvelopeFollower(sample_width, attack_halflife=1, decay_halflife=20, mult_slice=self.mult)
+        self.envelope = EnvelopeFollower(sample_width, attack_halflife=.1, decay_halflife=25, mult_slice=self.mult)
         # self.env_vga = EnvelopeVGA(sample_width, fs=fs, attack_halflife=1, decay_halflife=20, mult_slice=self.mult)
 
         super().__init__({
