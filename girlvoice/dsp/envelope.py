@@ -12,7 +12,7 @@ from amaranth.lib import stream
 from amaranth.sim import Simulator
 from girlvoice.dsp.tdm_slice import TDMMultiply
 from girlvoice.stream import stream_get, stream_put
-from girlvoice.dsp.utils import generate_chirp
+from girlvoice.dsp.utils import generate_chirp, generate_impulse
 
 
 '''
@@ -29,24 +29,32 @@ Attack and decay input parameters represent the time to decay halfway (halflife)
 '''
 class EnvelopeFollower(wiring.Component):
 
-    def __init__(self, sample_width=24, fs=48000, attack_halflife=10, decay_halflife=20, mult_slice:TDMMultiply = None):
+    def __init__(self, sample_width=24, fs=48000, attack_halflife=10, decay_halflife=20, mult_slice:TDMMultiply = None, formal=False):
+        self.formal = formal
         self.sample_width = sample_width
         self.fraction_width = sample_width - 1
 
         attack_hl_samples = fs * attack_halflife / 1000.0
-        attack = math.exp(math.log(0.5) / attack_hl_samples)
+        attack = math.exp(-1 / attack_hl_samples)
+        attack_comp = 1 - attack
 
         decay_hl_samples = fs * decay_halflife / 1000.0
-        decay = math.exp(math.log(0.5) / decay_hl_samples)
-
+        decay = math.exp(-1 / decay_hl_samples)
+        decay_comp = 1 - decay
         print(f"Envelope Decay parameter: {decay}")
         print(f"Envelope Attack parameter: {attack}")
 
         self.attack_fp = C(int(attack * (2**(self.fraction_width))), signed(sample_width))
-        self.attack_comp = C(int((1 - attack) * (2**(self.fraction_width))), signed(sample_width))
+        self.attack_comp = C(int(attack_comp * (2**(self.fraction_width))), signed(sample_width))
 
         self.decay_fp = C(int(decay * (2**(self.fraction_width))), signed(sample_width))
-        self.decay_comp = C(int((1 - decay) * (2**(self.fraction_width))), signed(sample_width))
+        self.decay_comp = C(int(decay_comp * (2**(self.fraction_width))), signed(sample_width))
+
+        attack_quant = self.attack_fp.value / 2**self.fraction_width
+        decay_quant = self.decay_fp.value / 2**self.fraction_width
+        print(f"Envelope Decay parameter quantized: {decay_quant}")
+        print(f"Envelope Attack parameter quantized: {attack_quant}")
+
 
         if mult_slice is not None:
             assert mult_slice.sample_width >= self.sample_width
@@ -125,6 +133,8 @@ class EnvelopeFollower(wiring.Component):
             with m.If(self.source.valid & self.source.ready):
                 m.d.sync += self.source.valid.eq(0)
                 m.d.sync += y.eq(self.source.payload)
+                if self.formal:
+                    m.d.sync += Assert(self.source.payload >= 0)
 
             with m.FSM():
                 with m.State("LOAD"):
@@ -168,14 +178,15 @@ def run_sim():
 
     m = Module()
     m.submodules.mult = mult = TDMMultiply(bit_width, num_threads=2)
-    m.submodules.dut = env = EnvelopeFollower(sample_width=bit_width, fs=fs, mult_slice=mult)
+    m.submodules.dut = env = EnvelopeFollower(sample_width=bit_width, fs=fs, mult_slice=mult, attack_halflife=1)
 
-    duration = 1
-    start_freq = 1
-    end_freq = 23000
-    test_sig_freq = 5000
-    (t, input_samples) = generate_ramp(test_sig_freq, duration, fs, bit_width)
+    duration = 0.1
+
+
+    # test_sig_freq = 5000
+    # (t, input_samples) = generate_ramp(test_sig_freq, duration, fs, bit_width)
     # (t, input_samples) = generate_chirp(duration, fs, start_freq, end_freq, bit_width)
+    t, input_samples = generate_impulse(duration, fs, bit_width)
 
     output_samples = []
     async def tb(ctx):

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import numpy as np
+from scipy import signal
 from scipy.io import wavfile
 import matplotlib.pyplot as plt
 
@@ -23,13 +24,21 @@ def import_wav(path, bit_shift=0):
 
     return (t, data[:, 0])
 
+def hack_env(samples):
+    b, a = signal.butter(1, 10, "lowpass", fs=48000)
+    abs_samples = np.abs(samples)
+    filtered = signal.lfilter(b, a, abs_samples)
+    return filtered
+
 def run_sim():
     clk_freq = 60e6
     bit_width = 16
-    dut = EnvelopeFollower(sample_width=bit_width, attack_halflife=1, decay_halflife=20)
+    dut = EnvelopeFollower(sample_width=bit_width, attack_halflife=0.1, decay_halflife=25)
 
-    fs = 44100
-    (t, input_samples) = import_wav('./amen_break_441khz_16bit.wav')
+    fs = 48000
+    (t, input_samples) = import_wav('./hotdog.wav')
+    t = t[:fs]
+    input_samples = input_samples[:fs]
 
     output_samples = []
     async def tb(ctx):
@@ -51,8 +60,10 @@ def run_sim():
     with sim.write_vcd(dutname + f".vcd"):
         sim.run()
         # bode_plot(fs, duration, end_freq, input_samples, output_samples)
+        test_samples = hack_env(input_samples)
         plt.plot(t, input_samples, alpha=0.5, label="Input")
         plt.plot(t, output_samples, alpha=0.5, label="Output")
+        plt.plot(t, test_samples, label="Trying so hard")
         plt.xlabel('time (s)')
         plt.title('Envelope Follower')
         plt.grid(True)

@@ -51,3 +51,12 @@ def generate_ramp(freq, duration, fs, sample_width):
     input_samples = np.flip(input_samples)
     input_samples[0:int(0.1*num_samples)] = 0
     return (t, input_samples)
+
+def generate_impulse(duration, fs, sample_width):
+    num_samples = int(duration * fs)
+    t = np.linspace(0, duration, num_samples)
+
+    impulse = np.zeros(num_samples)
+    impulse[0:50] = 2**(sample_width-1) - 1
+
+    return (t, impulse)
