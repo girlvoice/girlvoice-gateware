@@ -2,6 +2,8 @@
 name = "aw88395"
 version = "0.1.0"
 edition = "2021"
+authors = ["Sage Walker <sage@caesium.dev>"]
+description = "AW88395 Smart Amplifier Driver"
 categories = ["no-std", "embedded"]
 
 [dependencies]
