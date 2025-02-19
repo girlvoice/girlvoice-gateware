@@ -76,13 +76,14 @@ class _CRG(LiteXModule):
         self.cd_sys = ClockDomain()
 
         # Built in OSC
-        self.hf_clk = NXOSCA()
-        hf_clk_freq = 25e6
-        self.hf_clk.create_hf_clk(self.cd_por, hf_clk_freq)
+        # self.hf_clk = NXOSCA()
+        # hf_clk_freq = 25e6
+        # self.hf_clk.create_hf_clk(self.cd_por, hf_clk_freq)
 
-        platform.add_period_constraint(self.cd_por.clk, (1/hf_clk_freq)*1e9)
-        # clk12_freq = 12e6
-        # self.cd_por.clk = platform.request("clk12")
+        clk12_freq = 24e6
+        self.comb += self.cd_por.clk.eq(platform.request("clk12"))
+        por_clk_freq = clk12_freq
+        platform.add_period_constraint(self.cd_por.clk, (1/por_clk_freq)*1e9)
 
         # Power on reset
         por_count = Signal(16, reset=2**16-1)
@@ -96,7 +97,7 @@ class _CRG(LiteXModule):
         # PLL
         self.sys_pll = sys_pll = NXPLL(platform=platform, create_output_port_clocks=True)
         self.comb += sys_pll.reset.eq(self.rst)
-        sys_pll.register_clkin(self.cd_por.clk, hf_clk_freq)
+        sys_pll.register_clkin(self.cd_por.clk, por_clk_freq)
         sys_pll.create_clkout(self.cd_sys, sys_clk_freq)
         self.specials += AsyncResetSynchronizer(self.cd_sys, ~self.sys_pll.locked | ~por_done )
 
@@ -104,9 +105,7 @@ class _CRG(LiteXModule):
 
     # We have to add this platform command here to ensure that it comes after the PLL clock port has been created
     def do_finalize(self):
-        # self.platform.add_platform_command("set_clock_groups -asynchronous -group [get_clocks por_clk] -group [get_clocks PLL_0_P]")
-        if self.platform.toolchain == "radiant":
-            self.platform.add_platform_command("set_clock_groups -asynchronous -group [get_clocks crg_clkout] -group [get_clocks PLL_0_P]")
+        self.platform.add_platform_command("set_clock_groups -asynchronous -group [get_clocks por_clk] -group [get_clocks PLL_0_P]")
 
 
 # BaseSoC ------------------------------------------------------------------------------------------
@@ -276,32 +275,32 @@ class BaseSoC(SoCCore):
         self.comb += mic.bclk.eq(mic_bclk)
         self.comb += mic_sdata.eq(mic.data)
 
-        # self.vocoder = StaticVocoder(
-        #     platform,
-        #     start_freq = 300,
-        #     end_freq= 5000,
-        #     num_channels=16,
-        #     clk_sync_freq=sys_clk_freq,
-        #     fs=fs,
-        #     sample_width=sample_width,
-        #     channel_class=ThreadedVocoderChannel
-        # )
+        self.vocoder = StaticVocoder(
+            platform,
+            start_freq = 300,
+            end_freq= 3000,
+            num_channels=16,
+            clk_sync_freq=sys_clk_freq,
+            fs=fs,
+            sample_width=sample_width,
+            channel_class=ThreadedVocoderChannel
+        )
 
         # Connect I2S IO to Vocoder pipeline ----------------------------------------
 
-        # self.comb += self.vocoder.sink.data.eq(i2s_rx_payload)
-        # self.comb += self.vocoder.sink.valid.eq(i2s_rx_valid)
-        # self.comb += i2s_rx_ready.eq(self.vocoder.sink.ready)
+        self.comb += self.vocoder.sink.data.eq(i2s_rx_payload)
+        self.comb += self.vocoder.sink.valid.eq(i2s_rx_valid)
+        self.comb += i2s_rx_ready.eq(self.vocoder.sink.ready)
 
-        # self.comb += i2s_tx_payload.eq(self.vocoder.source.data)
-        # self.comb += i2s_tx_valid.eq(self.vocoder.source.valid)
-        # self.comb += self.vocoder.source.ready.eq(i2s_tx_ready)
+        self.comb += i2s_tx_payload.eq(self.vocoder.source.data)
+        self.comb += i2s_tx_valid.eq(self.vocoder.source.valid)
+        self.comb += self.vocoder.source.ready.eq(i2s_tx_ready)
 
         # Connect Mic directly to Amp ------------------------------------------------
 
-        self.comb += i2s_tx_valid.eq(i2s_rx_valid)
-        self.comb += i2s_tx_payload.eq(i2s_rx_payload)
-        self.comb += i2s_rx_ready.eq(i2s_tx_ready)
+        # self.comb += i2s_tx_valid.eq(i2s_rx_valid)
+        # self.comb += i2s_tx_payload.eq(i2s_rx_payload)
+        # self.comb += i2s_rx_ready.eq(i2s_tx_ready)
 
         self.comb += amp.en.eq(1)
 
