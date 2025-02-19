@@ -33,6 +33,7 @@ class EnvelopeFollower(wiring.Component):
         self.formal = formal
         self.sample_width = sample_width
         self.fraction_width = sample_width - 1
+        self.gate = 100
 
         attack_hl_samples = fs * attack_halflife / 1000.0
         attack = math.exp(-1 / attack_hl_samples)
@@ -126,7 +127,7 @@ class EnvelopeFollower(wiring.Component):
 
             m.d.comb += acc_quant.eq(acc >> self.fraction_width)
 
-            m.d.comb += self.source.payload.eq(acc_quant)
+            m.d.comb += self.source.payload.eq(Mux(acc_quant > self.gate, acc_quant, 0))
             with m.If(self.sink.valid & self.sink.ready):
                 m.d.sync += mac_in_1.eq(param_comp)
                 m.d.sync += mac_in_2.eq(abs(x))
