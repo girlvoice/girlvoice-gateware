@@ -10,7 +10,7 @@ from amaranth.sim import Simulator
 from girlvoice.stream import stream_get, stream_put, new_observer
 
 from girlvoice.dsp.tests.amen_envelope import import_wav
-from girlvoice.dsp.vocoder import StaticVocoder
+from girlvoice.dsp.vocoder import StaticVocoder, ThreadedVocoderChannel
 
 
 
@@ -19,9 +19,21 @@ def run_sim():
     bit_width = 16
     fs = 44100
     num_channels = 4
-    dut = StaticVocoder(start_freq=100, end_freq=2e3, num_channels=num_channels, fs=fs, sample_width=bit_width)
+    dut = StaticVocoder(
+        100,
+        1000,
+        num_channels=num_channels,
+        clk_sync_freq=clk_freq,
+        channel_class=ThreadedVocoderChannel,
+        fs=fs,
+        sample_width=bit_width
+    )
+
+    max_samples = 10000
     (t, input_samples) = import_wav('./amen_break_441khz_16bit.wav')
     input_samples = input_samples * 0.8
+    input_samples = input_samples[:max_samples]
+    t = t[:max_samples]
     output_samples = []
     start_time = time.time()
     async def tb(ctx):
@@ -31,7 +43,7 @@ def run_sim():
             output_samples.append(await stream_get(ctx, dut.source))
             await ctx.tick()
             samples_processed += 1
-            if samples_processed % 10000 == 0:
+            if samples_processed % 1000 == 0:
                 elapsed = time.time() - start_time
                 print(f"{samples_processed}/{len(t)} Samples processed in {elapsed} sec")
 
@@ -57,13 +69,13 @@ def run_sim():
     dutname = f"gtkw/{type(dut).__name__}"
     with sim.write_vcd(dutname + f".vcd"):
         sim.run()
-
+    print("Finished Simulation!")
     wavfile.write("amen_4_ch.wav", rate=fs, data=np.array(output_samples, dtype=np.int16))
     rows = 2
     cols = 2
     fig, axs = plt.subplots(rows, cols)
-    axs[1].plot(t, input_samples, alpha=0.5, label="Input")
-    axs[1].plot(t, output_samples, alpha=0.5, label="Output")
+    axs[0][0].plot(t, input_samples, alpha=0.5, label="Input")
+    axs[0][0].plot(t, output_samples, alpha=0.5, label="Output")
 
     for ch_num in range(num_channels):
         axn = plt.subplot(rows, cols, ch_num + 1)

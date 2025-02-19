@@ -19,12 +19,6 @@ def run_sim():
     duration = 2.0
 
     num_samples = int(duration * fs)
-    # dut = StaticVocoderChannel(
-    #     channel_freq=150,
-    #     channel_width=50,
-    #     fs=fs,
-    #     sample_width=bit_width,
-    # )
 
     dut = StaticVocoder(
         100,
