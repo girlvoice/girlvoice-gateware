@@ -27,6 +27,57 @@ impl<I2C: I2c> Sgtl5000<I2C> {
         self.i2c
     }
 
+    pub fn power_off_startup_power(&mut self) -> Result<(), Sgtl5000Error> {
+        self.config.chip_ana_power.linereg_simple_powerup = false;
+        self.config.chip_ana_power.startup_powerup = false;
+        self.update_config(Register::ChipAnaPower)
+    }
+
+    pub fn enable_charge_pump(&mut self) -> Result<(), Sgtl5000Error> {
+        self.config.chip_ana_power.vddc_chrgpmp_powerup = true;
+        self.update_config(Register::ChipAnaPower)
+    }
+
+    pub fn disable_charge_pump(&mut self) -> Result<(), Sgtl5000Error> {
+        self.config.chip_ana_power.vddc_chrgpmp_powerup = false;
+        self.update_config(Register::ChipAnaPower)
+    }
+
+    pub fn power_on_line_out(&mut self) -> Result<(), Sgtl5000Error> {
+        self.config.chip_ana_power.lineout_powerup = true;
+        self.update_config(Register::ChipAnaPower)
+    }
+
+    pub fn power_off_line_out(&mut self) -> Result<(), Sgtl5000Error> {
+        self.config.chip_ana_power.lineout_powerup = false;
+        self.update_config(Register::ChipAnaPower)
+    }
+
+    pub fn power_on_adc(&mut self) -> Result<(), Sgtl5000Error> {
+        self.config.chip_ana_power.adc_powerup = true;
+        self.update_config(Register::ChipAnaPower)
+    }
+
+    pub fn power_off_adc(&mut self) -> Result<(), Sgtl5000Error> {
+        self.config.chip_ana_power.adc_powerup = false;
+        self.update_config(Register::ChipAnaPower)
+    }
+
+    pub fn power_on_dac(&mut self) -> Result<(), Sgtl5000Error> {
+        self.config.chip_ana_power.dac_powerup = true;
+        self.update_config(Register::ChipAnaPower)
+    }
+
+    pub fn power_off_dac(&mut self) -> Result<(), Sgtl5000Error> {
+        self.config.chip_ana_power.dac_powerup = false;
+        self.update_config(Register::ChipAnaPower)
+    }
+
+    fn update_config(&mut self, reg: Register) -> Result<(), Sgtl5000Error> {
+        let reg_val = self.config.reg_val(reg);
+        self.write_reg(reg, reg_val)
+    }
+
     fn write_reg(&mut self, reg: Register, value: u16) -> Result<(), Sgtl5000Error> {
         let value_bytes = value.to_be_bytes();
         let reg_bytes = reg.addr().to_be_bytes();

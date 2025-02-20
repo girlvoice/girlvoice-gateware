@@ -3,7 +3,7 @@
 pub enum Register {
     Id = 0x00,
     ChipAnaPower = 0x0030,
-
+    ChipClkTopCtrl = 0x0034,
 }
 
 impl Register {
@@ -11,6 +11,7 @@ impl Register {
         match self {
             Register::Id => 0x000,
             Register::ChipAnaPower => 0x0030,
+            Register::ChipClkTopCtrl => 0x0034,
         }
     }
 }
@@ -21,6 +22,7 @@ pub trait MappedRegister {
 }
 
 pub struct ChipAnaPower {
+    // LSB first
     pub lineout_powerup: bool,
     pub adc_powerup: bool,
     pub capless_headphone_powerup: bool,
@@ -101,14 +103,43 @@ impl Default for ChipAnaPower {
     }
 }
 
+pub struct ChipClkTopCtrl {
+    input_freq_div2: bool,
+    enable_int_osc: bool,
+}
+
+impl MappedRegister for ChipClkTopCtrl {
+    fn value(&self) -> u16 {
+        let mut val: u16 = self.enable_int_osc as u16;
+        val = (val << 8) | (self.input_freq_div2 as u16);
+        val << 3
+    }
+
+    fn update(&mut self, val: u16) {
+        self.input_freq_div2 = (val >> 3) & 1 == 1;
+        self.enable_int_osc = (val >> 11) & 1 == 1;
+    }
+}
+
+impl Default for ChipClkTopCtrl {
+    fn default() -> Self {
+        Self {
+            input_freq_div2: false,
+            enable_int_osc: false,
+        }
+    }
+}
+
 pub struct Sgtl5000Config {
     pub chip_ana_power: ChipAnaPower,
+    pub chip_clk_top_ctrl: ChipClkTopCtrl,
 }
 
 impl Default for Sgtl5000Config {
     fn default() -> Self {
         Self {
             chip_ana_power: ChipAnaPower::default(),
+            chip_clk_top_ctrl: ChipClkTopCtrl::default(),
         }
     }
 }
@@ -117,6 +148,7 @@ impl Sgtl5000Config {
     pub fn reg_val(&self, reg: Register) -> u16 {
         match reg {
             Register::ChipAnaPower => self.chip_ana_power.value(),
+            Register::ChipClkTopCtrl => self.chip_clk_top_ctrl.value(),
             _ => 0,
         }
     }
@@ -124,6 +156,7 @@ impl Sgtl5000Config {
     pub fn update_reg(&mut self, reg: Register, val: u16) {
         match reg {
             Register::ChipAnaPower => self.chip_ana_power.update(val),
+            Register::ChipClkTopCtrl => self.chip_clk_top_ctrl.update(val),
             _ => (),
         }
     }
