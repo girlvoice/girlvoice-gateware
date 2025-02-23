@@ -26,6 +26,8 @@ mod spi;
 use i2c::I2c0;
 
 use litex_hal as hal;
+use sgtl5000::Sgtl5000;
+use sgtl5000::regmap::LineOutBiasCurrent;
 
 const SYS_CLK_FREQ: u32 = 60_000_000;
 
@@ -46,6 +48,23 @@ hal::uart! {
 
 hal::timer! {
     DELAY: pac::Timer0,
+}
+
+fn power_on_codec(mut sgtl5000: Sgtl5000<I2c0>) {
+    // Analog power up settings
+    sgtl5000.power_off_startup_power().unwrap();
+    sgtl5000.enable_charge_pump().unwrap();
+    sgtl5000.enable_charge_pump().unwrap();
+    sgtl5000.set_bias(0x7).unwrap();
+    sgtl5000.set_analog_gnd(0x04).unwrap();
+    sgtl5000.set_line_out_ana_gnd(0x4).unwrap();
+    sgtl5000.set_line_out_bias_current(LineOutBiasCurrent::MicroAmp360).unwrap();
+    sgtl5000.enable_small_pop().unwrap();
+
+    // Digital blocks and IO power on
+    sgtl5000.power_on_adc().unwrap();
+    sgtl5000.power_on_dac().unwrap();
+    sgtl5000.power_on_line_out().unwrap();
 }
 
 
