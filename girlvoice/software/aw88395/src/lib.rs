@@ -130,6 +130,16 @@ impl<I2C: I2c> Aw88395<I2C> {
         self.update_config(Register::SysCtrl2)
     }
 
+    pub fn enable_hagc(&mut self) -> Result<(), Aw88395Error> {
+        self.config.sys_ctrl.hagce = true;
+        self.update_config(Register::SysCtrl)
+    }
+
+    pub fn disable_hagc(&mut self) -> Result<(), Aw88395Error> {
+        self.config.sys_ctrl.hagce = false;
+        self.update_config(Register::SysCtrl)
+    }
+
     fn update_config(&mut self, reg: Register) -> Result<(), Aw88395Error> {
         let reg_val = self.config.reg_val(reg);
         self.write_reg(reg, reg_val)
