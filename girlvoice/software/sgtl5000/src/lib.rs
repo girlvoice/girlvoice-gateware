@@ -2,7 +2,7 @@
 #![no_std]
 pub mod regmap;
 
-use regmap::{LineOutBiasCurrent, Register, Sgtl5000Config};
+use regmap::{LineOutBiasCurrent, MclkFreqSetting, Register, SampleRateSetting, Sgtl5000Config};
 use embedded_hal::i2c::{Error, ErrorKind, I2c};
 
 pub const SGTL5000_QFN20_ADDR: u8 = 0x0A;
@@ -123,6 +123,16 @@ impl<I2C: I2c> Sgtl5000<I2C> {
         self.update_config(Register::ChipLineOutCtrl)
     }
 
+    pub fn set_line_out_right_vol(&mut self, vol_code: u8) -> Result<(), Sgtl5000Error> {
+        self.config.chip_line_out_vol.lo_vol_right = vol_code;
+        self.update_config(Register::ChipLineOutVol)
+    }
+
+    pub fn set_line_out_left_vol(&mut self, vol_code: u8) -> Result<(), Sgtl5000Error> {
+        self.config.chip_line_out_vol.lo_vol_left = vol_code;
+        self.update_config(Register::ChipLineOutVol)
+    }
+
     pub fn set_line_out_bias_current(&mut self, bias_current: LineOutBiasCurrent) -> Result<(), Sgtl5000Error> {
         match bias_current {
             LineOutBiasCurrent::MicroAmp180 => self.config.chip_line_out_ctrl.out_current = 0x0,
@@ -132,6 +142,16 @@ impl<I2C: I2c> Sgtl5000<I2C> {
             LineOutBiasCurrent::MicroAmp540 => self.config.chip_line_out_ctrl.out_current = 0xF,
         }
         self.update_config(Register::ChipLineOutCtrl)
+    }
+
+    pub fn set_mclk_config(&mut self, freq_setting: MclkFreqSetting) -> Result<(), Sgtl5000Error> {
+        self.config.chip_clk_ctrl.mclk_freq = freq_setting as u8;
+        self.update_config(Register::ChipClkCtrl)
+    }
+
+    pub fn set_sample_rate(&mut self, fs_setting: SampleRateSetting) -> Result<(), Sgtl5000Error> {
+        self.config.chip_clk_ctrl.sys_fs = fs_setting as u8;
+        self.update_config(Register::ChipClkCtrl)
     }
 
     fn update_config(&mut self, reg: Register) -> Result<(), Sgtl5000Error> {

@@ -53,18 +53,23 @@ hal::timer! {
 fn power_on_codec(mut sgtl5000: Sgtl5000<I2c0>) {
     // Analog power up settings
     sgtl5000.power_off_startup_power().unwrap();
+    sgtl5000.enable_int_osc().unwrap();
     sgtl5000.enable_charge_pump().unwrap();
-    sgtl5000.enable_charge_pump().unwrap();
-    sgtl5000.set_bias(0x7).unwrap();
-    sgtl5000.set_analog_gnd(0x04).unwrap();
-    sgtl5000.set_line_out_ana_gnd(0x4).unwrap();
-    sgtl5000.set_line_out_bias_current(LineOutBiasCurrent::MicroAmp360).unwrap();
-    sgtl5000.enable_small_pop().unwrap();
+    sgtl5000.set_bias(0x7).unwrap(); // Set bias current to 50% of nominal per data sheet
+    sgtl5000.set_analog_gnd(0x04).unwrap(); // Set analog gnd reference voltage to 0.9v (VDDA/2)
+    sgtl5000.set_line_out_ana_gnd(0x4).unwrap(); // Set line out analog ref voltage to 0.9v (VDDIO/2)
+    sgtl5000.set_line_out_bias_current(LineOutBiasCurrent::MicroAmp360).unwrap(); // Set line out bias current to 0.36mA for 10kOhm + 1.0nF load
+    sgtl5000.enable_small_pop().unwrap(); // Minimize pop
+
+    // Note: here datasheet enables short detect for headphone out
 
     // Digital blocks and IO power on
     sgtl5000.power_on_adc().unwrap();
     sgtl5000.power_on_dac().unwrap();
     sgtl5000.power_on_line_out().unwrap();
+
+    sgtl5000.set_line_out_left_vol(0x5).unwrap();
+    sgtl5000.set_line_out_right_vol(0x5).unwrap();
 }
 
 
