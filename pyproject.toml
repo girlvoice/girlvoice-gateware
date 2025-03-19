@@ -7,7 +7,7 @@ authors = [
 ]
 dependencies = [
     "amlib @ git+https://github.com/amaranth-farm/amlib.git",
-    "amaranth @ git+https://github.com/amaranth-lang/amaranth.git",
+    "amaranth==0.5.4",
     "amaranth-boards @ git+https://github.com/amaranth-lang/amaranth-boards.git",
     "migen @ git+https://github.com/m-labs/migen.git@4790bb577681a8c3a8d226bc196a4e5deb39e4df",
     "yowasp-nextpnr-nexus>=0.7.0.0.post519",
@@ -21,6 +21,7 @@ dependencies = [
     "matplotlib>=3.9.1.post1",
     "scipy>=1.14.1",
     "numpy>=2.2.1",
+    "amaranth-soc @ git+https://github.com/amaranth-lang/amaranth-soc@5c43cf58f15d9cd9c69ff83c97997708d386b2dc",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
