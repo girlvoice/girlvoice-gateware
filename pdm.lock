@@ -5,23 +5,26 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:fb1894c5445b7c4bce17f08914ecbfe6c2df242df81c5177243874e621b51033"
+content_hash = "sha256:30501724643818d357d7ff53a433d451500f1c135fc86e454bd8e6375761efc9"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
 
 [[package]]
 name = "amaranth"
-version = "0.6.0.dev72"
-requires_python = "~=3.9"
-git = "https://github.com/amaranth-lang/amaranth.git"
-revision = "590cba1d6c00dffba7abb5f399680ac50e252adf"
+version = "0.5.4"
+requires_python = "~=3.8"
 summary = "Amaranth hardware definition language"
 groups = ["default"]
 dependencies = [
     "Jinja2~=3.0",
+    "importlib-resources; python_version < \"3.9\"",
     "jschon~=0.11.1",
     "pyvcd<0.5,>=0.2.2",
+]
+files = [
+    {file = "amaranth-0.5.4-py3-none-any.whl", hash = "sha256:ce7473b4220acc78474474fd132177ca545fb144d4e69e1c7dbfc2ed7d32bcf3"},
+    {file = "amaranth-0.5.4.tar.gz", hash = "sha256:a0ea7ffe358ab00d5524b53c43277d279723437be146c8250e26f6b349b8a4fd"},
 ]
 
 [[package]]
@@ -34,6 +37,19 @@ summary = "Board and connector definitions for Amaranth HDL"
 groups = ["default"]
 dependencies = [
     "amaranth<0.7,>=0.5",
+]
+
+[[package]]
+name = "amaranth-soc"
+version = "0.1a1.dev24"
+requires_python = "~=3.9"
+git = "https://github.com/amaranth-lang/amaranth-soc"
+ref = "5c43cf58f15d9cd9c69ff83c97997708d386b2dc"
+revision = "5c43cf58f15d9cd9c69ff83c97997708d386b2dc"
+summary = "System on Chip toolkit for Amaranth HDL"
+groups = ["default"]
+dependencies = [
+    "amaranth<0.6,>=0.5",
 ]
 
 [[package]]
