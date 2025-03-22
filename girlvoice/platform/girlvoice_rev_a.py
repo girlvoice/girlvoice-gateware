@@ -19,6 +19,7 @@ class GirlvoiceRevAPlatform(LatticePlatform):
         Resource(
             "clk12", 0, Pins("11", dir="i"), Clock(12e6), Attrs(IO_TYPE="LVCMOS18H")
         ),
+        UARTResource(0, rx="USB_DP", tx="USB_DN", conn=("usb", 0)),
         I2CResource(0, scl="44", sda="42", attrs=Attrs(IO_TYPE="LVCMOS33")),
         *SPIFlashResources(
             0,
