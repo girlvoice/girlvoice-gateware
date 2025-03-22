@@ -30,37 +30,28 @@ from amaranth_soc                                import csr, gpio, wishbone
 from amaranth_soc.csr.wishbone                   import WishboneCSRBridge
 from amaranth_soc.wishbone.sram                  import WishboneSRAM
 
-from vendor.luna_soc.gateware.core               import spiflash, timer, uart
-from vendor.luna_soc.gateware.cpu                import InterruptController, VexRiscv
-from vendor.soc                                  import readbin
-from vendor.luna_soc.generate.svd                import SVD
+from .vendor.luna_soc.gateware.core               import spiflash, timer, uart
+from .vendor.luna_soc.gateware.cpu                import InterruptController, VexRiscv
+from .vendor.luna_soc.util                        import readbin
+from .vendor.luna_soc.generate.svd                import SVD
 
 
-from tiliqua.tiliqua_platform                    import *
-from tiliqua.types                               import FirmwareLocation
-
+kB = 1024
+mB = 1024*kB
 
 class GirlvoiceSoc(Component):
-    def __init__(self, *, firmware_bin_path, platform_class, clock_settings,
-                 touch=False, finalize_csr_bridge=True,
-                 mainram_size=0x2000, fw_location=None, fw_offset=None, cpu_variant="vescriscv_imac+dcache"):
+    def __init__(self, *, sys_clk_freq=60e6, finalize_csr_bridge=True,
+                 mainram_size=64*kB,   cpu_variant="imac+dcache"):
 
         super().__init__({})
 
-        self.sim_fs_strobe = Signal()
+        self.sys_clk_freq = sys_clk_freq
 
-        self.firmware_bin_path = firmware_bin_path
-        self.touch = touch
-        self.clock_settings = clock_settings
-
-        self.platform_class = platform_class
 
         self.mainram_base         = 0x00000000
         self.mainram_size         = mainram_size
         self.spiflash_base        = 0x10000000
         self.spiflash_size        = 0x01000000 # 128Mbit / 16MiB
-        self.psram_base           = 0x20000000
-        self.psram_size           = 0x01000000 # 128Mbit / 16MiB
         self.csr_base             = 0xf0000000
         # offsets from csr_base
         self.spiflash_ctrl_base   = 0x00000100
@@ -68,21 +59,9 @@ class GirlvoiceSoc(Component):
         self.timer0_base          = 0x00000300
         self.timer0_irq           = 0
         self.i2c0_base            = 0x00000400
-        self.i2c1_base            = 0x00000500
-        self.encoder0_base        = 0x00000600
 
-        # Some settings depend on whether code is in block RAM or SPI flash
-        self.fw_location = fw_location
-        match fw_location:
-            case FirmwareLocation.BRAM:
-                self.reset_addr  = self.mainram_base
-                self.fw_base     = None
-            case FirmwareLocation.SPIFlash:
-                # CLI provides the offset (indexed from 0 on the spiflash), however
-                # on the Vex it is memory mapped from self.spiflash_base onward.
-                self.fw_base     = self.spiflash_base + fw_offset
-                self.reset_addr  = self.fw_base
-                self.fw_max_size = 0x50000 # 320KiB
+        self.reset_addr  = self.mainram_base
+        self.fw_base     = None
 
         # cpu
         self.cpu = VexRiscv(
@@ -122,7 +101,7 @@ class GirlvoiceSoc(Component):
 
         # uart0
         uart_baud_rate = 115200
-        divisor = int(self.clock_settings.frequencies.sync // uart_baud_rate)
+        divisor = int(self.sys_clk_freq // uart_baud_rate)
         self.uart0 = uart.Peripheral(divisor=divisor)
         self.csr_decoder.add(self.uart0.bus, addr=self.uart0_base, name="uart0")
 
@@ -135,17 +114,17 @@ class GirlvoiceSoc(Component):
         self.interrupt_controller.add(self.timer0, number=self.timer0_irq, name="timer0")
 
         # spiflash peripheral
-        self.spi0_phy        = spiflash.SPIPHYController(domain="sync", divisor=0)
-        self.spiflash_periph = spiflash.Peripheral(phy=self.spi0_phy, mmap_size=self.spiflash_size,
-                                                   mmap_name="spiflash")
-        self.wb_decoder.add(self.spiflash_periph.bus, addr=self.spiflash_base, name="spiflash")
-        self.csr_decoder.add(self.spiflash_periph.csr, addr=self.spiflash_ctrl_base, name="spiflash_ctrl")
+        # self.spi0_phy        = spiflash.SPIPHYController(domain="sync", divisor=0)
+        # self.spiflash_periph = spiflash.Peripheral(phy=self.spi0_phy, mmap_size=self.spiflash_size,
+        #                                            mmap_name="spiflash")
+        # self.wb_decoder.add(self.spiflash_periph.bus, addr=self.spiflash_base, name="spiflash")
+        # self.csr_decoder.add(self.spiflash_periph.csr, addr=self.spiflash_ctrl_base, name="spiflash_ctrl")
 
 
         # mobo i2c
-        self.i2c0 = i2c.Peripheral()
-        self.i2c_stream0 = i2c.I2CStreamer(period_cyc=256)
-        self.csr_decoder.add(self.i2c0.bus, addr=self.i2c0_base, name="i2c0")
+        # self.i2c0 = i2c.Peripheral()
+        # self.i2c_stream0 = i2c.I2CStreamer(period_cyc=256)
+        # self.csr_decoder.add(self.i2c0.bus, addr=self.i2c0_base, name="i2c0")
 
         self.permit_bus_traffic = Signal()
 
@@ -170,11 +149,6 @@ class GirlvoiceSoc(Component):
 
         m = Module()
 
-        if self.fw_location == FirmwareLocation.BRAM:
-            # Init BRAM program memory if we aren't loading from SPI flash.
-            self.mainram.init = readbin.get_mem_data(self.firmware_bin_path, data_width=32, endianness="little")
-            assert self.mainram.init
-
         # bus
         m.submodules.wb_arbiter = self.wb_arbiter
         m.submodules.wb_decoder = self.wb_decoder
@@ -198,6 +172,9 @@ class GirlvoiceSoc(Component):
 
         # uart0
         m.submodules.uart0 = self.uart0
+        uart = platform.request("uart")
+        m.d.comb += self.uart0.pins.rx.eq(uart.rx.i)
+        m.d.comb += uart.tx.o.eq(self.uart0.pins.tx.o)
         # if sim.is_hw(platform):
         #     uart0_provider = uart.Provider(0)
         #     m.submodules.uart0_provider = uart0_provider
@@ -207,31 +184,31 @@ class GirlvoiceSoc(Component):
         m.submodules.timer0 = self.timer0
 
         # i2c0
-        m.submodules.i2c0 = self.i2c0
-        m.submodules.i2c_stream0 = self.i2c_stream0
-        wiring.connect(m, self.i2c0.i2c_stream, self.i2c_stream0.control)
+        # m.submodules.i2c0 = self.i2c0
+        # m.submodules.i2c_stream0 = self.i2c_stream0
+        # wiring.connect(m, self.i2c0.i2c_stream, self.i2c_stream0.control)
         # if sim.is_hw(platform):
         #     i2c0_provider = i2c.Provider()
         #     m.submodules.i2c0_provider = i2c0_provider
         #     wiring.connect(m, self.i2c_stream0.pins, i2c0_provider.pins)
 
         # spiflash
-        m.submodules.spi0_phy = self.spi0_phy
-        m.submodules.spiflash_periph = self.spiflash_periph
+        # m.submodules.spi0_phy = self.spi0_phy
+        # m.submodules.spiflash_periph = self.spiflash_periph
 
-        wiring.connect(m, self.i2c1.i2c_stream, self.pmod0.i2c_master.i2c_override)
+        # wiring.connect(m, self.i2c1.i2c_stream, self.pmod0.i2c_master.i2c_override)
 
-        if sim.is_hw(platform):
+        # if sim.is_hw(platform):
 
-            # generate our domain clocks/resets
-            m.submodules.car = car = platform.clock_domain_generator(self.clock_settings)
+        #     # generate our domain clocks/resets
+        #     m.submodules.car = car = platform.clock_domain_generator(self.clock_settings)
 
 
-            # Connect encoder button to RebootProvider
-            m.submodules.reboot = reboot = RebootProvider(self.clock_settings.frequencies.sync)
-            m.d.comb += reboot.button.eq(self.encoder0._button.f.button.r_data)
-        else:
-            m.submodules.car = sim.FakeTiliquaDomainGenerator()
+        #     # Connect encoder button to RebootProvider
+        #     m.submodules.reboot = reboot = RebootProvider(self.clock_settings.frequencies.sync)
+        #     m.d.comb += reboot.button.eq(self.encoder0._button.f.button.r_data)
+        # else:
+        #     m.submodules.car = sim.FakeTiliquaDomainGenerator()
 
         # wishbone csr bridge
         m.submodules.wb_to_csr = self.wb_to_csr
@@ -257,44 +234,22 @@ class GirlvoiceSoc(Component):
     def genmem(self, dst_mem):
         """Generate linker regions for Rust (memory.x)."""
         print("Generating (rust) memory.x ...", dst_mem)
-        if self.fw_location == FirmwareLocation.BRAM:
-            # .text, .rodata in shared block RAM region
-            memory_x = (
-                "MEMORY {{\n"
-                "    mainram : ORIGIN = {mainram_base}, LENGTH = {mainram_size}\n"
-                "}}\n"
-                "REGION_ALIAS(\"REGION_TEXT\", mainram);\n"
-                "REGION_ALIAS(\"REGION_RODATA\", mainram);\n"
-                "REGION_ALIAS(\"REGION_DATA\", mainram);\n"
-                "REGION_ALIAS(\"REGION_BSS\", mainram);\n"
-                "REGION_ALIAS(\"REGION_HEAP\", mainram);\n"
-                "REGION_ALIAS(\"REGION_STACK\", mainram);\n"
-            )
-            with open(dst_mem, "w") as f:
-                f.write(memory_x.format(mainram_base=hex(self.mainram_base),
-                                        mainram_size=hex(self.mainram.size),
-                                        ))
-        else:
-            # .text, .rodata stored elsewhere (SPI flash or PSRAM)
-            memory_x = (
-                "MEMORY {{\n"
-                "    mainram : ORIGIN = {mainram_base}, LENGTH = {mainram_size}\n"
-                "    {text_region} : ORIGIN = {spiflash_base}, LENGTH = {spiflash_size}\n"
-                "}}\n"
-                "REGION_ALIAS(\"REGION_TEXT\", {text_region});\n"
-                "REGION_ALIAS(\"REGION_RODATA\", {text_region});\n"
-                "REGION_ALIAS(\"REGION_DATA\", mainram);\n"
-                "REGION_ALIAS(\"REGION_BSS\", mainram);\n"
-                "REGION_ALIAS(\"REGION_HEAP\", mainram);\n"
-                "REGION_ALIAS(\"REGION_STACK\", mainram);\n"
-            )
-            with open(dst_mem, "w") as f:
-                f.write(memory_x.format(mainram_base=hex(self.mainram_base),
-                                        mainram_size=hex(self.mainram.size),
-                                        spiflash_base=hex(self.fw_base),
-                                        spiflash_size=hex(self.fw_max_size),
-                                        text_region=self.fw_location.value,
-                                        ))
+        # .text, .rodata in shared block RAM region
+        memory_x = (
+            "MEMORY {{\n"
+            "    mainram : ORIGIN = {mainram_base}, LENGTH = {mainram_size}\n"
+            "}}\n"
+            "REGION_ALIAS(\"REGION_TEXT\", mainram);\n"
+            "REGION_ALIAS(\"REGION_RODATA\", mainram);\n"
+            "REGION_ALIAS(\"REGION_DATA\", mainram);\n"
+            "REGION_ALIAS(\"REGION_BSS\", mainram);\n"
+            "REGION_ALIAS(\"REGION_HEAP\", mainram);\n"
+            "REGION_ALIAS(\"REGION_STACK\", mainram);\n"
+        )
+        with open(dst_mem, "w") as f:
+            f.write(memory_x.format(mainram_base=hex(self.mainram_base),
+                                    mainram_size=hex(self.mainram.size),
+                                    ))
 
     def genconst(self, dst):
         """Generate some high-level constants used by application code."""

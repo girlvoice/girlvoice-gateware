@@ -5,5 +5,4 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from .ic       import *
-from .minerva  import *
 from .vexriscv import *

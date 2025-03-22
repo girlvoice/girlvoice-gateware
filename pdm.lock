@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:30501724643818d357d7ff53a433d451500f1c135fc86e454bd8e6375761efc9"
+content_hash = "sha256:9e8f1b0e1ba2a696db354e9422a25d8f36590f44388549976809f901db5b2c01"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
@@ -164,6 +164,17 @@ groups = ["default"]
 files = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
+]
+
+[[package]]
+name = "construct"
+version = "2.10.70"
+requires_python = ">=3.6"
+summary = "A powerful declarative symmetric parser/builder for binary data"
+groups = ["default"]
+files = [
+    {file = "construct-2.10.70-py3-none-any.whl", hash = "sha256:c80be81ef595a1a821ec69dc16099550ed22197615f4320b57cc9ce2a672cb30"},
+    {file = "construct-2.10.70.tar.gz", hash = "sha256:4d2472f9684731e58cc9c56c463be63baa1447d674e0d66aeb5627b22f512c29"},
 ]
 
 [[package]]
@@ -429,6 +440,18 @@ files = [
 ]
 
 [[package]]
+name = "libusb1"
+version = "3.3.0"
+summary = "Pure-python wrapper for libusb-1.0"
+groups = ["default"]
+files = [
+    {file = "libusb1-3.3.0-py3-none-any.whl", hash = "sha256:7923ff2bbe43878e1c7cf733fde49cca844ecada29dbc436033bca6171cda41f"},
+    {file = "libusb1-3.3.0-py3-none-win32.whl", hash = "sha256:270f35b3a8faddd63d78de9b2341e49f6aed6083dceb4b04f47b95fd944e8d00"},
+    {file = "libusb1-3.3.0-py3-none-win_amd64.whl", hash = "sha256:61e2b4efdbacdd689bf4eab6b9afa2d6ee8a4bae20ffbf7c5785024d25fa3258"},
+    {file = "libusb1-3.3.0.tar.gz", hash = "sha256:b642aa518689f8e053f61955cba274e72bc8d0794c65d7990745aaae90dfc8a1"},
+]
+
+[[package]]
 name = "litex"
 version = "2023.12"
 requires_python = "~=3.7"
@@ -442,6 +465,25 @@ dependencies = [
 ]
 files = [
     {file = "litex-2023.12.tar.gz", hash = "sha256:4710694f5271990d2fde0c6d7b6989ec1ad72ccbab4161adeb5d6be51d6e36d4"},
+]
+
+[[package]]
+name = "luna-usb"
+version = "0.2.0"
+requires_python = ">=3.9"
+summary = "Amaranth HDL framework for FPGA-based USB solutions"
+groups = ["default"]
+dependencies = [
+    "amaranth~=0.5.0",
+    "libusb1>1.9.2",
+    "pyserial>=3.5",
+    "pyusb>1.1.1",
+    "pyvcd>=0.2.4",
+    "usb-protocol~=0.9.1",
+]
+files = [
+    {file = "luna_usb-0.2.0-py3-none-any.whl", hash = "sha256:d07543cca931b63dac951387ebcb51b284c06bb42c042f19cafbbd53ace05bed"},
+    {file = "luna_usb-0.2.0.tar.gz", hash = "sha256:ee105e3d177fb73adf1f8acf13a11978737579b10312b2f799df8c75058eba9f"},
 ]
 
 [[package]]
@@ -826,6 +868,17 @@ summary = "Python module containing data files for picolibc - a C library design
 groups = ["default"]
 
 [[package]]
+name = "pyusb"
+version = "1.3.1"
+requires_python = ">=3.9.0"
+summary = "Easy USB access for Python"
+groups = ["default"]
+files = [
+    {file = "pyusb-1.3.1-py3-none-any.whl", hash = "sha256:bf9b754557af4717fe80c2b07cc2b923a9151f5c08d17bdb5345dac09d6a0430"},
+    {file = "pyusb-1.3.1.tar.gz", hash = "sha256:3af070b607467c1c164f49d5b0caabe8ac78dbed9298d703a8dbf9df4052d17e"},
+]
+
+[[package]]
 name = "pyvcd"
 version = "0.4.1"
 requires_python = ">=3.7"
@@ -929,6 +982,20 @@ groups = ["default"]
 files = [
     {file = "urllib3-2.3.0-py3-none-any.whl", hash = "sha256:1cee9ad369867bfdbbb48b7dd50374c0967a0bb7710050facf0dd6911440e3df"},
     {file = "urllib3-2.3.0.tar.gz", hash = "sha256:f8c5449b3cf0861679ce7e0503c7b44b5ec981bec0d1d3795a07f1ba96f0204d"},
+]
+
+[[package]]
+name = "usb-protocol"
+version = "0.9.1"
+requires_python = ">=3.8"
+summary = "Python library providing utilities, data structures, constants, parsers, and tools for working with the USB protocol."
+groups = ["default"]
+dependencies = [
+    "construct~=2.10",
+]
+files = [
+    {file = "usb_protocol-0.9.1-py3-none-any.whl", hash = "sha256:9410292ce2f609c335a53ab176ff285e29ecb2ef90394f9cfea2836d1be0ae7b"},
+    {file = "usb_protocol-0.9.1.tar.gz", hash = "sha256:e6ff4cf96279bfb5d0107dd9c6e4f3de03762d0f6136f42c4b0247e07dd2fe24"},
 ]
 
 [[package]]
