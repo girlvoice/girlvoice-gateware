@@ -35,13 +35,14 @@ from .vendor.luna_soc.gateware.cpu                import InterruptController, Ve
 from .vendor.luna_soc.util                        import readbin
 from .vendor.luna_soc.generate.svd                import SVD
 
+from girlvoice.platform.nexus_utils.lram          import WishboneNXLRAM
 
 kB = 1024
 mB = 1024*kB
 
 class GirlvoiceSoc(Component):
     def __init__(self, *, sys_clk_freq=60e6, finalize_csr_bridge=True,
-                 mainram_size=64*kB,   cpu_variant="imac+dcache"):
+                 mainram_size=128*kB,   cpu_variant="imac+dcache"):
 
         super().__init__({})
 
@@ -89,10 +90,9 @@ class GirlvoiceSoc(Component):
         )
 
         # mainram
-        self.mainram = WishboneSRAM(
+        self.mainram = WishboneNXLRAM(
             size=self.mainram_size,
-            data_width=wb_data_width,
-            granularity=8
+            data_width=wb_data_width
         )
         self.wb_decoder.add(self.mainram.wb_bus, addr=self.mainram_base, name="mainram")
 
