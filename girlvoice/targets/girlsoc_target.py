@@ -4,6 +4,7 @@ from amaranth import *
 import amaranth.lib.wiring as wiring
 from amaranth.build import *
 from amaranth.build.plat import Platform
+from girlvoice.soc.vendor.luna_soc import top_level_cli
 
 from girlvoice.platform.girlvoice_rev_a import GirlvoiceRevAPlatform
 from girlvoice.platform.nexus_utils.pll import NXPLL
@@ -14,6 +15,9 @@ import girlvoice.dsp.vocoder as vocoder
 from girlvoice.soc.girlvoice_soc import GirlvoiceSoc
 
 class GirlTop(Elaboratable):
+
+    def __init__(self):
+        self.soc = GirlvoiceSoc()
 
     def elaborate(self, platform:Platform):
         m = Module()
@@ -39,7 +43,6 @@ class GirlTop(Elaboratable):
         platform.add_clock_constraint(cd_sync.clk, sync_freq)
 
         ## Add SoC
-        self.soc = GirlvoiceSoc()
         m.submodules.soc = self.soc
 
         ## Power On/Off
@@ -64,4 +67,5 @@ class GirlTop(Elaboratable):
 if __name__ == "__main__":
     p = GirlvoiceRevAPlatform(toolchain="Oxide")
 
-    p.build(GirlTop(), do_program=False, use_radiant_docker=False)
+    top_level_cli(GirlTop(), "--generate-svd")
+    # p.build(GirlTop(), do_program=False, use_radiant_docker=False)

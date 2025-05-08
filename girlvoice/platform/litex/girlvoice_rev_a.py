@@ -38,6 +38,8 @@ _io = [
         Misc("PULLMODE=NONE"),
     ),
     ("aux_mclk", 0, Pins("22"), IOStandard("LVCMOS18H")),
+    ("aux_datao", 0, Pins("9"), IOStandard("LVCMOS18H")),
+    ("aux_datai", 0, Pins("10"), IOStandard("LVCMOS18H")),
     (
         "amp",
         0,

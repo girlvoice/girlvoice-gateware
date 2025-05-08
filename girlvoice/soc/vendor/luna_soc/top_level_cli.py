@@ -14,6 +14,8 @@ import argparse
 from amaranth                import Elaboratable
 from amaranth._unused        import MustUse
 
+from girlvoice.platform.girlvoice_rev_a import GirlvoiceRevAPlatform
+
 from luna                    import configure_default_logging
 from luna.gateware.platform  import get_appropriate_platform, configure_toolchain
 
@@ -95,7 +97,7 @@ def top_level_cli(fragment, *pos_args, **kwargs):
         args.upload = False
 
     # Select platform.
-    platform = get_appropriate_platform()
+    platform = GirlvoiceRevAPlatform(toolchain="Oxide")
     if platform is None:
         logging.error("Failed to identify a supported platform")
         sys.exit(1)
@@ -141,11 +143,12 @@ def top_level_cli(fragment, *pos_args, **kwargs):
     # If we've been asked to generate a SVD description of the design, generate -only- that.
     if args.generate_svd:
         logging.info("Generating SVD description for SoC")
-        from luna_soc.generate import introspect, svd
+        from girlvoice.soc.vendor.luna_soc.generate import introspect, svd
         soc        = introspect.soc(fragment)
         memory_map = introspect.memory_map(soc)
         interrupts = introspect.interrupts(soc)
-        svd.SVD(memory_map, interrupts).generate(file=None)
+        with open("girlsoc.svd", "w") as f:
+            svd.SVD(memory_map, interrupts).generate(file=f)
         sys.exit(0)
 
     # If we've been asked for the cpu reset address, generate _only_ that.
