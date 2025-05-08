@@ -42,7 +42,7 @@ mB = 1024*kB
 
 class GirlvoiceSoc(Component):
     def __init__(self, *, sys_clk_freq=60e6, finalize_csr_bridge=True,
-                 mainram_size=128*kB,   cpu_variant="imac+dcache"):
+                 mainram_size=128*kB, cpu_variant="imac+dcache"):
 
         super().__init__({})
 
@@ -261,20 +261,9 @@ class GirlvoiceSoc(Component):
             f.write(f"pub const HW_REV_MAJOR: u32        = {self.platform_class.version_major};\n")
             f.write(f"pub const CLOCK_SYNC_HZ: u32       = {self.clock_settings.frequencies.sync};\n")
             f.write(f"pub const CLOCK_FAST_HZ: u32       = {self.clock_settings.frequencies.fast};\n")
-            f.write(f"pub const CLOCK_DVI_HZ: u32        = {self.clock_settings.frequencies.dvi};\n")
             f.write(f"pub const CLOCK_AUDIO_HZ: u32      = {self.clock_settings.frequencies.audio};\n")
-            f.write(f"pub const PSRAM_BASE: usize        = 0x{self.psram_base:x};\n")
-            f.write(f"pub const PSRAM_SZ_BYTES: usize    = 0x{self.psram_size:x};\n")
-            f.write(f"pub const PSRAM_SZ_WORDS: usize    = PSRAM_SZ_BYTES / 4;\n")
             f.write(f"pub const SPIFLASH_BASE: usize     = 0x{self.spiflash_base:x};\n")
             f.write(f"pub const SPIFLASH_SZ_BYTES: usize = 0x{self.spiflash_size:x};\n")
-            f.write(f"pub const H_ACTIVE: u32            = {self.video.fb_hsize};\n")
-            f.write(f"pub const V_ACTIVE: u32            = {self.video.fb_vsize};\n")
-            f.write(f"pub const VIDEO_ROTATE_90: bool    = {'true' if self.video_rotate_90 else 'false'};\n")
-            f.write(f"pub const PSRAM_FB_BASE: usize     = 0x{self.video.fb_base:x};\n")
-            f.write(f"pub const PX_HUE_MAX: i32          = 16;\n")
-            f.write(f"pub const PX_INTENSITY_MAX: i32    = 16;\n")
-            f.write(f"pub const N_BITSTREAMS: usize      = 8;\n")
             f.write(f"pub const MANIFEST_BASE: usize     = SPIFLASH_BASE + SPIFLASH_SZ_BYTES - 4096;\n")
             f.write(f"pub const MANIFEST_SZ_BYTES: usize = 4096;\n")
             f.write("// Extra constants specified by an SoC subclass:\n")
