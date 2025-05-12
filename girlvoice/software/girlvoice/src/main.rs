@@ -81,124 +81,21 @@ fn main() -> ! {
         registers: peripherals.uart,
     };
 
-    // let lcd_spi = SPI{
-    //     registers: peripherals.lcd_spi
-    // };
-
     let mut delay = DELAY {
         registers: peripherals.timer0,
         sys_clk: SYS_CLK_FREQ
     };
 
-    // let dc = DC { index: 0 }; // LCD Data/Command GPIO
-    // let mut bl = BL { index: 0 }; // LCD Backlight GPIO
-
-    // bl.set_high().unwrap();
-
-    // let interface = SPIDisplayInterface::new(lcd_spi, dc);
-
     // let i2c_freq = HertzU32::from_raw(400_000);
     let mut i2c0 = I2c0::new(peripherals.i2cfifo);
 
-    // let mut display_driver = Gc9a01::new(
-    //     interface,
-    //     DisplayResolution240x240,
-    //     gc9a01::prelude::DisplayRotation::Rotate0
-    // );
-
-    // display_driver.init(&mut delay).unwrap();
-
-
-    // display_driver.set_invert_pixels(true).unwrap();
-
-    // display_driver.clear_fit().unwrap();
-
-    // embedded-graphics hello world
-
-    // Triangle::new(Point::new(32, 16), Point::new(16, 48), Point::new(48, 48))
-    // .into_styled(PrimitiveStyle::with_stroke(Rgb565::MAGENTA, 1))
-    // .draw(&mut display_driver).unwrap();
-
-    // let pix: [u16; 100] = [Rgb565::MAGENTA.into_storage(); 100];
-
-    // display_driver.set_pixels((100, 100), (110, 110), &mut pix.into_iter()).unwrap();
-
-
-    serial.write_all(b"Starting I2C read!\n").unwrap();
-
-    // let test = TxCmd::RestartCount.value();
-    // let mut test_hex = [0_u8; 2];
-    // hex::encode_to_slice(test.to_be_bytes(), &mut test_hex).unwrap();
-    // serial.write_all(b"0x").unwrap();
-    // serial.write_all(&test_hex).unwrap();
-    // serial.write_all(b"\n").unwrap();
-
-    let dev_addr: SevenBitAddress = 0x34;
-    let max_reg_addr: u8 = 0x61;
-    const BYTES_TO_READ: usize = 2;
-    const REG_WIDTH: usize = 1;
-    let mut read_buf = [0_u8; BYTES_TO_READ];
-    let mut hex_bytes = [0_u8; BYTES_TO_READ * 2];
-
-    let mut reg_hex = [0_u8; REG_WIDTH * 2];
-
-
-
-    // i2c0.write(dev_addr, &[0x00, 0x55, 0xaa]).unwrap();
-
-    // let reg_addr: u16 = 0x0002;
-    // for reg_addr in (0..max_reg_addr+1).step_by(1) {
-
-    //     hex::encode_to_slice(reg_addr.to_be_bytes(), &mut reg_hex).unwrap();
-    //     serial.write_all(b"0x").unwrap();
-    //     serial.write_all(&reg_hex).unwrap();
-    //     serial.write_all(b": ").unwrap();
-
-    //     i2c0.write_read(dev_addr, &reg_addr.to_be_bytes(), &mut read_buf).unwrap();
-
-    //     serial.write_all(b"0x").unwrap();
-    //     hex::encode_to_slice(read_buf, &mut hex_bytes).unwrap();
-
-    //     serial.write_all(&hex_bytes).unwrap();
-    //     serial.write_all(b"\n").unwrap();
-
-    //     msleep(&mut timer, 1)
-    // }
-
-    // i2c0.write(dev_addr, &[0x04, 0x53, 0x06]).unwrap();
-    // // i2c0.write(dev_addr, &[0x52, 0x1f, 0x08]).unwrap();
-
-    // msleep(&mut timer, 2000);
-    // i2c0.write(dev_addr, &[0x04, 0x53, 0x04]).unwrap();
-    // msleep(&mut timer, 2000);
-
-
-
-    // hex::encode_to_slice(reg_addr.to_be_bytes(), &mut reg_hex).unwrap();
-    // serial.write_all(b"0x").unwrap();
-    // serial.write_all(&reg_hex).unwrap();
-    // serial.write_all(b": ").unwrap();
-
-    // i2c0.write_read(dev_addr, &reg_addr.to_be_bytes(), &mut read_buf).unwrap();
-    // let mut config = amp.get_sysctrl_bits().unwrap();
-    // hex::encode_to_slice(config.to_be_bytes(), &mut config_hex).unwrap();
-    // serial.write_all(b"0x").unwrap();
-    // serial.write_all(&config_hex).unwrap();
-    // serial.write_all(b"\n").unwrap();
-
-    // serial.write_all(b"0x").unwrap();
-    // hex::encode_to_slice(read_buf, &mut hex_bytes).unwrap();
-
-    // serial.write_all(&hex_bytes).unwrap();
-    // serial.write_all(b"\n").unwrap();
-
     let mut amp = Aw88395::new(i2c0);
 
-    let mut config_hex = [0u8; 4];
 
     amp.soft_reset().unwrap();
 
     let mut config = amp.get_sysctrl_bits().unwrap();
+    let mut config_hex = [0u8; 4];
     hex::encode_to_slice(config.to_be_bytes(), &mut config_hex).unwrap();
     serial.write_all(b"0x").unwrap();
     serial.write_all(&config_hex).unwrap();
@@ -248,6 +145,14 @@ fn main() -> ! {
 
     i2c0 = amp.release();
 
+    // Dump all amp registers to verify power on sequence was completed.
+    let dev_addr: SevenBitAddress = 0x34;
+    let max_reg_addr: u8 = 0x61;
+    const BYTES_TO_READ: usize = 2;
+    const REG_WIDTH: usize = 1;
+    let mut read_buf = [0_u8; BYTES_TO_READ];
+    let mut hex_bytes = [0_u8; BYTES_TO_READ * 2];
+    let mut reg_hex = [0_u8; REG_WIDTH * 2];
     for reg_addr in (0..max_reg_addr+1).step_by(1) {
 
         hex::encode_to_slice(reg_addr.to_be_bytes(), &mut reg_hex).unwrap();
@@ -268,9 +173,6 @@ fn main() -> ! {
     serial.write_all(b"Welcome to girlvoice\n").unwrap();
     loop {
         serial.write_all(b"awaw").unwrap();
-        // led.toggle();
-        // i2c0.setup_bus(8, true);
-        // i2c0.clear();
         delay.delay_ms(1000);
     }
 }
