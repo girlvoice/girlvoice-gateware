@@ -13,25 +13,12 @@ pub enum Error {
     RxUnderflow,
 }
 
-// #[derive(Debug, Copy, Clone)]
-// pub enum TxCmd {
-//     DataByte = 0x0,
-//     LastByte = 0x1,
-//     StartCount = 0x2,
-//     RestartCount = 0x3,
-// }
-
-
-// impl TxCmd {
-//     const fn value(&self) -> u8 {
-//         match *self {
-//             TxCmd::DataByte => 0x0,
-//             TxCmd::LastByte => 0x1,
-//             TxCmd::StartCount => 0x2,
-//             TxCmd::RestartCount => 0x3,
-//         }
-//     }
-// }
+pub enum TxCmd {
+    DataByte = 0x0,
+    LastByte = 0x1,
+    StartCount = 0x2,
+    RestartCount = 0x3,
+}
 
 pub struct I2c0 {
     registers: I2cfifo,
@@ -68,9 +55,9 @@ impl I2c0 {
         self.registers.i2crxfifo_lsb().write(|w| unsafe{ w.bits(0) });
     }
 
-    fn push_tx_byte(&mut self, byte: u8, cmd: u8){
+    fn push_tx_byte(&mut self, byte: u8, cmd: TxCmd){
         self.registers.i2ctxfifo_lsb().write(|w| unsafe{ w.txlsb().bits(byte) });
-        self.registers.i2ctxfifo_msb().write(|w| unsafe{ w.cmd().bits(cmd)} );
+        self.registers.i2ctxfifo_msb().write(|w| unsafe{ w.cmd().bits(cmd as u8)} );
     }
 
     fn pop_rx_byte(&mut self) -> u8 {
@@ -111,12 +98,12 @@ impl I2c0 {
 
         if self.is_bus_busy() {return Err(Error::InvalidState);}
 
-        self.push_tx_byte(0, 3);
-        self.push_tx_byte(address << 1, 0);
+        self.push_tx_byte(0, TxCmd::RestartCount);
+        self.push_tx_byte(address << 1, TxCmd::DataByte);
 
         for (i, byte) in bytes.enumerate() {
             let last = i == len - 1;
-            self.push_tx_byte(*byte, if last { 1 } else { 0 });
+            self.push_tx_byte(*byte, if last { TxCmd::LastByte } else { TxCmd::DataByte });
         }
 
         if self.recieved_nack() { return Err(Error::TransactionFailed) }
@@ -144,7 +131,6 @@ impl i2c::ErrorType for I2c0 {
 impl I2c<SevenBitAddress> for I2c0 {
     fn transaction(&mut self, address: SevenBitAddress, operations: &mut [Operation]) -> Result<(), Self::Error> {
 
-        // let operations = operations;
         for op in operations {
             match op {
                 Operation::Read(buf) => continue,
@@ -165,16 +151,16 @@ impl I2c<SevenBitAddress> for I2c0 {
 
         // if self.is_bus_busy() {return Err(Error::InvalidState);}
 
-        self.push_tx_byte(0, 3);
-        self.push_tx_byte(address << 1, 0);
+        self.push_tx_byte(0, TxCmd::RestartCount);
+        self.push_tx_byte(address << 1, TxCmd::DataByte);
 
         for byte in write.into_iter() {
-            self.push_tx_byte(*byte, 0);
+            self.push_tx_byte(*byte, TxCmd::DataByte);
         }
 
         // For some reason the I2CFIFO seems to always read one more than the number of bytes you tell it to read.
-        self.push_tx_byte(buf_len, 3);
-        self.push_tx_byte((address << 1) | 1, 0);
+        self.push_tx_byte(buf_len, TxCmd::RestartCount);
+        self.push_tx_byte((address << 1) | 1, TxCmd::DataByte);
 
         while !self.is_read_complete() {}
 
