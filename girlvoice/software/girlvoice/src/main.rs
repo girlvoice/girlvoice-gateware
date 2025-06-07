@@ -91,7 +91,6 @@ fn main() -> ! {
 
     let mut amp = Aw88395::new(i2c0);
 
-
     amp.soft_reset().unwrap();
 
     let mut config = amp.get_sysctrl_bits().unwrap();

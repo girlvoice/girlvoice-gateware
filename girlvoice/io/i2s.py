@@ -6,7 +6,6 @@ from amaranth.lib.wiring import Out, In
 
 from amaranth.sim import Simulator, Tick
 
-from girlvoice.stream import StreamSignature
 
 class i2s_tx(wiring.Component):
 
