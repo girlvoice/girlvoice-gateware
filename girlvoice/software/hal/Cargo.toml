@@ -1,0 +1,17 @@
+[package]
+name = "girlvoice-hal"
+version = "0.0.0"
+categories = ["embedded", "hardware-support", "no-std"]
+edition = "2024"
+
+[package.metadata.docs.rs]
+default-target = "riscv32imac-unknown-none-elf"
+targets = [
+    "riscv32i-unknown-none-elf",
+    "riscv32imac-unknown-none-elf",
+]
+
+[dependencies]
+embedded-hal = "1.0.0"
+embedded-hal-nb = "1.0.0"
+nb = "1.1.0"

@@ -1,7 +1,6 @@
 [target.riscv32imac-unknown-none-elf]
 runner = ".cargo/flash.sh"
 rustflags = [
-  "-C", "link-arg=-Tregions.ld",
   "-C", "link-arg=-Tmemory.x",
   "-C", "link-arg=-Tlink.x",
 ]
