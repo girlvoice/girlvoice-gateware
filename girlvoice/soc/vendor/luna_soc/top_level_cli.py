@@ -19,6 +19,8 @@ from girlvoice.platform.girlvoice_rev_a import GirlvoiceRevAPlatform
 from luna                    import configure_default_logging
 from luna.gateware.platform  import get_appropriate_platform, configure_toolchain
 
+from girlvoice.soc.girlvoice_soc import GirlvoiceSoc
+
 
 def top_level_cli(fragment, *pos_args, **kwargs):
 
@@ -127,7 +129,8 @@ def top_level_cli(fragment, *pos_args, **kwargs):
         soc        = introspect.soc(fragment)
         memory_map = introspect.memory_map(soc)
         reset_addr = introspect.reset_addr(soc)
-        c.LinkerScript(memory_map, reset_addr).generate(file=None)
+        with open("regions.ld", "w"):
+            c.LinkerScript(memory_map, reset_addr).generate(file=None)
         sys.exit(0)
 
     # If we've been asked to generate Rust linker region info, generate -only- that.
@@ -137,7 +140,8 @@ def top_level_cli(fragment, *pos_args, **kwargs):
         soc        = introspect.soc(fragment)
         memory_map = introspect.memory_map(soc)
         reset_addr = introspect.reset_addr(soc)
-        rust.LinkerScript(memory_map, reset_addr).generate(file=None)
+        with open("memory.x", "w") as f:
+            rust.LinkerScript(memory_map, reset_addr).generate(file=f)
         sys.exit(0)
 
     # If we've been asked to generate a SVD description of the design, generate -only- that.
@@ -166,7 +170,9 @@ def top_level_cli(fragment, *pos_args, **kwargs):
         logging.info("Erase complete.")
 
     # Build the relevant files.
-    build_dir = "build" if args.keep_files else tempfile.mkdtemp()
+    build_dir = os.path.join(os.getcwd(), "build")
+    if not os.path.exists(build_dir):
+        os.mkdir(build_dir)
     try:
         build(args, fragment, platform, build_dir)
 

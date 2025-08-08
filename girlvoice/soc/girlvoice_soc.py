@@ -30,10 +30,14 @@ from amaranth_soc                                import csr, gpio, wishbone
 from amaranth_soc.csr.wishbone                   import WishboneCSRBridge
 from amaranth_soc.wishbone.sram                  import WishboneSRAM
 
-from .vendor.luna_soc.gateware.core               import spiflash, timer, uart
-from .vendor.luna_soc.gateware.cpu                import InterruptController, VexRiscv
-from .vendor.luna_soc.util                        import readbin
-from .vendor.luna_soc.generate.svd                import SVD
+# from .vendor.luna_soc.gateware.core               import spiflash, timer, uart
+# from .vendor.luna_soc.gateware.cpu                import InterruptController, VexRiscv
+# from .vendor.luna_soc.util                        import readbin
+# from .vendor.luna_soc.generate.svd                import SVD
+from luna_soc.gateware.core               import spiflash, timer, uart
+from luna_soc.gateware.cpu                import InterruptController, VexRiscv
+from luna_soc.util                        import readbin
+from luna_soc.generate.svd                import SVD
 
 from girlvoice.platform.nexus_utils.lram          import WishboneNXLRAM
 
@@ -42,13 +46,15 @@ mB = 1024*kB
 
 class GirlvoiceSoc(Component):
     def __init__(self, *, sys_clk_freq=60e6, finalize_csr_bridge=True,
-                 mainram_size=128*kB, cpu_variant="imac+dcache"):
+                 mainram_size=128*kB, cpu_variant="imac+dcache", use_spi_flash = False):
 
         super().__init__({})
 
+        self.firmware_path = ""
+
         self.sys_clk_freq = sys_clk_freq
 
-
+        self.use_spi_flash        = False
         self.mainram_base         = 0x00000000
         self.mainram_size         = mainram_size
         self.spiflash_base        = 0x10000000
@@ -59,10 +65,12 @@ class GirlvoiceSoc(Component):
         self.uart0_base           = 0x00000200
         self.timer0_base          = 0x00000300
         self.timer0_irq           = 0
-        self.i2c0_base            = 0x00000400
+        # self.i2c0_base            = 0x00000400
+        self.led0_base            = 0x00000500
 
-        self.reset_addr  = self.mainram_base
-        self.fw_base     = None
+        if not use_spi_flash:
+            self.reset_addr  = self.mainram_base
+            self.fw_base     = None
 
         # cpu
         self.cpu = VexRiscv(
@@ -89,15 +97,11 @@ class GirlvoiceSoc(Component):
             features={"cti", "bte", "err"}
         )
 
-        # mainram
-        self.mainram = WishboneNXLRAM(
-            size=self.mainram_size,
-            data_width=wb_data_width
-        )
-        self.wb_decoder.add(self.mainram.wb_bus, addr=self.mainram_base, name="mainram")
 
         # csr decoder
-        self.csr_decoder = csr.Decoder(addr_width=28, data_width=8)
+        csr_addr_width = 28
+        csr_data_width = 8
+        self.csr_decoder = csr.Decoder(addr_width=csr_addr_width, data_width=csr_data_width)
 
         # uart0
         uart_baud_rate = 115200
@@ -112,6 +116,10 @@ class GirlvoiceSoc(Component):
         self.timer0 = timer.Peripheral(width=32)
         self.csr_decoder.add(self.timer0.bus, addr=self.timer0_base, name="timer0")
         self.interrupt_controller.add(self.timer0, number=self.timer0_irq, name="timer0")
+
+        # led
+        self.led0 = gpio.Peripheral(pin_count=1, addr_width=4, data_width=8)
+        self.csr_decoder.add(self.led0.bus, addr=self.led0_base, name="led0")
 
         # spiflash peripheral
         # self.spi0_phy        = spiflash.SPIPHYController(domain="sync", divisor=0)
@@ -149,6 +157,20 @@ class GirlvoiceSoc(Component):
 
         m = Module()
 
+        # mainram
+        maybe_fw_init = readbin.get_mem_data(self.firmware_path,  data_width=32, endianness="little")
+        if maybe_fw_init is None:
+            raise Exception()
+        self.mainram = WishboneNXLRAM(
+            size=self.mainram_size,
+            data_width=32,
+            init=maybe_fw_init
+        )
+        self.wb_decoder.add(self.mainram.wb_bus, addr=self.mainram_base, name="blockram")
+        if not self.use_spi_flash:
+            print("Initializing SoC RAM from firmware")
+            # self.mainram.init =
+
         # bus
         m.submodules.wb_arbiter = self.wb_arbiter
         m.submodules.wb_decoder = self.wb_decoder
@@ -182,6 +204,11 @@ class GirlvoiceSoc(Component):
 
         # timer0
         m.submodules.timer0 = self.timer0
+
+        # led0
+        m.submodules.led0 = self.led0
+        led_io = platform.request("led")
+        m.d.comb += led_io.o.eq(self.led0.pins[0].o)
 
         # i2c0
         # m.submodules.i2c0 = self.i2c0
@@ -223,6 +250,13 @@ class GirlvoiceSoc(Component):
             m.d.sync += self.permit_bus_traffic.eq(1)
 
         return m
+
+    def build(self, name, build_dir):
+
+        firmware_root = "../software/girlvoice"
+        firmware_bin_path = os.path.join(firmware_root, "girlvoice.bin")
+        # GirlvoiceSoc.compile_firmware(firmware_root, firmware_bin_path)
+        self.firmware_path = firmware_bin_path
 
     def gensvd(self, dst_svd):
         """Generate top-level SVD."""
@@ -313,10 +347,15 @@ class GirlvoiceSoc(Component):
 
         print("Rust PAC updated at ...", pac_dir)
 
+    @staticmethod
     def compile_firmware(rust_fw_root, rust_fw_bin):
+        print("Building SoC firmware...")
         subprocess.check_call([
             "cargo", "build", "--release"
             ], env=os.environ, cwd=rust_fw_root)
         subprocess.check_call([
             "cargo", "objcopy", "--release", "--", "-Obinary", rust_fw_bin
             ], env=os.environ, cwd=rust_fw_root)
+        # subprocess.check_call([
+        #     "riscv64-linux-gnu-objcopy", "objcopy", "" , "-O", "binary", rust_fw_bin
+        #     ], env=os.environ, cwd=rust_fw_root)

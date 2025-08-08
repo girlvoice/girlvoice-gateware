@@ -1,0 +1,614 @@
+<?xml version="1.0" encoding="utf-8"?>
+<device xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="1.1" xs:noNamespaceSchemaLocation="CMSIS-SVD.xsd">
+  <vendor>luna-soc</vendor>
+  <name>SOC</name>
+  <description>TODO device.description</description>
+  <addressUnitBits>8</addressUnitBits>
+  <width>32</width>
+  <size>32</size>
+  <access>read-write</access>
+  <resetValue>0x00000000</resetValue>
+  <resetMask>0xFFFFFFFF</resetMask>
+  <peripherals>
+    <peripheral>
+      <name>uart0</name>
+      <groupName/>
+      <baseAddress>0xf0000200</baseAddress>
+      <addressBlock>
+        <offset>0</offset>
+        <size>0x14</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <registers>
+        <register>
+          <name>tx_data</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0000</addressOffset>
+          <size>8</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>data</name>
+              <description>data field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>8</bitWidth>
+              <bitRange>[7:0]</bitRange>
+              <access>write-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>rx_data</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0004</addressOffset>
+          <size>8</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>data</name>
+              <description>data field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>8</bitWidth>
+              <bitRange>[7:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>tx_ready</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0008</addressOffset>
+          <size>8</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>txe</name>
+              <description>txe field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+              <bitRange>[0:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>rx_avail</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x000c</addressOffset>
+          <size>8</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>rxe</name>
+              <description>rxe field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+              <bitRange>[0:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>divisor</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0010</addressOffset>
+          <size>32</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>div</name>
+              <description>div field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>24</bitWidth>
+              <bitRange>[23:0]</bitRange>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+      </registers>
+    </peripheral>
+    <peripheral>
+      <name>timer0</name>
+      <groupName/>
+      <baseAddress>0xf0000300</baseAddress>
+      <addressBlock>
+        <offset>0</offset>
+        <size>0x12</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <interrupt>
+        <name>timer0</name>
+        <value>0</value>
+      </interrupt>
+      <registers>
+        <register>
+          <name>enable</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0000</addressOffset>
+          <size>8</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>enable</name>
+              <description>enable field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+              <bitRange>[0:0]</bitRange>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>mode</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0001</addressOffset>
+          <size>8</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>periodic</name>
+              <description>periodic field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+              <bitRange>[0:0]</bitRange>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>reload</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0004</addressOffset>
+          <size>32</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>value field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <bitRange>[31:0]</bitRange>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>counter</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0008</addressOffset>
+          <size>32</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>value field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <bitRange>[31:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>ev_enable</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0010</addressOffset>
+          <size>8</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>mask</name>
+              <description>mask field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+              <bitRange>[0:0]</bitRange>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>ev_pending</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0011</addressOffset>
+          <size>8</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>mask</name>
+              <description>mask field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+              <bitRange>[0:0]</bitRange>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+      </registers>
+    </peripheral>
+  </peripherals>
+</device>

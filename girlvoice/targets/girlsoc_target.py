@@ -5,6 +5,7 @@ import amaranth.lib.wiring as wiring
 from amaranth.build import *
 from amaranth.build.plat import Platform
 from girlvoice.soc.vendor.luna_soc import top_level_cli
+# from luna_soc import top_level_cli
 
 from girlvoice.platform.girlvoice_rev_a import GirlvoiceRevAPlatform
 from girlvoice.platform.nexus_utils.pll import NXPLL
@@ -51,7 +52,7 @@ class GirlTop(Elaboratable):
 
         pwr_on = Signal(init=1)
         m.d.comb += pwr_en.o.eq(pwr_on)
-        m.d.comb += platform.request("led", 0).o.eq(1)
+        # m.d.comb += platform.request("led", 0).o.eq(1)
 
         btn_last = Signal(init=1)
         btn_rising = Signal()
@@ -67,5 +68,5 @@ class GirlTop(Elaboratable):
 if __name__ == "__main__":
     p = GirlvoiceRevAPlatform(toolchain="Oxide")
 
-    top_level_cli(GirlTop(), "--generate-svd")
+    top_level_cli(GirlTop())
     # p.build(GirlTop(), do_program=False, use_radiant_docker=False)

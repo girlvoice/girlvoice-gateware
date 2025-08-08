@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:9e8f1b0e1ba2a696db354e9422a25d8f36590f44388549976809f901db5b2c01"
+content_hash = "sha256:647c312cb42ba6b91fb5e9d9d05c9e297a4d9ecc1f897f3bde5e5a496c2120a6"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
@@ -465,6 +465,19 @@ dependencies = [
 ]
 files = [
     {file = "litex-2023.12.tar.gz", hash = "sha256:4710694f5271990d2fde0c6d7b6989ec1ad72ccbab4161adeb5d6be51d6e36d4"},
+]
+
+[[package]]
+name = "luna-soc"
+version = "0.3.1.post1"
+requires_python = ">=3.9"
+git = "https://github.com/greatscottgadgets/luna-soc.git"
+ref = "main"
+revision = "e7e742fc93187768ed7f2a0a557a95f9a0eab8e9"
+summary = "Amaranth HDL libary for building SoCs with LUNA USB peripherals."
+groups = ["default"]
+dependencies = [
+    "luna-usb~=0.2",
 ]
 
 [[package]]
