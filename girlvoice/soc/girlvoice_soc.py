@@ -252,10 +252,9 @@ class GirlvoiceSoc(Component):
         return m
 
     def build(self, name, build_dir):
-
-        firmware_root = "../software/girlvoice"
+        firmware_root = os.path.join( os.getcwd(),"../software/girlvoice")
         firmware_bin_path = os.path.join(firmware_root, "girlvoice.bin")
-        # GirlvoiceSoc.compile_firmware(firmware_root, firmware_bin_path)
+        GirlvoiceSoc.compile_firmware(firmware_root, firmware_bin_path)
         self.firmware_path = firmware_bin_path
 
     def gensvd(self, dst_svd):
@@ -356,6 +355,3 @@ class GirlvoiceSoc(Component):
         subprocess.check_call([
             "cargo", "objcopy", "--release", "--", "-Obinary", rust_fw_bin
             ], env=os.environ, cwd=rust_fw_root)
-        # subprocess.check_call([
-        #     "riscv64-linux-gnu-objcopy", "objcopy", "" , "-O", "binary", rust_fw_bin
-        #     ], env=os.environ, cwd=rust_fw_root)

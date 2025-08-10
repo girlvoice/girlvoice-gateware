@@ -93,9 +93,6 @@ fn main() -> ! {
     loop {
         writeln!(serial, "awawawa").unwrap();
         pac_led.output().write( |w| w.pin_0().bit(true));
-        // led.toggle();
-        // i2c0.setup_bus(8, true);
-        // i2c0.clear();
         delay.delay_ms(1000);
         writeln!(serial, "awawawa").unwrap();
         pac_led.output().write( |w| w.pin_0().bit(false));

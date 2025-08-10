@@ -127,6 +127,7 @@ class WishboneNXLRAM(wiring.Component):
                 self.wb_bus.memory_map.add_resource(lram_block, name=(f"lram{d}{w}",), size=lram_block.size)
         self.wb_bus.memory_map.freeze()
 
+        self._init = []
         if len(init) != 0:
             self._set_init(init)
 
@@ -139,6 +140,15 @@ class WishboneNXLRAM(wiring.Component):
                 offset = d * self.width_cascading * mem_size_words + w * mem_size_words
                 chunk = data[offset:offset + mem_size_words]
                 self._lram_blocks[d][w].init = chunk
+
+        self._init = data
+    @property
+    def init(self):
+        return self._init
+
+    @init.setter
+    def init(self, init):
+        return self._set_init(init)
 
     def elaborate(self, platform):
         m = Module()
