@@ -92,10 +92,8 @@ fn main() -> ! {
     let mut led = Led0::new(peripherals.led0);
 
     loop {
-        writeln!(serial, "awawawa").unwrap();
+        writeln!(serial, "awawawa\r").unwrap();
         led.toggle().unwrap();
-        delay.delay_ms(1000);
-        writeln!(serial, "awawawa").unwrap();
         delay.delay_ms(1000);
     }
 }
