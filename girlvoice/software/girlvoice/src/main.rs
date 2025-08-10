@@ -3,10 +3,10 @@
 
 use core::fmt::Write;
 
-use embedded_hal::{digital::OutputPin, i2c::{I2c, SevenBitAddress}};
+use embedded_hal::{ i2c::{I2c, SevenBitAddress}};
 use embedded_hal::delay::DelayNs;
+use embedded_hal::digital::StatefulOutputPin;
 // use gc9a01::{mode::DisplayConfiguration, prelude::DisplayResolution240x240, Gc9a01, SPIDisplayInterface};
-use hex;
 use soc_pac as pac;
 use aw88395::Aw88395;
 use riscv_rt::entry;
@@ -44,6 +44,10 @@ const SYS_CLK_FREQ: u32 = 60_000_000;
 // hal::spi! {
 //     SPI: (pac::LcdSpi, u8),
 // }
+
+hal::impl_gpio!{
+    Led0: pac::Led0,
+}
 
 hal::impl_timer! {
     DELAY: pac::Timer0,
@@ -85,17 +89,13 @@ fn main() -> ! {
     let mut delay = DELAY::new(peripherals.timer0, SYS_CLK_FREQ);
     let mut serial = Serial0::new(peripherals.uart0);
 
-    let pac_led = peripherals.led0;
+    let mut led = Led0::new(peripherals.led0);
 
-    unsafe {
-        pac_led.mode().write( |w| w.bits(0b01));
-    }
     loop {
         writeln!(serial, "awawawa").unwrap();
-        pac_led.output().write( |w| w.pin_0().bit(true));
+        led.toggle().unwrap();
         delay.delay_ms(1000);
         writeln!(serial, "awawawa").unwrap();
-        pac_led.output().write( |w| w.pin_0().bit(false));
         delay.delay_ms(1000);
     }
 }

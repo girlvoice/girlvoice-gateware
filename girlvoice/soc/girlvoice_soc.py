@@ -10,10 +10,32 @@ Overview
 --------
 
 At a very high level, we have a vexriscv RISCV softcore running firmware (written
-in Rust), that interfaces with a bunch of peripherals through CSR registers. As
-the Vex also runs the menu system, often there is a dedicated peripheral with
-CSRs used to tweak parameters of the DSP pipeline.
-
+in Rust), that interfaces with a bunch of peripherals through CSR registers.
+  ┌─────────────────────────┐                     ┌──────────────────────────┐
+  │                         │  32-bit Wishbone    │                          │
+  │                         │       ┌────────────►│  Vocoder                 │
+  │                         │       │             │  CS Registers            │
+  │                         │       │             │                          │
+  │         VexRiscv        │◄──────┤             │                          │
+  │                         │       │             └──────────────────────────┘
+  │                         │       │
+  │                         │       │             ┌──────────────────────────┐
+  │                         │       │             │                          │
+  └─────────────────────────┘       ├────────────►│  SPI Controller          │
+  ┌─────────────────────────┐       │             │                          │
+  │                         │       │             └──────────────────────────┘
+  │   Wishbone-attached     │       │
+  │   SRAM                  │◄──────┤             ┌──────────────────────────┐
+  │                         │       │             │ Timer                    │
+  │                         │       ├────────────►│                          │
+  └─────────────────────────┘       │             └──────────────────────────┘
+  ┌─────────────────────────┐       │
+  │                         │       │
+  │                         │       │
+  │   Lattice I2C FIFO IP   │◄──────┘
+  │                         │
+  │                         │
+  └─────────────────────────┘
 """
 
 import enum
@@ -28,12 +50,7 @@ from amaranth.lib.wiring                         import Component, In, Out, flip
 
 from amaranth_soc                                import csr, gpio, wishbone
 from amaranth_soc.csr.wishbone                   import WishboneCSRBridge
-from amaranth_soc.wishbone.sram                  import WishboneSRAM
 
-# from .vendor.luna_soc.gateware.core               import spiflash, timer, uart
-# from .vendor.luna_soc.gateware.cpu                import InterruptController, VexRiscv
-# from .vendor.luna_soc.util                        import readbin
-# from .vendor.luna_soc.generate.svd                import SVD
 from luna_soc.gateware.core               import spiflash, timer, uart
 from luna_soc.gateware.cpu                import InterruptController, VexRiscv
 from luna_soc.util                        import readbin
@@ -83,7 +100,7 @@ class GirlvoiceSoc(Component):
 
         # bus
         wb_data_width = 32
-        self.wb_arbiter  = wishbone.Arbiter(
+        self.wb_arbiter = wishbone.Arbiter(
             addr_width=30,
             data_width=wb_data_width,
             granularity=8,
@@ -96,6 +113,12 @@ class GirlvoiceSoc(Component):
             alignment=0,
             features={"cti", "bte", "err"}
         )
+
+        self.mainram = WishboneNXLRAM(
+            size=self.mainram_size,
+            data_width=wb_data_width,
+        )
+        self.wb_decoder.add(self.mainram.wb_bus, addr=self.mainram_base, name="blockram")
 
 
         # csr decoder
@@ -150,10 +173,10 @@ class GirlvoiceSoc(Component):
         self.wb_to_csr = WishboneCSRBridge(self.csr_decoder.bus, data_width=32)
         self.wb_decoder.add(self.wb_to_csr.wb_bus, addr=self.csr_base, sparse=False, name="wb_to_csr")
 
-    def add_rust_constant(self, line):
+    def add_rust_constant(self, line: str):
         self.extra_rust_constants.append(line)
 
-    def elaborate(self, platform):
+    def elaborate(self, platform: Platform):
 
         m = Module()
 
@@ -161,15 +184,9 @@ class GirlvoiceSoc(Component):
         maybe_fw_init = readbin.get_mem_data(self.firmware_path,  data_width=32, endianness="little")
         if maybe_fw_init is None:
             raise Exception()
-        self.mainram = WishboneNXLRAM(
-            size=self.mainram_size,
-            data_width=32,
-            init=maybe_fw_init
-        )
-        self.wb_decoder.add(self.mainram.wb_bus, addr=self.mainram_base, name="blockram")
         if not self.use_spi_flash:
             print("Initializing SoC RAM from firmware")
-            # self.mainram.init =
+            self.mainram.init = maybe_fw_init
 
         # bus
         m.submodules.wb_arbiter = self.wb_arbiter
@@ -197,10 +214,6 @@ class GirlvoiceSoc(Component):
         uart = platform.request("uart")
         m.d.comb += self.uart0.pins.rx.eq(uart.rx.i)
         m.d.comb += uart.tx.o.eq(self.uart0.pins.tx.o)
-        # if sim.is_hw(platform):
-        #     uart0_provider = uart.Provider(0)
-        #     m.submodules.uart0_provider = uart0_provider
-        #     wiring.connect(m, self.uart0.pins, uart0_provider.pins)
 
         # timer0
         m.submodules.timer0 = self.timer0
@@ -225,17 +238,7 @@ class GirlvoiceSoc(Component):
 
         # wiring.connect(m, self.i2c1.i2c_stream, self.pmod0.i2c_master.i2c_override)
 
-        # if sim.is_hw(platform):
 
-        #     # generate our domain clocks/resets
-        #     m.submodules.car = car = platform.clock_domain_generator(self.clock_settings)
-
-
-        #     # Connect encoder button to RebootProvider
-        #     m.submodules.reboot = reboot = RebootProvider(self.clock_settings.frequencies.sync)
-        #     m.d.comb += reboot.button.eq(self.encoder0._button.f.button.r_data)
-        # else:
-        #     m.submodules.car = sim.FakeTiliquaDomainGenerator()
 
         # wishbone csr bridge
         m.submodules.wb_to_csr = self.wb_to_csr
@@ -289,16 +292,12 @@ class GirlvoiceSoc(Component):
         # TODO: better to move these to SVD vendor section?
         print("Generating (rust) constants ...", dst)
         with open(dst, "w") as f:
-            f.write(f"pub const UI_NAME: &str            = \"{self.ui_name}\";\n")
-            f.write(f"pub const UI_SHA: &str             = \"{self.ui_sha}\";\n")
             f.write(f"pub const HW_REV_MAJOR: u32        = {self.platform_class.version_major};\n")
             f.write(f"pub const CLOCK_SYNC_HZ: u32       = {self.clock_settings.frequencies.sync};\n")
             f.write(f"pub const CLOCK_FAST_HZ: u32       = {self.clock_settings.frequencies.fast};\n")
             f.write(f"pub const CLOCK_AUDIO_HZ: u32      = {self.clock_settings.frequencies.audio};\n")
             f.write(f"pub const SPIFLASH_BASE: usize     = 0x{self.spiflash_base:x};\n")
             f.write(f"pub const SPIFLASH_SZ_BYTES: usize = 0x{self.spiflash_size:x};\n")
-            f.write(f"pub const MANIFEST_BASE: usize     = SPIFLASH_BASE + SPIFLASH_SZ_BYTES - 4096;\n")
-            f.write(f"pub const MANIFEST_SZ_BYTES: usize = 4096;\n")
             f.write("// Extra constants specified by an SoC subclass:\n")
             for l in self.extra_rust_constants:
                 f.write(l)
