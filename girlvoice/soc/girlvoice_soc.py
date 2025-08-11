@@ -38,7 +38,6 @@ in Rust), that interfaces with a bunch of peripherals through CSR registers.
   └─────────────────────────┘
 """
 
-import enum
 import shutil
 import subprocess
 import os
@@ -56,7 +55,14 @@ from luna_soc.gateware.cpu                import InterruptController, VexRiscv
 from luna_soc.util                        import readbin
 from luna_soc.generate.svd                import SVD
 
+from girlvoice.platform.nexus_utils import lmmi
+from girlvoice.platform.nexus_utils.lmmi import LMMItoWishbone
 from girlvoice.platform.nexus_utils.lram          import WishboneNXLRAM
+
+from girlvoice.dsp.vocoder import StaticVocoder
+from girlvoice.io.i2s import i2s_rx, i2s_tx
+from girlvoice.platform.nexus_utils.i2c_fifo import I2CFIFO
+from girlvoice.platform.nexus_utils.lmmi_am import WishboneLMMIBridge
 
 kB = 1024
 mB = 1024*kB
@@ -77,6 +83,7 @@ class GirlvoiceSoc(Component):
         self.spiflash_base        = 0x10000000
         self.spiflash_size        = 0x01000000 # 128Mbit / 16MiB
         self.csr_base             = 0xf0000000
+        self.lmmi_base            = 0xa0000000
         # offsets from csr_base
         self.spiflash_ctrl_base   = 0x00000100
         self.uart0_base           = 0x00000200
@@ -151,11 +158,22 @@ class GirlvoiceSoc(Component):
         # self.wb_decoder.add(self.spiflash_periph.bus, addr=self.spiflash_base, name="spiflash")
         # self.csr_decoder.add(self.spiflash_periph.csr, addr=self.spiflash_ctrl_base, name="spiflash_ctrl")
 
-
+        # lattice i2c
+        self.i2c = I2CFIFO(scl_freq=400e3, use_hard_io=True)
+        self.lmmi_to_wb = WishboneLMMIBridge(lmmi_bus = self.i2c.lmmi, data_width=32)
+        self.wb_decoder.add(self.lmmi_to_wb.wb_bus, addr=self.lmmi_base, name = "wb_to_lmmi")
         # mobo i2c
         # self.i2c0 = i2c.Peripheral()
         # self.i2c_stream0 = i2c.I2CStreamer(period_cyc=256)
         # self.csr_decoder.add(self.i2c0.bus, addr=self.i2c0_base, name="i2c0")
+
+        sample_width = 16
+
+        bclk_freq = 4e6
+        fs = 32e3
+
+        self.i2s_tx = i2s_tx(self.sys_clk_freq, sclk_freq=bclk_freq, sample_width=sample_width)
+        self.i2s_rx = i2s_rx(sys_clk_freq, sclk_freq=bclk_freq, sample_width=sample_width)
 
         self.permit_bus_traffic = Signal()
 
@@ -224,7 +242,7 @@ class GirlvoiceSoc(Component):
         m.d.comb += led_io.o.eq(self.led0.pins[0].o)
 
         # i2c0
-        # m.submodules.i2c0 = self.i2c0
+        m.submodules.i2c0 = self.i2c
         # m.submodules.i2c_stream0 = self.i2c_stream0
         # wiring.connect(m, self.i2c0.i2c_stream, self.i2c_stream0.control)
         # if sim.is_hw(platform):
@@ -236,9 +254,24 @@ class GirlvoiceSoc(Component):
         # m.submodules.spi0_phy = self.spi0_phy
         # m.submodules.spiflash_periph = self.spiflash_periph
 
-        # wiring.connect(m, self.i2c1.i2c_stream, self.pmod0.i2c_master.i2c_override)
+        # I2S TX/RX
 
+        m.submodules.i2s_rx = self.i2s_rx
+        m.submodules.i2s_tx = self.i2s_tx
 
+        mic = platform.request("mic", 0)
+
+        m.d.comb += [
+            mic.lrclk.o.eq(self.i2s_rx.lrclk),
+            mic.clk.o.eq(self.i2s_rx.sclk),
+            self.i2s_rx.sdin.eq(mic.data.i)
+        ]
+
+        amp = platform.request("amp", 0)
+        m.d.comb += amp.en.o.eq(1)
+        m.d.comb += amp.lrclk.o.eq(~self.i2s_tx.lrclk)
+        m.d.comb += amp.clk.o.eq(self.i2s_tx.sclk)
+        m.d.comb += amp.data.o.eq(self.i2s_tx.sdout)
 
         # wishbone csr bridge
         m.submodules.wb_to_csr = self.wb_to_csr
