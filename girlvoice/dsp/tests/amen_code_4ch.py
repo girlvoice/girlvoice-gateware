@@ -13,7 +13,6 @@ from girlvoice.dsp.tests.amen_envelope import import_wav
 from girlvoice.dsp.vocoder import StaticVocoder, ThreadedVocoderChannel
 
 
-
 def run_sim():
     clk_freq = 60e6
     bit_width = 16
@@ -26,16 +25,17 @@ def run_sim():
         clk_sync_freq=clk_freq,
         channel_class=ThreadedVocoderChannel,
         fs=fs,
-        sample_width=bit_width
+        sample_width=bit_width,
     )
 
     max_samples = 10000
-    (t, input_samples) = import_wav('./amen_break_441khz_16bit.wav')
+    (t, input_samples) = import_wav("./amen_break_441khz_16bit.wav")
     input_samples = input_samples * 0.8
     input_samples = input_samples[:max_samples]
     t = t[:max_samples]
     output_samples = []
     start_time = time.time()
+
     async def tb(ctx):
         samples_processed = 0
         for sample in input_samples:
@@ -45,10 +45,12 @@ def run_sim():
             samples_processed += 1
             if samples_processed % 1000 == 0:
                 elapsed = time.time() - start_time
-                print(f"{samples_processed}/{len(t)} Samples processed in {elapsed} sec")
+                print(
+                    f"{samples_processed}/{len(t)} Samples processed in {elapsed} sec"
+                )
 
     sim = Simulator(dut)
-    sim.add_clock(1/clk_freq)
+    sim.add_clock(1 / clk_freq)
     sim.add_testbench(tb)
 
     env_ch = []
@@ -70,7 +72,9 @@ def run_sim():
     with sim.write_vcd(dutname + f".vcd"):
         sim.run()
     print("Finished Simulation!")
-    wavfile.write("amen_4_ch.wav", rate=fs, data=np.array(output_samples, dtype=np.int16))
+    wavfile.write(
+        "amen_4_ch.wav", rate=fs, data=np.array(output_samples, dtype=np.int16)
+    )
     rows = 2
     cols = 2
     fig, axs = plt.subplots(rows, cols)
@@ -84,14 +88,12 @@ def run_sim():
         axn.plot(t, bp_ch[ch_num], alpha=0.5, label=f"Bandpass {ch_num} Output")
         axn.plot(t, output_ch[ch_num], alpha=0.5, label=f"Channel {ch_num} Output")
 
-    plt.xlabel('time (s)')
-    plt.title('4 Channel vocoder')
+    plt.xlabel("time (s)")
+    plt.title("4 Channel vocoder")
     plt.grid(True)
     plt.legend()
     # plt.savefig(f"{type(dut).__name__}.png")
     plt.show()
-
-
 
 
 if __name__ == "__main__":

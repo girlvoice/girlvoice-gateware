@@ -11,9 +11,9 @@ from girlvoice.io.i2s import i2s_rx, i2s_tx
 from girlvoice.dsp.bandpass_iir import BandpassIIR
 import girlvoice.dsp.vocoder as vocoder
 
-class GirlTop(Elaboratable):
 
-    def elaborate(self, platform:Platform):
+class GirlTop(Elaboratable):
+    def elaborate(self, platform: Platform):
         m = Module()
 
         ## Clock Defs
@@ -33,12 +33,14 @@ class GirlTop(Elaboratable):
             clkin_freq=12e6,
             cd_out=cd_sync,
             clkout=cd_sync.clk,
-            clkout_freq=sync_freq)
+            clkout_freq=sync_freq,
+        )
         platform.add_clock_constraint(cd_sync.clk, sync_freq)
 
-
         ## RX from ADC
-        m.submodules.i2s_rx = rx = i2s_rx(sys_clk_freq=sync_freq, sclk_freq=bclk_freq, sample_width=18)
+        m.submodules.i2s_rx = rx = i2s_rx(
+            sys_clk_freq=sync_freq, sclk_freq=bclk_freq, sample_width=18
+        )
 
         adc = platform.request("mic", 0)
 
@@ -57,7 +59,9 @@ class GirlTop(Elaboratable):
         # m.d.comb += sclk_i.o.eq(adc_sclk.clk)
 
         ## TX to DAC
-        m.submodules.i2s_tx = tx = i2s_tx(sys_clk_freq=sync_freq, sclk_freq=bclk_freq, sample_width=18)
+        m.submodules.i2s_tx = tx = i2s_tx(
+            sys_clk_freq=sync_freq, sclk_freq=bclk_freq, sample_width=18
+        )
 
         amp = platform.request("amp", 0)
         amp_lr_clk = amp.lrclk
@@ -70,7 +74,6 @@ class GirlTop(Elaboratable):
         m.d.comb += amp_bclk.o.eq(tx.sclk)
         m.d.comb += dac_din.o.eq(tx.sdout)
 
-
         sample_rate = 48e3
         m.submodules.vocoder = v = vocoder.StaticVocoder(
             start_freq=500,
@@ -79,7 +82,7 @@ class GirlTop(Elaboratable):
             num_channels=20,
             fs=sample_rate,
             sample_width=18,
-            channel_class=vocoder.ThreadedVocoderChannel
+            channel_class=vocoder.ThreadedVocoderChannel,
         )
         wiring.connect(m, rx.source, v.sink)
         wiring.connect(m, v.source, tx.sink)
@@ -97,11 +100,11 @@ class GirlTop(Elaboratable):
         m.d.sync += btn_last.eq(pwr_button)
         m.d.sync += btn_rising.eq(pwr_button & ~btn_last)
 
-
         with m.If(btn_rising):
             m.d.sync += pwr_on.eq(0)
 
         return m
+
 
 if __name__ == "__main__":
     p = GirlvoiceRevAPlatform(toolchain="Oxide")

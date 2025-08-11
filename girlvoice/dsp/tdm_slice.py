@@ -9,6 +9,7 @@ from amaranth.lib import stream
 
 from amaranth.sim import Simulator
 
+
 class TDMMultiply(wiring.Component):
     def __init__(self, sample_width, num_threads):
         self.sample_width = sample_width
@@ -17,12 +18,12 @@ class TDMMultiply(wiring.Component):
         signature = {
             "source": Out(signed(2 * sample_width)),
             "sink_a": In(signed(sample_width)),
-            "sink_b": In(signed(sample_width))
+            "sink_b": In(signed(sample_width)),
         }
         self.thread_ids = range(self.num_threads)
         for i in self.thread_ids:
-            signature[f"sink_a_{i}"]  = In(signed(sample_width))
-            signature[f"sink_b_{i}"]  = In(signed(sample_width))
+            signature[f"sink_a_{i}"] = In(signed(sample_width))
+            signature[f"sink_b_{i}"] = In(signed(sample_width))
             valid_init = 1 if i == 0 else 0
             signature[f"valid_{i}"] = Out(1, init=valid_init)
 
@@ -55,10 +56,14 @@ class TDMMultiply(wiring.Component):
         self.sink_a = Signal(signed(self.sample_width))
         self.sink_b = Signal(signed(self.sample_width))
 
-        sink_idx = Signal(range(self.num_threads), init=self.num_threads-1)
-        sink_a_mux = Array([self.__dict__[f"sink_a_{i}"] for i in range(self.num_threads)])
-        sink_b_mux = Array([self.__dict__[f"sink_b_{i}"] for i in range(self.num_threads)])
-        with m.If(sink_idx == self.num_threads-1):
+        sink_idx = Signal(range(self.num_threads), init=self.num_threads - 1)
+        sink_a_mux = Array(
+            [self.__dict__[f"sink_a_{i}"] for i in range(self.num_threads)]
+        )
+        sink_b_mux = Array(
+            [self.__dict__[f"sink_b_{i}"] for i in range(self.num_threads)]
+        )
+        with m.If(sink_idx == self.num_threads - 1):
             m.d.sync += sink_idx.eq(0)
         with m.Else():
             m.d.sync += sink_idx.eq(sink_idx + 1)
@@ -66,10 +71,20 @@ class TDMMultiply(wiring.Component):
         m.d.comb += self.sink_b.eq(sink_b_mux[sink_idx])
 
         # Input delay registers
-        input_a_ring = [Signal(self.sample_width, name=f"input_a_ring{i}") for i in range(self.num_threads - 1)]
-        input_b_ring = [Signal(self.sample_width, name=f"input_b_ring{i}") for i in range(self.num_threads - 1)]
-        m.d.sync += [input_a_ring[i+1].eq(input_a_ring[i]) for i in range(self.num_threads - 2)]
-        m.d.sync += [input_b_ring[i+1].eq(input_b_ring[i]) for i in range(self.num_threads - 2)]
+        input_a_ring = [
+            Signal(self.sample_width, name=f"input_a_ring{i}")
+            for i in range(self.num_threads - 1)
+        ]
+        input_b_ring = [
+            Signal(self.sample_width, name=f"input_b_ring{i}")
+            for i in range(self.num_threads - 1)
+        ]
+        m.d.sync += [
+            input_a_ring[i + 1].eq(input_a_ring[i]) for i in range(self.num_threads - 2)
+        ]
+        m.d.sync += [
+            input_b_ring[i + 1].eq(input_b_ring[i]) for i in range(self.num_threads - 2)
+        ]
 
         m.d.sync += input_a_ring[0].eq(self.sink_a)
         m.d.sync += input_b_ring[0].eq(self.sink_b)
@@ -86,11 +101,14 @@ class TDMMultiply(wiring.Component):
 
         # Valid/Ready round robin
         for i in range(self.num_threads - 1):
-            m.d.sync += self.__dict__[f"valid_{i+1}"].eq(self.__dict__[f"valid_{i}"])
+            m.d.sync += self.__dict__[f"valid_{i + 1}"].eq(self.__dict__[f"valid_{i}"])
 
-        m.d.sync += self.__dict__[f"valid_0"].eq(self.__dict__[f"valid_{self.num_threads - 1}"])
+        m.d.sync += self.__dict__[f"valid_0"].eq(
+            self.__dict__[f"valid_{self.num_threads - 1}"]
+        )
 
         return m
+
 
 def run_sim():
     thread_count = 3
@@ -101,6 +119,7 @@ def run_sim():
     a = [i for i in range(100)]
     b = [i for i in range(100)]
     print("awa")
+
     async def tb(ctx):
         for i in range(100):
             ctx.set(dut.sink_a, a[i])
@@ -108,7 +127,7 @@ def run_sim():
             await ctx.tick()
 
     sim = Simulator(dut)
-    sim.add_clock(1/clk_freq)
+    sim.add_clock(1 / clk_freq)
     sim.add_testbench(tb)
 
     os.makedirs("gtkw", exist_ok=True)

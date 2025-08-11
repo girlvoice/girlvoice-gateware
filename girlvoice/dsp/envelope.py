@@ -15,7 +15,7 @@ from girlvoice.stream import stream_get, stream_put
 from girlvoice.dsp.utils import generate_chirp, generate_impulse
 
 
-'''
+"""
 An Envelope follower is essentially a special kind of low-pass filter
 Its purpose is to trace the "envelope" of a signal. In a channel vocoder, this "envelope"
 can be used to vary the amplification of one of the carrier signals.
@@ -26,10 +26,19 @@ https://kferg.dev/posts/2020/audio-reactive-programming-envelope-followers
 
 Attack and decay input parameters represent the time to decay halfway (halflife) in milliseconds
 
-'''
-class EnvelopeFollower(wiring.Component):
+"""
 
-    def __init__(self, sample_width=24, fs=48000, attack_halflife=10, decay_halflife=20, mult_slice:TDMMultiply = None, formal=False):
+
+class EnvelopeFollower(wiring.Component):
+    def __init__(
+        self,
+        sample_width=24,
+        fs=48000,
+        attack_halflife=10,
+        decay_halflife=20,
+        mult_slice: TDMMultiply = None,
+        formal=False,
+    ):
         self.formal = formal
         self.sample_width = sample_width
         self.fraction_width = sample_width - 1
@@ -45,17 +54,24 @@ class EnvelopeFollower(wiring.Component):
         print(f"Envelope Decay parameter: {decay}")
         print(f"Envelope Attack parameter: {attack}")
 
-        self.attack_fp = C(int(attack * (2**(self.fraction_width))), signed(sample_width))
-        self.attack_comp = C(int(attack_comp * (2**(self.fraction_width))), signed(sample_width))
+        self.attack_fp = C(
+            int(attack * (2 ** (self.fraction_width))), signed(sample_width)
+        )
+        self.attack_comp = C(
+            int(attack_comp * (2 ** (self.fraction_width))), signed(sample_width)
+        )
 
-        self.decay_fp = C(int(decay * (2**(self.fraction_width))), signed(sample_width))
-        self.decay_comp = C(int(decay_comp * (2**(self.fraction_width))), signed(sample_width))
+        self.decay_fp = C(
+            int(decay * (2 ** (self.fraction_width))), signed(sample_width)
+        )
+        self.decay_comp = C(
+            int(decay_comp * (2 ** (self.fraction_width))), signed(sample_width)
+        )
 
         attack_quant = self.attack_fp.value / 2**self.fraction_width
         decay_quant = self.decay_fp.value / 2**self.fraction_width
         print(f"Envelope Decay parameter quantized: {decay_quant}")
         print(f"Envelope Attack parameter quantized: {attack_quant}")
-
 
         if mult_slice is not None:
             assert mult_slice.sample_width >= self.sample_width
@@ -63,15 +79,17 @@ class EnvelopeFollower(wiring.Component):
         else:
             self.mult = None
 
-        super().__init__({
-            "sink": In(stream.Signature(signed(sample_width))),
-            "source": Out(stream.Signature(signed(sample_width)))
-        })
+        super().__init__(
+            {
+                "sink": In(stream.Signature(signed(sample_width))),
+                "source": Out(stream.Signature(signed(sample_width))),
+            }
+        )
 
     def elaborate(self, platform):
         m = Module()
 
-        mac_width = self.sample_width*2
+        mac_width = self.sample_width * 2
         acc = Signal(signed(mac_width))
         acc_quant = Signal(signed(self.sample_width))
         x = Signal(signed(self.sample_width))
@@ -114,14 +132,15 @@ class EnvelopeFollower(wiring.Component):
                     with m.If(acc_quant >= 0):
                         m.d.comb += self.source.payload.eq(acc_quant)
                     with m.Else():
-                        m.d.comb += self.source.payload.eq(2**(self.sample_width - 1) - 1)
+                        m.d.comb += self.source.payload.eq(
+                            2 ** (self.sample_width - 1) - 1
+                        )
                     with m.If(self.source.ready):
                         m.d.sync += y.eq(self.source.payload)
                         # m.d.sync += Assert(self.source.payload >= 0, "Envelope follower gave negative output")
                         m.next = "LOAD"
 
         else:
-
             mac_out = self.mult.source
             mac_in_1, mac_in_2, mult_valid = self.mult.get_next_thread_ports()
 
@@ -163,14 +182,16 @@ class EnvelopeFollower(wiring.Component):
 
 # Testbench ----------------------------------------
 
+
 def generate_ramp(freq, duration, fs, sample_width):
     num_samples = duration * fs
     t = np.linspace(0, duration, num_samples)
     input_samples = signal.sawtooth(2 * np.pi * freq * t) * t
-    input_samples *= (2**(sample_width - 1))
+    input_samples *= 2 ** (sample_width - 1)
     input_samples = np.flip(input_samples)
-    input_samples[0:int(0.1*num_samples)] = 0
+    input_samples[0 : int(0.1 * num_samples)] = 0
     return (t, input_samples)
+
 
 def run_sim():
     clk_freq = 60e6
@@ -179,10 +200,11 @@ def run_sim():
 
     m = Module()
     m.submodules.mult = mult = TDMMultiply(bit_width, num_threads=2)
-    m.submodules.dut = env = EnvelopeFollower(sample_width=bit_width, fs=fs, mult_slice=mult, attack_halflife=1)
+    m.submodules.dut = env = EnvelopeFollower(
+        sample_width=bit_width, fs=fs, mult_slice=mult, attack_halflife=1
+    )
 
     duration = 0.1
-
 
     # test_sig_freq = 5000
     # (t, input_samples) = generate_ramp(test_sig_freq, duration, fs, bit_width)
@@ -190,6 +212,7 @@ def run_sim():
     t, input_samples = generate_impulse(duration, fs, bit_width)
 
     output_samples = []
+
     async def tb(ctx):
         samples_processed = 0
         for sample in input_samples:
@@ -201,7 +224,7 @@ def run_sim():
                 print(f"{samples_processed}/{len(t)} Samples processed")
 
     sim = Simulator(m)
-    sim.add_clock(1/clk_freq)
+    sim.add_clock(1 / clk_freq)
     sim.add_testbench(tb)
 
     os.makedirs("gtkw", exist_ok=True)
@@ -212,15 +235,13 @@ def run_sim():
         ax2 = plt.subplot(111)
         ax2.plot(t, input_samples, alpha=0.5, label="Input")
         ax2.plot(t, output_samples, alpha=0.5, label="Output")
-        ax2.set_xlabel('time (s)')
-        plt.title('Envelope Follower')
+        ax2.set_xlabel("time (s)")
+        plt.title("Envelope Follower")
         plt.grid(True)
-        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0.0)
         plt.legend()
         # plt.savefig(f"{type(dut).__name__}.png")
         plt.show()
-
-
 
 
 if __name__ == "__main__":

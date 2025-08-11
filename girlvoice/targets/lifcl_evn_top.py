@@ -7,9 +7,9 @@ from girlvoice.platform.lifcl_evn import LIFCLEVNPlatform
 from girlvoice.platform.nexus_utils.pll import NXPLL
 from girlvoice.io.i2s import i2s_rx, i2s_tx
 
-class GirlTop(Elaboratable):
 
-    def elaborate(self, platform:Platform):
+class GirlTop(Elaboratable):
+    def elaborate(self, platform: Platform):
         m = Module()
 
         ## Clock Defs
@@ -27,7 +27,8 @@ class GirlTop(Elaboratable):
             clkin_freq=12e6,
             cd_out=cd_sync,
             clkout=clk_sync,
-            clkout_freq=sync_freq)
+            clkout_freq=sync_freq,
+        )
         platform.add_clock_constraint(cd_sync.clk, sync_freq)
 
         clk_ratio = int(sync_freq // bclk_freq)
@@ -41,7 +42,9 @@ class GirlTop(Elaboratable):
             m.d.sync += clk_div.eq(clk_div + 1)
 
         ## RX from ADC
-        m.submodules.i2s_rx = rx = i2s_rx(sys_clk_freq=sync_freq, sclk_freq=bclk_freq, sample_width=24)
+        m.submodules.i2s_rx = rx = i2s_rx(
+            sys_clk_freq=sync_freq, sclk_freq=bclk_freq, sample_width=24
+        )
 
         adc = platform.request("mic", 0)
 
@@ -61,7 +64,9 @@ class GirlTop(Elaboratable):
         # m.d.comb += sclk_i.o.eq(adc_sclk.clk)
 
         ## TX to DAC
-        m.submodules.i2s_tx = tx = i2s_tx(sys_clk_freq=sync_freq, sclk_freq=bclk_freq, sample_width=24)
+        m.submodules.i2s_tx = tx = i2s_tx(
+            sys_clk_freq=sync_freq, sclk_freq=bclk_freq, sample_width=24
+        )
 
         amp = platform.request("amp", 0)
         amp_lr_clk = amp.lrclk
@@ -74,7 +79,6 @@ class GirlTop(Elaboratable):
         m.d.comb += amp_bclk.o.eq(tx.sclk)
         m.d.comb += dac_din.o.eq(tx.sdout)
 
-
         m.d.comb += tx.sink.data.eq(rx.source.data)
         m.d.comb += rx.source.ready.eq(tx.sink.ready)
         m.d.comb += tx.sink.valid.eq(rx.source.valid)
@@ -83,31 +87,77 @@ class GirlTop(Elaboratable):
 
         return m
 
+
 if __name__ == "__main__":
     p = LIFCLEVNPlatform(VCCIO6="1V8", toolchain="Oxide")
 
     prototype_resources = [
-        Resource("mic", 0,
-            Subsignal("bclk", Pins("RASP_IO06", dir="o", conn=("RASP", 0)), Attrs(IO_TYPE="LVCMOS18")),
-            Subsignal("data", Pins("RASP_IO05", dir="i", conn=("RASP", 0)), Attrs(IO_TYPE="LVCMOS18")),
-            Subsignal("lrclk", Pins("RASP_IO19", dir="o", conn=("RASP", 0)), Attrs(IO_TYPE="LVCMOS18")),
-            Subsignal("sel", Pins("RASP_IO26", dir="o", conn=("RASP", 0)), Attrs(IO_TYPE="LVCMOS18"))
+        Resource(
+            "mic",
+            0,
+            Subsignal(
+                "bclk",
+                Pins("RASP_IO06", dir="o", conn=("RASP", 0)),
+                Attrs(IO_TYPE="LVCMOS18"),
+            ),
+            Subsignal(
+                "data",
+                Pins("RASP_IO05", dir="i", conn=("RASP", 0)),
+                Attrs(IO_TYPE="LVCMOS18"),
+            ),
+            Subsignal(
+                "lrclk",
+                Pins("RASP_IO19", dir="o", conn=("RASP", 0)),
+                Attrs(IO_TYPE="LVCMOS18"),
+            ),
+            Subsignal(
+                "sel",
+                Pins("RASP_IO26", dir="o", conn=("RASP", 0)),
+                Attrs(IO_TYPE="LVCMOS18"),
+            ),
         ),
-
-        Resource("amp", 0,
-            Subsignal("clk", Pins("RASP_IO03", dir="o", conn=("RASP", 0)), Attrs(IO_TYPE="LVCMOS18")),
-            Subsignal("data", Pins("RASP_IO02", dir="o", conn=("RASP", 0)), Attrs(IO_TYPE="LVCMOS18")),
-            Subsignal("lrclk", Pins("RASP_IO04", dir="o", conn=("RASP", 0)), Attrs(IO_TYPE="LVCMOS18")),
-            Subsignal("en", Pins("RASP_IO17", dir="o", conn=("RASP", 0)), Attrs(IO_TYPE="LVCMOS18")),
+        Resource(
+            "amp",
+            0,
+            Subsignal(
+                "clk",
+                Pins("RASP_IO03", dir="o", conn=("RASP", 0)),
+                Attrs(IO_TYPE="LVCMOS18"),
+            ),
+            Subsignal(
+                "data",
+                Pins("RASP_IO02", dir="o", conn=("RASP", 0)),
+                Attrs(IO_TYPE="LVCMOS18"),
+            ),
+            Subsignal(
+                "lrclk",
+                Pins("RASP_IO04", dir="o", conn=("RASP", 0)),
+                Attrs(IO_TYPE="LVCMOS18"),
+            ),
+            Subsignal(
+                "en",
+                Pins("RASP_IO17", dir="o", conn=("RASP", 0)),
+                Attrs(IO_TYPE="LVCMOS18"),
+            ),
         ),
     ]
 
     pmod_adc = [
-        Resource("adc", 0,
-            Subsignal("sclk", Pins("1", dir="o", conn=("pmod", 0)), Attrs(IO_TYPE="LVCMOS33")),
-            Subsignal("data", Pins("3", dir="i", conn=("pmod", 0)), Attrs(IO_TYPE="LVCMOS33")),
-            Subsignal("lrclk", Pins("2", dir="o", conn=("pmod", 0)), Attrs(IO_TYPE="LVCMOS33")),
-            Subsignal("bclk", Pins("4", dir="o", conn=("pmod", 0)), Attrs(IO_TYPE="LVCMOS33")),
+        Resource(
+            "adc",
+            0,
+            Subsignal(
+                "sclk", Pins("1", dir="o", conn=("pmod", 0)), Attrs(IO_TYPE="LVCMOS33")
+            ),
+            Subsignal(
+                "data", Pins("3", dir="i", conn=("pmod", 0)), Attrs(IO_TYPE="LVCMOS33")
+            ),
+            Subsignal(
+                "lrclk", Pins("2", dir="o", conn=("pmod", 0)), Attrs(IO_TYPE="LVCMOS33")
+            ),
+            Subsignal(
+                "bclk", Pins("4", dir="o", conn=("pmod", 0)), Attrs(IO_TYPE="LVCMOS33")
+            ),
         ),
     ]
     p.add_resources(prototype_resources)

@@ -14,8 +14,9 @@ from girlvoice.stream import stream_get, stream_put
 from girlvoice.dsp.tdm_slice import TDMMultiply
 from girlvoice.dsp.utils import generate_sine
 
+
 class VariableGainAmp(wiring.Component):
-    def __init__(self, carrier_width, modulator_width, mult_slice:TDMMultiply = None):
+    def __init__(self, carrier_width, modulator_width, mult_slice: TDMMultiply = None):
         self.modulator_width = modulator_width
         self.carrier_width = carrier_width
 
@@ -25,11 +26,13 @@ class VariableGainAmp(wiring.Component):
             self.mult = mult_slice
         else:
             self.mult = None
-        super().__init__({
-            "carrier": In(stream.Signature(signed(carrier_width))),
-            "modulator": In(stream.Signature(signed(modulator_width))),
-            "source": Out(stream.Signature(signed(carrier_width)))
-        })
+        super().__init__(
+            {
+                "carrier": In(stream.Signature(signed(carrier_width))),
+                "modulator": In(stream.Signature(signed(modulator_width))),
+                "source": Out(stream.Signature(signed(carrier_width))),
+            }
+        )
 
     def elaborate(self, platform):
         m = Module()
@@ -44,7 +47,9 @@ class VariableGainAmp(wiring.Component):
             m.d.comb += i_valid.eq(self.modulator.valid & self.carrier.valid)
 
             with m.If(i_valid & (~self.source.valid | self.source.ready)):
-                m.d.sync += self.source.payload.eq(product >> (self.modulator_width - 1))
+                m.d.sync += self.source.payload.eq(
+                    product >> (self.modulator_width - 1)
+                )
                 m.d.sync += self.source.valid.eq(1)
                 m.d.comb += self.carrier.ready.eq(1)
                 m.d.comb += self.modulator.ready.eq(1)
@@ -53,7 +58,6 @@ class VariableGainAmp(wiring.Component):
         else:
             product = self.mult.source
             mult_i_a, mult_i_b, mult_valid = self.mult.get_next_thread_ports()
-
 
             inputs_valid = Signal()
             m.d.comb += inputs_valid.eq(self.modulator.valid & self.carrier.valid)
@@ -73,7 +77,9 @@ class VariableGainAmp(wiring.Component):
                         m.next = "WAIT"
                 with m.State("WAIT"):
                     with m.If(mult_valid):
-                        m.d.sync += self.source.payload.eq(product >> (self.modulator_width - 1))
+                        m.d.sync += self.source.payload.eq(
+                            product >> (self.modulator_width - 1)
+                        )
                         m.d.sync += self.source.valid.eq(1)
                         m.next = "LOAD"
 
@@ -82,37 +88,36 @@ class VariableGainAmp(wiring.Component):
 
 def run_sim():
     clk_freq = 60e6
-    sample_width = 16 # Number of 2s complement bits
+    sample_width = 16  # Number of 2s complement bits
     fs = 48000
 
     mult = TDMMultiply(sample_width=sample_width, num_threads=2)
 
     dut = VariableGainAmp(
-        carrier_width=sample_width,
-        modulator_width=sample_width,
-        mult_slice=mult
+        carrier_width=sample_width, modulator_width=sample_width, mult_slice=mult
     )
 
-    duration = .25
+    duration = 0.25
     test_freq = 10
     (t, input_samples) = generate_sine(duration, fs, test_freq, sample_width)
     output_samples = np.zeros(int(duration * fs))
+
     async def tb(ctx):
         samples_processed = 0
         await ctx.tick()
-        ctx.set(dut.carrier.payload, 2**(sample_width - 2))
+        ctx.set(dut.carrier.payload, 2 ** (sample_width - 2))
         ctx.set(dut.carrier.valid, 1)
         await ctx.tick()
         for sample in input_samples:
             await stream_put(ctx, dut.modulator, int(sample))
-            output_samples[samples_processed] = (await stream_get(ctx, dut.source))
+            output_samples[samples_processed] = await stream_get(ctx, dut.source)
             await ctx.tick()
             samples_processed += 1
             if samples_processed % 1000 == 0:
                 print(f"{samples_processed}/{len(t)} Samples processed")
 
     sim = Simulator(dut)
-    sim.add_clock(1/clk_freq)
+    sim.add_clock(1 / clk_freq)
     sim.add_testbench(tb)
 
     os.makedirs("gtkw", exist_ok=True)
@@ -123,13 +128,14 @@ def run_sim():
         ax2 = plt.subplot(121)
         ax2.plot(t, input_samples, alpha=0.5, label="Input")
         ax2.plot(t, output_samples, alpha=0.5, label="Output")
-        ax2.set_xlabel('Time (s)')
+        ax2.set_xlabel("Time (s)")
         ax2.set_ylabel("Amplitude")
-        plt.title('Variable Gain Amplifier')
+        plt.title("Variable Gain Amplifier")
         plt.grid(True)
-        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0.0)
         # plt.savefig(f"{type(dut).__name__}.png")
         plt.show()
+
 
 if __name__ == "__main__":
     run_sim()

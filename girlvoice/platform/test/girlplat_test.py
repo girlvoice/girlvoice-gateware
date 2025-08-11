@@ -6,9 +6,9 @@ from girlvoice.platform.girlvoice_rev_a import GirlvoiceRevAPlatform
 from girlvoice.platform.nexus_utils.pll import NXPLL
 from girlvoice.io.i2s import i2s_rx, i2s_tx
 
-class GirlTop(Elaboratable):
 
-    def elaborate(self, platform:Platform):
+class GirlTop(Elaboratable):
+    def elaborate(self, platform: Platform):
         m = Module()
 
         pll_lock = Signal()
@@ -42,10 +42,13 @@ class GirlTop(Elaboratable):
             clkin_freq=12e6,
             cd_out=cd_sync,
             clkout=cd_sync.clk,
-            clkout_freq=24e6)
+            clkout_freq=24e6,
+        )
         platform.add_clock_constraint(cd_sync.clk, 24e6)
 
-        m.submodules.i2s_rx = rx = i2s_rx(sys_clk_freq=24e6, sclk_freq=4e6, sample_width=24)
+        m.submodules.i2s_rx = rx = i2s_rx(
+            sys_clk_freq=24e6, sclk_freq=4e6, sample_width=24
+        )
 
         m.d.comb += global_bclk.eq(rx.sclk)
         m.d.comb += global_lr_clk.eq(rx.lrclk)
@@ -54,6 +57,7 @@ class GirlTop(Elaboratable):
         m.d.comb += dac_sd_mode_n.o.eq(1)
 
         return m
+
 
 if __name__ == "__main__":
     p = GirlvoiceRevAPlatform()

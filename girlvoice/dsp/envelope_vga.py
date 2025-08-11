@@ -8,11 +8,21 @@ from amaranth.lib import stream
 from girlvoice.dsp.sine_synth import ParallelSineSynth
 from girlvoice.dsp.tdm_slice import TDMMultiply
 
-'''
+"""
 Combined Envelope follower and VGA. Saves a multiplication by combining the two components
-'''
+"""
+
+
 class EnvelopeVGA(wiring.Component):
-    def __init__(self, sample_width=24, fs=48000, attack_halflife=10, decay_halflife=20, mult_slice: TDMMultiply = None, formal=False):
+    def __init__(
+        self,
+        sample_width=24,
+        fs=48000,
+        attack_halflife=10,
+        decay_halflife=20,
+        mult_slice: TDMMultiply = None,
+        formal=False,
+    ):
         self.sample_width = sample_width
         self.fraction_width = sample_width - 1
         self.formal = formal
@@ -26,23 +36,33 @@ class EnvelopeVGA(wiring.Component):
         print(f"Envelope Decay parameter: {decay}")
         print(f"Envelope Attack parameter: {attack}")
 
-        self.attack_fp = C(int(attack * (2**(self.fraction_width))), signed(sample_width))
-        self.attack_comp = C(int((1 - attack) * (2**(self.fraction_width))), signed(sample_width))
+        self.attack_fp = C(
+            int(attack * (2 ** (self.fraction_width))), signed(sample_width)
+        )
+        self.attack_comp = C(
+            int((1 - attack) * (2 ** (self.fraction_width))), signed(sample_width)
+        )
 
-        self.decay_fp = C(int(decay * (2**(self.fraction_width))), signed(sample_width))
-        self.decay_comp = C(int((1 - decay) * (2**(self.fraction_width))), signed(sample_width))
+        self.decay_fp = C(
+            int(decay * (2 ** (self.fraction_width))), signed(sample_width)
+        )
+        self.decay_comp = C(
+            int((1 - decay) * (2 ** (self.fraction_width))), signed(sample_width)
+        )
 
         self.mult = mult_slice
-        super().__init__({
-            "sink": In(stream.Signature(signed(sample_width))),
-            "carrier": In(stream.Signature(signed(sample_width))),
-            "source": Out(stream.Signature(signed(sample_width)))
-        })
+        super().__init__(
+            {
+                "sink": In(stream.Signature(signed(sample_width))),
+                "carrier": In(stream.Signature(signed(sample_width))),
+                "source": Out(stream.Signature(signed(sample_width))),
+            }
+        )
 
     def elaborate(self, platform):
         m = Module()
 
-        mac_width = self.sample_width*2
+        mac_width = self.sample_width * 2
         acc = Signal(signed(mac_width))
         acc_quant = Signal(signed(self.sample_width))
         x = Signal(signed(self.sample_width))
@@ -66,7 +86,7 @@ class EnvelopeVGA(wiring.Component):
             with m.If(acc_quant >= 0):
                 m.d.comb += self.source.payload.eq(acc_quant)
             with m.Else():
-                m.d.comb += self.source.payload.eq(2**(self.sample_width - 1) - 1)
+                m.d.comb += self.source.payload.eq(2 ** (self.sample_width - 1) - 1)
 
             with m.FSM():
                 with m.State("LOAD"):
@@ -163,19 +183,25 @@ class EnvelopeVGA(wiring.Component):
 
         return m
 
+
 def run_sim():
     import matplotlib.pyplot as plt
     from amaranth.sim import Simulator
     from girlvoice.dsp.utils import generate_ramp
     from girlvoice.stream import stream_get, stream_put
+
     clk_freq = 60e6
     bit_width = 16
     fs = 48000
     synth_freq = 1000
     m = Module()
-    m.submodules.synth = synth = ParallelSineSynth([1000], fs=fs, sample_width=bit_width)
+    m.submodules.synth = synth = ParallelSineSynth(
+        [1000], fs=fs, sample_width=bit_width
+    )
     m.submodules.mult = mult = TDMMultiply(bit_width, num_threads=2)
-    m.submodules.env_vga = dut = EnvelopeVGA(sample_width=bit_width, fs=fs, mult_slice=mult, formal=True)
+    m.submodules.env_vga = dut = EnvelopeVGA(
+        sample_width=bit_width, fs=fs, mult_slice=mult, formal=True
+    )
     wiring.connect(m, dut.carrier, synth.source)
 
     duration = 0.25
@@ -183,6 +209,7 @@ def run_sim():
     (t, input_samples) = generate_ramp(test_sig_freq, duration, fs, bit_width)
 
     output_samples = []
+
     async def tb(ctx):
         samples_processed = 0
         for sample in input_samples:
@@ -194,7 +221,7 @@ def run_sim():
             samples_processed += 1
 
     sim = Simulator(m)
-    sim.add_clock(1/clk_freq)
+    sim.add_clock(1 / clk_freq)
     sim.add_testbench(tb)
 
     os.makedirs("gtkw", exist_ok=True)
@@ -204,15 +231,13 @@ def run_sim():
         ax2 = plt.subplot(111)
         ax2.plot(t, input_samples, alpha=0.5, label="Input")
         ax2.plot(t, output_samples, alpha=0.5, label="Output")
-        ax2.set_xlabel('time (s)')
-        plt.title('Envelope Follower')
+        ax2.set_xlabel("time (s)")
+        plt.title("Envelope Follower")
         plt.grid(True)
-        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0.0)
         plt.legend()
         # plt.savefig(f"{type(dut).__name__}.png")
         plt.show()
-
-
 
 
 if __name__ == "__main__":

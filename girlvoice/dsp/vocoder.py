@@ -16,8 +16,11 @@ from girlvoice.dsp.envelope_vga import EnvelopeVGA
 from girlvoice.dsp.tdm_slice import TDMMultiply
 from girlvoice.stream import stream_get, stream_put
 
+
 class ThreadedVocoderChannel(wiring.Component):
-    def __init__(self, channel_edges, fs=48000, sample_width=18, mult_slice: TDMMultiply = None):
+    def __init__(
+        self, channel_edges, fs=48000, sample_width=18, mult_slice: TDMMultiply = None
+    ):
         self.fs = fs
         self.sample_width = sample_width
 
@@ -30,17 +33,21 @@ class ThreadedVocoderChannel(wiring.Component):
             filter_order=1,
             sample_width=sample_width,
             fs=fs,
-            mult_slice=self.mult
+            mult_slice=self.mult,
         )
         self.vga = VariableGainAmp(sample_width, sample_width, mult_slice=self.mult)
-        self.envelope = EnvelopeFollower(sample_width, attack_halflife=.1, decay_halflife=25, mult_slice=self.mult)
+        self.envelope = EnvelopeFollower(
+            sample_width, attack_halflife=0.1, decay_halflife=25, mult_slice=self.mult
+        )
         # self.env_vga = EnvelopeVGA(sample_width, fs=fs, attack_halflife=1, decay_halflife=20, mult_slice=self.mult)
 
-        super().__init__({
-            "sink": In(stream.Signature(signed(sample_width))),
-            "carrier": In(stream.Signature(signed(sample_width))),
-            "source": Out(stream.Signature(signed(sample_width)))
-        })
+        super().__init__(
+            {
+                "sink": In(stream.Signature(signed(sample_width))),
+                "carrier": In(stream.Signature(signed(sample_width))),
+                "source": Out(stream.Signature(signed(sample_width))),
+            }
+        )
 
     def elaborate(self, platform):
         m = Module()
@@ -65,28 +72,30 @@ class ThreadedVocoderChannel(wiring.Component):
 
         return m
 
+
 class StaticVocoderChannel(wiring.Component):
     def __init__(self, channel_edges, fs=48000, sample_width=18):
         self.fs = fs
-        self.channel_freq = channel_edges[0] + (channel_edges[1] - channel_edges[0])/2
+        self.channel_freq = channel_edges[0] + (channel_edges[1] - channel_edges[0]) / 2
         self.sample_width = sample_width
 
         # self.vga = VariableGainAmp(sample_width, sample_width)
         # self.synth = StaticSineSynth(self.channel_freq, fs, clk_sync_freq, sample_width)
         self.bandpass = BandpassIIR(
-            band_edges=channel_edges,
-            filter_order=1,
-            sample_width=sample_width,
-            fs=fs
+            band_edges=channel_edges, filter_order=1, sample_width=sample_width, fs=fs
         )
-        self.env_vga = EnvelopeVGA(sample_width, fs=fs, attack_halflife=1, decay_halflife=20)
+        self.env_vga = EnvelopeVGA(
+            sample_width, fs=fs, attack_halflife=1, decay_halflife=20
+        )
         # self.envelope = EnvelopeFollower(sample_width, attack_halflife=1, decay_halflife=20)
 
-        super().__init__({
-            "sink": In(stream.Signature(signed(sample_width))),
-            "carrier": In(stream.Signature(signed(sample_width))),
-            "source": Out(stream.Signature(signed(sample_width)))
-        })
+        super().__init__(
+            {
+                "sink": In(stream.Signature(signed(sample_width))),
+                "carrier": In(stream.Signature(signed(sample_width))),
+                "source": Out(stream.Signature(signed(sample_width))),
+            }
+        )
 
     def elaborate(self, platform):
         m = Module()
@@ -103,17 +112,15 @@ class StaticVocoderChannel(wiring.Component):
 
         wiring.connect(m, wiring.flipped(self.source), self.env_vga.source)
 
-
         return m
+
 
 class ChannelDemux(wiring.Component):
     def __init__(self, num_channels, sample_width):
         self.sample_width = sample_width
         self.num_channels = num_channels
 
-        signature = {
-            "sink": In(stream.Signature(signed(sample_width)))
-        }
+        signature = {"sink": In(stream.Signature(signed(sample_width)))}
         for i in range(num_channels):
             signature[f"ch_source_{i}"] = Out(stream.Signature(signed(sample_width)))
 
@@ -141,14 +148,13 @@ class ChannelDemux(wiring.Component):
 
         return m
 
+
 class ChannelMux(wiring.Component):
     def __init__(self, num_channels, sample_width):
         self.sample_width = sample_width
         self.num_channels = num_channels
 
-        signature = {
-            "source": Out(stream.Signature(signed(sample_width)))
-        }
+        signature = {"source": Out(stream.Signature(signed(sample_width)))}
         for i in range(num_channels):
             signature[f"ch_sink_{i}"] = In(stream.Signature(signed(sample_width)))
 
@@ -171,7 +177,10 @@ class ChannelMux(wiring.Component):
         next_sample = Signal(self.sample_width)
 
         ch_valids = Signal(self.num_channels)
-        m.d.comb += [ch_valids.bit_select(i, 1).eq(self.sink(i).valid) for i in range(self.num_channels)]
+        m.d.comb += [
+            ch_valids.bit_select(i, 1).eq(self.sink(i).valid)
+            for i in range(self.num_channels)
+        ]
         all_ch_valid = Signal()
         m.d.comb += all_ch_valid.eq(ch_valids.all())
 
@@ -205,14 +214,26 @@ class ChannelMux(wiring.Component):
 
         return m
 
+
 def mel(freq):
-    return 1127 * log(1 + (freq/700))
+    return 1127 * log(1 + (freq / 700))
+
 
 def mel_to_freq(mel):
-    return 700 * (np.exp(mel/1127) - 1)
+    return 700 * (np.exp(mel / 1127) - 1)
+
 
 class StaticVocoder(wiring.Component):
-    def __init__(self, start_freq, end_freq, num_channels, clk_sync_freq, channel_class=StaticVocoderChannel, fs=48000, sample_width=18):
+    def __init__(
+        self,
+        start_freq,
+        end_freq,
+        num_channels,
+        clk_sync_freq,
+        channel_class=StaticVocoderChannel,
+        fs=48000,
+        sample_width=18,
+    ):
         self.sample_width = sample_width
         self.num_channels = num_channels
         self.fs = fs
@@ -227,7 +248,9 @@ class StaticVocoder(wiring.Component):
 
         print(f"Channel range as mel {start_mel}-{end_mel}")
 
-        ch_mel, channel_space = np.linspace(start_mel, end_mel, num_channels, retstep=True)
+        ch_mel, channel_space = np.linspace(
+            start_mel, end_mel, num_channels, retstep=True
+        )
         self.ch_freq = mel_to_freq(ch_mel)
 
         print(f"Channel center frequencies: {self.ch_freq}")
@@ -249,12 +272,14 @@ class StaticVocoder(wiring.Component):
         for i in range(len(self.ch_freq)):
             edges = self.ch_edges[i]
             # slice = self.slices[i//2]
-            self.channels.append(channel_class(
-                channel_edges=edges,
-                fs=fs,
-                sample_width=sample_width,
-                # mult_slice=slice
-            ))
+            self.channels.append(
+                channel_class(
+                    channel_edges=edges,
+                    fs=fs,
+                    sample_width=sample_width,
+                    # mult_slice=slice
+                )
+            )
 
         self.demux = ChannelDemux(num_channels=num_channels, sample_width=sample_width)
         self.mux = ChannelMux(num_channels=num_channels, sample_width=sample_width)
@@ -265,10 +290,12 @@ class StaticVocoder(wiring.Component):
             b = ch.bandpass.b_quant
             w, q = signal.freqz(b=b, a=a, fs=fs)
 
-        super().__init__({
-            "sink": In(stream.Signature(signed(sample_width))),
-            "source": Out(stream.Signature(signed(sample_width)))
-        })
+        super().__init__(
+            {
+                "sink": In(stream.Signature(signed(sample_width))),
+                "source": Out(stream.Signature(signed(sample_width))),
+            }
+        )
 
     def elaborate(self, platform):
         m = Module()
@@ -289,6 +316,7 @@ class StaticVocoder(wiring.Component):
 
         return m
 
+
 def demux_sim():
     clk_freq = 60e6
     bit_width = 16
@@ -301,10 +329,10 @@ def demux_sim():
         for sample in test_samples:
             await stream_put(ctx, dut.sink, sample)
 
-
     sim = Simulator()
-    sim.add_clock(1/clk_freq)
+    sim.add_clock(1 / clk_freq)
     sim.add_testbench(tb)
+
 
 if __name__ == "__main__":
     demux_sim()

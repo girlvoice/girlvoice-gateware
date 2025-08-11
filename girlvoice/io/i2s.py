@@ -8,17 +8,18 @@ from amaranth.sim import Simulator, Tick
 
 
 class i2s_tx(wiring.Component):
-
     def __init__(self, sys_clk_freq, sclk_freq, sample_width=32):
         self.clk_ratio = int(sys_clk_freq // sclk_freq)
         self.sample_width = sample_width
         self.clk_div = Signal(range(self.clk_ratio))
-        super().__init__({
-            "sink": In(stream.Signature(sample_width)),
-            "lrclk": Out(1),
-            "sclk": Out(1),
-            "sdout": Out(1),
-        })
+        super().__init__(
+            {
+                "sink": In(stream.Signature(sample_width)),
+                "lrclk": Out(1),
+                "sclk": Out(1),
+                "sdout": Out(1),
+            }
+        )
 
     def elaborate(self, platform):
         m = Module()
@@ -36,7 +37,6 @@ class i2s_tx(wiring.Component):
 
         m.d.comb += sclk_negedge.eq(~self.sclk & sclk_last)
         m.d.sync += sclk_last.eq(self.sclk)
-
 
         bit_count = Signal(range(32))
         shift_out = Signal(self.sample_width)
@@ -67,18 +67,19 @@ class i2s_tx(wiring.Component):
 
         return m
 
+
 class i2s_rx(wiring.Component):
-
-
     def __init__(self, sys_clk_freq, sclk_freq, sample_width=18):
         self.clk_ratio = int(sys_clk_freq // sclk_freq)
         self.sample_width = sample_width
-        super().__init__({
-            "source": Out(stream.Signature(sample_width)),
-            "lrclk": Out(1),
-            "sclk": Out(1),
-            "sdin": In(1),
-        })
+        super().__init__(
+            {
+                "source": Out(stream.Signature(sample_width)),
+                "lrclk": Out(1),
+                "sclk": Out(1),
+                "sdin": In(1),
+            }
+        )
 
     def elaborate(self, platform):
         m = Module()
@@ -87,7 +88,6 @@ class i2s_rx(wiring.Component):
         sclk_negedge = Signal()
 
         clk_div = Signal(range(self.clk_ratio))
-
 
         m.d.comb += sclk_negedge.eq(~self.sclk & sclk_last)
         m.d.sync += sclk_last.eq(self.sclk)
@@ -137,8 +137,12 @@ class i2s(wiring.Component):
 
     def __init__(self, sys_clk_freq, sclk_freq, sample_width=32):
         self.clk_ratio = int(sys_clk_freq // sclk_freq)
-        self.rx = i2s_rx(sys_clk_freq=sys_clk_freq, sclk_freq=sclk_freq, sample_width=sample_width)
-        self.tx = i2s_tx(sys_clk_freq=sys_clk_freq, sclk_freq=sclk_freq, sample_width=sample_width)
+        self.rx = i2s_rx(
+            sys_clk_freq=sys_clk_freq, sclk_freq=sclk_freq, sample_width=sample_width
+        )
+        self.tx = i2s_tx(
+            sys_clk_freq=sys_clk_freq, sclk_freq=sclk_freq, sample_width=sample_width
+        )
         super().__init__()
 
     def elaborate(self, platform):
@@ -154,7 +158,6 @@ class i2s(wiring.Component):
             rx.sclk.eq(self.sclk),
         ]
 
-
         with m.If(clk_div >= (self.clk_ratio - 1) // 2):
             m.d.sync += clk_div.eq(0)
             m.d.sync += self.sclk.eq(~self.sclk)
@@ -166,17 +169,18 @@ class i2s(wiring.Component):
 
         return m
 
+
 def tx_tb():
     sys_clk_freq = 64e6
     sclk_freq = 4e6
     dut = i2s_tx(sys_clk_freq=sys_clk_freq, sclk_freq=sclk_freq, sample_width=18)
     sim = Simulator(dut)
 
-    samples = [(C(i, 32) ) for i in range(32)]
+    samples = [(C(i, 32)) for i in range(32)]
 
     def process():
         while (yield ~dut.sink.ready):
-                yield Tick()
+            yield Tick()
 
         for i in range(len(samples)):
             yield dut.sink.payload.eq(samples[i])
@@ -194,13 +198,14 @@ def tx_tb():
     with sim.write_vcd(dutname + f".vcd"):
         sim.run()
 
+
 def rx_tb():
     sys_clk_freq = 64e6
     sclk_freq = 4e6
     dut = i2s_rx(sys_clk_freq=sys_clk_freq, sclk_freq=sclk_freq)
     sim = Simulator(dut)
 
-    samples = [(C(i << 14, 32) ) for i in range(32)]
+    samples = [(C(i << 14, 32)) for i in range(32)]
 
     def process():
         sample_in = 0
@@ -214,7 +219,7 @@ def rx_tb():
                     yield Tick()
                 if (yield dut.source.valid):
                     yield dut.source.ready.eq(1)
-                    sample_out = (yield dut.source.data)
+                    sample_out = yield dut.source.data
                     yield Tick()
                     yield dut.source.ready.eq(0)
             assert sample_in == sample_out, f"Expected {sample_in}, got: {sample_out}"

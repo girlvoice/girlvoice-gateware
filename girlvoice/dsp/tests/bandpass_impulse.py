@@ -14,17 +14,26 @@ from girlvoice.stream import stream_get, stream_put
 from girlvoice.dsp.tdm_slice import TDMMultiply
 from girlvoice.dsp.bandpass_iir import BandpassIIR
 
+
 def run_sim():
     clk_freq = 60e6
     bit_width = 18
     fs = 48000
     m = Module()
     m.submodules.mult = mult = TDMMultiply(sample_width=bit_width, num_threads=3)
-    m.submodules.dut = dut = BandpassIIR(center_freq=1e3, passband_width=500, filter_order=1, sample_width=bit_width, fs=fs, mult_slice=mult)
+    m.submodules.dut = dut = BandpassIIR(
+        center_freq=1e3,
+        passband_width=500,
+        filter_order=1,
+        sample_width=bit_width,
+        fs=fs,
+        mult_slice=mult,
+    )
     (t, input_samples) = generate_impulse(0.2, fs, bit_width)
 
     output_samples = []
     start_time = time.time()
+
     async def tb(ctx):
         samples_processed = 0
         for sample in input_samples:
@@ -34,10 +43,12 @@ def run_sim():
             samples_processed += 1
             if samples_processed % 1000 == 0:
                 elapsed = time.time() - start_time
-                print(f"{samples_processed}/{len(t)} Samples processed in {elapsed} sec")
+                print(
+                    f"{samples_processed}/{len(t)} Samples processed in {elapsed} sec"
+                )
 
     sim = Simulator(m)
-    sim.add_clock(1/clk_freq)
+    sim.add_clock(1 / clk_freq)
     sim.add_testbench(tb)
 
     os.makedirs("gtkw", exist_ok=True)
@@ -49,15 +60,13 @@ def run_sim():
     wavfile.write("amen_bp.wav", rate=fs, data=np.array(output_samples, dtype=np.int32))
     plt.plot(t, input_samples, alpha=0.5, label="Input")
     plt.plot(t, output_samples, alpha=0.5, label="Output")
-    plt.xlabel('time (s)')
-    plt.title('Bandpass filter')
+    plt.xlabel("time (s)")
+    plt.title("Bandpass filter")
     plt.grid(True)
     # # plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
     plt.legend()
     # plt.savefig(f"{type(dut).__name__}.png")
     plt.show()
-
-
 
 
 if __name__ == "__main__":
