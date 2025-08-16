@@ -102,6 +102,12 @@ class I2CFIFO(wiring.Component):
 
         self.lmmi.memory_map = MemoryMap(addr_width=self.lmmi.addr_width, data_width=self.lmmi.data_width)
 
+    def build_mem_map(self):
+        addr_width = self.lmmi.addr_width
+        data_width = self.lmmi.data_width
+        memory_map = MemoryMap(addr_width=addr_width, data_width=data_width)
+        # memory_map.add_resource(lmmi.Register(data_width), )
+
     def elaborate(self, platform):
         m = Module()
 

@@ -1,7 +1,9 @@
+#!/usr/bin/env python3
 from amaranth import *
 from amaranth.lib import wiring
 from amaranth.lib.wiring import In, Out
 from amaranth.utils import exact_log2
+from amaranth.sim import Simulator, SimulatorContext
 
 from amaranth_soc import wishbone
 from amaranth_soc.memory import MemoryMap
@@ -77,6 +79,14 @@ class Interface(wiring.PureInterface):
                              f"same as bus interface data width {self.data_width}")
         self._memory_map = memory_map
 
+
+class Register(wiring.Component):
+    def __init__(self, data_width):
+        super().__init__({"register": In(data_width)})
+
+    def elaborate(self, platform):
+        return Module()
+
 '''
 Really basic converter to bridge LMMI to Wishbone
 '''
@@ -115,29 +125,85 @@ class WishboneLMMIBridge(wiring.Component):
         lmmi_bus = self.lmmi_bus
         wb_bus = self.wb_bus
 
-        with m.FSM():
-            with m.State("IDLE"):
-                with m.If(wb_bus.cyc & wb_bus.stb):
-                    m.d.comb += [
-                        lmmi_bus.wdata.eq(wb_bus.dat_w),
-                        lmmi_bus.request.eq(1),
-                        lmmi_bus.wr_rdn.eq(wb_bus.we),
-                        lmmi_bus.offset.eq(wb_bus.adr[4:])
-                    ]
-                    with m.If(wb_bus.we):
-                        with m.If(lmmi_bus.ready):
-                            m.d.comb += wb_bus.ack.eq(1)
-                            m.next = "WRITE_WAIT"
-                    with m.Else():
-                        m.next = "READ_WAIT"
-            with m.State("WRITE_WAIT"):
-                m.d.comb += wb_bus.ack.eq(1)
-                m.next = "IDLE"
-            with m.State("READ_WAIT"):
-                with m.If(lmmi_bus.rdata_valid):
-                    m.d.comb += {
-                        wb_bus.dat_r.eq(lmmi_bus.rdata),
-                        wb_bus.ack.eq(1)
-                    }
-                    m.next += "IDLE"
+        # range one greater than the sel width so we can
+        cycle = Signal(range(len(wb_bus.sel) + 1))
+        m.d.comb += lmmi_bus.offset.eq(Cat(cycle[:exact_log2(len(wb_bus.sel))], wb_bus.adr))
+
+        with m.If(wb_bus.cyc & wb_bus.stb):
+            # Amaranth magic
+            with m.Switch(cycle):
+                def segment(index):
+                    return slice(index * wb_bus.granularity, (index + 1) * wb_bus.granularity)
+
+                for index, sel_index in enumerate(wb_bus.sel):
+                    with m.Case(index):
+                        if index > 0:
+                            # This might not actually work since lmmi expects
+                            # to wait for the slave to give a valid signal
+                            with m.If(wb_bus.sel[index-1] & lmmi_bus.rdata_valid):
+                                m.d.sync += wb_bus.dat_r[segment(index - 1)].eq(lmmi_bus.rdata)
+                        m.d.comb += lmmi_bus.wr_rdn.eq(sel_index & wb_bus.we)
+                        m.d.comb += lmmi_bus.wdata.eq(wb_bus.dat_w[segment(index)])
+                        m.d.comb += lmmi_bus.request.eq(sel_index)
+                        m.d.sync += cycle.eq(cycle + 1)
+
+                with m.Default():
+                    with m.If(wb_bus.sel[index-1]):
+                        m.d.sync += wb_bus.dat_r[segment(index)].eq(lmmi_bus.rdata)
+                    m.d.sync += wb_bus.ack.eq(1)
+
+        with m.If(wb_bus.ack):
+            m.d.sync += cycle.eq(0)
+            m.d.sync += wb_bus.ack.eq(0)
+
         return m
+
+
+def main():
+    clk_freq = 60e6
+
+    dut = Module()
+    map = MemoryMap(addr_width=8, data_width=8)
+    lmmi = Interface(addr_width=8, data_width=8)
+    lmmi.memory_map = map
+    bridge = WishboneLMMIBridge(lmmi_bus=lmmi, data_width=32)
+
+    # dut.submodules += lmmi
+    dut.submodules += bridge
+
+    async def tb(ctx: SimulatorContext):
+        await ctx.tick()
+        ctx.set(lmmi.ready, 1)
+        ctx.set(bridge.wb_bus.cyc, 1)
+        ctx.set(bridge.wb_bus.stb, 1)
+        ctx.set(bridge.wb_bus.sel, 0x03)
+        ctx.set(bridge.wb_bus.adr, 0x40000000)
+        ctx.set(bridge.wb_bus.dat_w, 0xAB41)
+        ctx.set(lmmi.rdata, 0xBC)
+        for _ in range(len(bridge.wb_bus.sel) + 1):
+            await ctx.tick()
+        await ctx.tick()
+        ctx.set(bridge.wb_bus.cyc, 0)
+        ctx.set(bridge.wb_bus.sel, 0x01)
+        ctx.set(bridge.wb_bus.stb, 0)
+        await ctx.tick()
+        await ctx.tick()
+        ctx.set(bridge.wb_bus.cyc, 1)
+        ctx.set(bridge.wb_bus.stb, 1)
+        ctx.set(bridge.wb_bus.we, 1)
+        ctx.set(bridge.wb_bus.sel, 0x03)
+        ctx.set(bridge.wb_bus.adr, 0x40000000)
+        ctx.set(bridge.wb_bus.dat_w, 0xAB41)
+        for _ in range(len(bridge.wb_bus.sel) + 1):
+            await ctx.tick()
+        await ctx.tick()
+
+
+    sim = Simulator(dut)
+    sim.add_clock(1/clk_freq)
+    sim.add_testbench(tb)
+    with sim.write_vcd("lmmi_bridge.vcd"):
+        sim.run()
+
+if __name__ == "__main__":
+    main()

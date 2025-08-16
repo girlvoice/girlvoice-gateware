@@ -1,5 +1,6 @@
 import os
 import subprocess
+from typing import List
 from amaranth import *
 from amaranth.build import *
 from amaranth.vendor import LatticePlatform
@@ -14,6 +15,9 @@ class GirlvoiceRevAPlatform(LatticePlatform):
     package = "SG72"
     speed = "8"
     default_clk = "clk12"
+    name = "girlvoice_rev_a"
+
+    constraints:str = ""
 
     resources = [
         Resource(
@@ -161,6 +165,13 @@ class GirlvoiceRevAPlatform(LatticePlatform):
         # })
     ]
 
+    def has_required_tools(self):
+        return True
+
+    def add_constraints(self, constraint: str):
+        print("adding: ", constraint)
+        self.constraints += constraint
+
     def build(
         self,
         elaboratable,
@@ -169,7 +180,7 @@ class GirlvoiceRevAPlatform(LatticePlatform):
         do_local_build=True,
         program_opts=None,
         do_program=False,
-        use_radiant_docker=False,
+        use_radiant_docker=True,
         **kwargs,
     ):
         docker_image = "radiant-container:latest"
@@ -196,6 +207,8 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             "/tmp/.X11-unix:/tmp/.X11-unix:rw",  # X11 passthrough
             "--ipc=host",  # X11 passthrough (MIT-SHM)
         ]
+
+        kwargs["add_constraints"] = "ldc_set_sysconfig {{CONFIGIO_VOLTAGE_BANK0=3.3 CONFIGIO_VOLTAGE_BANK1=3.3 JTAG_PORT=DISABLE SLAVE_SPI_PORT=DISABLE MASTER_SPI_PORT=SERIAL}}"
 
         if use_radiant_docker and self.toolchain == "Radiant":
             build_plan = super().build(

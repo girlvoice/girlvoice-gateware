@@ -243,6 +243,7 @@ class GirlvoiceSoc(Component):
 
         # i2c0
         m.submodules.i2c0 = self.i2c
+        m.submodules.wb_to_lmmi = self.lmmi_to_wb
         # m.submodules.i2c_stream0 = self.i2c_stream0
         # wiring.connect(m, self.i2c0.i2c_stream, self.i2c_stream0.control)
         # if sim.is_hw(platform):

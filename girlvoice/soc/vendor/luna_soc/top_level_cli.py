@@ -11,6 +11,7 @@ import logging
 import tempfile
 import argparse
 
+from amaranth.build import Platform
 from amaranth                import Elaboratable
 from amaranth._unused        import MustUse
 
@@ -83,6 +84,7 @@ def top_level_cli(fragment, *pos_args, **kwargs):
         help="If provided, a SVD description of this design's SoC will be printed to the stdout. Other options ignored.")
     parser.add_argument('--get-reset-address', action='store_true',
         help="If provided, the utility will print the cpu's reset address to stdout. Other options ignored.")
+    parser.add_argument("--toolchain")
 
     # Parse command arguments.
     args = parser.parse_args()
@@ -99,7 +101,10 @@ def top_level_cli(fragment, *pos_args, **kwargs):
         args.upload = False
 
     # Select platform.
-    platform = GirlvoiceRevAPlatform(toolchain="Oxide")
+    toolchain = "Oxide"
+    if args.toolchain == "radiant":
+        toolchain = "Radiant"
+    platform = GirlvoiceRevAPlatform(toolchain=toolchain)
     if platform is None:
         logging.error("Failed to identify a supported platform")
         sys.exit(1)
@@ -220,7 +225,7 @@ def _build_pre(args, fragment, platform, build_dir):
         soc_build(name="soc", build_dir=build_dir)
 
 
-def _build_gateware(args, fragment, platform, build_dir):
+def _build_gateware(args, fragment, platform: Platform, build_dir):
     """ Build gateware for the design."""
 
     # Configure toolchain.
@@ -235,7 +240,7 @@ def _build_gateware(args, fragment, platform, build_dir):
     products = platform.build(
         fragment,
         do_program=args.upload,
-        build_dir=build_dir
+        build_dir=build_dir,
     )
 
     # Disable UnusedElaboarable warnings again.
