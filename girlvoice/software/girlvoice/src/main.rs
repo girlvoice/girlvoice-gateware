@@ -1,38 +1,23 @@
 #![no_std]
 #![no_main]
 
-use core::fmt::Write;
-
-use embedded_hal::{ i2c::{I2c, SevenBitAddress}};
 use embedded_hal::delay::DelayNs;
 use embedded_hal::digital::StatefulOutputPin;
-// use gc9a01::{mode::DisplayConfiguration, prelude::DisplayResolution240x240, Gc9a01, SPIDisplayInterface};
-use soc_pac as pac;
+use embedded_hal::i2c::{I2c, SevenBitAddress};
 use aw88395::Aw88395;
 use riscv_rt::entry;
+use soc_pac as pac;
 extern crate panic_halt;
 
-// use embedded_graphics::{
-//     pixelcolor::Rgb565,
-//     prelude::*,
-//     primitives::{
-//         PrimitiveStyle, Triangle,
-//     },
-// };
 
 use girlvoice_hal as hal;
+use hal::hal_io::Write;
 mod spi;
+mod term;
 
-// use i2c::I2c0;
-
-use sgtl5000::Sgtl5000;
-use sgtl5000::regmap::LineOutBiasCurrent;
+use hal::i2c::I2c0;
 
 const SYS_CLK_FREQ: u32 = 60_000_000;
-
-// hal::uart! {
-//     UART: pac::Uart,
-// }
 
 // hal::gpio! {
 //     DC: pac::LcdCtl,
@@ -45,9 +30,9 @@ const SYS_CLK_FREQ: u32 = 60_000_000;
 //     SPI: (pac::LcdSpi, u8),
 // }
 
-hal::impl_gpio!{
-    Led0: pac::Led0,
-}
+// hal::impl_gpio!{
+//     Led0: pac::Led0,
+// }
 
 hal::impl_timer! {
     DELAY: pac::Timer0,
@@ -56,8 +41,6 @@ hal::impl_timer! {
 hal::impl_serial! {
     Serial0: pac::Uart0,
 }
-
-
 
 // fn power_on_codec(mut sgtl5000: Sgtl5000<I2c0>) {
 //     // Analog power up settings
@@ -89,11 +72,34 @@ fn main() -> ! {
     let mut delay = DELAY::new(peripherals.timer0, SYS_CLK_FREQ);
     let mut serial = Serial0::new(peripherals.uart0);
 
-    let mut led = Led0::new(peripherals.led0);
+    // let mut led = Led0::new(peripherals.led0);
+
+    let i2c0 = I2c0::new(peripherals.i2cfifo);
+    let mut amp = Aw88395::new(i2c0);
+
+    writeln!(serial, "\r").unwrap();
+    writeln!(serial, "Starting main loop!\r").unwrap();
+    write!(serial, "[girlvoice (^O^)~] ").unwrap();
+
+    let mut term = term::Terminal::new(serial);
+    // serial.
 
     loop {
-        writeln!(serial, "awawawa\r").unwrap();
-        led.toggle().unwrap();
-        delay.delay_ms(1000);
+
+        term.handle_char();
+        // let amp_id = amp.read_id_code();
+        // match amp_id {
+        //     Ok(id) => writeln!(serial, "Amp IDCODE: {:#x}\r", id).unwrap(),
+        //     Err(e) => writeln!(serial, "read reg failed :<\r").unwrap()
+        // }
+        // writeln!(serial, "reserved: {:#x}\r", i2c_reg.res);
+        // writeln!(serial, "control 1: {:#x}\r", i2c_reg.i2cc1);
+        // writeln!(serial, "control 2: {:#x}\r", i2c_reg.i2cc2);
+        // writeln!(serial, "clock scale: {:#x}\r", i2c_reg.i2cbr);
+
+        // writeln!(serial, "ctrl2 ptr: {:p}\r", &i2c_reg.i2cc2);
+
+        // led.toggle().unwrap();
+        // delay.delay_ms(1000);
     }
 }

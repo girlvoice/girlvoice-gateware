@@ -113,6 +113,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "edd0f118536f44f5ccd48bcb8b111bdc3de888b58c74639dfb034a357d0f206d"
 
 [[package]]
+name = "fixedstr"
+version = "0.5.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cd7fe1d85100f2405b683f73d7f0c2bdb09bcea9e817c6a0e07755a83c35be8a"
+
+[[package]]
 name = "float-cmp"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -157,6 +163,7 @@ dependencies = [
  "embedded-graphics",
  "embedded-hal",
  "embedded-io",
+ "fixedstr",
  "fugit",
  "gc9a01-rs",
  "girlvoice-hal",
@@ -175,7 +182,9 @@ version = "0.0.0"
 dependencies = [
  "embedded-hal",
  "embedded-hal-nb",
+ "embedded-io",
  "nb",
+ "soc-pac",
 ]
 
 [[package]]

@@ -14,4 +14,6 @@ targets = [
 [dependencies]
 embedded-hal = "1.0.0"
 embedded-hal-nb = "1.0.0"
+embedded-io = "0.6.1"
 nb = "1.1.0"
+soc-pac = { path = "../soc-pac", features = ["rt", "critical-section"] }

@@ -1,5 +1,5 @@
 /// Re-export hal serial error type
-pub use crate::hal_nb::serial::ErrorKind as Error;
+pub use crate::hal_io::ErrorKind as Error;
 
 #[macro_export]
 macro_rules! impl_serial {
@@ -43,45 +43,42 @@ macro_rules! impl_serial {
                 }
             }
 
-            // trait: core::fmt::Write
-            impl core::fmt::Write for $SERIALX {
-                fn write_str(&mut self, s: &str) -> core::fmt::Result {
-                    use $crate::nb;
-                    use $crate::hal_nb::serial::Write;
-                    let _ = s
-                        .bytes()
-                        .map(|c| nb::block!(self.write(c)))
-                        .last();
-                    Ok(())
-                }
-            }
-
             // - embedded_hal 1.0 traits --------------------------------------
 
-            // trait: hal_nb::serial::ErrorType
-            impl $crate::hal_nb::serial::ErrorType for $SERIALX {
+            impl $crate::hal_io::ErrorType for $SERIALX {
                 type Error = $crate::serial::Error;
             }
 
             // trait: hal_nb::serial::Write
-            impl $crate::hal_nb::serial::Write for $SERIALX {
-                fn write(&mut self, byte: u8) -> $crate::nb::Result<(), Self::Error> {
-                    if self.registers.tx_ready().read().txe().bit() {
-                        self.registers.tx_data().write(|w| unsafe { w.data().bits(byte.into()) });
-                        Ok(())
-                    } else {
-                        Err($crate::nb::Error::WouldBlock)
+            impl $crate::hal_io::Write for $SERIALX {
+                fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
+                    for word in buf.iter() {
+                        while !self.registers.tx_ready().read().txe().bit() {}
+                        self.registers.tx_data().write(|w| unsafe { w.data().bits(*word) });
+
                     }
+                    Ok(buf.len())
                 }
 
-                fn flush(&mut self) -> $crate::nb::Result<(), Self::Error> {
-                    if self.registers.tx_ready().read().txe().bit() {
-                        Ok(())
-                    } else {
-                        Err($crate::nb::Error::WouldBlock)
-                    }
+                fn flush(&mut self) -> Result<(), Self::Error> {
+                    while self.registers.tx_ready().read().txe().bit() {}
+                    Ok(())
                 }
             }
+
+            impl $crate::hal_io::Read for $SERIALX {
+                fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
+                    let mut i = 0;
+                    for word in buf.iter_mut() {
+                        while !self.registers.rx_avail().read().rxe().bit() {}
+
+                        *word = self.registers.rx_data().read().data().bits();
+                        i += 1;
+                    }
+                    Ok(i)
+                }
+            }
+
         )+
     }
 }

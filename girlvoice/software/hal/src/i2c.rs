@@ -1,6 +1,6 @@
 use core::u8;
 
-use litex_pac::I2cfifo;
+use soc_pac::I2cfifo;
 use embedded_hal::i2c::SevenBitAddress;
 use embedded_hal::i2c::{self, I2c, Operation};
 
