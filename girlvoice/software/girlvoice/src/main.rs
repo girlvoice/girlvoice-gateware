@@ -82,7 +82,6 @@ fn main() -> ! {
     write!(serial, "[girlvoice (^O^)~] ").unwrap();
 
     let mut term = term::Terminal::new(serial);
-    // serial.
 
     loop {
 

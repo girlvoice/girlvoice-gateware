@@ -4,6 +4,7 @@ use fixedstr::*;
 pub struct Terminal<T: Read + Write> {
     serial: T,
     cmd_str: zstr<256>,
+    prev_cmd: zstr<256>,
     char_buf: [u8; 1],
     csi_mode: bool
 }
@@ -21,7 +22,13 @@ fn parse_addr(addr_token: &str) -> Option<u32> {
 
 impl<T: Read + Write> Terminal<T> {
     pub fn new(serial: T) -> Self {
-        Self { serial: serial, cmd_str: zstr::default(), char_buf: [0], csi_mode: false }
+        Self {
+            serial: serial,
+            cmd_str: zstr::default(),
+            prev_cmd: zstr::default(),
+            char_buf: [0],
+            csi_mode: false
+        }
     }
 
     pub fn handle_char(&mut self) {
@@ -34,6 +41,7 @@ impl<T: Read + Write> Terminal<T> {
             match new_char {
                 '\r' => {
                     self.serial.write(b"\r\n").unwrap();
+                    self.prev_cmd = self.cmd_str;
                     self.handle_cmd();
                     self.cmd_str.clear();
                     write!(self.serial, "[girlvoice (^O^)~] ").unwrap();
@@ -58,8 +66,8 @@ impl<T: Read + Write> Terminal<T> {
                         _ => {}
                     };
                 }
-                _ => {
-                    writeln!(self.serial, "unknown char: {:#x}\r", new_char as u8).unwrap();
+                _ => { // Unknown character
+                    self.serial.write(&[new_char as u8]).unwrap();
                 }
 
             }
@@ -68,17 +76,26 @@ impl<T: Read + Write> Terminal<T> {
 
     fn handle_csi_command(&mut self, new_char: char) {
         match new_char {
+            '\u{0041}' => {
+                if !self.cmd_str.is_empty() {
+                    let cmd_len = (self.cmd_str.len()) as u8;
+                    for _ in 0..cmd_len {
+                        self.serial.write(&[0x1b, b'[', b'D']).unwrap(); // move back to the start of the command
+                    }
+                    self.serial.write(&[0x1b, b'[', b'K']).unwrap(); // Clear everything past the cursor
+                }
+                write!(self.serial, "{}", self.prev_cmd).unwrap(); // print the new command
+                self.cmd_str = self.prev_cmd;
+            },
             _ => {
                 writeln!(self.serial, "got command char: {:#x}\r", new_char as u8).unwrap();
-                self.csi_mode = false;
             }
-        }
+        };
+        self.csi_mode = false;
 
     }
 
-
     fn handle_cmd(&mut self) {
-        // TODO write handling for reading from a memory addr
         if self.cmd_str.len() == 0 {
             return;
         }
@@ -91,7 +108,8 @@ impl<T: Read + Write> Terminal<T> {
                 if let Some(addr_token) = split.next() {
                     if let Some(addr) = parse_addr(addr_token) {
                         let addr_ptr = addr as *mut u8;
-                        let data: u8 = unsafe { *addr_ptr };
+
+                        let data: u8 = unsafe { core::ptr::read(addr_ptr) };
                         writeln!(self.serial, "{:#x}: {:#x}\r",addr, data).unwrap();
                         return;
                     }
@@ -104,9 +122,21 @@ impl<T: Read + Write> Terminal<T> {
                     if let Some(addr) = parse_addr(addr_token) {
                         let addr_ptr = addr as *mut u8;
                         if let Some(data_token) =  split.next() {
-                            if let Ok(new_data) = data_token.parse::<u8>() {
-                                unsafe {core::ptr::write(addr_ptr, new_data) };
+                            match data_token.strip_prefix("0x") {
+                                Some(stripped_data) => {
+                                    if let Ok(new_data) = u8::from_str_radix(stripped_data, 16) {
+                                        unsafe {core::ptr::write(addr_ptr, new_data) };
+                                        writeln!(self.serial, "{:#x}\r", new_data).unwrap();
+                                    }
+                                },
+                                None => {
+                                    if let Ok(new_data) = data_token.parse::<u8>() {
+                                        unsafe {core::ptr::write(addr_ptr, new_data) };
+                                        writeln!(self.serial, "{:#x}\r", new_data).unwrap();
+                                    }
+                                }
                             }
+                            return;
                         }
                     }
                 }
