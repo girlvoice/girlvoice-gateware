@@ -166,35 +166,44 @@ def main():
     map = MemoryMap(addr_width=8, data_width=8)
     lmmi = Interface(addr_width=8, data_width=8)
     lmmi.memory_map = map
+    decoder = wishbone.Decoder(
+        addr_width=32,
+        data_width=32,
+        granularity=8,
+        alignment=0,
+        features={"cti", "bte", "err"}
+    )
     bridge = WishboneLMMIBridge(lmmi_bus=lmmi, data_width=32)
+    decoder.add(bridge.wb_bus, addr=0xa0000000, name="wb_to_lmmi")
 
     # dut.submodules += lmmi
     dut.submodules += bridge
+    dut.submodules += decoder
 
     async def tb(ctx: SimulatorContext):
         await ctx.tick()
         ctx.set(lmmi.ready, 1)
-        ctx.set(bridge.wb_bus.cyc, 1)
-        ctx.set(bridge.wb_bus.stb, 1)
-        ctx.set(bridge.wb_bus.sel, 0x03)
-        ctx.set(bridge.wb_bus.adr, 0x40000000)
-        ctx.set(bridge.wb_bus.dat_w, 0xAB41)
+        ctx.set(decoder.bus.cyc, 1)
+        ctx.set(decoder.bus.stb, 1)
+        ctx.set(decoder.bus.sel, 0x03)
+        ctx.set(decoder.bus.adr, 0xa0000000)
+        ctx.set(decoder.bus.dat_w, 0xAB41)
         ctx.set(lmmi.rdata, 0xBC)
         for _ in range(len(bridge.wb_bus.sel) + 1):
             await ctx.tick()
         await ctx.tick()
-        ctx.set(bridge.wb_bus.cyc, 0)
-        ctx.set(bridge.wb_bus.sel, 0x01)
-        ctx.set(bridge.wb_bus.stb, 0)
+        ctx.set(decoder.bus.cyc, 0)
+        ctx.set(decoder.bus.sel, 0x01)
+        ctx.set(decoder.bus.stb, 0)
         await ctx.tick()
         await ctx.tick()
-        ctx.set(bridge.wb_bus.cyc, 1)
-        ctx.set(bridge.wb_bus.stb, 1)
-        ctx.set(bridge.wb_bus.we, 1)
-        ctx.set(bridge.wb_bus.sel, 0x03)
-        ctx.set(bridge.wb_bus.adr, 0x40000000)
-        ctx.set(bridge.wb_bus.dat_w, 0xAB41)
-        for _ in range(len(bridge.wb_bus.sel) + 1):
+        ctx.set(decoder.bus.cyc, 1)
+        ctx.set(decoder.bus.stb, 1)
+        ctx.set(decoder.bus.we, 1)
+        ctx.set(decoder.bus.sel, 0x03)
+        ctx.set(decoder.bus.adr, 0xa0000000)
+        ctx.set(decoder.bus.dat_w, 0xAB41)
+        for _ in range(len(decoder.bus.sel) + 1):
             await ctx.tick()
         await ctx.tick()
 

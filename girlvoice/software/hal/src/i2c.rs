@@ -11,6 +11,7 @@ pub enum Error {
     TransactionFailed,
     InvalidState,
     RxUnderflow,
+    RecievedNack,
 }
 
 pub enum TxCmd {
@@ -119,7 +120,8 @@ impl i2c::Error for Error {
         match *self {
             Error::RxUnderflow => i2c::ErrorKind::Other,
             Error::TransactionFailed => i2c::ErrorKind::Bus,
-            Error::InvalidState => i2c::ErrorKind::Other
+            Error::InvalidState => i2c::ErrorKind::Other,
+            Error::RecievedNack => i2c::ErrorKind::NoAcknowledge(i2c::NoAcknowledgeSource::Unknown),
         }
     }
 }
@@ -162,13 +164,19 @@ impl I2c<SevenBitAddress> for I2c0 {
         self.push_tx_byte(buf_len, TxCmd::RestartCount);
         self.push_tx_byte((address << 1) | 1, TxCmd::DataByte);
 
-        while !self.is_read_complete() {}
+        while !self.is_read_complete() {
+            if self.recieved_nack() {
+                self.reset_rx_fifo();
+                return Err(Error::RecievedNack);
+            }
+        }
 
         for byte in read.iter_mut() {
             *byte = self.pop_rx_byte();
-            // if self.check_rx_underflow() {
-            //     return Err(Error::RxUnderflow);
-            // }
+            if self.check_rx_underflow() {
+                self.reset_rx_fifo();
+                return Err(Error::RxUnderflow);
+            }
         }
         // // Block until transaction is finished
         while self.is_bus_busy() {

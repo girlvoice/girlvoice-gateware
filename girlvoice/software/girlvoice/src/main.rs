@@ -74,11 +74,17 @@ fn main() -> ! {
 
     // let mut led = Led0::new(peripherals.led0);
 
-    let i2c0 = I2c0::new(peripherals.i2cfifo);
-    let mut amp = Aw88395::new(i2c0);
+    let mut i2c0 = I2c0::new(peripherals.i2cfifo);
+    // let mut amp = Aw88395::new(i2c0);
 
     writeln!(serial, "\r").unwrap();
     writeln!(serial, "Starting main loop!\r").unwrap();
+    let mut rdbuf: [u8; 2] = [0, 0];
+    match i2c0.write_read(0x0A, &[0, 0], &mut rdbuf) {
+        Ok(_) => writeln!(serial, "{:#x} {:#x}\r", rdbuf[1], rdbuf[0]).unwrap(),
+        Err(i2c_err) => writeln!(serial, "read failed {:?}\r", i2c_err).unwrap(),
+    };
+
     write!(serial, "[girlvoice (^O^)~] ").unwrap();
 
     let mut term = term::Terminal::new(serial);
