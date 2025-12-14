@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:647c312cb42ba6b91fb5e9d9d05c9e297a4d9ecc1f897f3bde5e5a496c2120a6"
+content_hash = "sha256:e002c46e7e4d560b7bd8c4f062f0aff201022ef22a3950f8aadf641f768494eb"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
@@ -156,6 +156,43 @@ files = [
 ]
 
 [[package]]
+name = "cocotb"
+version = "2.0.1"
+requires_python = ">=3.6.2"
+summary = "cocotb is a coroutine based cosimulation library for writing VHDL and Verilog testbenches in Python."
+groups = ["default"]
+dependencies = [
+    "find-libpython",
+]
+files = [
+    {file = "cocotb-2.0.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:35d6e4b1553c541fa2236e32009ba8fc2cb2d9209d589c56c285352c600d2366"},
+    {file = "cocotb-2.0.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:8588fe4621db6e19b93f1d1b0a1aead37d23ad063d6b248b9a445e3f4104efac"},
+    {file = "cocotb-2.0.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d2730f19f5e3e800cc9a667fe2711812dd3a8c818f0167aa1e107e2b93624160"},
+    {file = "cocotb-2.0.1-cp310-cp310-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:f92b5ca05178bf6c231d649758a221d58490bd0e3ddda5ea83500cb49e472e36"},
+    {file = "cocotb-2.0.1-cp310-cp310-win32.whl", hash = "sha256:223509932a610f1f20834103e4c0f2ce9acb1ed0b5982bdeddcbd2bbf1aba349"},
+    {file = "cocotb-2.0.1-cp310-cp310-win_amd64.whl", hash = "sha256:c66018569d2f91ba8ea866984caf8fbb1cb6376102c187e99675c425ec1adcd9"},
+    {file = "cocotb-2.0.1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:1b99e5eab7236993cab7b4ed6464a249ad32daca93a6aa2987d5048272d77315"},
+    {file = "cocotb-2.0.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:cd45a2874c0a4fa11042259ab6a10d3226568c06ac27440101373cec54ae5789"},
+    {file = "cocotb-2.0.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:41e0244dce20ba3ef2830224f41f786ff5669fe14cec04db8ec92f9a8ac5b04f"},
+    {file = "cocotb-2.0.1-cp311-cp311-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:f13862231a841ffdf44e67e4e4377006d51732c4713b39a30eb4c7322d9d5ac7"},
+    {file = "cocotb-2.0.1-cp311-cp311-win32.whl", hash = "sha256:8437d4b39ecad5cddcda049b972878c8badc0b57a43dc94fb7cdecdf467b7427"},
+    {file = "cocotb-2.0.1-cp311-cp311-win_amd64.whl", hash = "sha256:a042b8c5b4d70f873a652ba60f1f17a21ff621e243a02bffa4f11a037ca21af5"},
+    {file = "cocotb-2.0.1-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:5a197c451312333170119378d796a29a6c9413e6283e9de3614c4f35af6e9d1f"},
+    {file = "cocotb-2.0.1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:ca491be0eff5cfa2a16f19aeb1aa62967a9d40b0882e32636ffd517c12c1f289"},
+    {file = "cocotb-2.0.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4fd0ae786019d18e7195a1186f93bff5afcda7b5aba8de710d3e74182e57a116"},
+    {file = "cocotb-2.0.1-cp312-cp312-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:3a2df61424b355899cab0f252b14f69d5c2c6b1c9422b2a4152eaa3fd169a9d6"},
+    {file = "cocotb-2.0.1-cp312-cp312-win32.whl", hash = "sha256:5798b47a4df3b4eb17a4b214c889d70d31e710b81a2109538b006569780bd115"},
+    {file = "cocotb-2.0.1-cp312-cp312-win_amd64.whl", hash = "sha256:f08b5ef2e59460a0ebee6927a3c92fdb66823278a295df50042a40df3314be8c"},
+    {file = "cocotb-2.0.1-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:1564125b6ace66b3f350d083a97308249c247515891487b56e527d9a4e7ebb0a"},
+    {file = "cocotb-2.0.1-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:be9d205fd5976cad89888dc394a91315037ccb7e684cd9f1a09f52509199cadf"},
+    {file = "cocotb-2.0.1-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9236df78a8fcdecb09a0916300c55ce1ab7a92fc67ac09b22f63ff592a47232e"},
+    {file = "cocotb-2.0.1-cp313-cp313-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:fed79b086414ac2d5faa1eff74b7533cb46404dfcd5a8e52cdffaeecdf98033a"},
+    {file = "cocotb-2.0.1-cp313-cp313-win32.whl", hash = "sha256:ad5ed2c7ced2c8088d9ee8bd0c0d4497297248d76698c2940e978d5e54dbed33"},
+    {file = "cocotb-2.0.1-cp313-cp313-win_amd64.whl", hash = "sha256:d1329c0efc1b460f12f8c76e5d030322adb4e89bc48f70c6f0805535d6eb1b10"},
+    {file = "cocotb-2.0.1.tar.gz", hash = "sha256:69887748412ff43e98f8579ad6c0da1f6ff19a94d0c3b4d6da472d8e86784e82"},
+]
+
+[[package]]
 name = "colorama"
 version = "0.4.6"
 requires_python = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
@@ -252,6 +289,17 @@ groups = ["default"]
 files = [
     {file = "cycler-0.12.1-py3-none-any.whl", hash = "sha256:85cef7cff222d8644161529808465972e51340599459b8ac3ccbac5a854e0d30"},
     {file = "cycler-0.12.1.tar.gz", hash = "sha256:88bb128f02ba341da8ef447245a9e138fae777f6a23943da4540077d3601eb1c"},
+]
+
+[[package]]
+name = "find-libpython"
+version = "0.5.0"
+requires_python = ">=3.9"
+summary = "Finds the libpython associated with your environment, wherever it may be hiding"
+groups = ["default"]
+files = [
+    {file = "find_libpython-0.5.0-py3-none-any.whl", hash = "sha256:7690dcf6442cdce39c0df191903fd5ecf9af437fa920effb6569fbf2c8ca8ab4"},
+    {file = "find_libpython-0.5.0.tar.gz", hash = "sha256:4e4e0ffcad3bfaf2af9461b359329b8736e3f721dc375da7c167aff383e56be1"},
 ]
 
 [[package]]

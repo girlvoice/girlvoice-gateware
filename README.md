@@ -35,3 +35,5 @@ run: `svd2rust -i girlsoc.svd --target riscv` to create the PAC `lib.rs` file.
 
 `pdm run girlvoice/girlvoice_rev_a.py` to build for the girlvoice rev A PCB.
 
+
+Use `pdm run girlvoice/targets/girlsoc_target.py --keep-files --toolchain radiant` to build the LUNA-SOC based design

@@ -7,7 +7,9 @@ use embedded_hal::i2c::{I2c, SevenBitAddress};
 use aw88395::Aw88395;
 use riscv_rt::entry;
 use soc_pac as pac;
-extern crate panic_halt;
+use core::ptr;
+use core::arch::asm;
+// extern crate panic_halt;
 
 
 use girlvoice_hal as hal;
@@ -64,6 +66,17 @@ hal::impl_serial! {
 //     sgtl5000.set_line_out_right_vol(0x5).unwrap();
 // }
 
+use core::panic::PanicInfo;
+#[inline(never)]
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    let mut serial = unsafe {Serial0::summon()};
+    let _err = writeln!(serial,"{}",  info.message());
+    if let Some(loc) = info.location() {
+        let _ = writeln!(serial, "Panic occurred at line: {}, file: {}", loc.line(), loc.file());
+    };
+    loop {}
+}
 
 #[entry]
 fn main() -> ! {
@@ -77,13 +90,43 @@ fn main() -> ! {
     let mut i2c0 = I2c0::new(peripherals.i2cfifo);
     // let mut amp = Aw88395::new(i2c0);
 
-    writeln!(serial, "\r").unwrap();
-    writeln!(serial, "Starting main loop!\r").unwrap();
-    let mut rdbuf: [u8; 2] = [0, 0];
-    match i2c0.write_read(0x0A, &[0, 0], &mut rdbuf) {
-        Ok(_) => writeln!(serial, "{:#x} {:#x}\r", rdbuf[1], rdbuf[0]).unwrap(),
-        Err(i2c_err) => writeln!(serial, "read failed {:?}\r", i2c_err).unwrap(),
-    };
+    // writeln!(serial, "\r").unwrap();
+    // writeln!(serial, "Starting main loop!\r").unwrap();
+    // let mut rdbuf: [u8; 2] = [0, 0];
+    // match i2c0.write_read(0x34, &[0], &mut rdbuf) {
+    //     Ok(_) => writeln!(serial, "{:#x} {:#x}\r", rdbuf[1], rdbuf[0]).unwrap(),
+    //     Err(i2c_err) => writeln!(serial, "read failed {:?}\r", i2c_err).unwrap(),
+    // };
+
+    // const TX_LSB: *mut u8 = 0xa0000012 as *mut u8;
+    // const TX_MSB: *mut u8 = 0xa0000013 as *mut u8;
+    // const SR: *mut u8 = 0xa0000018 as *mut u8;
+    // unsafe {
+    //     ptr::write_volatile(TX_LSB, 0);
+    //     ptr::write_volatile(TX_MSB, 0x3);
+    //     // *TX_LSB = 0;
+    //     // *TX_MSB = 0x3;
+    //     asm!("nop");
+    // }
+
+    // // delay.delay_ns(100);
+    // unsafe {
+    //     ptr::write_volatile(TX_LSB, 0x68);
+    //     ptr::write_volatile(TX_MSB, 0x0);
+    //     // *TX_LSB = 0x68;
+    //     // *TX_MSB = 0;
+    //     asm!("nop");
+
+    // }
+
+    // unsafe {
+    //     *TX_LSB = 0;
+    //     *TX_MSB = 0;
+    //     asm!("nop");
+    //     *TX_LSB = 0x55;
+    //     // asm!("nop");
+    //     *TX_MSB = 0x1;
+    // }
 
     write!(serial, "[girlvoice (^O^)~] ").unwrap();
 

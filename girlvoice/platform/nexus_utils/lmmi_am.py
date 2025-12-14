@@ -131,10 +131,14 @@ class WishboneLMMIBridge(wiring.Component):
 
         with m.If(wb_bus.cyc & wb_bus.stb):
             # Amaranth magic
+            # Switch on the cycle register. This holds the integer bus section to be handled.
             with m.Switch(cycle):
                 def segment(index):
                     return slice(index * wb_bus.granularity, (index + 1) * wb_bus.granularity)
 
+                # Enumerate the sel lines on the wb bus.
+                # index is a variable containing the sel index
+                # sel_index is the wire at that index
                 for index, sel_index in enumerate(wb_bus.sel):
                     with m.Case(index):
                         if index > 0:
@@ -158,6 +162,65 @@ class WishboneLMMIBridge(wiring.Component):
 
         return m
 
+# class WishboneLMMIBridge(wiring.Component):
+#     def __init__(self, lmmi_bus: Interface , data_width=None, name=None):
+#         if isinstance(lmmi_bus, wiring.FlippedInterface):
+#             lmmi_bus_unflipped = wiring.flipped(lmmi_bus)
+#         else:
+#             lmmi_bus_unflipped = lmmi_bus
+
+#         if not isinstance(lmmi_bus_unflipped, Interface):
+#             raise TypeError(f"LMMI bus must be an instance of lmmi.Interface, not "
+#                             f"{lmmi_bus_unflipped!r}")
+#         if data_width is None:
+#             data_width = lmmi_bus.data_width
+
+#         # ratio  = data_width // lmmi_bus.data_width
+#         wb_sig = wishbone.Signature(
+#             addr_width=lmmi_bus.addr_width << 2,
+#             data_width=data_width,
+#             granularity=8
+#         )
+#         super().__init__({"wb_bus": In(wb_sig)})
+
+#         self.wb_bus.memory_map = MemoryMap(addr_width=lmmi_bus.addr_width << 2, data_width=lmmi_bus.data_width)
+
+#         self.wb_bus.memory_map.add_window(lmmi_bus.memory_map, name=name)
+#         self._lmmi_bus = lmmi_bus
+
+#     @property
+#     def lmmi_bus(self):
+#         return self._lmmi_bus
+
+#     def elaborate(self, platform):
+#         m = Module()
+#         lmmi_bus = self.lmmi_bus
+#         wb_bus = self.wb_bus
+
+#         with m.FSM():
+#             with m.State("IDLE"):
+#                 with m.If(wb_bus.cyc & wb_bus.stb):
+#                     m.d.comb += [lmmi_bus.wdata.eq(wb_bus.dat_w),
+#                                  lmmi_bus.request.eq(1),
+#                                  lmmi_bus.wr_rdn.eq(wb_bus.we),
+#                                  lmmi_bus.offset.eq(wb_bus.adr[4:])
+#                                  ]
+#                     with m.If(wb_bus.we):
+#                         with m.If(lmmi_bus.ready):
+#                             m.d.comb += wb_bus.ack.eq(1)
+#                             m.next = "WRITE-WAIT"
+#                     with m.Else():
+#                         m.next = "READ-WAIT"
+
+#             with m.State("WRITE-WAIT"):
+#                 m.d.comb += wb_bus.ack.eq(1)
+#                 m.next = "IDLE"
+#             with m.State("READ-WAIT"):
+#                 with m.If(lmmi_bus.rdata_valid):
+#                     m.d.comb += wb_bus.dat_r.eq(lmmi_bus.rdata)
+#                     m.d.comb += wb_bus.ack.eq(1)
+#                     m.next = "IDLE"
+#         return m
 
 def main():
     clk_freq = 60e6
@@ -186,7 +249,7 @@ def main():
         ctx.set(decoder.bus.cyc, 1)
         ctx.set(decoder.bus.stb, 1)
         ctx.set(decoder.bus.sel, 0x03)
-        ctx.set(decoder.bus.adr, 0xa0000000)
+        ctx.set(decoder.bus.adr, 0xa0000012)
         ctx.set(decoder.bus.dat_w, 0xAB41)
         ctx.set(lmmi.rdata, 0xBC)
         for _ in range(len(bridge.wb_bus.sel) + 1):

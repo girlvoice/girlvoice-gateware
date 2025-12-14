@@ -24,6 +24,7 @@ dependencies = [
     "amaranth-soc @ git+https://github.com/amaranth-lang/amaranth-soc@5c43cf58f15d9cd9c69ff83c97997708d386b2dc",
     "luna-usb>=0.2.0",
     "luna-soc @ git+https://github.com/greatscottgadgets/luna-soc.git@main",
+    "cocotb>=2.0.1",
 ]
 requires-python = ">=3.10"
 readme = "README.md"

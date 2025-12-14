@@ -49,6 +49,7 @@ from amaranth.lib.wiring                         import Component, In, Out, flip
 
 from amaranth_soc                                import csr, gpio, wishbone
 from amaranth_soc.csr.wishbone                   import WishboneCSRBridge
+from amaranth_soc.wishbone.sram                  import WishboneSRAM
 
 from luna_soc.gateware.core               import spiflash, timer, uart
 from luna_soc.gateware.cpu                import InterruptController, VexRiscv
@@ -61,6 +62,7 @@ from girlvoice.platform.nexus_utils.lram          import WishboneNXLRAM
 
 from girlvoice.dsp.vocoder import StaticVocoder
 from girlvoice.io.i2s import i2s_rx, i2s_tx
+import girlvoice.io.i2c as i2c
 from girlvoice.platform.nexus_utils.i2c_fifo import I2CFIFO
 from girlvoice.platform.nexus_utils.lmmi_am import WishboneLMMIBridge
 
@@ -69,11 +71,12 @@ mB = 1024*kB
 
 class GirlvoiceSoc(Component):
     def __init__(self, *, sys_clk_freq=60e6, finalize_csr_bridge=True,
-                 mainram_size=128*kB, cpu_variant="imac+dcache", use_spi_flash = False):
+                 mainram_size=128*kB, cpu_variant="imac+dcache", use_spi_flash = False, sim = False):
 
         super().__init__({})
 
         self.firmware_path = ""
+        self.sim = sim
 
         self.sys_clk_freq = sys_clk_freq
 
@@ -89,7 +92,7 @@ class GirlvoiceSoc(Component):
         self.uart0_base           = 0x00000200
         self.timer0_base          = 0x00000300
         self.timer0_irq           = 0
-        # self.i2c0_base            = 0x00000400
+        self.i2c0_base            = 0x00000400
         self.led0_base            = 0x00000500
 
         if not use_spi_flash:
@@ -120,36 +123,44 @@ class GirlvoiceSoc(Component):
             alignment=0,
             features={"cti", "bte", "err"}
         )
-
-        self.mainram = WishboneNXLRAM(
-            size=self.mainram_size,
-            data_width=wb_data_width,
-        )
+        if not self.sim:
+            self.mainram = WishboneNXLRAM(
+                size=self.mainram_size,
+                data_width=wb_data_width,
+            )
+        else:
+            self.mainram = WishboneSRAM(
+                size=mainram_size,
+                data_width=wb_data_width,
+                granularity=8
+            )
         self.wb_decoder.add(self.mainram.wb_bus, addr=self.mainram_base, name="blockram")
 
 
         # csr decoder
-        csr_addr_width = 28
-        csr_data_width = 8
-        self.csr_decoder = csr.Decoder(addr_width=csr_addr_width, data_width=csr_data_width)
 
-        # uart0
-        uart_baud_rate = 115200
-        divisor = int(self.sys_clk_freq // uart_baud_rate)
-        self.uart0 = uart.Peripheral(divisor=divisor)
-        self.csr_decoder.add(self.uart0.bus, addr=self.uart0_base, name="uart0")
+        if not self.sim:
+            csr_addr_width = 28
+            csr_data_width = 8
+            self.csr_decoder = csr.Decoder(addr_width=csr_addr_width, data_width=csr_data_width)
 
-        # FIXME: timer events / isrs currently not implemented, adding the event
-        # bus to the csr decoder segfaults yosys somehow ...
+            # uart0
+            uart_baud_rate = 115200
+            divisor = int(self.sys_clk_freq // uart_baud_rate)
+            self.uart0 = uart.Peripheral(divisor=divisor)
+            self.csr_decoder.add(self.uart0.bus, addr=self.uart0_base, name="uart0")
 
-        # timer0
-        self.timer0 = timer.Peripheral(width=32)
-        self.csr_decoder.add(self.timer0.bus, addr=self.timer0_base, name="timer0")
-        self.interrupt_controller.add(self.timer0, number=self.timer0_irq, name="timer0")
+            # FIXME: timer events / isrs currently not implemented, adding the event
+            # bus to the csr decoder segfaults yosys somehow ...
 
-        # led
-        self.led0 = gpio.Peripheral(pin_count=1, addr_width=4, data_width=8)
-        self.csr_decoder.add(self.led0.bus, addr=self.led0_base, name="led0")
+            # timer0
+            self.timer0 = timer.Peripheral(width=32)
+            self.csr_decoder.add(self.timer0.bus, addr=self.timer0_base, name="timer0")
+            self.interrupt_controller.add(self.timer0, number=self.timer0_irq, name="timer0")
+
+            # led
+            self.led0 = gpio.Peripheral(pin_count=1, addr_width=4, data_width=8)
+            self.csr_decoder.add(self.led0.bus, addr=self.led0_base, name="led0")
 
         # spiflash peripheral
         # self.spi0_phy        = spiflash.SPIPHYController(domain="sync", divisor=0)
@@ -159,12 +170,14 @@ class GirlvoiceSoc(Component):
         # self.csr_decoder.add(self.spiflash_periph.csr, addr=self.spiflash_ctrl_base, name="spiflash_ctrl")
 
         # lattice i2c
-        self.i2c = I2CFIFO(scl_freq=400e3, use_hard_io=True)
+        self.i2c = I2CFIFO(scl_freq=400e3, use_hard_io=True, sim=sim)
         self.lmmi_to_wb = WishboneLMMIBridge(lmmi_bus = self.i2c.lmmi, data_width=32)
         self.wb_decoder.add(self.lmmi_to_wb.wb_bus, addr=self.lmmi_base, name = "wb_to_lmmi")
-        # mobo i2c
+
+        # on-fabric i2c
+
         # self.i2c0 = i2c.Peripheral()
-        # self.i2c_stream0 = i2c.I2CStreamer(period_cyc=256)
+        # self.i2c_stream0 = i2c.I2CStreamer(period_cyc=150) # 400kHz with 60MHz sys clock
         # self.csr_decoder.add(self.i2c0.bus, addr=self.i2c0_base, name="i2c0")
 
         sample_width = 16
@@ -179,7 +192,7 @@ class GirlvoiceSoc(Component):
 
         self.extra_rust_constants = []
 
-        if finalize_csr_bridge:
+        if finalize_csr_bridge and not self.sim:
             self.finalize_csr_bridge()
 
     def finalize_csr_bridge(self):
@@ -199,9 +212,9 @@ class GirlvoiceSoc(Component):
         m = Module()
 
         # mainram
-        maybe_fw_init = readbin.get_mem_data(self.firmware_path,  data_width=32, endianness="little")
+        maybe_fw_init = readbin.get_mem_data(self.firmware_path, data_width=32, endianness="little")
         if maybe_fw_init is None:
-            raise Exception()
+            raise RuntimeError("No firmware found to initialize")
         if not self.use_spi_flash:
             print("Initializing SoC RAM from firmware")
             self.mainram.init = maybe_fw_init
@@ -225,31 +238,34 @@ class GirlvoiceSoc(Component):
         m.submodules.mainram = self.mainram
 
         # csr decoder
-        m.submodules.csr_decoder = self.csr_decoder
+        if not self.sim:
+            m.submodules.csr_decoder = self.csr_decoder
 
         # uart0
-        m.submodules.uart0 = self.uart0
-        uart = platform.request("uart")
-        m.d.comb += self.uart0.pins.rx.eq(uart.rx.i)
-        m.d.comb += uart.tx.o.eq(self.uart0.pins.tx.o)
+        if not self.sim:
+            m.submodules.uart0 = self.uart0
+            uart = platform.request("uart")
+            m.d.comb += self.uart0.pins.rx.eq(uart.rx.i)
+            m.d.comb += uart.tx.o.eq(self.uart0.pins.tx.o)
 
-        # timer0
-        m.submodules.timer0 = self.timer0
+            # timer0
+            m.submodules.timer0 = self.timer0
 
-        # led0
-        m.submodules.led0 = self.led0
-        led_io = platform.request("led")
-        m.d.comb += led_io.o.eq(self.led0.pins[0].o)
+            # led0
+            m.submodules.led0 = self.led0
+            led_io = platform.request("led")
+            m.d.comb += led_io.o.eq(self.led0.pins[0].o)
 
         # i2c0
         m.submodules.i2c0 = self.i2c
         m.submodules.wb_to_lmmi = self.lmmi_to_wb
+
         # m.submodules.i2c_stream0 = self.i2c_stream0
         # wiring.connect(m, self.i2c0.i2c_stream, self.i2c_stream0.control)
         # if sim.is_hw(platform):
-        #     i2c0_provider = i2c.Provider()
-        #     m.submodules.i2c0_provider = i2c0_provider
-        #     wiring.connect(m, self.i2c_stream0.pins, i2c0_provider.pins)
+        # i2c0_provider = i2c.Provider()
+        # m.submodules.i2c0_provider = i2c0_provider
+        # wiring.connect(m, self.i2c_stream0.pins, i2c0_provider.pins)
 
         # spiflash
         # m.submodules.spi0_phy = self.spi0_phy
@@ -260,22 +276,24 @@ class GirlvoiceSoc(Component):
         m.submodules.i2s_rx = self.i2s_rx
         m.submodules.i2s_tx = self.i2s_tx
 
-        mic = platform.request("mic", 0)
+        if not self.sim:
+            mic = platform.request("mic", 0)
 
-        m.d.comb += [
-            mic.lrclk.o.eq(self.i2s_rx.lrclk),
-            mic.clk.o.eq(self.i2s_rx.sclk),
-            self.i2s_rx.sdin.eq(mic.data.i)
-        ]
+            m.d.comb += [
+                mic.lrclk.o.eq(self.i2s_rx.lrclk),
+                mic.clk.o.eq(self.i2s_rx.sclk),
+                self.i2s_rx.sdin.eq(mic.data.i)
+            ]
 
-        amp = platform.request("amp", 0)
-        m.d.comb += amp.en.o.eq(1)
-        m.d.comb += amp.lrclk.o.eq(~self.i2s_tx.lrclk)
-        m.d.comb += amp.clk.o.eq(self.i2s_tx.sclk)
-        m.d.comb += amp.data.o.eq(self.i2s_tx.sdout)
+            amp = platform.request("amp", 0)
+            m.d.comb += amp.en.o.eq(1)
+            m.d.comb += amp.lrclk.o.eq(~self.i2s_tx.lrclk)
+            m.d.comb += amp.clk.o.eq(self.i2s_tx.sclk)
+            m.d.comb += amp.data.o.eq(self.i2s_tx.sdout)
 
         # wishbone csr bridge
-        m.submodules.wb_to_csr = self.wb_to_csr
+        if not self.sim:
+            m.submodules.wb_to_csr = self.wb_to_csr
 
         # Memory controller hangs if we start making requests to it straight away.
         on_delay = Signal(32)
@@ -388,3 +406,33 @@ class GirlvoiceSoc(Component):
         subprocess.check_call([
             "cargo", "objcopy", "--release", "--", "-Obinary", rust_fw_bin
             ], env=os.environ, cwd=rust_fw_root)
+
+class VerilatorPlatform():
+    def __init__(self):
+        self.files = {}
+        # self.ila = False
+
+    def add_file(self, file_name, contents):
+        self.files[file_name] = contents
+
+
+if __name__ == "__main__":
+    import amaranth.back.verilog as verilog
+    soc = GirlvoiceSoc(sim=True)
+    soc.build(name="", build_dir="")
+
+    plat = VerilatorPlatform()
+    print(list(soc.signature.flatten(soc)))
+    with open(f"girlvoice_soc.v", "w") as f:
+        f.write(
+            verilog.convert(
+                soc,
+                name="girlvoice_soc",
+                ports=[
+                    # soc.clk
+                ],
+                emit_src=False,
+                strip_internal_attrs=True,
+                platform=plat
+            )
+        )

@@ -1,6 +1,8 @@
 from amaranth import *
+from amaranth.build import Platform
 from amaranth.lib import wiring
 from amaranth.lib.wiring import In
+from amaranth.lib import io
 
 from amaranth_soc.memory import MemoryMap
 from girlvoice.platform.nexus_utils import lmmi_am as lmmi
@@ -11,11 +13,14 @@ Wrapper for the Lattice I2CFIFO hard IP on Nexus devices
 class I2CFIFO(wiring.Component):
 
     lmmi: In(lmmi.Signature(addr_width=8, data_width=8))
-    def __init__(self, scl_freq: int, use_hard_io: bool):
+    def __init__(self, scl_freq: int, use_hard_io: bool, sim=False):
 
-        alt_io_en = "IO" if use_hard_io else "FABRIC"
+        self.use_hard_io = use_hard_io
         self.params = {}
+        self.scl_freq = scl_freq
+        self.sim = sim
         assert scl_freq in [100e3, 400e3], "Invalid I2C frequency"
+        alt_io_en = "IO" if use_hard_io else "FABRIC"
 
         NBASE_DELAY = "0b1010"
         self.params.update(
@@ -71,14 +76,14 @@ class I2CFIFO(wiring.Component):
             self.alt_scl_i = Signal()
             self.alt_sda_i = Signal()
 
-            self.params.update(
-                i_ALTSCLIN = self.alt_scl_i,
-                o_ALTSCLOUT = self.alt_scl_o,
-                o_ALTSCLOEN = self.alt_scl_oen, # For some reason the only output signals for the hard-IO is the inverted output-enable
-                i_ALTSDAIN = self.alt_sda_i,
-                o_ALTSDAOUT = self.alt_sda_o,
-                o_ALTSDAOEN = self.alt_sda_oen,
-            )
+            # self.params.update(
+            #     i_ALTSCLIN = self.alt_scl_i,
+            #     o_ALTSCLOUT = self.alt_scl_o,
+            #     o_ALTSCLOEN = self.alt_scl_oen, # For some reason the only output signals for the hard-IO is the inverted output-enable
+            #     i_ALTSDAIN = self.alt_sda_i,
+            #     o_ALTSDAOUT = self.alt_sda_o,
+            #     o_ALTSDAOEN = self.alt_sda_oen,
+            # )
         else:
             self.scl_o = Signal()
             self.sda_o = Signal()
@@ -108,7 +113,7 @@ class I2CFIFO(wiring.Component):
         memory_map = MemoryMap(addr_width=addr_width, data_width=data_width)
         # memory_map.add_resource(lmmi.Register(data_width), )
 
-    def elaborate(self, platform):
+    def elaborate(self, platform: Platform):
         m = Module()
 
         self.i2c_rstn = Signal()
@@ -125,7 +130,6 @@ class I2CFIFO(wiring.Component):
 
         self.i2c_bus_busy = Signal()
         self.params.update(
-
             i_LMMICLK = ClockSignal(),
             i_LMMIRESET_N = ~ResetSignal(),
             i_LMMIREQUEST = self.lmmi.request,
@@ -139,6 +143,29 @@ class I2CFIFO(wiring.Component):
             i_FIFORESET = self.fifo_rst,
             i_I2CLSRRSTN = True,
         )
-        m.submodules.i2c_fifo = Instance("I2CFIFO", **self.params)
+
+        # i2c_port = platform.request("i2c")
+        # scl_port = io.SingleEndedPort(i2c_port.scl)
+        # sda_port = io.SingleEndedPort(i2c_port.sda)
+        # m.submodules.sda_buf = sda_buf = io.Buffer(io.Direction.Bidir, sda_port)
+        # m.submodules.scl_buf = scl_buf = io.Buffer(io.Direction.Bidir, scl_port)
+        if not self.sim:
+            m.submodules.i2c_fifo = Instance("I2CFIFO", **self.params)
+            i2c_port = platform.request("i2c")
+
+            if not self.use_hard_io:
+                sda_buf = i2c_port.sda
+                scl_buf = i2c_port.scl
+
+                m.d.comb += [
+                    scl_buf.oe.eq(self.sda_oe),
+                    sda_buf.o.eq(0),
+                    self.sda_i.eq(sda_buf.i),
+                    self.scl_i.eq(scl_buf.i),
+                    scl_buf.oe.eq(self.scl_oe),
+                    scl_buf.o.eq(0)
+                ]
+                platform.add_clock_constraint(self.scl_oe, self.scl_freq)
+
 
         return m

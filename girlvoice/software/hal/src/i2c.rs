@@ -164,6 +164,10 @@ impl I2c<SevenBitAddress> for I2c0 {
         self.push_tx_byte(buf_len, TxCmd::RestartCount);
         self.push_tx_byte((address << 1) | 1, TxCmd::DataByte);
 
+        if !self.is_bus_busy() {
+            return Err(Error::TransactionFailed);
+        }
+
         while !self.is_read_complete() {
             if self.recieved_nack() {
                 self.reset_rx_fifo();

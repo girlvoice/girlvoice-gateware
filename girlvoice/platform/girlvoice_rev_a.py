@@ -24,7 +24,11 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             "clk12", 0, Pins("11", dir="i"), Clock(12e6), Attrs(IO_TYPE="LVCMOS18H")
         ),
         UARTResource(0, rx="USB_DP", tx="USB_DN", conn=("usb", 0)),
-        I2CResource(0, scl="44", sda="42", attrs=Attrs(IO_TYPE="LVCMOS33")),
+        # I2CResource(0, scl="44", sda="42", attrs=Attrs(IO_TYPE="LVCMOS33", USE_PRIMARY=False)),
+        Resource("i2c", 0,
+                 Subsignal("sda", Pins("42", dir="io")),
+                 Subsignal("scl", Pins("44", dir="io")),
+                 Attrs(IO_TYPE="LVCMOS33", PULLMODE="NONE")),
         *SPIFlashResources(
             0,
             cs_n="56",
@@ -208,7 +212,8 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             "--ipc=host",  # X11 passthrough (MIT-SHM)
         ]
 
-        kwargs["add_constraints"] = "ldc_set_sysconfig {{CONFIGIO_VOLTAGE_BANK0=3.3 CONFIGIO_VOLTAGE_BANK1=3.3 JTAG_PORT=DISABLE SLAVE_SPI_PORT=DISABLE MASTER_SPI_PORT=SERIAL}}"
+        kwargs["add_constraints"] = "ldc_set_sysconfig {{CONFIGIO_VOLTAGE_BANK0=3.3 CONFIGIO_VOLTAGE_BANK1=3.3 JTAG_PORT=DISABLE SLAVE_SPI_PORT=DISABLE MASTER_SPI_PORT=SERIAL}}\n"
+        kwargs["add_constraints"] += "ldc_set_attribute {USE_PRIMARY=FALSE} [get_ports \"i2c_0__scl__io\"]\n"
 
         if use_radiant_docker and self.toolchain == "Radiant":
             build_plan = super().build(

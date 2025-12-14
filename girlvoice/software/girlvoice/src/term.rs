@@ -67,7 +67,7 @@ impl<T: Read + Write> Terminal<T> {
                     };
                 }
                 _ => { // Unknown character
-                    self.serial.write(&[new_char as u8]).unwrap();
+                    // self.serial.write(&[new_char as u8]).unwrap();
                 }
 
             }
@@ -125,13 +125,13 @@ impl<T: Read + Write> Terminal<T> {
                             match data_token.strip_prefix("0x") {
                                 Some(stripped_data) => {
                                     if let Ok(new_data) = u8::from_str_radix(stripped_data, 16) {
-                                        unsafe {core::ptr::write(addr_ptr, new_data) };
+                                        unsafe { *addr_ptr = new_data};
                                         writeln!(self.serial, "{:#x}\r", new_data).unwrap();
                                     }
                                 },
                                 None => {
                                     if let Ok(new_data) = data_token.parse::<u8>() {
-                                        unsafe {core::ptr::write(addr_ptr, new_data) };
+                                        unsafe { *addr_ptr = new_data};
                                         writeln!(self.serial, "{:#x}\r", new_data).unwrap();
                                     }
                                 }

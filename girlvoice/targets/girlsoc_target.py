@@ -52,7 +52,7 @@ class GirlTop(Elaboratable):
 
         pwr_on = Signal(init=1)
         m.d.comb += pwr_en.o.eq(pwr_on)
-        # m.d.comb += platform.request("led", 0).o.eq(1)
+        m.d.comb += platform.request("led", 0).o.eq(1)
 
         btn_last = Signal(init=1)
         btn_rising = Signal()
