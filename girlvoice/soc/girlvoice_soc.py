@@ -410,7 +410,6 @@ class GirlvoiceSoc(Component):
 class VerilatorPlatform():
     def __init__(self):
         self.files = {}
-        # self.ila = False
 
     def add_file(self, file_name, contents):
         self.files[file_name] = contents

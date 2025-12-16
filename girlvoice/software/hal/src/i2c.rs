@@ -63,7 +63,7 @@ impl I2c0 {
 
     fn pop_rx_byte(&mut self) -> u8 {
         let byte = self.registers.i2crxfifo_lsb().read().rx_lsb().bits();
-        let _first = self.registers.i2crxfifo_msb().read().dfirst().bit();
+        // let _first = self.registers.i2crxfifo_msb().read().dfirst().bit();
         byte
     }
 
@@ -161,12 +161,12 @@ impl I2c<SevenBitAddress> for I2c0 {
         }
 
         // For some reason the I2CFIFO seems to always read one more than the number of bytes you tell it to read.
-        self.push_tx_byte(buf_len, TxCmd::RestartCount);
+        self.push_tx_byte(buf_len + 1, TxCmd::RestartCount);
         self.push_tx_byte((address << 1) | 1, TxCmd::DataByte);
 
-        if !self.is_bus_busy() {
-            return Err(Error::TransactionFailed);
-        }
+        // if !self.is_bus_busy() {
+        //     return Err(Error::TransactionFailed);
+        // }
 
         while !self.is_read_complete() {
             if self.recieved_nack() {
@@ -177,10 +177,10 @@ impl I2c<SevenBitAddress> for I2c0 {
 
         for byte in read.iter_mut() {
             *byte = self.pop_rx_byte();
-            if self.check_rx_underflow() {
-                self.reset_rx_fifo();
-                return Err(Error::RxUnderflow);
-            }
+            // if self.check_rx_underflow() {
+            //     self.reset_rx_fifo();
+            //     return Err(Error::RxUnderflow);
+            // }
         }
         // // Block until transaction is finished
         while self.is_bus_busy() {

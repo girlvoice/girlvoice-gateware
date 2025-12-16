@@ -88,58 +88,70 @@ fn main() -> ! {
     // let mut led = Led0::new(peripherals.led0);
 
     let mut i2c0 = I2c0::new(peripherals.i2cfifo);
-    // let mut amp = Aw88395::new(i2c0);
 
     // writeln!(serial, "\r").unwrap();
     // writeln!(serial, "Starting main loop!\r").unwrap();
-    // let mut rdbuf: [u8; 2] = [0, 0];
-    // match i2c0.write_read(0x34, &[0], &mut rdbuf) {
-    //     Ok(_) => writeln!(serial, "{:#x} {:#x}\r", rdbuf[1], rdbuf[0]).unwrap(),
-    //     Err(i2c_err) => writeln!(serial, "read failed {:?}\r", i2c_err).unwrap(),
-    // };
+    let mut rdbuf: [u8; 2] = [0, 0];
+    match i2c0.write_read(0x34, &[0], &mut rdbuf) {
+        Ok(_) => writeln!(serial, "{:#x} {:#x}\r", rdbuf[1], rdbuf[0]).unwrap(),
+        Err(i2c_err) => writeln!(serial, "read failed {:?}\r", i2c_err).unwrap(),
+    };
+    let mut amp = Aw88395::new(i2c0);
 
     // const TX_LSB: *mut u8 = 0xa0000012 as *mut u8;
     // const TX_MSB: *mut u8 = 0xa0000013 as *mut u8;
     // const SR: *mut u8 = 0xa0000018 as *mut u8;
     // unsafe {
-    //     ptr::write_volatile(TX_LSB, 0);
-    //     ptr::write_volatile(TX_MSB, 0x3);
-    //     // *TX_LSB = 0;
-    //     // *TX_MSB = 0x3;
-    //     asm!("nop");
-    // }
 
-    // // delay.delay_ns(100);
+    //     *TX_LSB = 0;
+    //     *TX_MSB = 0x3;
+    // }
+    // // for _ in 0..1 {
+    // //     unsafe {
+    // //         asm!("nop");
+    // //     }
+    // // }
+
     // unsafe {
-    //     ptr::write_volatile(TX_LSB, 0x68);
-    //     ptr::write_volatile(TX_MSB, 0x0);
-    //     // *TX_LSB = 0x68;
-    //     // *TX_MSB = 0;
-    //     asm!("nop");
-
+    //     // ptr::write_volatile(TX_LSB, 0x68);
+    //     // ptr::write_volatile(TX_MSB, 0x0);
+    //     *TX_LSB = 0x68;
+    //     *TX_MSB = 0;
     // }
+    // // for _ in 0..1 {
+    // //     unsafe {
+    // //         asm!("nop");
+    // //     }
+    // // }
 
     // unsafe {
     //     *TX_LSB = 0;
     //     *TX_MSB = 0;
-    //     asm!("nop");
+    //     for _ in 0..1 {
+    //         asm!("nop");
+    //     }
     //     *TX_LSB = 0x55;
-    //     // asm!("nop");
     //     *TX_MSB = 0x1;
+    //     for _ in 0..1 {
+    //         asm!("nop");
+    //     }
+    //     let awa = *TX_LSB;
     // }
 
-    write!(serial, "[girlvoice (^O^)~] ").unwrap();
 
-    let mut term = term::Terminal::new(serial);
+
+    // write!(serial, "[girlvoice (^O^)~] ").unwrap();
+
+    // let mut term = term::Terminal::new(serial);
 
     loop {
 
-        term.handle_char();
-        // let amp_id = amp.read_id_code();
-        // match amp_id {
-        //     Ok(id) => writeln!(serial, "Amp IDCODE: {:#x}\r", id).unwrap(),
-        //     Err(e) => writeln!(serial, "read reg failed :<\r").unwrap()
-        // }
+        // term.handle_char();
+        let amp_id = amp.read_id_code();
+        match amp_id {
+            Ok(id) => writeln!(serial, "Amp IDCODE: {:#x}\r", id).unwrap(),
+            Err(e) => writeln!(serial, "read reg failed :<\r").unwrap()
+        }
         // writeln!(serial, "reserved: {:#x}\r", i2c_reg.res);
         // writeln!(serial, "control 1: {:#x}\r", i2c_reg.i2cc1);
         // writeln!(serial, "control 2: {:#x}\r", i2c_reg.i2cc2);

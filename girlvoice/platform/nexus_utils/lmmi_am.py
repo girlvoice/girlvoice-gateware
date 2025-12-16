@@ -127,7 +127,10 @@ class WishboneLMMIBridge(wiring.Component):
 
         # range one greater than the sel width so we can
         cycle = Signal(range(len(wb_bus.sel) + 1))
-        m.d.comb += lmmi_bus.offset.eq(Cat(cycle[:exact_log2(len(wb_bus.sel))], wb_bus.adr))
+        with m.If(lmmi_bus.request):
+            m.d.comb += lmmi_bus.offset.eq(Cat(cycle[:exact_log2(len(wb_bus.sel))], wb_bus.adr))
+        with m.Else():
+            m.d.comb += lmmi_bus.offset.eq(0)
 
         with m.If(wb_bus.cyc & wb_bus.stb):
             # Amaranth magic
@@ -144,7 +147,7 @@ class WishboneLMMIBridge(wiring.Component):
                         if index > 0:
                             # This might not actually work since lmmi expects
                             # to wait for the slave to give a valid signal
-                            with m.If(wb_bus.sel[index-1] & lmmi_bus.rdata_valid):
+                            with m.If(wb_bus.sel[index-1]):
                                 m.d.sync += wb_bus.dat_r[segment(index - 1)].eq(lmmi_bus.rdata)
                         m.d.comb += lmmi_bus.wr_rdn.eq(sel_index & wb_bus.we)
                         m.d.comb += lmmi_bus.wdata.eq(wb_bus.dat_w[segment(index)])
