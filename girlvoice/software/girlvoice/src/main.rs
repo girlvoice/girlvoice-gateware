@@ -5,10 +5,10 @@ use embedded_hal::delay::DelayNs;
 use embedded_hal::digital::StatefulOutputPin;
 use embedded_hal::i2c::{I2c, SevenBitAddress};
 use aw88395::Aw88395;
+use sgtl5000::{Sgtl5000};
+use sgtl5000::regmap::LineOutBiasCurrent;
 use riscv_rt::entry;
 use soc_pac as pac;
-use core::ptr;
-use core::arch::asm;
 // extern crate panic_halt;
 
 
@@ -44,27 +44,27 @@ hal::impl_serial! {
     Serial0: pac::Uart0,
 }
 
-// fn power_on_codec(mut sgtl5000: Sgtl5000<I2c0>) {
-//     // Analog power up settings
-//     sgtl5000.power_off_startup_power().unwrap();
-//     sgtl5000.enable_int_osc().unwrap();
-//     sgtl5000.enable_charge_pump().unwrap();
-//     sgtl5000.set_bias(0x7).unwrap(); // Set bias current to 50% of nominal per data sheet
-//     sgtl5000.set_analog_gnd(0x04).unwrap(); // Set analog gnd reference voltage to 0.9v (VDDA/2)
-//     sgtl5000.set_line_out_ana_gnd(0x4).unwrap(); // Set line out analog ref voltage to 0.9v (VDDIO/2)
-//     sgtl5000.set_line_out_bias_current(LineOutBiasCurrent::MicroAmp360).unwrap(); // Set line out bias current to 0.36mA for 10kOhm + 1.0nF load
-//     sgtl5000.enable_small_pop().unwrap(); // Minimize pop
+fn power_on_codec(mut sgtl5000: Sgtl5000<I2c0>) {
+    // Analog power up settings
+    sgtl5000.power_off_startup_power().unwrap();
+    sgtl5000.enable_int_osc().unwrap();
+    sgtl5000.enable_charge_pump().unwrap();
+    sgtl5000.set_bias(0x7).unwrap(); // Set bias current to 50% of nominal per data sheet
+    sgtl5000.set_analog_gnd(0x04).unwrap(); // Set analog gnd reference voltage to 0.9v (VDDA/2)
+    sgtl5000.set_line_out_ana_gnd(0x4).unwrap(); // Set line out analog ref voltage to 0.9v (VDDIO/2)
+    sgtl5000.set_line_out_bias_current(LineOutBiasCurrent::MicroAmp360).unwrap(); // Set line out bias current to 0.36mA for 10kOhm + 1.0nF load
+    sgtl5000.enable_small_pop().unwrap(); // Minimize pop
 
-//     // Note: here datasheet enables short detect for headphone out
+    // Note: here datasheet enables short detect for headphone out
 
-//     // Digital blocks and IO power on
-//     sgtl5000.power_on_adc().unwrap();
-//     sgtl5000.power_on_dac().unwrap();
-//     sgtl5000.power_on_line_out().unwrap();
+    // Digital blocks and IO power on
+    sgtl5000.power_on_adc().unwrap();
+    sgtl5000.power_on_dac().unwrap();
+    sgtl5000.power_on_line_out().unwrap();
 
-//     sgtl5000.set_line_out_left_vol(0x5).unwrap();
-//     sgtl5000.set_line_out_right_vol(0x5).unwrap();
-// }
+    sgtl5000.set_line_out_left_vol(0x5).unwrap();
+    sgtl5000.set_line_out_right_vol(0x5).unwrap();
+}
 
 use core::panic::PanicInfo;
 #[inline(never)]

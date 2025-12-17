@@ -168,7 +168,6 @@ dependencies = [
  "gc9a01-rs",
  "girlvoice-hal",
  "hex",
- "litex-hal",
  "panic-halt",
  "riscv",
  "riscv-rt",
@@ -192,15 +191,6 @@ name = "hex"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
-
-[[package]]
-name = "litex-hal"
-version = "0.4.0"
-dependencies = [
- "embedded-hal",
- "embedded-io",
- "nb",
-]
 
 [[package]]
 name = "micromath"

@@ -11,13 +11,10 @@ pub struct Terminal<T: Read + Write> {
 
 fn parse_addr(addr_token: &str) -> Option<u32> {
     if let Some(unprefixed) = addr_token.strip_prefix("0x") {
-        let maybe_int = u32::from_str_radix(unprefixed, 16);
-        return match maybe_int {
-            Ok(addr) => Some(addr),
-            Err(_) => None,
-        }
+        u32::from_str_radix(unprefixed, 16).ok()
+    } else {
+        None
     }
-    return None;
 }
 
 impl<T: Read + Write> Terminal<T> {

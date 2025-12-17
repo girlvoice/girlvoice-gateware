@@ -181,7 +181,6 @@ impl<I2C: I2c> Aw88395<I2C> {
         self.read_reg(regmap::Register::Id)
     }
 
-
     fn write_reg(&mut self, reg: Register, value: u16) -> Result<(), Aw88395Error> {
         let value_bytes = value.to_be_bytes();
         let regbuf = [reg.addr(), value_bytes[0], value_bytes[1]];

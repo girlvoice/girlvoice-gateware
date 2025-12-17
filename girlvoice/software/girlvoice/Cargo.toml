@@ -9,9 +9,6 @@ edition = "2021"
 embedded-hal = "1.0.0"
 fugit = "0.3.7"
 hex = { version = "0.4.3", default-features = false}
-# litex-hal = { version = "0.4.0", features = ["gpio"] }
-litex-hal = { path = "/home/sage/programming_stuff/sage/rust-litex-hal" }
-# litex-pac = { path = "../litex-pac", features = ["rt", "critical-section"] }
 soc-pac = { path = "../soc-pac", features = ["rt", "critical-section"] }
 girlvoice-hal = { path = "../hal" }
 panic-halt = "1.0.0"
