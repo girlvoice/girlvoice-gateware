@@ -15,7 +15,7 @@ from amaranth.lib         import wiring
 from amaranth_soc         import csr
 from amaranth_soc.memory  import MemoryMap, ResourceInfo
 
-from ..gateware.cpu.ic    import InterruptMap
+from luna_soc.gateware.cpu.ic    import InterruptMap
 
 
 # - soc attributes ------------------------------------------------------------

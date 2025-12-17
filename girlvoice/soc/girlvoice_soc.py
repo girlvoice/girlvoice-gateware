@@ -173,12 +173,6 @@ class GirlvoiceSoc(Component):
         self.lmmi_to_wb = WishboneLMMIBridge(lmmi_bus = self.i2c.lmmi, data_width=32)
         self.wb_decoder.add(self.lmmi_to_wb.wb_bus, addr=self.lmmi_base, name = "wb_to_lmmi")
 
-        # on-fabric i2c
-
-        # self.i2c0 = i2c.Peripheral()
-        # self.i2c_stream0 = i2c.I2CStreamer(period_cyc=150) # 400kHz with 60MHz sys clock
-        # self.csr_decoder.add(self.i2c0.bus, addr=self.i2c0_base, name="i2c0")
-
         sample_width = 16
 
         bclk_freq = 4e6
@@ -259,12 +253,6 @@ class GirlvoiceSoc(Component):
         m.submodules.i2c0 = self.i2c
         m.submodules.wb_to_lmmi = self.lmmi_to_wb
 
-        # m.submodules.i2c_stream0 = self.i2c_stream0
-        # wiring.connect(m, self.i2c0.i2c_stream, self.i2c_stream0.control)
-        # if sim.is_hw(platform):
-        # i2c0_provider = i2c.Provider()
-        # m.submodules.i2c0_provider = i2c0_provider
-        # wiring.connect(m, self.i2c_stream0.pins, i2c0_provider.pins)
 
         # spiflash
         # m.submodules.spi0_phy = self.spi0_phy
