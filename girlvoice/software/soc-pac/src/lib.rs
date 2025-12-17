@@ -1507,12 +1507,11 @@ pub mod i2cfifo {
         _reserved1: [u8; 0x0f],
         i2ctxfifo_lsb: I2ctxfifoLsb,
         i2ctxfifo_msb: I2ctxfifoMsb,
-        i2crxfifo_lsb: I2crxfifoLsb,
-        i2crxfifo_msb: I2crxfifoMsb,
-        _reserved5: [u8; 0x02],
+        i2crxfifo: I2crxfifo,
+        _reserved4: [u8; 0x02],
         i2cfifosr_lsb: I2cfifosrLsb,
         i2cfifosr_msb: I2cfifosrMsb,
-        _reserved7: [u8; 0x0d],
+        _reserved6: [u8; 0x0d],
         i2ctxfifobyteavail: I2ctxfifobyteavail,
     }
     impl RegisterBlock {
@@ -1533,13 +1532,8 @@ pub mod i2cfifo {
         }
         #[doc = "0x14 - "]
         #[inline(always)]
-        pub const fn i2crxfifo_lsb(&self) -> &I2crxfifoLsb {
-            &self.i2crxfifo_lsb
-        }
-        #[doc = "0x15 - "]
-        #[inline(always)]
-        pub const fn i2crxfifo_msb(&self) -> &I2crxfifoMsb {
-            &self.i2crxfifo_msb
+        pub const fn i2crxfifo(&self) -> &I2crxfifo {
+            &self.i2crxfifo
         }
         #[doc = "0x18 - "]
         #[inline(always)]
@@ -1698,68 +1692,30 @@ module"]
             const RESET_VALUE: u8 = 0;
         }
     }
-    #[doc = "I2CRXFIFO_LSB (rw) register accessor: \n\nYou can [`read`](crate::generic::Reg::read) this register and get [`i2crxfifo_lsb::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`i2crxfifo_lsb::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@i2crxfifo_lsb`]
+    #[doc = "I2CRXFIFO (rw) register accessor: \n\nYou can [`read`](crate::generic::Reg::read) this register and get [`i2crxfifo::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`i2crxfifo::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@i2crxfifo`]
 module"]
-    #[doc(alias = "I2CRXFIFO_LSB")]
-    pub type I2crxfifoLsb = crate::Reg<i2crxfifo_lsb::I2crxfifoLsbSpec>;
+    #[doc(alias = "I2CRXFIFO")]
+    pub type I2crxfifo = crate::Reg<i2crxfifo::I2crxfifoSpec>;
     #[doc = ""]
-    pub mod i2crxfifo_lsb {
-        #[doc = "Register `I2CRXFIFO_LSB` reader"]
-        pub type R = crate::R<I2crxfifoLsbSpec>;
-        #[doc = "Register `I2CRXFIFO_LSB` writer"]
-        pub type W = crate::W<I2crxfifoLsbSpec>;
-        #[doc = "Field `rx_lsb` reader - "]
-        pub type RxLsbR = crate::FieldReader;
-        #[doc = "Field `rx_lsb` writer - "]
-        pub type RxLsbW<'a, REG> = crate::FieldWriter<'a, REG, 8>;
-        impl R {
-            #[doc = "Bits 0:7"]
-            #[inline(always)]
-            pub fn rx_lsb(&self) -> RxLsbR {
-                RxLsbR::new(self.bits)
-            }
-        }
-        impl W {
-            #[doc = "Bits 0:7"]
-            #[inline(always)]
-            #[must_use]
-            pub fn rx_lsb(&mut self) -> RxLsbW<I2crxfifoLsbSpec> {
-                RxLsbW::new(self, 0)
-            }
-        }
-        #[doc = "\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`i2crxfifo_lsb::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`i2crxfifo_lsb::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
-        pub struct I2crxfifoLsbSpec;
-        impl crate::RegisterSpec for I2crxfifoLsbSpec {
-            type Ux = u8;
-        }
-        #[doc = "`read()` method returns [`i2crxfifo_lsb::R`](R) reader structure"]
-        impl crate::Readable for I2crxfifoLsbSpec {}
-        #[doc = "`write(|w| ..)` method takes [`i2crxfifo_lsb::W`](W) writer structure"]
-        impl crate::Writable for I2crxfifoLsbSpec {
-            type Safety = crate::Unsafe;
-            const ZERO_TO_MODIFY_FIELDS_BITMAP: u8 = 0;
-            const ONE_TO_MODIFY_FIELDS_BITMAP: u8 = 0;
-        }
-        #[doc = "`reset()` method sets I2CRXFIFO_LSB to value 0"]
-        impl crate::Resettable for I2crxfifoLsbSpec {
-            const RESET_VALUE: u8 = 0;
-        }
-    }
-    #[doc = "I2CRXFIFO_MSB (rw) register accessor: \n\nYou can [`read`](crate::generic::Reg::read) this register and get [`i2crxfifo_msb::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`i2crxfifo_msb::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@i2crxfifo_msb`]
-module"]
-    #[doc(alias = "I2CRXFIFO_MSB")]
-    pub type I2crxfifoMsb = crate::Reg<i2crxfifo_msb::I2crxfifoMsbSpec>;
-    #[doc = ""]
-    pub mod i2crxfifo_msb {
-        #[doc = "Register `I2CRXFIFO_MSB` reader"]
-        pub type R = crate::R<I2crxfifoMsbSpec>;
-        #[doc = "Register `I2CRXFIFO_MSB` writer"]
-        pub type W = crate::W<I2crxfifoMsbSpec>;
+    pub mod i2crxfifo {
+        #[doc = "Register `I2CRXFIFO` reader"]
+        pub type R = crate::R<I2crxfifoSpec>;
+        #[doc = "Register `I2CRXFIFO` writer"]
+        pub type W = crate::W<I2crxfifoSpec>;
+        #[doc = "Field `rx_data` reader - "]
+        pub type RxDataR = crate::FieldReader;
+        #[doc = "Field `rx_data` writer - "]
+        pub type RxDataW<'a, REG> = crate::FieldWriter<'a, REG, 8>;
         #[doc = "Field `dfirst` reader - "]
         pub type DfirstR = crate::BitReader;
         #[doc = "Field `dfirst` writer - "]
         pub type DfirstW<'a, REG> = crate::BitWriter<'a, REG>;
         impl R {
+            #[doc = "Bits 0:7"]
+            #[inline(always)]
+            pub fn rx_data(&self) -> RxDataR {
+                RxDataR::new((self.bits & 0xff) as u8)
+            }
             #[doc = "Bit 0"]
             #[inline(always)]
             pub fn dfirst(&self) -> DfirstR {
@@ -1767,29 +1723,35 @@ module"]
             }
         }
         impl W {
+            #[doc = "Bits 0:7"]
+            #[inline(always)]
+            #[must_use]
+            pub fn rx_data(&mut self) -> RxDataW<I2crxfifoSpec> {
+                RxDataW::new(self, 0)
+            }
             #[doc = "Bit 0"]
             #[inline(always)]
             #[must_use]
-            pub fn dfirst(&mut self) -> DfirstW<I2crxfifoMsbSpec> {
+            pub fn dfirst(&mut self) -> DfirstW<I2crxfifoSpec> {
                 DfirstW::new(self, 0)
             }
         }
-        #[doc = "\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`i2crxfifo_msb::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`i2crxfifo_msb::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
-        pub struct I2crxfifoMsbSpec;
-        impl crate::RegisterSpec for I2crxfifoMsbSpec {
-            type Ux = u8;
+        #[doc = "\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`i2crxfifo::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`i2crxfifo::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
+        pub struct I2crxfifoSpec;
+        impl crate::RegisterSpec for I2crxfifoSpec {
+            type Ux = u16;
         }
-        #[doc = "`read()` method returns [`i2crxfifo_msb::R`](R) reader structure"]
-        impl crate::Readable for I2crxfifoMsbSpec {}
-        #[doc = "`write(|w| ..)` method takes [`i2crxfifo_msb::W`](W) writer structure"]
-        impl crate::Writable for I2crxfifoMsbSpec {
+        #[doc = "`read()` method returns [`i2crxfifo::R`](R) reader structure"]
+        impl crate::Readable for I2crxfifoSpec {}
+        #[doc = "`write(|w| ..)` method takes [`i2crxfifo::W`](W) writer structure"]
+        impl crate::Writable for I2crxfifoSpec {
             type Safety = crate::Unsafe;
-            const ZERO_TO_MODIFY_FIELDS_BITMAP: u8 = 0;
-            const ONE_TO_MODIFY_FIELDS_BITMAP: u8 = 0;
+            const ZERO_TO_MODIFY_FIELDS_BITMAP: u16 = 0;
+            const ONE_TO_MODIFY_FIELDS_BITMAP: u16 = 0;
         }
-        #[doc = "`reset()` method sets I2CRXFIFO_MSB to value 0"]
-        impl crate::Resettable for I2crxfifoMsbSpec {
-            const RESET_VALUE: u8 = 0;
+        #[doc = "`reset()` method sets I2CRXFIFO to value 0"]
+        impl crate::Resettable for I2crxfifoSpec {
+            const RESET_VALUE: u16 = 0;
         }
     }
     #[doc = "I2CFIFOSR_LSB (rw) register accessor: \n\nYou can [`read`](crate::generic::Reg::read) this register and get [`i2cfifosr_lsb::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`i2cfifosr_lsb::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@i2cfifosr_lsb`]

@@ -53,7 +53,7 @@ impl I2c0 {
 
     // RX FIFO can be reset to known-good state by writing anything to it.
     fn reset_rx_fifo(&mut self) {
-        self.registers.i2crxfifo_lsb().write(|w| unsafe{ w.bits(0) });
+        self.registers.i2crxfifo().write(|w| unsafe{ w.bits(0) });
     }
 
     fn push_tx_byte(&mut self, byte: u8, cmd: TxCmd){
@@ -62,8 +62,7 @@ impl I2c0 {
     }
 
     fn pop_rx_byte(&mut self) -> u8 {
-        let byte = self.registers.i2crxfifo_lsb().read().rx_lsb().bits();
-        // let _first = self.registers.i2crxfifo_msb().read().dfirst().bit();
+        let byte = self.registers.i2crxfifo().read().rx_data().bits();
         byte
     }
 
