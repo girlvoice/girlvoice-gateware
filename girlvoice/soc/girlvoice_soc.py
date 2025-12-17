@@ -62,7 +62,6 @@ from girlvoice.platform.nexus_utils.lram          import WishboneNXLRAM
 
 from girlvoice.dsp.vocoder import StaticVocoder
 from girlvoice.io.i2s import i2s_rx, i2s_tx
-import girlvoice.io.i2c as i2c
 from girlvoice.platform.nexus_utils.i2c_fifo import I2CFIFO
 from girlvoice.platform.nexus_utils.lmmi_am import WishboneLMMIBridge
 
