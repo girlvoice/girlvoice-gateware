@@ -1,4 +1,3 @@
-from lzma import is_check_supported
 from amaranth import *
 from amaranth.lib import wiring
 from amaranth.lib.wiring import In, Out

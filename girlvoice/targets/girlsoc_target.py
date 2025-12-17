@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-from os import sync
 from amaranth import *
-import amaranth.lib.wiring as wiring
 from amaranth.build import *
 from amaranth.build.plat import Platform
 from girlvoice.soc.vendor.luna_soc import top_level_cli

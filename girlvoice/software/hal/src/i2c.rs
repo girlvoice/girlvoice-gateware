@@ -11,7 +11,7 @@ pub enum Error {
     TransactionFailed,
     InvalidState,
     RxUnderflow,
-    RecievedNack,
+    ReceivedNack,
 }
 
 pub enum TxCmd {
@@ -38,7 +38,7 @@ impl I2c0 {
         self.registers.i2cfifosr_lsb().read().busy().bit()
     }
 
-    pub fn recieved_nack(&mut self) -> bool {
+    pub fn received_nack(&mut self) -> bool {
         self.registers.i2cfifosr_lsb().read().rnack().bit()
     }
 
@@ -106,7 +106,7 @@ impl I2c0 {
             self.push_tx_byte(*byte, if last { TxCmd::LastByte } else { TxCmd::DataByte });
         }
 
-        if self.recieved_nack() { return Err(Error::TransactionFailed) }
+        if self.received_nack() { return Err(Error::TransactionFailed) }
 
         while self.is_bus_busy() {}
 
@@ -120,7 +120,7 @@ impl i2c::Error for Error {
             Error::RxUnderflow => i2c::ErrorKind::Other,
             Error::TransactionFailed => i2c::ErrorKind::Bus,
             Error::InvalidState => i2c::ErrorKind::Other,
-            Error::RecievedNack => i2c::ErrorKind::NoAcknowledge(i2c::NoAcknowledgeSource::Unknown),
+            Error::ReceivedNack => i2c::ErrorKind::NoAcknowledge(i2c::NoAcknowledgeSource::Unknown),
         }
     }
 }
@@ -150,7 +150,7 @@ impl I2c<SevenBitAddress> for I2c0 {
 
         self.reset_tx_fifo();
 
-        // if self.is_bus_busy() {return Err(Error::InvalidState);}
+        if self.is_bus_busy() {return Err(Error::InvalidState);}
 
         self.push_tx_byte(0, TxCmd::RestartCount);
         self.push_tx_byte(address << 1, TxCmd::DataByte);
@@ -168,20 +168,20 @@ impl I2c<SevenBitAddress> for I2c0 {
         // }
 
         while !self.is_read_complete() {
-            if self.recieved_nack() {
+            if self.received_nack() {
                 self.reset_rx_fifo();
-                return Err(Error::RecievedNack);
+                return Err(Error::ReceivedNack);
             }
         }
 
         for byte in read.iter_mut() {
             *byte = self.pop_rx_byte();
-            // if self.check_rx_underflow() {
-            //     self.reset_rx_fifo();
-            //     return Err(Error::RxUnderflow);
-            // }
+            if self.check_rx_underflow() {
+                self.reset_rx_fifo();
+                return Err(Error::RxUnderflow);
+            }
         }
-        // // Block until transaction is finished
+        // Block until transaction is finished
         while self.is_bus_busy() {
         }
 
