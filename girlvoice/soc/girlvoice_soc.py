@@ -43,7 +43,7 @@ import subprocess
 import os
 
 from amaranth                                    import *
-from amaranth.build                              import Attrs, Pins, PinsN, Platform, Resource, Subsignal
+from amaranth.build                              import Platform
 from amaranth.lib                                import wiring
 from amaranth.lib.wiring                         import Component, In, Out, flipped, connect
 
@@ -56,14 +56,12 @@ from luna_soc.gateware.cpu                import InterruptController, VexRiscv
 from luna_soc.util                        import readbin
 from luna_soc.generate.svd                import SVD
 
-from girlvoice.platform.nexus_utils import lmmi
-from girlvoice.platform.nexus_utils.lmmi import LMMItoWishbone
+import girlvoice.platform.nexus_utils.lmmi as lmmi
 from girlvoice.platform.nexus_utils.lram          import WishboneNXLRAM
 
 from girlvoice.dsp.vocoder import StaticVocoder
 from girlvoice.io.i2s import i2s_rx, i2s_tx
 from girlvoice.platform.nexus_utils.i2c_fifo import I2CFIFO
-from girlvoice.platform.nexus_utils.lmmi_am import WishboneLMMIBridge
 
 kB = 1024
 mB = 1024*kB
@@ -170,7 +168,7 @@ class GirlvoiceSoc(Component):
 
         # lattice i2c
         self.i2c = I2CFIFO(scl_freq=400e3, use_hard_io=True, sim=sim)
-        self.lmmi_to_wb = WishboneLMMIBridge(lmmi_bus = self.i2c.lmmi, data_width=32)
+        self.lmmi_to_wb = lmmi.WishboneLMMIBridge(lmmi_bus = self.i2c.lmmi, data_width=32)
         self.wb_decoder.add(self.lmmi_to_wb.wb_bus, addr=self.lmmi_base, name = "wb_to_lmmi")
 
         sample_width = 16

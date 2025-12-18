@@ -7,9 +7,6 @@ from girlvoice.soc.vendor.luna_soc import top_level_cli
 
 from girlvoice.platform.girlvoice_rev_a import GirlvoiceRevAPlatform
 from girlvoice.platform.nexus_utils.pll import NXPLL
-from girlvoice.io.i2s import i2s_rx, i2s_tx
-from girlvoice.dsp.bandpass_iir import BandpassIIR
-import girlvoice.dsp.vocoder as vocoder
 
 from girlvoice.soc.girlvoice_soc import GirlvoiceSoc
 

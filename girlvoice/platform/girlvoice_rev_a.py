@@ -1,6 +1,5 @@
 import os
 import subprocess
-from typing import List
 from amaranth import *
 from amaranth.build import *
 from amaranth.vendor import LatticePlatform

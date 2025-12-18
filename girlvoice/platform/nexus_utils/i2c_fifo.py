@@ -2,10 +2,9 @@ from amaranth import *
 from amaranth.build import Platform
 from amaranth.lib import wiring
 from amaranth.lib.wiring import In
-from amaranth.lib import io
 
 from amaranth_soc.memory import MemoryMap
-from girlvoice.platform.nexus_utils import lmmi_am as lmmi
+from girlvoice.platform.nexus_utils import lmmi as lmmi
 
 '''
 Wrapper for the Lattice I2CFIFO hard IP on Nexus devices
@@ -144,11 +143,6 @@ class I2CFIFO(wiring.Component):
             i_I2CLSRRSTN = True,
         )
 
-        # i2c_port = platform.request("i2c")
-        # scl_port = io.SingleEndedPort(i2c_port.scl)
-        # sda_port = io.SingleEndedPort(i2c_port.sda)
-        # m.submodules.sda_buf = sda_buf = io.Buffer(io.Direction.Bidir, sda_port)
-        # m.submodules.scl_buf = scl_buf = io.Buffer(io.Direction.Bidir, scl_port)
         if not self.sim:
             m.submodules.i2c_fifo = Instance("I2CFIFO", **self.params)
             i2c_port = platform.request("i2c")
