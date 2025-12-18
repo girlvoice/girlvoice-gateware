@@ -1,12 +1,20 @@
 
+use core::fmt::write;
+
 use embedded_io::{Read, Write};
+use embedded_hal::i2c::I2c;
+use embedded_hal::delay::DelayNs;
 use fixedstr::*;
-pub struct Terminal<T: Read + Write> {
+use aw88395::Aw88395;
+
+pub struct Terminal<T: Read + Write, U: I2c, V: DelayNs> {
     serial: T,
     cmd_str: zstr<256>,
     prev_cmd: zstr<256>,
     char_buf: [u8; 1],
-    csi_mode: bool
+    csi_mode: bool,
+    amp: Aw88395<U>,
+    timer: V
 }
 
 fn parse_addr(addr_token: &str) -> Option<u32> {
@@ -17,14 +25,16 @@ fn parse_addr(addr_token: &str) -> Option<u32> {
     }
 }
 
-impl<T: Read + Write> Terminal<T> {
-    pub fn new(serial: T) -> Self {
+impl<T: Read + Write, U: I2c, V: DelayNs> Terminal<T, U, V> {
+    pub fn new(serial: T, amp: Aw88395<U>, timer: V) -> Self {
         Self {
             serial: serial,
             cmd_str: zstr::default(),
             prev_cmd: zstr::default(),
             char_buf: [0],
-            csi_mode: false
+            csi_mode: false,
+            amp: amp,
+            timer: timer
         }
     }
 
@@ -112,7 +122,6 @@ impl<T: Read + Write> Terminal<T> {
                     }
                 }
                 writeln!(self.serial, "usage: read 0x<addr>\r").unwrap();
-
             },
             Some("write") => {
                 if let Some(addr_token) = split.next() {
@@ -139,10 +148,92 @@ impl<T: Read + Write> Terminal<T> {
                 }
                 writeln!(self.serial, "usage: write 0x<addr> <data>\r").unwrap();
             },
+            Some("init") => {
+                // Run the amplifier initialization sequence
+                if self.amp.soft_reset().is_err() {
+                    writeln!(self.serial, "Failed to reset amplifier").unwrap();
+                    return;
+                }
+                if self.amp.power_on().is_err() {
+                    writeln!(self.serial, "Failed to power on amplifier").unwrap();
+                    return;
+                }
+                writeln!(self.serial, "Waiting for amp PLL lock").unwrap();
+                if !self.wait_for_pll_lock() {
+                    writeln!(self.serial, "Failed to find PLL lock!").unwrap();
+                    return;
+                }
+                if self.amp.set_volume(100).is_err() {
+                    writeln!(self.serial, "Failed to set initial amplifier volume").unwrap();
+                    return;
+                }
+                if self.amp.enable_i2s().is_err() {
+                    writeln!(self.serial, "Failed to enable i2s during amplifier init").unwrap();
+                    return;
+                }
+                writeln!(self.serial, "Enabling class D amplifier and boost converter").unwrap();
+                if self.amp.enable_amp().is_err() {
+                    writeln!(self.serial, "Failed to enable boost amplifier").unwrap();
+                    return;
+                }
+                if !self.wait_for_pll_lock() {
+                    writeln!(self.serial, "Failed to power on boost amplifier").unwrap();
+                    return;
+                }
+
+                writeln!(self.serial, "Unmuting...").unwrap();
+                if self.amp.unmute().is_err() {
+                    writeln!(self.serial, "Failed to unmute amplifier").unwrap();
+                    return;
+                }
+
+            }
             Some(_) => writeln!(self.serial, "idk how to do that yet\r").unwrap(),
             None => writeln!(self.serial, "ouch that hurt!").unwrap(),
             _ => writeln!(self.serial, "ouchieee").unwrap(),
         };
+    }
+
+    fn wait_for_pll_lock(&mut self) -> bool {
+        const MAX_RETRIES: i32 = 2;
+        for _ in 0..MAX_RETRIES {
+            match self.amp.pll_locked() {
+                Ok(is_enabled) => {
+                    if is_enabled {
+                        return true;
+                    } else {
+                        self.timer.delay_ms(500);
+                        write!(self.serial, ".").unwrap();
+                    }
+                }
+                Err(_) => {
+                    writeln!(self.serial, "Failed to query PLL status").unwrap();
+                    return false;
+                }
+            }
+        }
+        false
+    }
+
+    fn wait_for_amp_pwr(&mut self) -> bool {
+        const MAX_RETRIES: i32 = 2;
+        for _ in 0..MAX_RETRIES {
+            match self.amp.boost_init_finished() {
+                Ok(is_enabled) => {
+                    if is_enabled {
+                        return true;
+                    } else {
+                        self.timer.delay_ms(500);
+                        write!(self.serial, ".").unwrap();
+                    }
+                }
+                Err(_) => {
+                    writeln!(self.serial, "Failed to query boost converter status").unwrap();
+                    return false;
+                }
+            }
+        }
+        false
     }
 
 }

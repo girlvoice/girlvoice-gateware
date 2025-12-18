@@ -82,7 +82,7 @@ fn panic(info: &PanicInfo) -> ! {
 fn main() -> ! {
     let peripherals = pac::Peripherals::take().unwrap();
 
-    let mut delay = DELAY::new(peripherals.timer0, SYS_CLK_FREQ);
+    let delay = DELAY::new(peripherals.timer0, SYS_CLK_FREQ);
     let mut serial = Serial0::new(peripherals.uart0);
 
     // let mut led = Led0::new(peripherals.led0);
@@ -91,23 +91,14 @@ fn main() -> ! {
 
     // writeln!(serial, "\r").unwrap();
     // writeln!(serial, "Starting main loop!\r").unwrap();
-    let mut amp = Aw88395::new(i2c0);
+    let amp = Aw88395::new(i2c0);
 
 
-    // write!(serial, "[girlvoice (^O^)~] ").unwrap();
+    write!(serial, "[girlvoice (^O^)~] ").unwrap();
 
-    // let mut term = term::Terminal::new(serial);
+    let mut term = term::Terminal::new(serial, amp, delay);
 
     loop {
-
-        // term.handle_char();
-        let amp_id = amp.read_id_code();
-        match amp_id {
-            Ok(id) => writeln!(serial, "Amp IDCODE: {:#x}\r", id).unwrap(),
-            Err(e) => writeln!(serial, "read reg failed :<\r").unwrap()
-        }
-
-        // led.toggle().unwrap();
-        // delay.delay_ms(1000);
+        term.handle_char();
     }
 }
