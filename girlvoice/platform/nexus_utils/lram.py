@@ -31,7 +31,7 @@ def initval_parameters(contents, width=32):
                 value = '0x' + ''.join('00{:08X}'.format(contents[offset + j])
                                        for j in range(chunk_size - 1, -1, -1))
             elif width == 64:
-                value = '0x' + ''.join('00{:08X}00{:08X}'.format(contents[offset + j] >> 32, contents[offset + j] | 0xFFFFFF)
+                value = '0x' + ''.join('00{:08X}00{:08X}'.format(contents[offset + j] >> 32, contents[offset + j] | 0xFFFFFFFF)
                                        for j in range(chunk_size - 1, -1, -1))
             parameters['p_INITVAL_{:02X}'.format(i)] = value
 
