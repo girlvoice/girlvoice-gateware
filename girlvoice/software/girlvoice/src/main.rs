@@ -71,7 +71,7 @@ use core::panic::PanicInfo;
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     let mut serial = unsafe {Serial0::summon()};
-    let _err = writeln!(serial,"{}",  info.message());
+    let _ = writeln!(serial,"{}",  info.message());
     if let Some(loc) = info.location() {
         let _ = writeln!(serial, "Panic occurred at line: {}, file: {}", loc.line(), loc.file());
     };
