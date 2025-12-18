@@ -9,13 +9,8 @@ dependencies = [
     "amlib @ git+https://github.com/amaranth-farm/amlib.git",
     "amaranth==0.5.4",
     "amaranth-boards @ git+https://github.com/amaranth-lang/amaranth-boards.git",
-    "migen @ git+https://github.com/m-labs/migen.git@4790bb577681a8c3a8d226bc196a4e5deb39e4df",
     "yowasp-nextpnr-nexus>=0.7.0.0.post519",
     "yowasp-yosys>=0.40.0.0.post707",
-    "litex>=2023.12",
-    "pythondata-cpu-vexriscv @ git+https://github.com/litex-hub/pythondata-cpu-vexriscv.git",
-    "pythondata-software-picolibc @ git+https://github.com/litex-hub/pythondata-software-picolibc.git",
-    "pythondata-software-compiler-rt @ git+https://github.com/litex-hub/pythondata-software-compiler_rt.git",
     "meson>=1.4.0",
     "ninja>=1.11.1.1",
     "matplotlib>=3.9.1.post1",
@@ -23,7 +18,7 @@ dependencies = [
     "numpy>=2.2.1",
     "amaranth-soc @ git+https://github.com/amaranth-lang/amaranth-soc@5c43cf58f15d9cd9c69ff83c97997708d386b2dc",
     "luna-usb>=0.2.0",
-    "luna-soc @ git+https://github.com/greatscottgadgets/luna-soc.git@main",
+    "luna-soc @ git+https://github.com/greatscottgadgets/luna-soc.git@7fa1cc16ddbaf8608efa515efc7f4ef32454299c",
     "cocotb>=2.0.1",
 ]
 requires-python = ">=3.10"

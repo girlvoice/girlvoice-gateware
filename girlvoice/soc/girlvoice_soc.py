@@ -56,10 +56,11 @@ from luna_soc.gateware.cpu                import InterruptController, VexRiscv
 from luna_soc.util                        import readbin
 from luna_soc.generate.svd                import SVD
 
+from girlvoice.dsp import vocoder
 import girlvoice.platform.nexus_utils.lmmi as lmmi
 from girlvoice.platform.nexus_utils.lram          import WishboneNXLRAM
 
-from girlvoice.dsp.vocoder import StaticVocoder
+from girlvoice.dsp.vocoder import StaticVocoder, ThreadedVocoderChannel
 from girlvoice.io.i2s import i2s_rx, i2s_tx
 from girlvoice.platform.nexus_utils.i2c_fifo import I2CFIFO
 
@@ -177,7 +178,19 @@ class GirlvoiceSoc(Component):
         fs = 32e3
 
         self.i2s_tx = i2s_tx(self.sys_clk_freq, sclk_freq=bclk_freq, sample_width=sample_width)
-        self.i2s_rx = i2s_rx(sys_clk_freq, sclk_freq=bclk_freq, sample_width=sample_width)
+        self.i2s_rx = i2s_rx(self.sys_clk_freq, sclk_freq=bclk_freq, sample_width=sample_width)
+
+        # Vocoder!
+
+        self.vocoder = StaticVocoder(
+            start_freq=100,
+            end_freq=5000,
+            num_channels=14,
+            clk_sync_freq=sys_clk_freq,
+            fs=fs,
+            sample_width=sample_width,
+            channel_class=ThreadedVocoderChannel
+        )
 
         self.permit_bus_traffic = Signal()
 
@@ -275,6 +288,11 @@ class GirlvoiceSoc(Component):
             m.d.comb += amp.lrclk.o.eq(~self.i2s_tx.lrclk)
             m.d.comb += amp.clk.o.eq(self.i2s_tx.sclk)
             m.d.comb += amp.data.o.eq(self.i2s_tx.sdout)
+
+        m.submodules.vocoder = self.vocoder
+
+        wiring.connect(m, self.vocoder.sink, self.i2s_rx.source)
+        wiring.connect(m, self.vocoder.source, self.i2s_tx.sink)
 
         # wishbone csr bridge
         if not self.sim:
