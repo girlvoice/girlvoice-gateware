@@ -6,7 +6,6 @@ use embedded_hal::i2c::I2c;
 use embedded_hal::delay::DelayNs;
 use fixedstr::*;
 use aw88395::Aw88395;
-use girlvoice_hal::serial;
 
 pub struct Terminal<T: Read + Write, U: I2c, V: DelayNs> {
     serial: T,
@@ -154,7 +153,7 @@ impl<T: Read + Write, U: I2c, V: DelayNs> Terminal<T, U, V> {
             }
             Some("set_vol") => {
                 if let Some(vol_token) = split.next() {
-                    if let Some(vol_percent) = vol_token.parse::<u16>() {
+                    if let Ok(vol_percent) = vol_token.parse::<u16>() {
                         match self.amp.set_volume_percent(vol_percent) {
                             Ok(volume_reg) => writeln!(self.serial, "Set volume register to {}", volume_reg).unwrap(),
                             Err(_) => writeln!(self.serial, "Failed to set volume").unwrap(),
