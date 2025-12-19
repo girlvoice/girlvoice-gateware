@@ -8,4 +8,5 @@ categories = ["no-std", "embedded"]
 
 [dependencies]
 embedded-hal = "1.0.0"
+libm = "0.2.15"
 readonly = "0.2.12"

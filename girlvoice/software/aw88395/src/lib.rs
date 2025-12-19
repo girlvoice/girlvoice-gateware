@@ -10,6 +10,7 @@
 mod regmap;
 use regmap::{Aw88395Config, MappedRegister, Register};
 use embedded_hal::i2c::{Error, ErrorKind, I2c};
+use libm::Libm;
 
 
 const AW88395_ADDR: u8 = 0x34;
@@ -48,6 +49,8 @@ pub enum SampleRate {
     SR48kHz = 0x8,
     SR96kHz = 0x9
 }
+
+const MAX_VOLUME_SETTING: u16 = 0x3ff;
 
 
 impl<I2C: I2c> Aw88395<I2C> {
@@ -122,12 +125,30 @@ impl<I2C: I2c> Aw88395<I2C> {
     }
 
     pub fn set_volume(&mut self, volume: u16) -> Result<(), Aw88395Error> {
-        if volume > 0x3ff {
+        if volume > MAX_VOLUME_SETTING {
             return Err(Aw88395Error::OutOfRange);
         }
         self.config.sys_ctrl2.vol_course = (volume >> 6) as u8;
         self.config.sys_ctrl2.vol_fine = (volume & 0x3f) as u8;
         self.update_config(Register::SysCtrl2)
+    }
+
+    pub fn set_volume_percent(&mut self, percent_volume: u16) -> Result<u16, Aw88395Error> {
+        if percent_volume > 100 {
+            return Err(Aw88395Error::OutOfRange);
+        }
+        if percent_volume == 0 {
+            self.mute()?;
+            return Ok(MAX_VOLUME_SETTING);
+        }
+        let attenuation_percent = 100 - percent_volume;
+        let attenuation_setting: u16 =
+            Libm::<f32>::round(MAX_VOLUME_SETTING as f32 * (attenuation_percent as f32 / 100.0)) as u16;
+        self.set_volume(attenuation_setting)?;
+        if self.config.sys_ctrl.mute == true {
+            self.unmute()?;
+        }
+        return Ok(attenuation_setting);
     }
 
     pub fn enable_hagc(&mut self) -> Result<(), Aw88395Error> {
@@ -183,7 +204,7 @@ impl<I2C: I2c> Aw88395<I2C> {
 
     fn write_reg(&mut self, reg: Register, value: u16) -> Result<(), Aw88395Error> {
         let value_bytes = value.to_be_bytes();
-        let regbuf = [reg.addr(), value_bytes[0], value_bytes[1]];
+        let regbuf = [reg as u8, value_bytes[0], value_bytes[1]];
         match self.i2c.write(AW88395_ADDR, &regbuf) {
             Err(e) => match e.kind() {
                 ErrorKind::NoAcknowledge(_) => Err(Aw88395Error::OpFailed),
@@ -196,7 +217,7 @@ impl<I2C: I2c> Aw88395<I2C> {
     fn read_reg(&mut self, reg: Register) -> Result<u16, Aw88395Error> {
         let mut regbuf = [0u8; 2];
 
-        match self.i2c.write_read(AW88395_ADDR, &[reg.addr()], &mut regbuf) {
+        match self.i2c.write_read(AW88395_ADDR, &[reg as u8], &mut regbuf) {
             Err(e) => match e.kind() {
                 ErrorKind::NoAcknowledge(_) => Err(Aw88395Error::OpFailed),
                 _ => Err(Aw88395Error::OpFailed),

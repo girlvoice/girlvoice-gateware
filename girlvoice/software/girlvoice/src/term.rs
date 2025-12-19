@@ -6,6 +6,7 @@ use embedded_hal::i2c::I2c;
 use embedded_hal::delay::DelayNs;
 use fixedstr::*;
 use aw88395::Aw88395;
+use girlvoice_hal::serial;
 
 pub struct Terminal<T: Read + Write, U: I2c, V: DelayNs> {
     serial: T,
@@ -149,49 +150,65 @@ impl<T: Read + Write, U: I2c, V: DelayNs> Terminal<T, U, V> {
                 writeln!(self.serial, "usage: write 0x<addr> <data>\r").unwrap();
             },
             Some("init") => {
-                // Run the amplifier initialization sequence
-                if self.amp.soft_reset().is_err() {
-                    writeln!(self.serial, "Failed to reset amplifier").unwrap();
-                    return;
+                self.initialize_amplifier();
+            }
+            Some("set_vol") => {
+                if let Some(vol_token) = split.next() {
+                    if let Some(vol_percent) = vol_token.parse::<u16>() {
+                        match self.amp.set_volume_percent(vol_percent) {
+                            Ok(volume_reg) => writeln!(self.serial, "Set volume register to {}", volume_reg).unwrap(),
+                            Err(_) => writeln!(self.serial, "Failed to set volume").unwrap(),
+                        }
+                    }
                 }
-                if self.amp.power_on().is_err() {
-                    writeln!(self.serial, "Failed to power on amplifier").unwrap();
-                    return;
-                }
-                writeln!(self.serial, "Waiting for amp PLL lock").unwrap();
-                if !self.wait_for_pll_lock() {
-                    writeln!(self.serial, "Failed to find PLL lock!").unwrap();
-                    return;
-                }
-                if self.amp.set_volume(100).is_err() {
-                    writeln!(self.serial, "Failed to set initial amplifier volume").unwrap();
-                    return;
-                }
-                if self.amp.enable_i2s().is_err() {
-                    writeln!(self.serial, "Failed to enable i2s during amplifier init").unwrap();
-                    return;
-                }
-                writeln!(self.serial, "Enabling class D amplifier and boost converter").unwrap();
-                if self.amp.enable_amp().is_err() {
-                    writeln!(self.serial, "Failed to enable boost amplifier").unwrap();
-                    return;
-                }
-                if !self.wait_for_pll_lock() {
-                    writeln!(self.serial, "Failed to power on boost amplifier").unwrap();
-                    return;
-                }
-
-                writeln!(self.serial, "Unmuting...").unwrap();
-                if self.amp.unmute().is_err() {
-                    writeln!(self.serial, "Failed to unmute amplifier").unwrap();
-                    return;
-                }
-
+                writeln!(self.serial, "usage: set_vol <volume> : Set the amplifier volume on a scale from 0-100%\r").unwrap();
             }
             Some(_) => writeln!(self.serial, "idk how to do that yet\r").unwrap(),
             None => writeln!(self.serial, "ouch that hurt!").unwrap(),
             _ => writeln!(self.serial, "ouchieee").unwrap(),
         };
+    }
+
+    fn initialize_amplifier(&mut self) {
+        writeln!(self.serial, "Beginning amplifier initialization.").unwrap();
+        if self.amp.soft_reset().is_err() {
+            writeln!(self.serial, "Failed to reset amplifier").unwrap();
+            return;
+        }
+        if self.amp.power_on().is_err() {
+            writeln!(self.serial, "Failed to power on amplifier").unwrap();
+            return;
+        }
+        writeln!(self.serial, "Waiting for amp PLL lock").unwrap();
+        if !self.wait_for_pll_lock() {
+            writeln!(self.serial, "Failed to find PLL lock!").unwrap();
+            return;
+        }
+
+        if self.amp.set_volume(100).is_err() {
+            writeln!(self.serial, "Failed to set initial amplifier volume").unwrap();
+            return;
+        }
+        if self.amp.enable_i2s().is_err() {
+            writeln!(self.serial, "Failed to enable i2s during amplifier init").unwrap();
+            return;
+        }
+        writeln!(self.serial, "Enabling class D amplifier and boost converter").unwrap();
+        if self.amp.enable_amp().is_err() {
+            writeln!(self.serial, "Failed to enable boost amplifier").unwrap();
+            return;
+        }
+        if !self.wait_for_amp_pwr() {
+            writeln!(self.serial, "Failed to power on boost amplifier").unwrap();
+            return;
+        }
+
+        writeln!(self.serial, "Unmuting...").unwrap();
+        if self.amp.unmute().is_err() {
+            writeln!(self.serial, "Failed to unmute amplifier").unwrap();
+            return;
+        }
+
     }
 
     fn wait_for_pll_lock(&mut self) -> bool {
@@ -200,6 +217,7 @@ impl<T: Read + Write, U: I2c, V: DelayNs> Terminal<T, U, V> {
             match self.amp.pll_locked() {
                 Ok(is_enabled) => {
                     if is_enabled {
+                        writeln!(self.serial, "done!").unwrap();
                         return true;
                     } else {
                         self.timer.delay_ms(500);
@@ -221,6 +239,7 @@ impl<T: Read + Write, U: I2c, V: DelayNs> Terminal<T, U, V> {
             match self.amp.boost_init_finished() {
                 Ok(is_enabled) => {
                     if is_enabled {
+                        writeln!(self.serial, "done!").unwrap();
                         return true;
                     } else {
                         self.timer.delay_ms(500);
