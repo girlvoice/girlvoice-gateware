@@ -6,7 +6,6 @@ from amaranth.lib.wiring import Out, In
 
 from amaranth.sim import Simulator, Tick
 
-
 class i2s_tx(wiring.Component):
     def __init__(self, sys_clk_freq, sclk_freq, sample_width=32):
         self.clk_ratio = int(sys_clk_freq // sclk_freq)

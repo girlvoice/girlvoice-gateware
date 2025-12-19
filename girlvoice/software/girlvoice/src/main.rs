@@ -1,39 +1,25 @@
 #![no_std]
 #![no_main]
 
-use embedded_hal::{digital::OutputPin, i2c::{I2c, SevenBitAddress}};
-use embedded_io::Write;
 use embedded_hal::delay::DelayNs;
-// use gc9a01::{mode::DisplayConfiguration, prelude::DisplayResolution240x240, Gc9a01, SPIDisplayInterface};
-use hex;
-use litex_pac as pac;
+use embedded_hal::digital::StatefulOutputPin;
+use embedded_hal::i2c::{I2c, SevenBitAddress};
 use aw88395::Aw88395;
-use riscv_rt::entry;
-extern crate panic_halt;
-
-// use embedded_graphics::{
-//     pixelcolor::Rgb565,
-//     prelude::*,
-//     primitives::{
-//         PrimitiveStyle, Triangle,
-//     },
-// };
-
-mod timer;
-mod i2c;
-mod spi;
-
-use i2c::I2c0;
-
-use litex_hal as hal;
-use sgtl5000::Sgtl5000;
+use sgtl5000::{Sgtl5000};
 use sgtl5000::regmap::LineOutBiasCurrent;
+use riscv_rt::entry;
+use soc_pac as pac;
+// extern crate panic_halt;
+
+
+use girlvoice_hal as hal;
+use hal::hal_io::Write;
+mod spi;
+mod term;
+
+use hal::i2c::I2c0;
 
 const SYS_CLK_FREQ: u32 = 60_000_000;
-
-hal::uart! {
-    UART: pac::Uart,
-}
 
 // hal::gpio! {
 //     DC: pac::LcdCtl,
@@ -46,8 +32,16 @@ hal::uart! {
 //     SPI: (pac::LcdSpi, u8),
 // }
 
-hal::timer! {
+// hal::impl_gpio!{
+//     Led0: pac::Led0,
+// }
+
+hal::impl_timer! {
     DELAY: pac::Timer0,
+}
+
+hal::impl_serial! {
+    Serial0: pac::Uart0,
 }
 
 fn power_on_codec(mut sgtl5000: Sgtl5000<I2c0>) {
@@ -72,106 +66,39 @@ fn power_on_codec(mut sgtl5000: Sgtl5000<I2c0>) {
     sgtl5000.set_line_out_right_vol(0x5).unwrap();
 }
 
+use core::panic::PanicInfo;
+#[inline(never)]
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    let mut serial = unsafe {Serial0::summon()};
+    let _ = writeln!(serial,"{}",  info.message());
+    if let Some(loc) = info.location() {
+        let _ = writeln!(serial, "Panic occurred at line: {}, file: {}", loc.line(), loc.file());
+    };
+    loop {}
+}
 
 #[entry]
 fn main() -> ! {
     let peripherals = pac::Peripherals::take().unwrap();
 
-    let mut serial = UART {
-        registers: peripherals.uart,
-    };
+    let delay = DELAY::new(peripherals.timer0, SYS_CLK_FREQ);
+    let mut serial = Serial0::new(peripherals.uart0);
 
-    let mut delay = DELAY {
-        registers: peripherals.timer0,
-        sys_clk: SYS_CLK_FREQ
-    };
+    // let mut led = Led0::new(peripherals.led0);
 
-    // let i2c_freq = HertzU32::from_raw(400_000);
-    let mut i2c0 = I2c0::new(peripherals.i2cfifo);
+    let i2c0 = I2c0::new(peripherals.i2cfifo);
 
-    let mut amp = Aw88395::new(i2c0);
-
-    amp.soft_reset().unwrap();
-
-    let mut config = amp.get_sysctrl_bits().unwrap();
-    let mut config_hex = [0u8; 4];
-    hex::encode_to_slice(config.to_be_bytes(), &mut config_hex).unwrap();
-    serial.write_all(b"0x").unwrap();
-    serial.write_all(&config_hex).unwrap();
-    serial.write_all(b"\n").unwrap();
-
-    serial.write_all(b"Starting amp power-up sequence\n").unwrap();
-    serial.write_all(b"Enabling I2S Interface\n").unwrap();
-    serial.write_all(b"Powering on\n").unwrap();
-    amp.power_on().unwrap();
-    serial.write_all(b"Power on success\n").unwrap();
-
-    // msleep(&mut timer, 1000);
-
-    config = amp.get_sysctrl_bits().unwrap();
-    hex::encode_to_slice(config.to_be_bytes(), &mut config_hex).unwrap();
-    serial.write_all(b"0x").unwrap();
-    serial.write_all(&config_hex).unwrap();
-    serial.write_all(b"\n").unwrap();
+    // writeln!(serial, "\r").unwrap();
+    // writeln!(serial, "Starting main loop!\r").unwrap();
+    let amp = Aw88395::new(i2c0);
 
 
-    while !amp.pll_locked().unwrap() {
-        serial.write_all(b"Waiting for PLL lock...\n").unwrap();
-        delay.delay_ms(1000);
-    }
-    serial.write_all(b"PLL Locked\n").unwrap();
+    write!(serial, "[girlvoice (^O^)~] ").unwrap();
 
-    serial.write_all(b"Setting volume to 500 i guess\n").unwrap();
-    amp.set_volume(100).unwrap();
-    // amp.set_i2s_channel(aw88395::ChannelSetting::Left).unwrap();
-    amp.enable_i2s().unwrap();
-    // amp.set_i2s_data_fmt(aw88395::I2SDataFmt::MSBFirst).unwrap();
-    // amp.set_i2s_samplerate(0x6).unwrap();
-    // amp.set_i2s_data_width(0x0).unwrap();
+    let mut term = term::Terminal::new(serial, amp, delay);
 
-    serial.write_all(b"Enabling class D amplifier and boost converter\n").unwrap();
-    amp.enable_amp().unwrap();
-    serial.write_all(b"Waiting for amplifier power-on...\n").unwrap();
-
-    while !amp.boost_init_finished().unwrap() {
-        serial.write_all(b"Waiting for amplifier power-on...\n").unwrap();
-        delay.delay_ms(1000);
-    }
-    serial.write_all(b"Amplifier power-on complete\n").unwrap();
-
-    serial.write_all(b"Unmuting\n").unwrap();
-    amp.unmute().unwrap();
-
-    i2c0 = amp.release();
-
-    // Dump all amp registers to verify power on sequence was completed.
-    let dev_addr: SevenBitAddress = 0x34;
-    let max_reg_addr: u8 = 0x61;
-    const BYTES_TO_READ: usize = 2;
-    const REG_WIDTH: usize = 1;
-    let mut read_buf = [0_u8; BYTES_TO_READ];
-    let mut hex_bytes = [0_u8; BYTES_TO_READ * 2];
-    let mut reg_hex = [0_u8; REG_WIDTH * 2];
-    for reg_addr in (0..max_reg_addr+1).step_by(1) {
-
-        hex::encode_to_slice(reg_addr.to_be_bytes(), &mut reg_hex).unwrap();
-        serial.write_all(b"0x").unwrap();
-        serial.write_all(&reg_hex).unwrap();
-        serial.write_all(b": ").unwrap();
-
-        i2c0.write_read(dev_addr, &reg_addr.to_be_bytes(), &mut read_buf).unwrap();
-
-        serial.write_all(b"0x").unwrap();
-        hex::encode_to_slice(read_buf, &mut hex_bytes).unwrap();
-
-        serial.write_all(&hex_bytes).unwrap();
-        serial.write_all(b"\n").unwrap();
-
-        delay.delay_ms(1);
-    }
-    serial.write_all(b"Welcome to girlvoice\n").unwrap();
     loop {
-        serial.write_all(b"awaw").unwrap();
-        delay.delay_ms(1000);
+        term.handle_char();
     }
 }

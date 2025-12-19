@@ -1,6 +1,6 @@
 use core::u8;
 
-use litex_pac::I2cfifo;
+use soc_pac::I2cfifo;
 use embedded_hal::i2c::SevenBitAddress;
 use embedded_hal::i2c::{self, I2c, Operation};
 
@@ -11,6 +11,7 @@ pub enum Error {
     TransactionFailed,
     InvalidState,
     RxUnderflow,
+    ReceivedNack,
 }
 
 pub enum TxCmd {
@@ -37,7 +38,7 @@ impl I2c0 {
         self.registers.i2cfifosr_lsb().read().busy().bit()
     }
 
-    pub fn recieved_nack(&mut self) -> bool {
+    pub fn received_nack(&mut self) -> bool {
         self.registers.i2cfifosr_lsb().read().rnack().bit()
     }
 
@@ -52,7 +53,7 @@ impl I2c0 {
 
     // RX FIFO can be reset to known-good state by writing anything to it.
     fn reset_rx_fifo(&mut self) {
-        self.registers.i2crxfifo_lsb().write(|w| unsafe{ w.bits(0) });
+        self.registers.i2crxfifo().write(|w| unsafe{ w.bits(0) });
     }
 
     fn push_tx_byte(&mut self, byte: u8, cmd: TxCmd){
@@ -61,8 +62,7 @@ impl I2c0 {
     }
 
     fn pop_rx_byte(&mut self) -> u8 {
-        let byte = self.registers.i2crxfifo_lsb().read().rx_lsb().bits();
-        let _first = self.registers.i2crxfifo_msb().read().dfirst().bit();
+        let byte = self.registers.i2crxfifo().read().rx_data().bits();
         byte
     }
 
@@ -106,7 +106,7 @@ impl I2c0 {
             self.push_tx_byte(*byte, if last { TxCmd::LastByte } else { TxCmd::DataByte });
         }
 
-        if self.recieved_nack() { return Err(Error::TransactionFailed) }
+        if self.received_nack() { return Err(Error::TransactionFailed) }
 
         while self.is_bus_busy() {}
 
@@ -119,7 +119,8 @@ impl i2c::Error for Error {
         match *self {
             Error::RxUnderflow => i2c::ErrorKind::Other,
             Error::TransactionFailed => i2c::ErrorKind::Bus,
-            Error::InvalidState => i2c::ErrorKind::Other
+            Error::InvalidState => i2c::ErrorKind::Other,
+            Error::ReceivedNack => i2c::ErrorKind::NoAcknowledge(i2c::NoAcknowledgeSource::Unknown),
         }
     }
 }
@@ -149,7 +150,7 @@ impl I2c<SevenBitAddress> for I2c0 {
 
         self.reset_tx_fifo();
 
-        // if self.is_bus_busy() {return Err(Error::InvalidState);}
+        if self.is_bus_busy() {return Err(Error::InvalidState);}
 
         self.push_tx_byte(0, TxCmd::RestartCount);
         self.push_tx_byte(address << 1, TxCmd::DataByte);
@@ -159,18 +160,28 @@ impl I2c<SevenBitAddress> for I2c0 {
         }
 
         // For some reason the I2CFIFO seems to always read one more than the number of bytes you tell it to read.
-        self.push_tx_byte(buf_len, TxCmd::RestartCount);
+        self.push_tx_byte(buf_len + 1, TxCmd::RestartCount);
         self.push_tx_byte((address << 1) | 1, TxCmd::DataByte);
 
-        while !self.is_read_complete() {}
+        // if !self.is_bus_busy() {
+        //     return Err(Error::TransactionFailed);
+        // }
+
+        while !self.is_read_complete() {
+            if self.received_nack() {
+                self.reset_rx_fifo();
+                return Err(Error::ReceivedNack);
+            }
+        }
 
         for byte in read.iter_mut() {
             *byte = self.pop_rx_byte();
-            // if self.check_rx_underflow() {
-            //     return Err(Error::RxUnderflow);
-            // }
+            if self.check_rx_underflow() {
+                self.reset_rx_fifo();
+                return Err(Error::RxUnderflow);
+            }
         }
-        // // Block until transaction is finished
+        // Block until transaction is finished
         while self.is_bus_busy() {
         }
 

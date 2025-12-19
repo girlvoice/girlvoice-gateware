@@ -14,12 +14,20 @@ class GirlvoiceRevAPlatform(LatticePlatform):
     package = "SG72"
     speed = "8"
     default_clk = "clk12"
+    name = "girlvoice_rev_a"
+
+    constraints:str = ""
 
     resources = [
         Resource(
             "clk12", 0, Pins("11", dir="i"), Clock(12e6), Attrs(IO_TYPE="LVCMOS18H")
         ),
-        I2CResource(0, scl="44", sda="42", attrs=Attrs(IO_TYPE="LVCMOS33")),
+        UARTResource(0, rx="USB_DP", tx="USB_DN", conn=("usb", 0)),
+        # I2CResource(0, scl="44", sda="42", attrs=Attrs(IO_TYPE="LVCMOS33", USE_PRIMARY=False)),
+        Resource("i2c", 0,
+                 Subsignal("sda", Pins("42", dir="io")),
+                 Subsignal("scl", Pins("44", dir="io")),
+                 Attrs(IO_TYPE="LVCMOS33", PULLMODE="NONE")),
         *SPIFlashResources(
             0,
             cs_n="56",
@@ -160,6 +168,13 @@ class GirlvoiceRevAPlatform(LatticePlatform):
         # })
     ]
 
+    def has_required_tools(self):
+        return True
+
+    def add_constraints(self, constraint: str):
+        print("adding: ", constraint)
+        self.constraints += constraint
+
     def build(
         self,
         elaboratable,
@@ -168,7 +183,7 @@ class GirlvoiceRevAPlatform(LatticePlatform):
         do_local_build=True,
         program_opts=None,
         do_program=False,
-        use_radiant_docker=False,
+        use_radiant_docker=True,
         **kwargs,
     ):
         docker_image = "radiant-container:latest"
@@ -196,6 +211,9 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             "--ipc=host",  # X11 passthrough (MIT-SHM)
         ]
 
+        kwargs["add_constraints"] = "ldc_set_sysconfig {{CONFIGIO_VOLTAGE_BANK0=3.3 CONFIGIO_VOLTAGE_BANK1=3.3 JTAG_PORT=DISABLE SLAVE_SPI_PORT=DISABLE MASTER_SPI_PORT=SERIAL}}\n"
+        kwargs["add_constraints"] += "ldc_set_attribute {USE_PRIMARY=FALSE} [get_ports \"i2c_0__scl__io\"]\n"
+
         if use_radiant_docker and self.toolchain == "Radiant":
             build_plan = super().build(
                 elaboratable, name, build_dir, False, program_opts, do_program, **kwargs
@@ -221,7 +239,7 @@ class GirlvoiceRevAPlatform(LatticePlatform):
     def toolchain_program(self, products, name):
         ecpprog = os.environ.get("ECPPROG", "ecpprog")
         with products.extract("{}.bit".format(name)) as bitstream_filename:
-            if self.toolchain == "radiant":
+            if self.toolchain == "Radiant":
                 bitstream_filename = f"build/impl/{name}_impl.bit"
             subprocess.check_call(ecpprog, "-S", bitstream_filename)
 
