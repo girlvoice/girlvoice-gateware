@@ -155,56 +155,73 @@ impl<T: Read + Write, U: I2c, V: DelayNs> Terminal<T, U, V> {
                 if let Some(vol_token) = split.next() {
                     if let Ok(vol_percent) = vol_token.parse::<u16>() {
                         match self.amp.set_volume_percent(vol_percent) {
-                            Ok(volume_reg) => writeln!(self.serial, "Set volume register to {}", volume_reg).unwrap(),
-                            Err(_) => writeln!(self.serial, "Failed to set volume").unwrap(),
+                            Ok(volume_reg) => writeln!(self.serial, "Set volume register to {}\r", volume_reg).unwrap(),
+                            Err(_) => writeln!(self.serial, "Failed to set volume\r").unwrap(),
                         }
                     }
+                } else {
+                    writeln!(self.serial, "usage: set_vol <volume> : Set the amplifier volume on a scale from 0-100%\r").unwrap();
                 }
-                writeln!(self.serial, "usage: set_vol <volume> : Set the amplifier volume on a scale from 0-100%\r").unwrap();
             }
             Some(_) => writeln!(self.serial, "idk how to do that yet\r").unwrap(),
-            None => writeln!(self.serial, "ouch that hurt!").unwrap(),
-            _ => writeln!(self.serial, "ouchieee").unwrap(),
+            None => writeln!(self.serial, "ouch that hurt!\r").unwrap(),
         };
     }
 
     fn initialize_amplifier(&mut self) {
-        writeln!(self.serial, "Beginning amplifier initialization.").unwrap();
+        writeln!(self.serial, "Beginning amplifier initialization.\r").unwrap();
         if self.amp.soft_reset().is_err() {
-            writeln!(self.serial, "Failed to reset amplifier").unwrap();
+            writeln!(self.serial, "Failed to reset amplifier\r").unwrap();
+            let stat = self.amp.get_status_bits().unwrap();
+
+            writeln!(self.serial, "Status register {:#x}", stat).unwrap();
             return;
         }
         if self.amp.power_on().is_err() {
-            writeln!(self.serial, "Failed to power on amplifier").unwrap();
+            writeln!(self.serial, "Failed to power on amplifier\r").unwrap();
             return;
         }
-        writeln!(self.serial, "Waiting for amp PLL lock").unwrap();
+        writeln!(self.serial, "Waiting for amp PLL lock\r").unwrap();
         if !self.wait_for_pll_lock() {
-            writeln!(self.serial, "Failed to find PLL lock!").unwrap();
+            writeln!(self.serial, "Failed to find PLL lock!\r").unwrap();
+            let stat = self.amp.get_status_bits().unwrap();
+
+            writeln!(self.serial, "Status register {:#x}", stat).unwrap();
             return;
         }
 
         if self.amp.set_volume(100).is_err() {
-            writeln!(self.serial, "Failed to set initial amplifier volume").unwrap();
-            return;
-        }
-        if self.amp.enable_i2s().is_err() {
-            writeln!(self.serial, "Failed to enable i2s during amplifier init").unwrap();
-            return;
-        }
-        writeln!(self.serial, "Enabling class D amplifier and boost converter").unwrap();
-        if self.amp.enable_amp().is_err() {
-            writeln!(self.serial, "Failed to enable boost amplifier").unwrap();
-            return;
-        }
-        if !self.wait_for_amp_pwr() {
-            writeln!(self.serial, "Failed to power on boost amplifier").unwrap();
+            writeln!(self.serial, "Failed to set initial amplifier volume\r").unwrap();
             return;
         }
 
-        writeln!(self.serial, "Unmuting...").unwrap();
+        writeln!(self.serial, "Waiting for amp PLL lock\r").unwrap();
+        if self.amp.enable_i2s().is_err() {
+            writeln!(self.serial, "Failed to enable i2s during amplifier init\r").unwrap();
+            let stat = self.amp.get_status_bits().unwrap();
+
+            writeln!(self.serial, "Status register {:#x}", stat).unwrap();
+            return;
+        }
+        writeln!(self.serial, "Enabling class D amplifier and boost converter\r").unwrap();
+        if self.amp.enable_amp().is_err() {
+            writeln!(self.serial, "Failed to enable boost amplifier\r").unwrap();
+            return;
+        }
+        if !self.wait_for_amp_pwr() {
+            writeln!(self.serial, "Failed to power on boost amplifier\r").unwrap();
+            let stat = self.amp.get_status_bits().unwrap();
+
+            writeln!(self.serial, "Status register {:#x}", stat).unwrap();
+            return;
+        }
+
+        writeln!(self.serial, "Unmuting...\r").unwrap();
         if self.amp.unmute().is_err() {
-            writeln!(self.serial, "Failed to unmute amplifier").unwrap();
+            writeln!(self.serial, "Failed to unmute amplifier\r").unwrap();
+            let stat = self.amp.get_status_bits().unwrap();
+
+            writeln!(self.serial, "Status register {:#x}\r", stat).unwrap();
             return;
         }
 
@@ -216,7 +233,7 @@ impl<T: Read + Write, U: I2c, V: DelayNs> Terminal<T, U, V> {
             match self.amp.pll_locked() {
                 Ok(is_enabled) => {
                     if is_enabled {
-                        writeln!(self.serial, "done!").unwrap();
+                        writeln!(self.serial, "done!\r").unwrap();
                         return true;
                     } else {
                         self.timer.delay_ms(500);
@@ -224,7 +241,7 @@ impl<T: Read + Write, U: I2c, V: DelayNs> Terminal<T, U, V> {
                     }
                 }
                 Err(_) => {
-                    writeln!(self.serial, "Failed to query PLL status").unwrap();
+                    writeln!(self.serial, "Failed to query PLL status\r").unwrap();
                     return false;
                 }
             }
@@ -233,20 +250,20 @@ impl<T: Read + Write, U: I2c, V: DelayNs> Terminal<T, U, V> {
     }
 
     fn wait_for_amp_pwr(&mut self) -> bool {
-        const MAX_RETRIES: i32 = 2;
+        const MAX_RETRIES: i32 = 3;
         for _ in 0..MAX_RETRIES {
             match self.amp.boost_init_finished() {
                 Ok(is_enabled) => {
                     if is_enabled {
-                        writeln!(self.serial, "done!").unwrap();
+                        writeln!(self.serial, "done!\r").unwrap();
                         return true;
                     } else {
-                        self.timer.delay_ms(500);
                         write!(self.serial, ".").unwrap();
+                        self.timer.delay_ms(1000);
                     }
                 }
                 Err(_) => {
-                    writeln!(self.serial, "Failed to query boost converter status").unwrap();
+                    writeln!(self.serial, "Failed to query boost converter status\r").unwrap();
                     return false;
                 }
             }

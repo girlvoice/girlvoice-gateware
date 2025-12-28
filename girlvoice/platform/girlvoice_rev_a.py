@@ -38,6 +38,31 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             hold_n="52",
             attrs=Attrs(IO_TYPE="LVCMOS33"),
         ),
+
+        Resource("spi", 0,
+            Subsignal("cs",
+                      PinsN("53", dir="o"),
+                      Attrs(IO_TYPE="LVCMOS33"),
+                    ),
+            Subsignal(
+                "clk",
+                Pins("48", dir="o"),
+                Attrs(IO_TYPE="LVCMOS33"),
+            ),
+            Subsignal(
+                "copi",
+                Pins("45", dir="io"),
+                Attrs(IO_TYPE="LVCMOS33"),
+            ),
+        ),
+        # SPIResource(
+        #     0,
+        #     cs_n="53",
+        #     clk="48",
+        #     copi="45",
+        #     cipo=None,
+        #     attrs=Attrs(IO_TYPE="LVCMOS33"),
+        # ),
         Resource(
             "usbn",
             0,
@@ -80,6 +105,9 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             Attrs(IO_TYPE="LVCMOS18"),
         ),
         Resource("led", 0, Pins("13", dir="o"), Attrs(IO_TYPE="LVCMOS18H")),
+        Resource("dc", 0, Pins("46", dir="o"), Attrs(IO_TYPE="LVCMOS33")),
+        Resource("bl", 0, Pins("36", dir="o"), Attrs(IO_TYPE="LVCMOS18H")),
+
         Resource(
             "mic",
             0,
@@ -211,7 +239,7 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             "--ipc=host",  # X11 passthrough (MIT-SHM)
         ]
 
-        kwargs["add_constraints"] = "ldc_set_sysconfig {{CONFIGIO_VOLTAGE_BANK0=3.3 CONFIGIO_VOLTAGE_BANK1=3.3 JTAG_PORT=DISABLE SLAVE_SPI_PORT=DISABLE MASTER_SPI_PORT=SERIAL}}\n"
+        kwargs["add_constraints"] = "ldc_set_sysconfig {{CONFIGIO_VOLTAGE_BANK0=3.3 CONFIGIO_VOLTAGE_BANK1=3.3 JTAG_PORT=DISABLE SLAVE_SPI_PORT=DISABLE MASTER_SPI_PORT=DISABLE}}\n"
         kwargs["add_constraints"] += "ldc_set_attribute {USE_PRIMARY=FALSE} [get_ports \"i2c_0__scl__io\"]\n"
 
         if use_radiant_docker and self.toolchain == "Radiant":

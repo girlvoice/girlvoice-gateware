@@ -48,13 +48,13 @@ macro_rules! impl_gpio {
 
             impl $crate::hal::digital::OutputPin for $GPIOX {
                 fn set_low(&mut self) -> Result<(), Self::Error> {
-                    self.registers.output().write(|w| w.pin_0().bit(false));
+                    self.registers.set_clr().write(|w| w.pin_0_clr().bit(true));
                     self.pin_state = false;
                     return Ok(());
                 }
 
                 fn set_high(&mut self) -> Result<(), Self::Error> {
-                    self.registers.output().write(|w| w.pin_0().bit(true));
+                    self.registers.set_clr().write(|w| w.pin_0_set().bit(true));
                     self.pin_state = true;
                     return Ok(());
                 }

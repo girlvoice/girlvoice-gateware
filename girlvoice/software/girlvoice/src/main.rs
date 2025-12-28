@@ -2,15 +2,26 @@
 #![no_main]
 
 use embedded_hal::delay::DelayNs;
-use embedded_hal::digital::StatefulOutputPin;
-use embedded_hal::i2c::{I2c, SevenBitAddress};
 use aw88395::Aw88395;
+use embedded_hal::spi::SpiDevice;
 use sgtl5000::{Sgtl5000};
 use sgtl5000::regmap::LineOutBiasCurrent;
 use riscv_rt::entry;
 use soc_pac as pac;
-// extern crate panic_halt;
 
+use gc9a01::{prelude::*, Gc9a01, SPIDisplayInterface};
+
+
+use embedded_graphics::{
+    mono_font::{ascii::FONT_6X10, MonoTextStyle},
+    pixelcolor::BinaryColor,
+    pixelcolor::Rgb565,
+    prelude::*,
+    primitives::{
+        Circle, PrimitiveStyle, PrimitiveStyleBuilder, Rectangle, StrokeAlignment, Triangle,
+    },
+    text::{Alignment, Text},
+};
 
 use girlvoice_hal as hal;
 use hal::hal_io::Write;
@@ -21,20 +32,17 @@ use hal::i2c::I2c0;
 
 const SYS_CLK_FREQ: u32 = 60_000_000;
 
-// hal::gpio! {
-//     DC: pac::LcdCtl,
-// }
-// hal::gpio! {
-//     BL: pac::LcdBl,
-// }
+hal::impl_gpio!{
+    Gpo1: pac::Gpo1,
+}
 
-// hal::spi! {
-//     SPI: (pac::LcdSpi, u8),
-// }
+hal::impl_spi!{
+    Spi0: (pac::SpiflashCtrl, u8, 8),
+}
 
-// hal::impl_gpio!{
-//     Led0: pac::Led0,
-// }
+hal::impl_gpio!{
+    Led0: pac::Led0,
+}
 
 hal::impl_timer! {
     DELAY: pac::Timer0,
@@ -82,17 +90,84 @@ fn panic(info: &PanicInfo) -> ! {
 fn main() -> ! {
     let peripherals = pac::Peripherals::take().unwrap();
 
-    let delay = DELAY::new(peripherals.timer0, SYS_CLK_FREQ);
+    let mut delay = DELAY::new(peripherals.timer0, SYS_CLK_FREQ);
     let mut serial = Serial0::new(peripherals.uart0);
+
+    peripherals.gpo1.mode().write(|w| unsafe { w.pin_1().bits(0x1)});
+    peripherals.gpo1.output().write(|w| w.pin_1().bit(true));
+    let gpo1 = Gpo1::new(peripherals.gpo1);
+
+    let spi0 = Spi0::new(peripherals.spiflash_ctrl);
+    // let tx_buf: [u8; 2] =[0xBE, 0xD0];
+    // let _ = spi0.write(&tx_buf);
+
+    let interface = SPIDisplayInterface::new(spi0, gpo1);
+
+
+    // let _ = interface.send_commands(DataFormat::U8(&tx_buf));
+
+    let mut display = Gc9a01::new(
+        interface,
+        DisplayResolution240x240,
+        DisplayRotation::Rotate0
+    ).into_buffered_graphics();
+
+    display.init(&mut delay).ok();
+
+    display.clear();
+
+    display.flush().ok();
+
+    // display.fill(0x2d26);
+
+
+    // Create styles used by the drawing operations.
+    let thin_stroke = PrimitiveStyle::with_stroke(Rgb565::GREEN, 2);
+    let thick_stroke = PrimitiveStyle::with_stroke(Rgb565::CSS_CRIMSON, 3);
+    let border_stroke = PrimitiveStyleBuilder::new()
+        .stroke_color(Rgb565::CSS_AQUA)
+        .stroke_width(3)
+        .stroke_alignment(StrokeAlignment::Inside)
+        .build();
+    let fill = PrimitiveStyle::with_fill(Rgb565::BLUE);
+    let character_style = MonoTextStyle::new(&FONT_6X10, Rgb565::CSS_PINK);
+
+    let yoffset = 20;
+
+    // Draw a 3px wide outline around the display.
+    display
+        .bounding_box()
+        .into_styled(border_stroke)
+        .draw(&mut display).unwrap();
+
+    // Draw a triangle.
+    Triangle::new(
+        Point::new(16, 16 + yoffset),
+        Point::new(16 + 16, 16 + yoffset),
+        Point::new(16 + 8, yoffset),
+    )
+    .into_styled(thin_stroke)
+    .draw(&mut display).unwrap();
+
+     // Draw centered text.
+    let text = "girlvoice!";
+    Text::with_alignment(
+        text,
+        display.bounding_box().center() + Point::new(0, 15),
+        character_style,
+        Alignment::Center,
+    )
+    .draw(&mut display).unwrap();
+
+
+    display.flush().ok();
+
 
     // let mut led = Led0::new(peripherals.led0);
 
     let i2c0 = I2c0::new(peripherals.i2cfifo);
 
-    // writeln!(serial, "\r").unwrap();
-    // writeln!(serial, "Starting main loop!\r").unwrap();
     let amp = Aw88395::new(i2c0);
-
 
     write!(serial, "[girlvoice (^O^)~] ").unwrap();
 

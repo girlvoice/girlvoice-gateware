@@ -6,6 +6,9 @@ from amaranth import *
 import amaranth.lib.wiring as wiring
 from amaranth.lib.wiring import In, Out
 from amaranth.lib import stream, memory
+import amaranth_soc.wishbone.bus as wishbone
+from amaranth_soc.wishbone.sram import WishboneSRAM
+from amaranth_soc.memory import MemoryMap
 from amaranth.sim import Simulator
 
 from girlvoice.stream import stream_get
@@ -93,7 +96,19 @@ class ParallelSineSynth(wiring.Component):
 
             signature[f"source_{i}"] = Out(stream.Signature(signed(sample_width)))
 
+        # If I actually use 18 bit samples at some point this will fuck me
+        granularity = 8
+        self.wavetable_ram = WishboneSRAM(
+            data_width=32,
+            granularity=granularity,
+            size=len(self.lut) * 32 // 8,
+            init=self.lut
+        )
+
+        signature["wb_bus"] = In(self.wavetable_ram.wb_bus.signature)
         super().__init__(signature=signature)
+
+        self.wb_bus.memory_map = self.wavetable_ram.wb_bus.memory_map
 
     def source(self, i):
         return self.__dict__[f"source_{i}"]
@@ -101,10 +116,11 @@ class ParallelSineSynth(wiring.Component):
     def elaborate(self, platform):
         m = Module()
 
-        m.submodules.rom = wavetable_rom = memory.Memory(
-            shape=signed(self.sample_width), depth=len(self.lut), init=self.lut
-        )
-        rd_port_wavetable: memory.ReadPort = wavetable_rom.read_port()
+        # m.submodules.rom = wavetable_rom = memory.Memory(
+        #     shape=signed(self.sample_width), depth=len(self.lut), init=self.lut
+        # )
+        m.submodules.ram = self.wavetable_ram
+        rd_port_wavetable: memory.ReadPort = self.wavetable_ram._mem.read_port()
         m.d.comb += rd_port_wavetable.en.eq(1)
 
         N = self.N

@@ -59,9 +59,11 @@ from luna_soc.generate.svd                import SVD
 from girlvoice.dsp import vocoder
 import girlvoice.platform.nexus_utils.lmmi as lmmi
 from girlvoice.platform.nexus_utils.lram          import WishboneNXLRAM
+from girlvoice.soc.provider import girlvoice_rev_a as provider
 
 from girlvoice.dsp.vocoder import StaticVocoder, ThreadedVocoderChannel
 from girlvoice.io.i2s import i2s_rx, i2s_tx
+from girlvoice.io import spi
 from girlvoice.platform.nexus_utils.i2c_fifo import I2CFIFO
 
 kB = 1024
@@ -69,7 +71,7 @@ mB = 1024*kB
 
 class GirlvoiceSoc(Component):
     def __init__(self, *, sys_clk_freq=60e6, finalize_csr_bridge=True,
-                 mainram_size=128*kB, cpu_variant="imac+dcache", use_spi_flash = False, sim = False):
+                 mainram_size=256*kB, cpu_variant="imac+dcache", use_spi_flash = False, sim = False):
 
         super().__init__({})
 
@@ -82,9 +84,10 @@ class GirlvoiceSoc(Component):
         self.mainram_base         = 0x00000000
         self.mainram_size         = mainram_size
         self.spiflash_base        = 0x10000000
-        self.spiflash_size        = 0x01000000 # 128Mbit / 16MiB
+        self.spiflash_size        = 0x00400000 # 128Mbit / 16MiB
         self.csr_base             = 0xf0000000
         self.lmmi_base            = 0xa0000000
+        self.wavetable_base       = 0xb0000000
         # offsets from csr_base
         self.spiflash_ctrl_base   = 0x00000100
         self.uart0_base           = 0x00000200
@@ -92,6 +95,7 @@ class GirlvoiceSoc(Component):
         self.timer0_irq           = 0
         self.i2c0_base            = 0x00000400
         self.led0_base            = 0x00000500
+        self.gpo1_base            = 0x00000600
 
         if not use_spi_flash:
             self.reset_addr  = self.mainram_base
@@ -160,12 +164,16 @@ class GirlvoiceSoc(Component):
             self.led0 = gpio.Peripheral(pin_count=1, addr_width=4, data_width=8)
             self.csr_decoder.add(self.led0.bus, addr=self.led0_base, name="led0")
 
-        # spiflash peripheral
-        # self.spi0_phy        = spiflash.SPIPHYController(domain="sync", divisor=0)
-        # self.spiflash_periph = spiflash.Peripheral(phy=self.spi0_phy, mmap_size=self.spiflash_size,
-        #                                            mmap_name="spiflash")
-        # self.wb_decoder.add(self.spiflash_periph.bus, addr=self.spiflash_base, name="spiflash")
-        # self.csr_decoder.add(self.spiflash_periph.csr, addr=self.spiflash_ctrl_base, name="spiflash_ctrl")
+            self.gpo_1 = gpio.Peripheral(pin_count=2, addr_width=4, data_width=8)
+            self.csr_decoder.add(self.gpo_1.bus, addr=self.gpo1_base, name="gpo1")
+
+            # LCD SPI control
+            self.spi_pads = provider.SPIFlashProvider(id="spi")
+            self.spi_pads.pins.sck = Signal()
+            self.spi0_phy        = spiflash.SPIPHYController(pads = self.spi_pads.pins, domain="sync", divisor=0)
+            self.spi0            = spi.SPIController(name="spi_ctrl")
+
+            self.csr_decoder.add(self.spi0.bus, addr=self.spiflash_ctrl_base, name="spiflash_ctrl")
 
         # lattice i2c
         self.i2c = I2CFIFO(scl_freq=400e3, use_hard_io=True, sim=sim)
@@ -185,12 +193,15 @@ class GirlvoiceSoc(Component):
         self.vocoder = StaticVocoder(
             start_freq=100,
             end_freq=5000,
-            num_channels=14,
+            num_channels=12,
             clk_sync_freq=sys_clk_freq,
             fs=fs,
             sample_width=sample_width,
             channel_class=ThreadedVocoderChannel
         )
+
+        # Add vocoder wavetable to wb bus
+        self.wb_decoder.add(self.vocoder.synth.wb_bus, addr=self.wavetable_base, name="wavetable")
 
         self.permit_bus_traffic = Signal()
 
@@ -260,17 +271,36 @@ class GirlvoiceSoc(Component):
             led_io = platform.request("led")
             m.d.comb += led_io.o.eq(self.led0.pins[0].o)
 
+            m.submodules.gpo1 = self.gpo_1
+            dc_pin = platform.request("dc")
+            bl_pin = platform.request("bl")
+
+            m.d.comb += dc_pin.o.eq(self.gpo_1.pins[0].o)
+            m.d.comb += bl_pin.o.eq(self.gpo_1.pins[1].o)
+
         # i2c0
         m.submodules.i2c0 = self.i2c
         m.submodules.wb_to_lmmi = self.lmmi_to_wb
 
 
-        # spiflash
-        # m.submodules.spi0_phy = self.spi0_phy
-        # m.submodules.spiflash_periph = self.spiflash_periph
+        # Multiboot module is required to unlock use of
+        # SPI pins for the LCD
+        m.submodules.multiboot = Instance(
+            "MULTIBOOT",
+            p_SOURCESEL="EN",
+            i_AUTOREBOOT=0,
+            i_MSPIMADDR=0
+        )
+
+        # lcd spi controller
+        m.submodules.spi0_phy = self.spi0_phy
+        m.submodules.spi0 = self.spi0
+        m.submodules.spi_provider = self.spi_pads
+        wiring.connect(m, self.spi0.source, self.spi0_phy.source)
+        wiring.connect(m, self.spi0.sink, self.spi0_phy.sink)
+        m.d.comb += self.spi0_phy.cs.eq(self.spi0.cs)
 
         # I2S TX/RX
-
         m.submodules.i2s_rx = self.i2s_rx
         m.submodules.i2s_tx = self.i2s_tx
 
@@ -289,10 +319,10 @@ class GirlvoiceSoc(Component):
             m.d.comb += amp.clk.o.eq(self.i2s_tx.sclk)
             m.d.comb += amp.data.o.eq(self.i2s_tx.sdout)
 
-        m.submodules.vocoder = self.vocoder
+        # m.submodules.vocoder = self.vocoder
 
-        wiring.connect(m, self.vocoder.sink, self.i2s_rx.source)
-        wiring.connect(m, self.vocoder.source, self.i2s_tx.sink)
+        # wiring.connect(m, self.vocoder.sink, self.i2s_rx.source)
+        # wiring.connect(m, self.vocoder.source, self.i2s_tx.sink)
 
         # wishbone csr bridge
         if not self.sim:

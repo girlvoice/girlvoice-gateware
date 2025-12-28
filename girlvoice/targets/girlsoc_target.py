@@ -21,7 +21,6 @@ class GirlTop(Elaboratable):
         ## Clock Defs
 
         sync_freq = 60e6
-        bclk_freq = 4e6
 
         clkin = platform.request("clk12", dir="i").i
         m.domains.clk12 = cd_clk12 = ClockDomain("clk12")
