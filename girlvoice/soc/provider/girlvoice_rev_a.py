@@ -15,7 +15,7 @@ class SPIFlashProvider(Component):
             "pins": In(spiflash.PinSignature())
         })
 
-
+        self.pins.sck = Signal()
 
     def elaborate(self, platform: Platform):
         m = Module()

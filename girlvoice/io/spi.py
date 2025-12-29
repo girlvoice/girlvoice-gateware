@@ -7,7 +7,8 @@
 
 from amaranth             import Module, DomainRenamer, Signal, unsigned
 from amaranth.lib         import wiring
-from amaranth.lib.fifo    import SyncFIFO
+from amaranth.lib.fifo    import AsyncFIFO
+from amaranth.lib.cdc       import FFSynchronizer
 from amaranth.lib.data    import StructLayout, View
 from amaranth.lib.wiring  import In, Out, flipped, connect
 
@@ -68,10 +69,11 @@ class SPIController(wiring.Component):
             })
 
 
-    def __init__(self, *, data_width=32, granularity=8, tx_depth=16, name=None, domain="sync"):
+    def __init__(self, *, data_width=32, granularity=8, tx_depth=16, name=None, domain="sync", phy_domain="fast"):
         wiring.Component.__init__(self, SPIControlPort(data_width))
 
-        self._domain   = domain
+        self._domain     = domain
+        self._phy_domain = phy_domain
 
         # layout description for writing to the tx fifo
         self.tx_fifo_layout = StructLayout({
@@ -82,7 +84,13 @@ class SPIController(wiring.Component):
         })
 
         # fifos
-        self._tx_fifo = DomainRenamer(domain)(SyncFIFO(width=len(self.source.payload), depth=tx_depth))
+        self._tx_fifo = AsyncFIFO(
+            width=len(self.source.payload),
+            depth=tx_depth,
+            w_domain=self._domain,
+            r_domain=self._phy_domain,
+        )
+
 
         # registers
         regs = csr.Builder(addr_width=5, data_width=8)
@@ -133,9 +141,6 @@ class SPIController(wiring.Component):
             tx_fifo_payload.width          .eq(self._phy.f.width.data),
             tx_fifo_payload.mask           .eq(self._phy.f.mask.data),
 
-            # SPI chip select.
-            self.cs                        .eq(cs),
-
             # TX FIFO to SPI PHY (PICO).
             self.source.payload            .eq(tx_fifo.r_data),
             self.source.valid              .eq(tx_fifo.r_rdy),
@@ -147,6 +152,12 @@ class SPIController(wiring.Component):
             # FIFOs ready flags.
             self._status.f.tx_ready.r_data .eq(tx_fifo.w_rdy),
         ]
+
+        m.submodules.cs_cdc = self._cs_cdc = FFSynchronizer(
+            cs,
+            self.cs,
+            o_domain=self._phy_domain,
+        )
 
         # Convert our sync domain to the domain requested by the user, if necessary.
         if self._domain != "sync":

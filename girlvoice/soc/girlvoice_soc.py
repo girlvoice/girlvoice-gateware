@@ -169,8 +169,11 @@ class GirlvoiceSoc(Component):
 
             # LCD SPI control
             self.spi_pads = provider.SPIFlashProvider(id="spi")
-            self.spi_pads.pins.sck = Signal()
-            self.spi0_phy        = spiflash.SPIPHYController(pads = self.spi_pads.pins, domain="sync", divisor=0)
+            self.spi0_phy        = spiflash.SPIPHYController(
+                pads = self.spi_pads.pins,
+                domain="fast",
+                divisor=0
+            )
             self.spi0            = spi.SPIController(name="spi_ctrl")
 
             self.csr_decoder.add(self.spi0.bus, addr=self.spiflash_ctrl_base, name="spiflash_ctrl")
@@ -296,8 +299,9 @@ class GirlvoiceSoc(Component):
         m.submodules.spi0_phy = self.spi0_phy
         m.submodules.spi0 = self.spi0
         m.submodules.spi_provider = self.spi_pads
+
         wiring.connect(m, self.spi0.source, self.spi0_phy.source)
-        wiring.connect(m, self.spi0.sink, self.spi0_phy.sink)
+        m.d.comb += self.spi0_phy.sink.ready.eq(1)
         m.d.comb += self.spi0_phy.cs.eq(self.spi0.cs)
 
         # I2S TX/RX

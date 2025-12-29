@@ -20,22 +20,30 @@ class GirlTop(Elaboratable):
 
         ## Clock Defs
 
+        source_clk_freq = 12e6
         sync_freq = 60e6
+        fast_clk_freq = 2 * sync_freq
+
 
         clkin = platform.request("clk12", dir="i").i
         m.domains.clk12 = cd_clk12 = ClockDomain("clk12")
         m.d.comb += cd_clk12.clk.eq(clkin)
-        platform.add_clock_constraint(cd_clk12.clk, 12e6)
+        platform.add_clock_constraint(cd_clk12.clk, source_clk_freq)
 
         m.domains.sync = cd_sync = ClockDomain("sync")
+        m.domains.fast = cd_fast = ClockDomain("fast")
 
         m.submodules.pll = pll = NXPLL(
             clkin=clkin,
-            clkin_freq=12e6,
-            cd_out=cd_sync,
-            clkout=cd_sync.clk,
-            clkout_freq=sync_freq)
+            clkin_freq=source_clk_freq,
+            cd_out=cd_fast,
+            clkout=cd_fast.clk,
+            clkout_freq=fast_clk_freq)
+
+        pll.create_clkout(cd_sync, sync_freq)
+
         platform.add_clock_constraint(cd_sync.clk, sync_freq)
+        platform.add_clock_constraint(cd_fast.clk, fast_clk_freq)
 
         ## Add SoC
         m.submodules.soc = self.soc
