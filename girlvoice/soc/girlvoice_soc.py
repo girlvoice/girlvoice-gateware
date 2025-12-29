@@ -84,7 +84,7 @@ class GirlvoiceSoc(Component):
         self.mainram_base         = 0x00000000
         self.mainram_size         = mainram_size
         self.spiflash_base        = 0x10000000
-        self.spiflash_size        = 0x00400000 # 128Mbit / 16MiB
+        self.spiflash_size        = 0x00400000 # 32Mbit / 4MiB
         self.csr_base             = 0xf0000000
         self.lmmi_base            = 0xa0000000
         self.wavetable_base       = 0xb0000000
