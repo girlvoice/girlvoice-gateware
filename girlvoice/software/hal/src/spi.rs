@@ -53,7 +53,6 @@ macro_rules! impl_spi {
 
                 fn write_priv(&mut self, words: &[$WORD]) -> Result<(), SpiError> {
                     self.registers.cs().write(|w| w.select().bit(true));
-                    let mut words_cleared = 0;
                     for word in words.iter() {
                         while ! self.tx_ready() {}
                         self.registers.data().write(|w| unsafe {w.tx().bits(*word as u32)});

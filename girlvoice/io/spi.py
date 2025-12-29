@@ -1,5 +1,4 @@
-#
-# This file is part of LUNA.
+# This file is based on the luna-soc SPI controller.
 #
 # Copyright (c) 2024 Great Scott Gadgets <info@greatscottgadgets.com>
 # SPDX-License-Identifier: BSD-3-Clause
@@ -18,11 +17,13 @@ from luna_soc.gateware.core.spiflash.port                import SPIControlPort
 
 
 class SPIController(wiring.Component):
-    """Wishbone generic SPI Flash Controller interface.
+    """Wishbone write-only SPI Flash Controller interface.
 
-    Provides a generic SPI Controller that can be interfaced using CSRs.
+    Provides a write-only SPI Controller that can be interfaced using CSRs.
     Supports multiple access modes with the help of ``width`` and ``mask`` registers which
     can be used to configure the PHY into any supported SDR mode (single/dual/quad/octal).
+
+    Since this is only being used for write transactions on a fixed width bus, the PHY could probably be simplified
     """
 
     class Phy(csr.Register, access="rw"):
@@ -67,7 +68,7 @@ class SPIController(wiring.Component):
             })
 
 
-    def __init__(self, *, data_width=32, granularity=8, rx_depth=16, tx_depth=16, name=None, domain="sync"):
+    def __init__(self, *, data_width=32, granularity=8, tx_depth=16, name=None, domain="sync"):
         wiring.Component.__init__(self, SPIControlPort(data_width))
 
         self._domain   = domain
