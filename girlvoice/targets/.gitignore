@@ -1,2 +1,4 @@
 *.v
 init_params.txt
+*.svd
+memory.x
