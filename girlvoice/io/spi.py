@@ -138,8 +138,8 @@ class SPIController(wiring.Component):
             tx_fifo.w_en                   .eq(self._data.f.tx.w_stb),
             tx_fifo_payload.data           .eq(self._data.f.tx.w_data),
             tx_fifo_payload.len            .eq(self._phy.f.length.data),
-            tx_fifo_payload.width          .eq(self._phy.f.width.data),
-            tx_fifo_payload.mask           .eq(self._phy.f.mask.data),
+            tx_fifo_payload.width          .eq(1),
+            tx_fifo_payload.mask           .eq(1),
 
             # TX FIFO to SPI PHY (PICO).
             self.source.payload            .eq(tx_fifo.r_data),
