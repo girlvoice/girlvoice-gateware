@@ -193,7 +193,7 @@ class GirlvoiceSoc(Component):
         self.vocoder = StaticVocoder(
             start_freq=100,
             end_freq=5000,
-            num_channels=12,
+            num_channels=14,
             clk_sync_freq=sys_clk_freq,
             fs=fs,
             sample_width=sample_width,
@@ -319,10 +319,9 @@ class GirlvoiceSoc(Component):
             m.d.comb += amp.clk.o.eq(self.i2s_tx.sclk)
             m.d.comb += amp.data.o.eq(self.i2s_tx.sdout)
 
-        # m.submodules.vocoder = self.vocoder
-
-        # wiring.connect(m, self.vocoder.sink, self.i2s_rx.source)
-        # wiring.connect(m, self.vocoder.source, self.i2s_tx.sink)
+        m.submodules.vocoder = self.vocoder
+        wiring.connect(m, self.vocoder.sink, self.i2s_rx.source)
+        wiring.connect(m, self.vocoder.source, self.i2s_tx.sink)
 
         # wishbone csr bridge
         if not self.sim:

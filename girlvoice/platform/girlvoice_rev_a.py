@@ -23,11 +23,13 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             "clk12", 0, Pins("11", dir="i"), Clock(12e6), Attrs(IO_TYPE="LVCMOS18H")
         ),
         UARTResource(0, rx="USB_DP", tx="USB_DN", conn=("usb", 0)),
-        # I2CResource(0, scl="44", sda="42", attrs=Attrs(IO_TYPE="LVCMOS33", USE_PRIMARY=False)),
+
         Resource("i2c", 0,
                  Subsignal("sda", Pins("42", dir="io")),
                  Subsignal("scl", Pins("44", dir="io")),
                  Attrs(IO_TYPE="LVCMOS33", PULLMODE="NONE")),
+
+        # SPI Flash
         *SPIFlashResources(
             0,
             cs_n="56",
@@ -39,6 +41,7 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             attrs=Attrs(IO_TYPE="LVCMOS33"),
         ),
 
+        # Display SPI
         Resource("spi", 0,
             Subsignal("cs",
                       PinsN("53", dir="o"),
@@ -55,14 +58,10 @@ class GirlvoiceRevAPlatform(LatticePlatform):
                 Attrs(IO_TYPE="LVCMOS33"),
             ),
         ),
-        # SPIResource(
-        #     0,
-        #     cs_n="53",
-        #     clk="48",
-        #     copi="45",
-        #     cipo=None,
-        #     attrs=Attrs(IO_TYPE="LVCMOS33"),
-        # ),
+        # Display D/C pin and backlight enable
+        Resource("dc", 0, Pins("46", dir="o"), Attrs(IO_TYPE="LVCMOS33")),
+        Resource("bl", 0, Pins("36", dir="o"), Attrs(IO_TYPE="LVCMOS18H")),
+
         Resource(
             "usbn",
             0,
@@ -105,8 +104,6 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             Attrs(IO_TYPE="LVCMOS18"),
         ),
         Resource("led", 0, Pins("13", dir="o"), Attrs(IO_TYPE="LVCMOS18H")),
-        Resource("dc", 0, Pins("46", dir="o"), Attrs(IO_TYPE="LVCMOS33")),
-        Resource("bl", 0, Pins("36", dir="o"), Attrs(IO_TYPE="LVCMOS18H")),
 
         Resource(
             "mic",
