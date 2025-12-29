@@ -3,7 +3,6 @@
 
 use embedded_hal::delay::DelayNs;
 use aw88395::Aw88395;
-use embedded_hal::spi::SpiDevice;
 use sgtl5000::{Sgtl5000};
 use sgtl5000::regmap::LineOutBiasCurrent;
 use riscv_rt::entry;
@@ -25,7 +24,6 @@ use embedded_graphics::{
 
 use girlvoice_hal as hal;
 use hal::hal_io::Write;
-mod spi;
 mod term;
 
 use hal::i2c::I2c0;
@@ -98,13 +96,9 @@ fn main() -> ! {
     let gpo1 = Gpo1::new(peripherals.gpo1);
 
     let spi0 = Spi0::new(peripherals.spiflash_ctrl);
-    // let tx_buf: [u8; 2] =[0xBE, 0xD0];
-    // let _ = spi0.write(&tx_buf);
-
     let interface = SPIDisplayInterface::new(spi0, gpo1);
 
 
-    // let _ = interface.send_commands(DataFormat::U8(&tx_buf));
 
     let mut display = Gc9a01::new(
         interface,
@@ -118,9 +112,6 @@ fn main() -> ! {
 
     display.flush().ok();
 
-    // display.fill(0x2d26);
-
-
     // Create styles used by the drawing operations.
     let thin_stroke = PrimitiveStyle::with_stroke(Rgb565::GREEN, 2);
     let thick_stroke = PrimitiveStyle::with_stroke(Rgb565::CSS_CRIMSON, 3);
@@ -132,7 +123,7 @@ fn main() -> ! {
     let fill = PrimitiveStyle::with_fill(Rgb565::BLUE);
     let character_style = MonoTextStyle::new(&FONT_6X10, Rgb565::CSS_PINK);
 
-    let yoffset = 20;
+    let yoffset = 50;
 
     // Draw a 3px wide outline around the display.
     display
