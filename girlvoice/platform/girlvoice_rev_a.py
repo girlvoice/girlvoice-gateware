@@ -77,13 +77,13 @@ class GirlvoiceRevAPlatform(LatticePlatform):
         Resource("pwr_en", 0, Pins("28", dir="o"), Attrs(IO_TYPE="LVCMOS18H")),
         Resource("btn_pwr", 0, Pins("27", dir="i"), Attrs(IO_TYPE="LVCMOS18H")),
         Resource(
-            "button_up", 0, Pins("19", dir="i", invert=True), Attrs(IO_TYPE="LVCMOS18")
+            "button_up", 0, Pins("19", dir="i", invert=True), Attrs(IO_TYPE="LVCMOS18H")
         ),
         Resource(
             "button_down",
             0,
             Pins("20", dir="i", invert=True),
-            Attrs(IO_TYPE="LVCMOS18"),
+            Attrs(IO_TYPE="LVCMOS18H"),
         ),
         Resource(
             "aux_clk",
