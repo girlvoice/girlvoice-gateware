@@ -2277,6 +2277,116 @@ module"]
         }
     }
 }
+#[doc = "gpi0"]
+pub struct Gpi0 {
+    _marker: PhantomData<*const ()>,
+}
+unsafe impl Send for Gpi0 {}
+impl Gpi0 {
+    #[doc = r"Pointer to the register block"]
+    pub const PTR: *const gpi0::RegisterBlock = 0xf000_0700 as *const _;
+    #[doc = r"Return the pointer to the register block"]
+    #[inline(always)]
+    pub const fn ptr() -> *const gpi0::RegisterBlock {
+        Self::PTR
+    }
+    #[doc = r" Steal an instance of this peripheral"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" Ensure that the new instance of the peripheral cannot be used in a way"]
+    #[doc = r" that may race with any existing instances, for example by only"]
+    #[doc = r" accessing read-only or write-only registers, or by consuming the"]
+    #[doc = r" original peripheral and using critical sections to coordinate"]
+    #[doc = r" access between multiple new instances."]
+    #[doc = r""]
+    #[doc = r" Additionally, other software such as HALs may rely on only one"]
+    #[doc = r" peripheral instance existing to ensure memory safety; ensure"]
+    #[doc = r" no stolen instances are passed to such software."]
+    pub unsafe fn steal() -> Self {
+        Self {
+            _marker: PhantomData,
+        }
+    }
+}
+impl Deref for Gpi0 {
+    type Target = gpi0::RegisterBlock;
+    #[inline(always)]
+    fn deref(&self) -> &Self::Target {
+        unsafe { &*Self::PTR }
+    }
+}
+impl core::fmt::Debug for Gpi0 {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("Gpi0").finish()
+    }
+}
+#[doc = "gpi0"]
+pub mod gpi0 {
+    #[repr(C)]
+    #[doc = "Register block"]
+    pub struct RegisterBlock {
+        input: Input,
+    }
+    impl RegisterBlock {
+        #[doc = "0x00 - A CSR register. Parameters ---------- fields : :class:`dict` or :class:`list` or :class:`Field` Collection of register fields. If ``None`` (default), a dict is populated from Python :term:`variable annotations &lt;python:variable annotations>`. ``fields`` is used to create a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`, depending on its type (dict, list, or Field). Interface attributes -------------------- element : :class:`Element` Interface between this register and a CSR bus primitive. Attributes ---------- field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction` Collection of field instances. f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction` Shorthand for :attr:`Register.field`. Raises ------ :exc:`TypeError` If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`. :exc:`ValueError` If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`. :exc:`ValueError` If ``element.access`` is not readable and at least one field is readable. :exc:`ValueError` If ``element.access`` is not writable and at least one field is writable."]
+        #[inline(always)]
+        pub const fn input(&self) -> &Input {
+            &self.input
+        }
+    }
+    #[doc = "Input (rw) register accessor: A CSR register. Parameters ---------- fields : :class:`dict` or :class:`list` or :class:`Field` Collection of register fields. If ``None`` (default), a dict is populated from Python :term:`variable annotations &lt;python:variable annotations>`. ``fields`` is used to create a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`, depending on its type (dict, list, or Field). Interface attributes -------------------- element : :class:`Element` Interface between this register and a CSR bus primitive. Attributes ---------- field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction` Collection of field instances. f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction` Shorthand for :attr:`Register.field`. Raises ------ :exc:`TypeError` If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`. :exc:`ValueError` If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`. :exc:`ValueError` If ``element.access`` is not readable and at least one field is readable. :exc:`ValueError` If ``element.access`` is not writable and at least one field is writable.\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`input::R`].  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`input::W`]. You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@input`]
+module"]
+    pub type Input = crate::Reg<input::InputSpec>;
+    #[doc = "A CSR register. Parameters ---------- fields : :class:`dict` or :class:`list` or :class:`Field` Collection of register fields. If ``None`` (default), a dict is populated from Python :term:`variable annotations &lt;python:variable annotations>`. ``fields`` is used to create a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`, depending on its type (dict, list, or Field). Interface attributes -------------------- element : :class:`Element` Interface between this register and a CSR bus primitive. Attributes ---------- field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction` Collection of field instances. f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction` Shorthand for :attr:`Register.field`. Raises ------ :exc:`TypeError` If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`. :exc:`ValueError` If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`. :exc:`ValueError` If ``element.access`` is not readable and at least one field is readable. :exc:`ValueError` If ``element.access`` is not writable and at least one field is writable."]
+    pub mod input {
+        #[doc = "Register `Input` reader"]
+        pub type R = crate::R<InputSpec>;
+        #[doc = "Register `Input` writer"]
+        pub type W = crate::W<InputSpec>;
+        #[doc = "Field `pin_0` reader - pin_0 field"]
+        pub type Pin0R = crate::BitReader;
+        #[doc = "Field `pin_1` reader - pin_1 field"]
+        pub type Pin1R = crate::BitReader;
+        #[doc = "Field `pin_2` reader - pin_2 field"]
+        pub type Pin2R = crate::BitReader;
+        impl R {
+            #[doc = "Bit 0 - pin_0 field"]
+            #[inline(always)]
+            pub fn pin_0(&self) -> Pin0R {
+                Pin0R::new((self.bits & 1) != 0)
+            }
+            #[doc = "Bit 1 - pin_1 field"]
+            #[inline(always)]
+            pub fn pin_1(&self) -> Pin1R {
+                Pin1R::new(((self.bits >> 1) & 1) != 0)
+            }
+            #[doc = "Bit 2 - pin_2 field"]
+            #[inline(always)]
+            pub fn pin_2(&self) -> Pin2R {
+                Pin2R::new(((self.bits >> 2) & 1) != 0)
+            }
+        }
+        impl W {}
+        #[doc = "A CSR register. Parameters ---------- fields : :class:`dict` or :class:`list` or :class:`Field` Collection of register fields. If ``None`` (default), a dict is populated from Python :term:`variable annotations &lt;python:variable annotations>`. ``fields`` is used to create a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`, depending on its type (dict, list, or Field). Interface attributes -------------------- element : :class:`Element` Interface between this register and a CSR bus primitive. Attributes ---------- field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction` Collection of field instances. f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction` Shorthand for :attr:`Register.field`. Raises ------ :exc:`TypeError` If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`. :exc:`ValueError` If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`. :exc:`ValueError` If ``element.access`` is not readable and at least one field is readable. :exc:`ValueError` If ``element.access`` is not writable and at least one field is writable.\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`input::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`input::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
+        pub struct InputSpec;
+        impl crate::RegisterSpec for InputSpec {
+            type Ux = u8;
+        }
+        #[doc = "`read()` method returns [`input::R`](R) reader structure"]
+        impl crate::Readable for InputSpec {}
+        #[doc = "`write(|w| ..)` method takes [`input::W`](W) writer structure"]
+        impl crate::Writable for InputSpec {
+            type Safety = crate::Unsafe;
+            const ZERO_TO_MODIFY_FIELDS_BITMAP: u8 = 0;
+            const ONE_TO_MODIFY_FIELDS_BITMAP: u8 = 0;
+        }
+        #[doc = "`reset()` method sets Input to value 0"]
+        impl crate::Resettable for InputSpec {
+            const RESET_VALUE: u8 = 0;
+        }
+    }
+}
 #[doc = "I2CFIFO"]
 pub struct I2cfifo {
     _marker: PhantomData<*const ()>,
@@ -2870,6 +2980,8 @@ pub struct Peripherals {
     pub led0: Led0,
     #[doc = "gpo1"]
     pub gpo1: Gpo1,
+    #[doc = "gpi0"]
+    pub gpi0: Gpi0,
     #[doc = "I2CFIFO"]
     pub i2cfifo: I2cfifo,
 }
@@ -2907,6 +3019,9 @@ impl Peripherals {
                 _marker: PhantomData,
             },
             gpo1: Gpo1 {
+                _marker: PhantomData,
+            },
+            gpi0: Gpi0 {
                 _marker: PhantomData,
             },
             i2cfifo: I2cfifo {
