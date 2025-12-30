@@ -63,7 +63,7 @@ from girlvoice.soc.provider import girlvoice_rev_a as provider
 
 from girlvoice.dsp.vocoder import StaticVocoder, ThreadedVocoderChannel
 from girlvoice.io.i2s import i2s_rx, i2s_tx
-from girlvoice.io import spi
+from girlvoice.io import spi, gpi
 from girlvoice.platform.nexus_utils.i2c_fifo import I2CFIFO
 
 kB = 1024
@@ -96,6 +96,7 @@ class GirlvoiceSoc(Component):
         self.i2c0_base            = 0x00000400
         self.led0_base            = 0x00000500
         self.gpo1_base            = 0x00000600
+        self.gpi0_base            = 0x00000700
 
         if not use_spi_flash:
             self.reset_addr  = self.mainram_base
@@ -166,6 +167,9 @@ class GirlvoiceSoc(Component):
 
             self.gpo_1 = gpio.Peripheral(pin_count=2, addr_width=4, data_width=8)
             self.csr_decoder.add(self.gpo_1.bus, addr=self.gpo1_base, name="gpo1")
+
+            self.gpi0 = gpi.Peripheral(pin_count=3, addr_width=4, data_width=8)
+            self.csr_decoder.add(self.gpi0.bus, addr=self.gpi0_base, name="gpi0")
 
             # LCD SPI control
             self.spi_pads = provider.SPIFlashProvider(id="spi")
@@ -259,8 +263,8 @@ class GirlvoiceSoc(Component):
         if not self.sim:
             m.submodules.csr_decoder = self.csr_decoder
 
-        # uart0
         if not self.sim:
+            # uart0
             m.submodules.uart0 = self.uart0
             uart = platform.request("uart")
             m.d.comb += self.uart0.pins.rx.eq(uart.rx.i)
@@ -280,6 +284,15 @@ class GirlvoiceSoc(Component):
 
             m.d.comb += dc_pin.o.eq(self.gpo_1.pins[0].o)
             m.d.comb += bl_pin.o.eq(self.gpo_1.pins[1].o)
+
+            m.submodules.gpi0 = self.gpi0
+            btn_up = platform.request("button_up")
+            btn_down = platform.request("button_down")
+            btn_power = platform.request("btn_pwr")
+            m.d.comb += self.gpi0.pins[0].eq(btn_up.i)
+            m.d.comb += self.gpi0.pins[1].eq(btn_down.i)
+            m.d.comb += self.gpi0.pins[2].eq(btn_power.i)
+
 
         # i2c0
         m.submodules.i2c0 = self.i2c
