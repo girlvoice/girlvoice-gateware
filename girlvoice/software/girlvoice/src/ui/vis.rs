@@ -31,6 +31,8 @@ pub struct HarmonicLoop {
     harmonic_phases: [LFO; MAX_CHANNELS],
     total_energy: EnvelopeSmoother,
     resolution: usize,
+    trail_history: [[Point2D; 256]; 6],
+    trail_index: usize,
     circular_mask: bool,
     glow: bool,
 }
@@ -43,17 +45,19 @@ impl HarmonicLoop {
             energies: [0.0; MAX_CHANNELS],
             rotation: LFO::new(0.02),
             harmonic_phases: core::array::from_fn(|i| {
-                LFO::new_with_phase(0.08 + (i as f32 * 0.03), i as f32 * 0.4)
+                LFO::new_with_phase(0.08 + (i as f32 * 0.03), i as f32 * 0.4) // i made these up and it looks good
             }),
             total_energy: EnvelopeSmoother::new(60.0, 2.0, 50.0),
             resolution: 200,
+            trail_history: [[Point2D::default(); 256]; 6],
+            trail_index: 0,
             circular_mask: true,
-            glow: false, // Disable glow by default on embedded (saves CPU)
+            glow: true,
         }
     }
 
     fn sample_point(&self, t: f32, rotation: f32) -> Point2D {
-        // use fixed-point LUT for all sin/cos operations
+        // Use fixed-point LUT for all sin/cos operations
         let t_fx = math::fx_from_f32(t);
         let mut x = math::fx_cos(t_fx);
         let mut y = math::fx_sin(t_fx);
@@ -107,6 +111,14 @@ impl HarmonicLoop {
             total += self.energies[i];
         }
         self.total_energy.process(total / self.num_channels as f32);
+
+        // store trail
+        self.trail_index = (self.trail_index + 1) % self.trail_history.len();
+        let rotation = self.rotation.phase;
+        for i in 0..self.resolution {
+            let t = (i as f32 / self.resolution as f32) * core::f32::consts::TAU;
+            self.trail_history[self.trail_index][i] = self.sample_point(t, rotation);
+        }
     }
 
     pub fn render<F>(&self, set_pixel: F)
@@ -120,7 +132,22 @@ impl HarmonicLoop {
     where
         F: FnMut(usize, usize, Color),
     {
-        // trails are handled by framebuffer fading now - just draw the current frame
+        // draw faded trails using palette accent color
+        for age in 1..self.trail_history.len() {
+            let hist_idx = (self.trail_index + self.trail_history.len() - age) % self.trail_history.len();
+            let fade_base = 1.0 - age as f32 / self.trail_history.len() as f32;
+            let fade = fade_base * fade_base * 0.4;
+            if fade < 0.02 { continue; }
+
+            let trail_color = pal.accent.scale(fade);
+            for i in 0..self.resolution {
+                let p0 = self.trail_history[hist_idx][i];
+                let p1 = self.trail_history[hist_idx][(i + 1) % self.resolution];
+                let (sx0, sy0) = p0.to_screen();
+                let (sx1, sy1) = p1.to_screen();
+                draw_line(sx0, sy0, sx1, sy1, trail_color, self.circular_mask, &mut set_pixel);
+            }
+        }
 
         // draw main figure using palette colors
         let rotation = self.rotation.phase;
