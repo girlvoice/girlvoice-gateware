@@ -38,6 +38,10 @@ impl<T: Read + Write, U: I2c, V: DelayNs> Terminal<T, U, V> {
         }
     }
 
+    pub fn delay_ms(&mut self, ms: u32) {
+        self.timer.delay_ms(ms);
+    }
+
     pub fn handle_char(&mut self) {
 
         let read_size = self.serial.read(&mut self.char_buf).unwrap();

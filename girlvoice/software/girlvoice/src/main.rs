@@ -3,28 +3,23 @@
 
 use embedded_hal::delay::DelayNs;
 use aw88395::Aw88395;
-use sgtl5000::{Sgtl5000};
+use sgtl5000::Sgtl5000;
 use sgtl5000::regmap::LineOutBiasCurrent;
 use riscv_rt::entry;
 use soc_pac as pac;
 
 use gc9a01::{prelude::*, Gc9a01, SPIDisplayInterface};
 
-
 use embedded_graphics::{
-    mono_font::{ascii::FONT_6X10, MonoTextStyle},
-    pixelcolor::BinaryColor,
     pixelcolor::Rgb565,
     prelude::*,
-    primitives::{
-        Circle, PrimitiveStyle, PrimitiveStyleBuilder, Rectangle, StrokeAlignment, Triangle,
-    },
-    text::{Alignment, Text},
+    Pixel,
 };
 
 use girlvoice_hal as hal;
 use hal::hal_io::Write;
 mod term;
+mod ui;
 
 use hal::i2c::I2c0;
 
@@ -109,49 +104,14 @@ fn main() -> ! {
     display.init(&mut delay).ok();
 
     display.clear();
-
     display.flush().ok();
 
-    // Create styles used by the drawing operations.
-    let thin_stroke = PrimitiveStyle::with_stroke(Rgb565::GREEN, 2);
-    let thick_stroke = PrimitiveStyle::with_stroke(Rgb565::CSS_CRIMSON, 3);
-    let border_stroke = PrimitiveStyleBuilder::new()
-        .stroke_color(Rgb565::CSS_AQUA)
-        .stroke_width(3)
-        .stroke_alignment(StrokeAlignment::Inside)
-        .build();
-    let fill = PrimitiveStyle::with_fill(Rgb565::BLUE);
-    let character_style = MonoTextStyle::new(&FONT_6X10, Rgb565::CSS_PINK);
+    // Create the visualizer with 8 channels (matching the vocoder)
+    let mut visualizer = ui::Visualizer::new(8);
 
-    let yoffset = 50;
-
-    // Draw a 3px wide outline around the display.
-    display
-        .bounding_box()
-        .into_styled(border_stroke)
-        .draw(&mut display).unwrap();
-
-    // Draw a triangle.
-    Triangle::new(
-        Point::new(16, 16 + yoffset),
-        Point::new(16 + 16, 16 + yoffset),
-        Point::new(16 + 8, yoffset),
-    )
-    .into_styled(thin_stroke)
-    .draw(&mut display).unwrap();
-
-     // Draw centered text.
-    let text = "girlvoice!";
-    Text::with_alignment(
-        text,
-        display.bounding_box().center() + Point::new(0, 15),
-        character_style,
-        Alignment::Center,
-    )
-    .draw(&mut display).unwrap();
-
-
-    display.flush().ok();
+    // Simulated energies for testing (will be replaced with actual vocoder data)
+    let mut demo_energies = [0.0f32; 8];
+    let mut frame_counter: u32 = 0;
 
 
     // let mut led = Led0::new(peripherals.led0);
@@ -164,7 +124,34 @@ fn main() -> ! {
 
     let mut term = term::Terminal::new(serial, amp, delay);
 
+    // ~30 fps, delay based for now
+    const FRAME_DELAY_MS: u32 = 33;
+
     loop {
         term.handle_char();
+
+        // Update demo energies with a simple pattern for testing
+        frame_counter = frame_counter.wrapping_add(1);
+        for i in 0..8 {
+            // Create a cycling wave pattern across channels
+            let phase = (frame_counter as f32 / 60.0) + (i as f32 * 0.5);
+            demo_energies[i] = (libm::sinf(phase) * 0.5 + 0.5) * 0.8;
+        }
+
+        // Update visualizer (dt = 1/30 sec)
+        visualizer.update(FRAME_DELAY_MS as f32 / 1000.0, &demo_energies);
+
+        display.clear();
+
+        // Render visualizer to display
+        visualizer.render(|x, y, color| {
+            let rgb565 = Rgb565::new(color.r >> 3, color.g >> 2, color.b >> 3);
+            let _ = Pixel(Point::new(x as i32, y as i32), rgb565).draw(&mut display);
+        });
+
+        // Flush buffer to display
+        display.flush().ok();
+
+        term.delay_ms(FRAME_DELAY_MS);
     }
 }
