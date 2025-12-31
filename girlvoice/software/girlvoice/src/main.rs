@@ -139,18 +139,32 @@ fn main() -> ! {
     // ~30 fps, delay based for now
     const FRAME_DELAY_MS: u32 = 33;
 
+    // constants for demo pattern
+    use ui::math::{Fixed, fx_sin, fx_to_f32, consts::HALF};
+    let dt_fixed = Fixed::from_num(FRAME_DELAY_MS) / Fixed::from_num(1000);
+    let phase_increment = Fixed::from_num(1) / Fixed::from_num(60); // 1/60 per frame
+    let channel_offset = HALF; // 0.5 phase offset per channel
+    let amplitude = Fixed::lit("0.8");
+
+    let mut phase_base = Fixed::ZERO;
+
     loop {
         term.handle_char();
 
-        // update demo energies with a simple pattern for testing
+        // update demo energies with a simple pattern
         frame_counter = frame_counter.wrapping_add(1);
+        phase_base = phase_base + phase_increment;
+
         for i in 0..8 {
-            let phase = (frame_counter as f32 / 60.0) + (i as f32 * 0.5);
-            demo_energies[i] = (libm::sinf(phase) * 0.5 + 0.5) * 0.8;
+            let phase = phase_base + Fixed::from_num(i as i32) * channel_offset;
+            // sin returns -1 to 1, scale to 0 to 1, then multiply by 0.8
+            let sin_val = fx_sin(phase);
+            let normalized = (sin_val + Fixed::ONE) * HALF; // now 0 to 1
+            demo_energies[i] = fx_to_f32(normalized * amplitude);
         }
 
         // update visualizer (dt = 1/30 sec)
-        visualizer.update(FRAME_DELAY_MS as f32 / 1000.0, &demo_energies);
+        visualizer.update(fx_to_f32(dt_fixed), &demo_energies);
 
         fade_framebuffer(fb.data_mut());
 
