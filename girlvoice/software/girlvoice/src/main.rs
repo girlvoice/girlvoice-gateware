@@ -2,6 +2,7 @@
 #![no_main]
 
 use aw88395::Aw88395;
+use embedded_hal::delay::DelayNs;
 use sgtl5000::Sgtl5000;
 use sgtl5000::regmap::LineOutBiasCurrent;
 use riscv_rt::entry;
@@ -12,6 +13,7 @@ use gc9a01::{prelude::*, Gc9a01, SPIDisplayInterface};
 use embedded_graphics::{
     pixelcolor::Rgb565,
     pixelcolor::raw::BigEndian,
+    pixelcolor::IntoStorage,
     prelude::*,
     framebuffer::{Framebuffer, buffer_size},
 };
@@ -108,7 +110,6 @@ fn main() -> ! {
     display.init_with_addr_mode(&mut delay).ok();
 
     // create the local framebuffer
-    // using BigEndian to match the display's expected byte order
     let mut fb = Framebuffer::<
         Rgb565,
         _,
@@ -149,7 +150,7 @@ fn main() -> ! {
     let mut phase_base = Fixed::ZERO;
 
     loop {
-        term.handle_char();
+        //term.handle_char();
 
         // update demo energies with a simple pattern
         frame_counter = frame_counter.wrapping_add(1);
@@ -178,15 +179,11 @@ fn main() -> ! {
 
         // write framebuffer to display
         display.set_draw_area((0, 0), (DISPLAY_WIDTH as u16 - 1, DISPLAY_HEIGHT as u16 - 1)).ok();
-        display.draw_buffer(unsafe {
-            // reinterpret as [u16] for the display driver
-            core::slice::from_raw_parts(
-                fb.data().as_ptr() as *const u16,
-                DISPLAY_WIDTH * DISPLAY_HEIGHT,
-            )
-        }).ok();
+        display.set_write_mode().ok();
+        #[allow(deprecated)]
+        display.draw(fb.data()).ok();
 
-        term.delay_ms(FRAME_DELAY_MS);
+        //term.delay_ms(FRAME_DELAY_MS);
     }
 }
 
