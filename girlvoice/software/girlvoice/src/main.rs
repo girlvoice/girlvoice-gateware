@@ -42,6 +42,10 @@ hal::impl_gpio!{
     Led0: pac::Led0,
 }
 
+hal::impl_gpi!{
+    Gpi0: pac::Gpi0,
+}
+
 hal::impl_timer! {
     DELAY: pac::Timer0,
 }

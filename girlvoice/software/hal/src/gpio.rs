@@ -69,6 +69,41 @@ macro_rules! impl_gpio {
                 }
             }
         )+
-
+    }
 }
+
+#[macro_export]
+macro_rules! impl_gpi {
+    ($(
+        $GPIX:ident: $PACGPIX:ty,
+    )+) => {
+        $(
+            pub struct $GPIX {
+                registers: $PACGPIX,
+            }
+
+            impl $GPIX {
+                pub fn new(registers: $PACGPIX) -> Self {
+                    Self { registers }
+                }
+
+                pub fn free(self) -> $PACGPIX {
+                    self.registers
+                }
+            }
+            impl $crate::hal::digital::ErrorType for $GPIX {
+                type Error = $crate::gpio::GpioError;
+            }
+
+            impl $crate::hal::digital::InputPin for $GPIX {
+                fn is_low(&mut self) -> Result<bool, Self::Error> {
+                    Ok(self.registers.input().read().pin_0().bit() == false)
+                }
+
+                fn is_high(&mut self) -> Result<bool, Self::Error> {
+                    Ok(self.registers.input().read().pin_0().bit())
+                }
+            }
+        )+
+    }
 }
