@@ -8,8 +8,9 @@ use sgtl5000::regmap::LineOutBiasCurrent;
 use riscv_rt::entry;
 use soc_pac as pac;
 
-use gc9a01::{prelude::*, Gc9a01, SPIDisplayInterface};
-
+// use gc9a01::{prelude::*, Gc9a01, SPIDisplayInterface};
+use mipidsi::interface::SpiInterface;
+use mipidsi::{Builder, models::GC9A01, options::ColorInversion, TestImage};
 
 use embedded_graphics::{
     mono_font::{ascii::FONT_6X10, MonoTextStyle},
@@ -96,21 +97,28 @@ fn main() -> ! {
     let gpo1 = Gpo1::new(peripherals.gpo1);
 
     let spi0 = Spi0::new(peripherals.spiflash_ctrl);
-    let interface = SPIDisplayInterface::new(spi0, gpo1);
+    // let interface = SPIDisplayInterface::new(spi0, gpo1);
+    let mut buffer = [0_u8; 512];
+    let interface = SpiInterface::new(spi0, gpo1, &mut buffer);
 
 
 
-    let mut display = Gc9a01::new(
-        interface,
-        DisplayResolution240x240,
-        DisplayRotation::Rotate0
-    ).into_buffered_graphics();
+    // let mut display = Gc9a01::new(
+    //     interface,
+    //     DisplayResolution240x240,
+    //     DisplayRotation::Rotate0
+    // ).into_buffered_graphics();
 
-    display.init(&mut delay).ok();
+    let mut display = Builder::new(GC9A01, interface)
+        .display_size(240, 240)
+        .invert_colors(ColorInversion::Inverted)
+        .init(&mut delay).unwrap();
 
-    display.clear();
+    // display.init(&mut delay).ok();
 
-    display.flush().ok();
+    display.clear(Rgb565::BLACK).unwrap();
+
+    // display.flush().ok();
 
     // Create styles used by the drawing operations.
     let thin_stroke = PrimitiveStyle::with_stroke(Rgb565::GREEN, 2);
@@ -150,10 +158,6 @@ fn main() -> ! {
     )
     .draw(&mut display).unwrap();
 
-
-    display.flush().ok();
-
-
     // let mut led = Led0::new(peripherals.led0);
 
     let i2c0 = I2c0::new(peripherals.i2cfifo);
@@ -164,7 +168,9 @@ fn main() -> ! {
 
     let mut term = term::Terminal::new(serial, amp, delay);
 
+    let img = TestImage::new();
     loop {
-        term.handle_char();
+        // term.handle_char();
+        img.draw(&mut display).unwrap();
     }
 }
