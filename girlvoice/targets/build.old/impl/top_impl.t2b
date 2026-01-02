@@ -1,4 +1,0 @@
--gui
--msgset "/build/promote.xml"
-
--g REGISTER_INIT:ON

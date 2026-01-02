@@ -1,4 +1,0 @@
-_top.soc.spi0.tx_fifo _storage_102_initial_block
-_top.soc.vocoder.synth.ram _mem_102_initial_block
-_top.soc.vocoder.synth _phase_delta_rom_102_initial_block
-_top.soc.vocoder.synth _phase_offset_mem_102_initial_block

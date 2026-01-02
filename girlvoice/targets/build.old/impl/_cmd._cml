@@ -1,1 +1,0 @@
--link -encrypt -top top -osyn /build/impl/synwork/top_impl_comp.srs /build/impl/synwork/layer0.srs  -jobname linker  

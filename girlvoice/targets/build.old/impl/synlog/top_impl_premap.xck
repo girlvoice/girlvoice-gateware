@@ -1,2 +1,0 @@
-ckid0_103:@|S:pll.U\$0.CLKOS@|E:btn_rising@|F:@syn_dgcc_clockid0_103==1@|M:ClockId_0_103
-ckid0_109:@|S:pll.U\$0.CLKOP@|E:soc.spi0.cs_cdc.stage1@|F:@syn_dgcc_clockid0_109==1@|M:ClockId_0_109
