@@ -32,7 +32,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -100,7 +100,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -152,7 +152,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -204,7 +204,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -268,7 +268,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -320,7 +320,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -372,7 +372,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -424,7 +424,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -476,7 +476,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -544,7 +544,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -596,7 +596,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -648,7 +648,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -700,7 +700,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -752,7 +752,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -804,7 +804,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -868,7 +868,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -920,7 +920,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -972,7 +972,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -1024,7 +1024,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -1096,7 +1096,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -1156,7 +1156,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -1216,7 +1216,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -1276,7 +1276,7 @@
         :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
         a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
         depending on its type (dict, list, or Field).
-
+    
 
     Interface attributes
     --------------------
@@ -1343,174 +1343,744 @@
       </registers>
     </peripheral>
     <peripheral>
-        <name>I2CFIFO</name>
-        <baseAddress>0xa0000000</baseAddress>
-        <groupName>I2CFIFO</groupName>
-        <addressBlock>
-          <offset>0</offset>
-          <size>0x100</size>
-          <usage>registers</usage>
-        </addressBlock>
-        <registers>
-            <register>
-                <name>I2CC1</name>
-                <addressOffset>0x0002</addressOffset>
-                <resetValue>0x9a</resetValue>
-                <size>8</size>
-                <fields>
-                    <field>
-                        <name>i2c_en</name>
-                        <msb>7</msb>
-                        <bitRange>[7:7]</bitRange>
-                        <lsb>7</lsb>
-                    </field>
-                </fields>
-            </register>
-            <register>
-                <name>I2CTXFIFO_LSB</name>
-                <addressOffset>0x0012</addressOffset>
-                <resetValue>0x00</resetValue>
-                <size>8</size>
-                <fields>
-                    <field>
-                        <name>txlsb</name>
-                        <msb>7</msb>
-                        <bitRange>[7:0]</bitRange>
-                        <lsb>0</lsb>
-                    </field>
-                </fields>
-            </register>
-            <register>
-                <name>I2CTXFIFO_MSB</name>
-                <addressOffset>0x0013</addressOffset>
-                <resetValue>0x00</resetValue>
-                <size>8</size>
-                <fields>
-                    <field>
-                        <name>cmd</name>
-                        <msb>1</msb>
-                        <bitRange>[1:0]</bitRange>
-                        <lsb>0</lsb>
-                    </field>
-                </fields>
-            </register>
-            <register>
-                <name>I2CRXFIFO</name>
-                <addressOffset>0x0014</addressOffset>
-                <resetValue>0x00</resetValue>
-                <size>16</size>
-                <fields>
-                    <field>
-                        <name>rx_data</name>
-                        <msb>7</msb>
-                        <bitRange>[7:0]</bitRange>
-                        <lsb>0</lsb>
-                    </field>
-                    <field>
-                        <name>dfirst</name>
-                        <msb>8</msb>
-                        <bitRange>[0:0]</bitRange>
-                        <lsb>8</lsb>
-                    </field>
-                </fields>
-            </register>
-            <register>
-                <name>I2CFIFOSR_LSB</name>
-                <addressOffset>0x0018</addressOffset>
-                <resetValue>0x00</resetValue>
-                <size>8</size>
-                <fields>
-                    <field>
-                        <name>arblost</name>
-                        <msb>1</msb>
-                        <bitRange>[1:1]</bitRange>
-                        <lsb>1</lsb>
-                    </field>
-                    <field>
-                        <name>busy</name>
-                        <msb>3</msb>
-                        <bitRange>[3:3]</bitRange>
-                        <lsb>3</lsb>
-                    </field>
-                    <field>
-                        <name>rnack</name>
-                        <msb>4</msb>
-                        <bitRange>[4:4]</bitRange>
-                        <lsb>4</lsb>
-                    </field>
-                    <field>
-                        <name>rxoverfl</name>
-                        <msb>5</msb>
-                        <bitRange>[5:5]</bitRange>
-                        <lsb>5</lsb>
-                    </field>
-                    <field>
-                        <name>txoverfl</name>
-                        <msb>6</msb>
-                        <bitRange>[6:6]</bitRange>
-                        <lsb>6</lsb>
-                    </field>
-                    <field>
-                        <name>txserr</name>
-                        <msb>7</msb>
-                        <bitRange>[7:7]</bitRange>
-                        <lsb>7</lsb>
-                    </field>
-                </fields>
-            </register>
-            <register>
-                <name>I2CFIFOSR_MSB</name>
-                <addressOffset>0x0019</addressOffset>
-                <resetValue>0x00</resetValue>
-                <size>8</size>
-                <fields>
-                    <field>
-                        <name>rdcmpl</name>
-                        <msb>0</msb>
-                        <bitRange>[0:0]</bitRange>
-                        <lsb>0</lsb>
-                    </field>
-                    <field>
-                        <name>perifrw</name>
-                        <msb>1</msb>
-                        <bitRange>[1:1]</bitRange>
-                        <lsb>1</lsb>
-                    </field>
-                    <field>
-                        <name>txoverfl</name>
-                        <msb>2</msb>
-                        <bitRange>[2:2]</bitRange>
-                        <lsb>2</lsb>
-                    </field>
-                    <field>
-                        <name>rxunderfl</name>
-                        <msb>3</msb>
-                        <bitRange>[3:3]</bitRange>
-                        <lsb>3</lsb>
-                    </field>
-                    <field>
-                        <name>bus_free</name>
-                        <msb>4</msb>
-                        <bitRange>[4:4]</bitRange>
-                        <lsb>4</lsb>
-                    </field>
-                </fields>
-            </register>
-            <register>
-                <name>I2CTXFIFOBYTEAVAIL</name>
-                <addressOffset>0x0027</addressOffset>
-                <resetValue>0x00</resetValue>
-                <size>8</size>
-                <fields>
-                    <field>
-                        <name>dfirst</name>
-                        <msb>0</msb>
-                        <bitRange>[0:0]</bitRange>
-                        <lsb>0</lsb>
-                    </field>
-                </fields>
-            </register>
-        </registers>
+      <name>envelope</name>
+      <groupName/>
+      <baseAddress>0xf0000700</baseAddress>
+      <addressBlock>
+        <offset>0</offset>
+        <size>0x1c</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <registers>
+        <register>
+          <name>Ch0</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0000</addressOffset>
+          <size>16</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>value field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+              <bitRange>[15:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>Ch1</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0002</addressOffset>
+          <size>16</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>value field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+              <bitRange>[15:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>Ch2</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0004</addressOffset>
+          <size>16</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>value field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+              <bitRange>[15:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>Ch3</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0006</addressOffset>
+          <size>16</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>value field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+              <bitRange>[15:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>Ch4</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0008</addressOffset>
+          <size>16</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>value field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+              <bitRange>[15:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>Ch5</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x000a</addressOffset>
+          <size>16</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>value field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+              <bitRange>[15:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>Ch6</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x000c</addressOffset>
+          <size>16</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>value field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+              <bitRange>[15:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>Ch7</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x000e</addressOffset>
+          <size>16</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>value field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+              <bitRange>[15:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>Ch8</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0010</addressOffset>
+          <size>16</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>value field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+              <bitRange>[15:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>Ch9</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0012</addressOffset>
+          <size>16</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>value field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+              <bitRange>[15:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>Ch10</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0014</addressOffset>
+          <size>16</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>value field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+              <bitRange>[15:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>Ch11</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0016</addressOffset>
+          <size>16</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>value field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+              <bitRange>[15:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>Ch12</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x0018</addressOffset>
+          <size>16</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>value field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+              <bitRange>[15:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>Ch13</name>
+          <description>
+    A CSR register.
+
+    Parameters
+    ----------
+    fields : :class:`dict` or :class:`list` or :class:`Field`
+        Collection of register fields. If ``None`` (default), a dict is populated from Python
+        :term:`variable annotations &lt;python:variable annotations&gt;`. ``fields`` is used to create
+        a :class:`FieldActionMap`, :class:`FieldActionArray`, or :class:`FieldAction`,
+        depending on its type (dict, list, or Field).
+    
+
+    Interface attributes
+    --------------------
+    element : :class:`Element`
+        Interface between this register and a CSR bus primitive.
+
+    Attributes
+    ----------
+    field : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Collection of field instances.
+    f : :class:`FieldActionMap` or :class:`FieldActionArray` or :class:`FieldAction`
+        Shorthand for :attr:`Register.field`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        If ``fields`` is neither ``None``, a :class:`dict`, a :class:`list`, or a :class:`Field`.
+    :exc:`ValueError`
+        If ``fields`` is not ``None`` and at least one variable annotation is a :class:`Field`.
+    :exc:`ValueError`
+        If ``element.access`` is not readable and at least one field is readable.
+    :exc:`ValueError`
+        If ``element.access`` is not writable and at least one field is writable.
+    </description>
+          <addressOffset>0x001a</addressOffset>
+          <size>16</size>
+          <resetValue>0x00</resetValue>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>value field</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>16</bitWidth>
+              <bitRange>[15:0]</bitRange>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+      </registers>
     </peripheral>
   </peripherals>
 </device>

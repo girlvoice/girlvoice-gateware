@@ -28,6 +28,7 @@ mod term;
 mod ui;
 
 use hal::i2c::I2c0;
+use ui::math::fx_to_f32;
 
 const SYS_CLK_FREQ: u32 = 60_000_000;
 
@@ -118,12 +119,15 @@ fn main() -> ! {
         { buffer_size::<Rgb565>(DISPLAY_WIDTH, DISPLAY_HEIGHT) }
     >::new();
 
-    // create the visualizer with 8 channels (for testing)
-    let mut visualizer = ui::Visualizer::new(8);
+    // create the visualizer with 14 channels (matching vocoder)
+    let mut visualizer = ui::Visualizer::new(14);
 
-    // simulated energies for testing (will be replaced with actual vocoder data)
-    let mut demo_energies = [0.0f32; 8];
+    // envelope energies from vocoder (14 channels)
+    let mut energies = [0.0f32; 14];
     let mut frame_counter: u32 = 0;
+
+    // access envelope registers
+    let envelope = &peripherals.envelope;
 
 
     // let mut led = Led0::new(peripherals.led0);
@@ -139,33 +143,35 @@ fn main() -> ! {
     // ~10 fps, delay based for now
     const FRAME_DELAY_MS: u32 = 100;
 
-    // constants for demo pattern
-    use ui::math::{Fixed, fx_sin, fx_to_f32, consts::HALF};
-    let dt_fixed = Fixed::from_num(FRAME_DELAY_MS) / Fixed::from_num(1000);
-    let phase_increment = Fixed::from_num(1) / Fixed::from_num(60); // 1/60 per frame
-    let channel_offset = HALF; // 0.5 phase offset per channel
-    let amplitude = Fixed::lit("0.8");
+    let dt_fixed = ui::math::Fixed::from_num(FRAME_DELAY_MS) / ui::math::Fixed::from_num(1000);
 
-    let mut phase_base = Fixed::ZERO;
+    // max envelope value for normalization (16-bit signed, so max positive is 32767)
+    const ENVELOPE_MAX: f32 = 32767.0;
 
     loop {
         //term.handle_char();
 
-        // update demo energies with a simple pattern
         frame_counter = frame_counter.wrapping_add(1);
-        phase_base = phase_base + phase_increment;
 
-        for i in 0..8 {
-            let phase = phase_base + Fixed::from_num(i as i32) * channel_offset;
-            // sin returns -1 to 1, scale to 0 to 1, then multiply by 0.8
-            let sin_val = fx_sin(phase);
-            let normalized = (sin_val + Fixed::ONE) * HALF; // now 0 to 1
-            demo_energies[i] = fx_to_f32(normalized * amplitude);
-        }
+        // read envelope values from hardware registers
+        energies[0] = envelope.ch0().read().value().bits() as f32 / ENVELOPE_MAX;
+        energies[1] = envelope.ch1().read().value().bits() as f32 / ENVELOPE_MAX;
+        energies[2] = envelope.ch2().read().value().bits() as f32 / ENVELOPE_MAX;
+        energies[3] = envelope.ch3().read().value().bits() as f32 / ENVELOPE_MAX;
+        energies[4] = envelope.ch4().read().value().bits() as f32 / ENVELOPE_MAX;
+        energies[5] = envelope.ch5().read().value().bits() as f32 / ENVELOPE_MAX;
+        energies[6] = envelope.ch6().read().value().bits() as f32 / ENVELOPE_MAX;
+        energies[7] = envelope.ch7().read().value().bits() as f32 / ENVELOPE_MAX;
+        energies[8] = envelope.ch8().read().value().bits() as f32 / ENVELOPE_MAX;
+        energies[9] = envelope.ch9().read().value().bits() as f32 / ENVELOPE_MAX;
+        energies[10] = envelope.ch10().read().value().bits() as f32 / ENVELOPE_MAX;
+        energies[11] = envelope.ch11().read().value().bits() as f32 / ENVELOPE_MAX;
+        energies[12] = envelope.ch12().read().value().bits() as f32 / ENVELOPE_MAX;
+        energies[13] = envelope.ch13().read().value().bits() as f32 / ENVELOPE_MAX;
 
-        // update visualizer (dt = 1/30 sec)
+        // update visualizer
         fade_framebuffer(fb.data_mut());
-        visualizer.update(fx_to_f32(dt_fixed), &demo_energies);
+        visualizer.update(fx_to_f32(dt_fixed), &energies);
 
         // render visualizer to our local framebuffer
         visualizer.render(|x, y, color| {

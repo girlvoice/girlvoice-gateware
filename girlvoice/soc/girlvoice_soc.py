@@ -64,6 +64,7 @@ from girlvoice.soc.provider import girlvoice_rev_a as provider
 from girlvoice.dsp.vocoder import StaticVocoder, ThreadedVocoderChannel
 from girlvoice.io.i2s import i2s_rx, i2s_tx
 from girlvoice.io import spi
+from girlvoice.io import envelope_csr
 from girlvoice.platform.nexus_utils.i2c_fifo import I2CFIFO
 
 kB = 1024
@@ -96,6 +97,7 @@ class GirlvoiceSoc(Component):
         self.i2c0_base            = 0x00000400
         self.led0_base            = 0x00000500
         self.gpo1_base            = 0x00000600
+        self.envelope_base        = 0x00000700
 
         if not use_spi_flash:
             self.reset_addr  = self.mainram_base
@@ -166,6 +168,15 @@ class GirlvoiceSoc(Component):
 
             self.gpo_1 = gpio.Peripheral(pin_count=2, addr_width=4, data_width=8)
             self.csr_decoder.add(self.gpo_1.bus, addr=self.gpo1_base, name="gpo1")
+
+            # Envelope CSR - exposes vocoder envelope values to CPU
+            self.envelope_csr = envelope_csr.Peripheral(
+                num_channels=14,
+                sample_width=16,  # matches vocoder sample_width
+                addr_width=8,
+                data_width=8,
+            )
+            self.csr_decoder.add(self.envelope_csr.bus, addr=self.envelope_base, name="envelope")
 
             # LCD SPI control
             self.spi_pads = provider.SPIFlashProvider(id="spi")
@@ -326,6 +337,15 @@ class GirlvoiceSoc(Component):
         m.submodules.vocoder = self.vocoder
         wiring.connect(m, self.vocoder.sink, self.i2s_rx.source)
         wiring.connect(m, self.vocoder.source, self.i2s_tx.sink)
+
+        # Envelope CSR - connect envelope values from vocoder channels
+        if not self.sim:
+            m.submodules.envelope_csr = self.envelope_csr
+            for i, ch in enumerate(self.vocoder.channels):
+                m.d.comb += [
+                    self.envelope_csr.envelopes[i].eq(ch.envelope.source.payload),
+                    self.envelope_csr.valids[i].eq(ch.envelope.source.valid),
+                ]
 
         # wishbone csr bridge
         if not self.sim:

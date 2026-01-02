@@ -2277,6 +2277,285 @@ module"]
         }
     }
 }
+#[doc = "envelope"]
+pub struct Envelope {
+    _marker: PhantomData<*const ()>,
+}
+unsafe impl Send for Envelope {}
+impl Envelope {
+    #[doc = r"Pointer to the register block"]
+    pub const PTR: *const envelope::RegisterBlock = 0xf000_0700 as *const _;
+    #[doc = r"Return the pointer to the register block"]
+    #[inline(always)]
+    pub const fn ptr() -> *const envelope::RegisterBlock {
+        Self::PTR
+    }
+    #[doc = r" Steal an instance of this peripheral"]
+    pub unsafe fn steal() -> Self {
+        Self {
+            _marker: PhantomData,
+        }
+    }
+}
+impl Deref for Envelope {
+    type Target = envelope::RegisterBlock;
+    #[inline(always)]
+    fn deref(&self) -> &Self::Target {
+        unsafe { &*Self::PTR }
+    }
+}
+impl core::fmt::Debug for Envelope {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("Envelope").finish()
+    }
+}
+#[doc = "Envelope follower CSR registers"]
+pub mod envelope {
+    #[repr(C)]
+    #[doc = "Register block"]
+    pub struct RegisterBlock {
+        ch0: Ch0,
+        ch1: Ch1,
+        ch2: Ch2,
+        ch3: Ch3,
+        ch4: Ch4,
+        ch5: Ch5,
+        ch6: Ch6,
+        ch7: Ch7,
+        ch8: Ch8,
+        ch9: Ch9,
+        ch10: Ch10,
+        ch11: Ch11,
+        ch12: Ch12,
+        ch13: Ch13,
+    }
+    impl RegisterBlock {
+        #[doc = "0x00 - Channel 0 envelope value"]
+        #[inline(always)]
+        pub const fn ch0(&self) -> &Ch0 { &self.ch0 }
+        #[doc = "0x02 - Channel 1 envelope value"]
+        #[inline(always)]
+        pub const fn ch1(&self) -> &Ch1 { &self.ch1 }
+        #[doc = "0x04 - Channel 2 envelope value"]
+        #[inline(always)]
+        pub const fn ch2(&self) -> &Ch2 { &self.ch2 }
+        #[doc = "0x06 - Channel 3 envelope value"]
+        #[inline(always)]
+        pub const fn ch3(&self) -> &Ch3 { &self.ch3 }
+        #[doc = "0x08 - Channel 4 envelope value"]
+        #[inline(always)]
+        pub const fn ch4(&self) -> &Ch4 { &self.ch4 }
+        #[doc = "0x0a - Channel 5 envelope value"]
+        #[inline(always)]
+        pub const fn ch5(&self) -> &Ch5 { &self.ch5 }
+        #[doc = "0x0c - Channel 6 envelope value"]
+        #[inline(always)]
+        pub const fn ch6(&self) -> &Ch6 { &self.ch6 }
+        #[doc = "0x0e - Channel 7 envelope value"]
+        #[inline(always)]
+        pub const fn ch7(&self) -> &Ch7 { &self.ch7 }
+        #[doc = "0x10 - Channel 8 envelope value"]
+        #[inline(always)]
+        pub const fn ch8(&self) -> &Ch8 { &self.ch8 }
+        #[doc = "0x12 - Channel 9 envelope value"]
+        #[inline(always)]
+        pub const fn ch9(&self) -> &Ch9 { &self.ch9 }
+        #[doc = "0x14 - Channel 10 envelope value"]
+        #[inline(always)]
+        pub const fn ch10(&self) -> &Ch10 { &self.ch10 }
+        #[doc = "0x16 - Channel 11 envelope value"]
+        #[inline(always)]
+        pub const fn ch11(&self) -> &Ch11 { &self.ch11 }
+        #[doc = "0x18 - Channel 12 envelope value"]
+        #[inline(always)]
+        pub const fn ch12(&self) -> &Ch12 { &self.ch12 }
+        #[doc = "0x1a - Channel 13 envelope value"]
+        #[inline(always)]
+        pub const fn ch13(&self) -> &Ch13 { &self.ch13 }
+    }
+    pub type Ch0 = crate::Reg<ch0::Ch0Spec>;
+    pub mod ch0 {
+        pub type R = crate::R<Ch0Spec>;
+        pub type ValueR = crate::FieldReader<u16>;
+        impl R {
+            #[inline(always)]
+            pub fn value(&self) -> ValueR { ValueR::new(self.bits) }
+        }
+        pub struct Ch0Spec;
+        impl crate::RegisterSpec for Ch0Spec { type Ux = u16; }
+        impl crate::Readable for Ch0Spec {}
+        impl crate::Resettable for Ch0Spec { const RESET_VALUE: u16 = 0; }
+    }
+    pub type Ch1 = crate::Reg<ch1::Ch1Spec>;
+    pub mod ch1 {
+        pub type R = crate::R<Ch1Spec>;
+        pub type ValueR = crate::FieldReader<u16>;
+        impl R {
+            #[inline(always)]
+            pub fn value(&self) -> ValueR { ValueR::new(self.bits) }
+        }
+        pub struct Ch1Spec;
+        impl crate::RegisterSpec for Ch1Spec { type Ux = u16; }
+        impl crate::Readable for Ch1Spec {}
+        impl crate::Resettable for Ch1Spec { const RESET_VALUE: u16 = 0; }
+    }
+    pub type Ch2 = crate::Reg<ch2::Ch2Spec>;
+    pub mod ch2 {
+        pub type R = crate::R<Ch2Spec>;
+        pub type ValueR = crate::FieldReader<u16>;
+        impl R {
+            #[inline(always)]
+            pub fn value(&self) -> ValueR { ValueR::new(self.bits) }
+        }
+        pub struct Ch2Spec;
+        impl crate::RegisterSpec for Ch2Spec { type Ux = u16; }
+        impl crate::Readable for Ch2Spec {}
+        impl crate::Resettable for Ch2Spec { const RESET_VALUE: u16 = 0; }
+    }
+    pub type Ch3 = crate::Reg<ch3::Ch3Spec>;
+    pub mod ch3 {
+        pub type R = crate::R<Ch3Spec>;
+        pub type ValueR = crate::FieldReader<u16>;
+        impl R {
+            #[inline(always)]
+            pub fn value(&self) -> ValueR { ValueR::new(self.bits) }
+        }
+        pub struct Ch3Spec;
+        impl crate::RegisterSpec for Ch3Spec { type Ux = u16; }
+        impl crate::Readable for Ch3Spec {}
+        impl crate::Resettable for Ch3Spec { const RESET_VALUE: u16 = 0; }
+    }
+    pub type Ch4 = crate::Reg<ch4::Ch4Spec>;
+    pub mod ch4 {
+        pub type R = crate::R<Ch4Spec>;
+        pub type ValueR = crate::FieldReader<u16>;
+        impl R {
+            #[inline(always)]
+            pub fn value(&self) -> ValueR { ValueR::new(self.bits) }
+        }
+        pub struct Ch4Spec;
+        impl crate::RegisterSpec for Ch4Spec { type Ux = u16; }
+        impl crate::Readable for Ch4Spec {}
+        impl crate::Resettable for Ch4Spec { const RESET_VALUE: u16 = 0; }
+    }
+    pub type Ch5 = crate::Reg<ch5::Ch5Spec>;
+    pub mod ch5 {
+        pub type R = crate::R<Ch5Spec>;
+        pub type ValueR = crate::FieldReader<u16>;
+        impl R {
+            #[inline(always)]
+            pub fn value(&self) -> ValueR { ValueR::new(self.bits) }
+        }
+        pub struct Ch5Spec;
+        impl crate::RegisterSpec for Ch5Spec { type Ux = u16; }
+        impl crate::Readable for Ch5Spec {}
+        impl crate::Resettable for Ch5Spec { const RESET_VALUE: u16 = 0; }
+    }
+    pub type Ch6 = crate::Reg<ch6::Ch6Spec>;
+    pub mod ch6 {
+        pub type R = crate::R<Ch6Spec>;
+        pub type ValueR = crate::FieldReader<u16>;
+        impl R {
+            #[inline(always)]
+            pub fn value(&self) -> ValueR { ValueR::new(self.bits) }
+        }
+        pub struct Ch6Spec;
+        impl crate::RegisterSpec for Ch6Spec { type Ux = u16; }
+        impl crate::Readable for Ch6Spec {}
+        impl crate::Resettable for Ch6Spec { const RESET_VALUE: u16 = 0; }
+    }
+    pub type Ch7 = crate::Reg<ch7::Ch7Spec>;
+    pub mod ch7 {
+        pub type R = crate::R<Ch7Spec>;
+        pub type ValueR = crate::FieldReader<u16>;
+        impl R {
+            #[inline(always)]
+            pub fn value(&self) -> ValueR { ValueR::new(self.bits) }
+        }
+        pub struct Ch7Spec;
+        impl crate::RegisterSpec for Ch7Spec { type Ux = u16; }
+        impl crate::Readable for Ch7Spec {}
+        impl crate::Resettable for Ch7Spec { const RESET_VALUE: u16 = 0; }
+    }
+    pub type Ch8 = crate::Reg<ch8::Ch8Spec>;
+    pub mod ch8 {
+        pub type R = crate::R<Ch8Spec>;
+        pub type ValueR = crate::FieldReader<u16>;
+        impl R {
+            #[inline(always)]
+            pub fn value(&self) -> ValueR { ValueR::new(self.bits) }
+        }
+        pub struct Ch8Spec;
+        impl crate::RegisterSpec for Ch8Spec { type Ux = u16; }
+        impl crate::Readable for Ch8Spec {}
+        impl crate::Resettable for Ch8Spec { const RESET_VALUE: u16 = 0; }
+    }
+    pub type Ch9 = crate::Reg<ch9::Ch9Spec>;
+    pub mod ch9 {
+        pub type R = crate::R<Ch9Spec>;
+        pub type ValueR = crate::FieldReader<u16>;
+        impl R {
+            #[inline(always)]
+            pub fn value(&self) -> ValueR { ValueR::new(self.bits) }
+        }
+        pub struct Ch9Spec;
+        impl crate::RegisterSpec for Ch9Spec { type Ux = u16; }
+        impl crate::Readable for Ch9Spec {}
+        impl crate::Resettable for Ch9Spec { const RESET_VALUE: u16 = 0; }
+    }
+    pub type Ch10 = crate::Reg<ch10::Ch10Spec>;
+    pub mod ch10 {
+        pub type R = crate::R<Ch10Spec>;
+        pub type ValueR = crate::FieldReader<u16>;
+        impl R {
+            #[inline(always)]
+            pub fn value(&self) -> ValueR { ValueR::new(self.bits) }
+        }
+        pub struct Ch10Spec;
+        impl crate::RegisterSpec for Ch10Spec { type Ux = u16; }
+        impl crate::Readable for Ch10Spec {}
+        impl crate::Resettable for Ch10Spec { const RESET_VALUE: u16 = 0; }
+    }
+    pub type Ch11 = crate::Reg<ch11::Ch11Spec>;
+    pub mod ch11 {
+        pub type R = crate::R<Ch11Spec>;
+        pub type ValueR = crate::FieldReader<u16>;
+        impl R {
+            #[inline(always)]
+            pub fn value(&self) -> ValueR { ValueR::new(self.bits) }
+        }
+        pub struct Ch11Spec;
+        impl crate::RegisterSpec for Ch11Spec { type Ux = u16; }
+        impl crate::Readable for Ch11Spec {}
+        impl crate::Resettable for Ch11Spec { const RESET_VALUE: u16 = 0; }
+    }
+    pub type Ch12 = crate::Reg<ch12::Ch12Spec>;
+    pub mod ch12 {
+        pub type R = crate::R<Ch12Spec>;
+        pub type ValueR = crate::FieldReader<u16>;
+        impl R {
+            #[inline(always)]
+            pub fn value(&self) -> ValueR { ValueR::new(self.bits) }
+        }
+        pub struct Ch12Spec;
+        impl crate::RegisterSpec for Ch12Spec { type Ux = u16; }
+        impl crate::Readable for Ch12Spec {}
+        impl crate::Resettable for Ch12Spec { const RESET_VALUE: u16 = 0; }
+    }
+    pub type Ch13 = crate::Reg<ch13::Ch13Spec>;
+    pub mod ch13 {
+        pub type R = crate::R<Ch13Spec>;
+        pub type ValueR = crate::FieldReader<u16>;
+        impl R {
+            #[inline(always)]
+            pub fn value(&self) -> ValueR { ValueR::new(self.bits) }
+        }
+        pub struct Ch13Spec;
+        impl crate::RegisterSpec for Ch13Spec { type Ux = u16; }
+        impl crate::Readable for Ch13Spec {}
+        impl crate::Resettable for Ch13Spec { const RESET_VALUE: u16 = 0; }
+    }
+}
 #[doc = "I2CFIFO"]
 pub struct I2cfifo {
     _marker: PhantomData<*const ()>,
@@ -2870,6 +3149,8 @@ pub struct Peripherals {
     pub led0: Led0,
     #[doc = "gpo1"]
     pub gpo1: Gpo1,
+    #[doc = "envelope"]
+    pub envelope: Envelope,
     #[doc = "I2CFIFO"]
     pub i2cfifo: I2cfifo,
 }
@@ -2907,6 +3188,9 @@ impl Peripherals {
                 _marker: PhantomData,
             },
             gpo1: Gpo1 {
+                _marker: PhantomData,
+            },
+            envelope: Envelope {
                 _marker: PhantomData,
             },
             i2cfifo: I2cfifo {
