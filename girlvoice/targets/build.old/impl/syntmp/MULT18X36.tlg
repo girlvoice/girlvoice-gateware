@@ -1,0 +1,196 @@
+Selecting top level module MULT18X36
+@N: CG364 :"/build/impl/syntmp/MULT18X36.v":44247:7:44247:18|Synthesizing module PREADD9_CORE in library work.
+
+	SIGNEDSTATIC_EN=65'b00100010001001001010100110100000101000010010011000100010101000100
+	SUBSTRACT_EN=89'b00101001101010101010000100101010001010010010000010100001101010100010010010100111101001110
+	CSIGNED=65'b00100010001001001010100110100000101000010010011000100010101000100
+	BSIGNED_OPERAND_EN=65'b00100010001001001010100110100000101000010010011000100010101000100
+	BYPASS_PREADD9=49'b0010000100101100101010000010000010101001101010011
+	REGBYPSBR0=65'b00000000000000000010000100101100101010000010000010101001101010011
+	REGBYPSBR1=65'b00000000000000000010000100101100101010000010000010101001101010011
+	REGBYPSBL=65'b00101001001000101010001110100100101010011010101000100010101010010
+	SHIFTBR=65'b00101001001000101010001110100100101010011010101000100010101010010
+	SHIFTBL=65'b00101001001000101010001110100100101010011010101000100010101010010
+	GSR=65'b00000000001000101010011100100000101000010010011000100010101000100
+	PREADDCAS_EN=65'b00100010001001001010100110100000101000010010011000100010101000100
+	SR_18BITSHIFT_EN=65'b00100010001001001010100110100000101000010010011000100010101000100
+	OPC=217'b0010010010100111001010000010101010101010001011111010000100101111101000001010100110101111101010000010100100100010101000001010001000100010001000101010100100101111101001111010100000100010101010010010000010100111001000100
+	RESET=41'b00000000001010011010110010100111001000011
+   Generated name = PREADD9_CORE_Z1
+@W: CG532 :"/build/impl/syntmp/MULT18X36.v":44665:1:44665:7|Within an initial block, only Verilog force statements and memory initialization statements and initialization of entire variable are recognized, and all other content is ignored. Simulation mismatch may occur
+@N: CG364 :"/build/impl/syntmp/MULT18X36.v":45803:7:45803:21|Synthesizing module PREADD9_hw_sync in library work.
+@W: CG360 :"/build/impl/syntmp/MULT18X36.v":46045:5:46045:16|Removing wire dsp_sleep_lt, as there is no assignment to it.
+Running optimization stage 1 on PREADD9_hw_sync .......
+Finished optimization stage 1 on PREADD9_hw_sync (CPU Time 0h:00m:00s, Memory Used current: 929MB peak: 929MB)
+Running optimization stage 1 on PREADD9_CORE_Z1 .......
+Finished optimization stage 1 on PREADD9_CORE_Z1 (CPU Time 0h:00m:00s, Memory Used current: 929MB peak: 929MB)
+@N: CG364 :"/build/impl/syntmp/MULT18X36.v":46301:7:46301:16|Synthesizing module MULT9_CORE in library work.
+
+	SIGNEDSTATIC_EN=65'b00100010001001001010100110100000101000010010011000100010101000100
+	ASIGNED_OPERAND_EN=65'b00100010001001001010100110100000101000010010011000100010101000100
+	BYPASS_MULT9=49'b0000000000000000001010101010100110100010101000100
+	REGBYPSB=65'b00000000000000000010000100101100101010000010000010101001101010011
+	REGBYPSA1=65'b00000000000000000010000100101100101010000010000010101001101010011
+	REGBYPSA2=65'b00000000000000000010000100101100101010000010000010101001101010011
+	SHIFTA=65'b00100010001001001010100110100000101000010010011000100010101000100
+	SR_18BITSHIFT_EN=65'b00100010001001001010100110100000101000010010011000100010101000100
+	GSR=65'b00000000001000101010011100100000101000010010011000100010101000100
+	RESET=41'b00000000001010011010110010100111001000011
+   Generated name = MULT9_CORE_DISABLED_DISABLED_USED_BYPASS_BYPASS_BYPASS_DISABLED_DISABLED_ENABLED_SYNC_Z2
+@W: CG532 :"/build/impl/syntmp/MULT18X36.v":46713:1:46713:7|Within an initial block, only Verilog force statements and memory initialization statements and initialization of entire variable are recognized, and all other content is ignored. Simulation mismatch may occur
+@N: CG364 :"/build/impl/syntmp/MULT18X36.v":47639:7:47639:19|Synthesizing module MULT9_hw_sync in library work.
+@W: CG360 :"/build/impl/syntmp/MULT18X36.v":47897:5:47897:16|Removing wire dsp_sleep_lt, as there is no assignment to it.
+Running optimization stage 1 on MULT9_hw_sync .......
+Finished optimization stage 1 on MULT9_hw_sync (CPU Time 0h:00m:00s, Memory Used current: 929MB peak: 929MB)
+Running optimization stage 1 on MULT9_CORE_DISABLED_DISABLED_USED_BYPASS_BYPASS_BYPASS_DISABLED_DISABLED_ENABLED_SYNC_Z2 .......
+Finished optimization stage 1 on MULT9_CORE_DISABLED_DISABLED_USED_BYPASS_BYPASS_BYPASS_DISABLED_DISABLED_ENABLED_SYNC_Z2 (CPU Time 0h:00m:00s, Memory Used current: 929MB peak: 929MB)
+@N: CG364 :"/build/impl/syntmp/MULT18X36.v":43147:7:43147:15|Synthesizing module MULT18_hw in library work.
+Running optimization stage 1 on MULT18_hw .......
+Finished optimization stage 1 on MULT18_hw (CPU Time 0h:00m:00s, Memory Used current: 931MB peak: 931MB)
+@N: CG364 :"/build/impl/syntmp/MULT18X36.v":42531:7:42531:17|Synthesizing module MULT18_CORE in library work.
+
+	SFTEN=65'b00100010001001001010100110100000101000010010011000100010101000100
+	MULT18X18=65'b00000000001000101010011100100000101000010010011000100010101000100
+	ROUNDHALFUP=65'b00100010001001001010100110100000101000010010011000100010101000100
+	ROUNDRTZI=137'b00000000000000000000000000000000001010010010011110101010101001110010001000101111101010100010011110101111101011010010001010101001001001111
+	ROUNDBIT=113'b00000000001010010010011110101010101001110010001000101111101010100010011110101111101000010010010010101010000110000
+   Generated name = MULT18_CORE_DISABLED_ENABLED_DISABLED_ROUND_TO_ZERO_ROUND_TO_BIT0_Z3
+Running optimization stage 1 on MULT18_CORE_DISABLED_ENABLED_DISABLED_ROUND_TO_ZERO_ROUND_TO_BIT0_Z3 .......
+Finished optimization stage 1 on MULT18_CORE_DISABLED_ENABLED_DISABLED_ROUND_TO_ZERO_ROUND_TO_BIT0_Z3 (CPU Time 0h:00m:00s, Memory Used current: 931MB peak: 931MB)
+@N: CG364 :"/build/impl/syntmp/MULT18X36.v":48865:7:48865:18|Synthesizing module MULT18X36_hw in library work.
+Running optimization stage 1 on MULT18X36_hw .......
+Finished optimization stage 1 on MULT18X36_hw (CPU Time 0h:00m:00s, Memory Used current: 934MB peak: 934MB)
+@N: CG364 :"/build/impl/syntmp/MULT18X36.v":48083:7:48083:20|Synthesizing module MULT18X36_CORE in library work.
+
+	SFTEN=65'b00100010001001001010100110100000101000010010011000100010101000100
+	MULT18X36=65'b00000000001000101010011100100000101000010010011000100010101000100
+	MULT36=65'b00100010001001001010100110100000101000010010011000100010101000100
+	MULT36X36H=233'b00000000001010101010100110100010101000100010111110100000101010011010111110100110001001111010101110100010101010010010111110100001001001001010101000101111101000111010001010100111001000101010100100100000101010100010010010100111101001110
+	ROUNDHALFUP=65'b00100010001001001010100110100000101000010010011000100010101000100
+	ROUNDRTZI=137'b00000000000000000000000000000000001010010010011110101010101001110010001000101111101010100010011110101111101011010010001010101001001001111
+	ROUNDBIT=113'b00000000001010010010011110101010101001110010001000101111101010100010011110101111101000010010010010101010000110000
+   Generated name = MULT18X36_CORE_DISABLED_ENABLED_DISABLED_USED_AS_LOWER_BIT_GENERATION_DISABLED_ROUND_TO_ZERO_ROUND_TO_BIT0_Z4
+Running optimization stage 1 on MULT18X36_CORE_DISABLED_ENABLED_DISABLED_USED_AS_LOWER_BIT_GENERATION_DISABLED_ROUND_TO_ZERO_ROUND_TO_BIT0_Z4 .......
+Finished optimization stage 1 on MULT18X36_CORE_DISABLED_ENABLED_DISABLED_USED_AS_LOWER_BIT_GENERATION_DISABLED_ROUND_TO_ZERO_ROUND_TO_BIT0_Z4 (CPU Time 0h:00m:00s, Memory Used current: 934MB peak: 934MB)
+@N: CG364 :"/build/impl/syntmp/MULT18X36.v":43501:7:43501:16|Synthesizing module REG18_CORE in library work.
+
+	REGBYPS=65'b00000000000000000010000100101100101010000010000010101001101010011
+	GSR=65'b00000000001000101010011100100000101000010010011000100010101000100
+	RESET=41'b00000000001010011010110010100111001000011
+   Generated name = REG18_CORE_BYPASS_ENABLED_SYNC
+@W: CG532 :"/build/impl/syntmp/MULT18X36.v":43673:1:43673:7|Within an initial block, only Verilog force statements and memory initialization statements and initialization of entire variable are recognized, and all other content is ignored. Simulation mismatch may occur
+@N: CG364 :"/build/impl/syntmp/MULT18X36.v":44079:7:44079:19|Synthesizing module REG18_hw_sync in library work.
+@W: CG360 :"/build/impl/syntmp/MULT18X36.v":44191:5:44191:16|Removing wire dsp_sleep_lt, as there is no assignment to it.
+Running optimization stage 1 on REG18_hw_sync .......
+Finished optimization stage 1 on REG18_hw_sync (CPU Time 0h:00m:00s, Memory Used current: 935MB peak: 936MB)
+Running optimization stage 1 on REG18_CORE_BYPASS_ENABLED_SYNC .......
+Finished optimization stage 1 on REG18_CORE_BYPASS_ENABLED_SYNC (CPU Time 0h:00m:00s, Memory Used current: 935MB peak: 936MB)
+@N: CG364 :"/build/impl/syntmp/MULT18X36.v":14:7:14:9|Synthesizing module VHI in library work.
+Running optimization stage 1 on VHI .......
+Finished optimization stage 1 on VHI (CPU Time 0h:00m:00s, Memory Used current: 935MB peak: 936MB)
+@N: CG364 :"/build/impl/syntmp/MULT18X36.v":24:7:24:9|Synthesizing module VLO in library work.
+Running optimization stage 1 on VLO .......
+Finished optimization stage 1 on VLO (CPU Time 0h:00m:00s, Memory Used current: 935MB peak: 936MB)
+@N: CG364 :"/build/impl/syntmp/MULT18X36.v":1786:7:1786:15|Synthesizing module MULT18X36 in library work.
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2840:14:2840:14|Input BRS10 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2842:14:2842:14|Input BRS11 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2844:14:2844:14|Input BRS12 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2846:14:2846:14|Input BRS13 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2848:14:2848:14|Input BRS14 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2850:14:2850:14|Input BRS15 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2852:14:2852:14|Input BRS16 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2854:14:2854:14|Input BRS17 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2856:14:2856:14|Input BRS18 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2858:14:2858:14|Input BRS20 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2860:14:2860:14|Input BRS21 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2862:14:2862:14|Input BRS22 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2864:14:2864:14|Input BRS23 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2866:14:2866:14|Input BRS24 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2868:14:2868:14|Input BRS25 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2870:14:2870:14|Input BRS26 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2872:14:2872:14|Input BRS27 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2874:14:2874:14|Input BRS28 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2912:14:2912:14|Input BRSS1 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2914:14:2914:14|Input BRSS2 on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":2920:16:2920:16|Input PRCASIN on instance PREADD9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3072:14:3072:14|Input BRS20 on instance PREADD9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3074:14:3074:14|Input BRS21 on instance PREADD9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3076:14:3076:14|Input BRS22 on instance PREADD9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3078:14:3078:14|Input BRS23 on instance PREADD9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3080:14:3080:14|Input BRS24 on instance PREADD9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3082:14:3082:14|Input BRS25 on instance PREADD9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3084:14:3084:14|Input BRS26 on instance PREADD9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3086:14:3086:14|Input BRS27 on instance PREADD9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3088:14:3088:14|Input BRS28 on instance PREADD9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3128:14:3128:14|Input BRSS2 on instance PREADD9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3694:13:3694:13|Input AS10 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3696:13:3696:13|Input AS11 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3698:13:3698:13|Input AS12 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3700:13:3700:13|Input AS13 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3702:13:3702:13|Input AS14 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3704:13:3704:13|Input AS15 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3706:13:3706:13|Input AS16 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3708:13:3708:13|Input AS17 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3710:13:3710:13|Input AS18 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3712:13:3712:13|Input AS20 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3714:13:3714:13|Input AS21 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3716:13:3716:13|Input AS22 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3718:13:3718:13|Input AS23 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3720:13:3720:13|Input AS24 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3722:13:3722:13|Input AS25 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3724:13:3724:13|Input AS26 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3726:13:3726:13|Input AS27 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3728:13:3728:13|Input AS28 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3730:18:3730:18|Input ASSIGNED1 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3732:18:3732:18|Input ASSIGNED2 on instance MULT9_L0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3920:13:3920:13|Input AS20 on instance MULT9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3922:13:3922:13|Input AS21 on instance MULT9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3924:13:3924:13|Input AS22 on instance MULT9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3926:13:3926:13|Input AS23 on instance MULT9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3928:13:3928:13|Input AS24 on instance MULT9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3930:13:3930:13|Input AS25 on instance MULT9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3932:13:3932:13|Input AS26 on instance MULT9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3934:13:3934:13|Input AS27 on instance MULT9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3936:13:3936:13|Input AS28 on instance MULT9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+@W: CG781 :"/build/impl/syntmp/MULT18X36.v":3940:18:3940:18|Input ASSIGNED2 on instance MULT9_H0 is undriven; assigning to 0.  Simulation mismatch possible. Either assign the input or remove the declaration. 
+Running optimization stage 1 on MULT18X36 .......
+Finished optimization stage 1 on MULT18X36 (CPU Time 0h:00m:00s, Memory Used current: 935MB peak: 936MB)
+Running optimization stage 2 on MULT18X36 .......
+Finished optimization stage 2 on MULT18X36 (CPU Time 0h:00m:00s, Memory Used current: 935MB peak: 936MB)
+Running optimization stage 2 on VLO .......
+Finished optimization stage 2 on VLO (CPU Time 0h:00m:00s, Memory Used current: 935MB peak: 936MB)
+Running optimization stage 2 on VHI .......
+Finished optimization stage 2 on VHI (CPU Time 0h:00m:00s, Memory Used current: 935MB peak: 936MB)
+Running optimization stage 2 on REG18_hw_sync .......
+@N: CL159 :"/build/impl/syntmp/MULT18X36.v":44119:16:44119:24|Input dsp_sleep is unused.
+@N: CL159 :"/build/impl/syntmp/MULT18X36.v":44133:9:44133:12|Input gsrn is unused.
+@N: CL159 :"/build/impl/syntmp/MULT18X36.v":44149:10:44149:20|Input mc1_gsrn_en is unused.
+Finished optimization stage 2 on REG18_hw_sync (CPU Time 0h:00m:00s, Memory Used current: 936MB peak: 936MB)
+Running optimization stage 2 on REG18_CORE_BYPASS_ENABLED_SYNC .......
+Finished optimization stage 2 on REG18_CORE_BYPASS_ENABLED_SYNC (CPU Time 0h:00m:00s, Memory Used current: 936MB peak: 936MB)
+Running optimization stage 2 on MULT18X36_CORE_DISABLED_ENABLED_DISABLED_USED_AS_LOWER_BIT_GENERATION_DISABLED_ROUND_TO_ZERO_ROUND_TO_BIT0_Z4 .......
+Finished optimization stage 2 on MULT18X36_CORE_DISABLED_ENABLED_DISABLED_USED_AS_LOWER_BIT_GENERATION_DISABLED_ROUND_TO_ZERO_ROUND_TO_BIT0_Z4 (CPU Time 0h:00m:00s, Memory Used current: 936MB peak: 936MB)
+Running optimization stage 2 on MULT18X36_hw .......
+@W: CL247 :"/build/impl/syntmp/MULT18X36.v":48901:12:48901:15|Input port bit 37 of ph36[37:0] is unused
+
+@N: CL159 :"/build/impl/syntmp/MULT18X36.v":48915:10:48915:18|Input signed18h is unused.
+Finished optimization stage 2 on MULT18X36_hw (CPU Time 0h:00m:00s, Memory Used current: 948MB peak: 948MB)
+Running optimization stage 2 on MULT18_CORE_DISABLED_ENABLED_DISABLED_ROUND_TO_ZERO_ROUND_TO_BIT0_Z3 .......
+Finished optimization stage 2 on MULT18_CORE_DISABLED_ENABLED_DISABLED_ROUND_TO_ZERO_ROUND_TO_BIT0_Z3 (CPU Time 0h:00m:00s, Memory Used current: 948MB peak: 948MB)
+Running optimization stage 2 on MULT18_hw .......
+@W: CL246 :"/build/impl/syntmp/MULT18X36.v":43191:12:43191:15|Input port bits 19 to 18 of pl18[19:0] are unused. Assign logic for all port bits or change the input port size.
+Finished optimization stage 2 on MULT18_hw (CPU Time 0h:00m:00s, Memory Used current: 949MB peak: 949MB)
+Running optimization stage 2 on MULT9_hw_sync .......
+@N: CL159 :"/build/impl/syntmp/MULT18X36.v":47733:16:47733:24|Input dsp_sleep is unused.
+@N: CL159 :"/build/impl/syntmp/MULT18X36.v":47763:9:47763:12|Input gsrn is unused.
+@N: CL159 :"/build/impl/syntmp/MULT18X36.v":47819:10:47819:20|Input mc1_gsrn_en is unused.
+Finished optimization stage 2 on MULT9_hw_sync (CPU Time 0h:00m:00s, Memory Used current: 951MB peak: 951MB)
+Running optimization stage 2 on MULT9_CORE_DISABLED_DISABLED_USED_BYPASS_BYPASS_BYPASS_DISABLED_DISABLED_ENABLED_SYNC_Z2 .......
+Finished optimization stage 2 on MULT9_CORE_DISABLED_DISABLED_USED_BYPASS_BYPASS_BYPASS_DISABLED_DISABLED_ENABLED_SYNC_Z2 (CPU Time 0h:00m:00s, Memory Used current: 951MB peak: 951MB)
+Running optimization stage 2 on PREADD9_hw_sync .......
+@N: CL159 :"/build/impl/syntmp/MULT18X36.v":45915:16:45915:24|Input dsp_sleep is unused.
+@N: CL159 :"/build/impl/syntmp/MULT18X36.v":45947:9:45947:12|Input gsrn is unused.
+@N: CL159 :"/build/impl/syntmp/MULT18X36.v":45999:10:45999:20|Input mc1_gsrn_en is unused.
+Finished optimization stage 2 on PREADD9_hw_sync (CPU Time 0h:00m:00s, Memory Used current: 959MB peak: 959MB)
+Running optimization stage 2 on PREADD9_CORE_Z1 .......
+Finished optimization stage 2 on PREADD9_CORE_Z1 (CPU Time 0h:00m:00s, Memory Used current: 959MB peak: 959MB)

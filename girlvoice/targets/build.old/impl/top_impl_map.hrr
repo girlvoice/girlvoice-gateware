@@ -1,0 +1,1987 @@
+---------------------------------------------------
+Report for cell top
+   Instance path: top
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	      20.00        100.0
+                                  LUT4	      13488        100.0
+                               LUTGATE	      10852        100.0
+                                LUTRAM	         90        100.0
+                                LUTCCU	       2546        100.0
+                                 IOREG	          4        100.0
+                                 IOBUF	         20        100.0
+                                PFUREG	       8055        100.0
+                                   EBR	         11        100.0
+                                  LRAM	          4        100.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+                 Z\top.pin_amp_0__clk_	          1         0.0
+                Z\top.pin_amp_0__data_	          1         0.0
+                  Z\top.pin_amp_0__en_	          1         0.0
+               Z\top.pin_amp_0__lrclk_	          1         0.0
+                       Z\top.pin_bl_0_	          1         0.0
+                  Z\top.pin_btn_pwr_0_	          1         0.0
+                    Z\top.pin_clk12_0_	          1         0.0
+                       Z\top.pin_dc_0_	          1         0.0
+                 Z\top.pin_i2c_0__scl_	          1         0.0
+                 Z\top.pin_i2c_0__sda_	          1         0.0
+                      Z\top.pin_led_0_	          1         0.0
+                 Z\top.pin_mic_0__clk_	          1         0.0
+                Z\top.pin_mic_0__data_	          1         0.0
+               Z\top.pin_mic_0__lrclk_	          1         0.0
+                   Z\top.pin_pwr_en_0_	          1         0.0
+                 Z\top.pin_spi_0__clk_	          1         0.0
+                Z\top.pin_spi_0__copi_	          1         0.0
+                  Z\top.pin_spi_0__cs_	          1         0.0
+                 Z\top.pin_uart_0__rx_	          1         0.0
+                 Z\top.pin_uart_0__tx_	          1         0.0
+                            Z\top.pll_	          1         0.0
+                            Z\top.soc_	          1        100.0
+---------------------------------------------------
+Report for cell Z\top.pin_amp_0__clk_
+   Instance path: top/pin_amp_0__clk
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+             Z\top.pin_amp_0__clk.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_amp_0__clk.buf_
+   Instance path: top/pin_amp_0__clk/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+         Z\top.pin_amp_0__clk.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_amp_0__clk.buf.buf_
+   Instance path: top/pin_amp_0__clk/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_amp_0__data_
+   Instance path: top/pin_amp_0__data
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+            Z\top.pin_amp_0__data.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_amp_0__data.buf_
+   Instance path: top/pin_amp_0__data/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+        Z\top.pin_amp_0__data.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_amp_0__data.buf.buf_
+   Instance path: top/pin_amp_0__data/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_amp_0__en_
+   Instance path: top/pin_amp_0__en
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+              Z\top.pin_amp_0__en.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_amp_0__en.buf_
+   Instance path: top/pin_amp_0__en/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+          Z\top.pin_amp_0__en.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_amp_0__en.buf.buf_
+   Instance path: top/pin_amp_0__en/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_amp_0__lrclk_
+   Instance path: top/pin_amp_0__lrclk
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+           Z\top.pin_amp_0__lrclk.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_amp_0__lrclk.buf_
+   Instance path: top/pin_amp_0__lrclk/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+       Z\top.pin_amp_0__lrclk.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_amp_0__lrclk.buf.buf_
+   Instance path: top/pin_amp_0__lrclk/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_bl_0_
+   Instance path: top/pin_bl_0
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+                   Z\top.pin_bl_0.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_bl_0.buf_
+   Instance path: top/pin_bl_0/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+               Z\top.pin_bl_0.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_bl_0.buf.buf_
+   Instance path: top/pin_bl_0/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_btn_pwr_0_
+   Instance path: top/pin_btn_pwr_0
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+              Z\top.pin_btn_pwr_0.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_btn_pwr_0.buf_
+   Instance path: top/pin_btn_pwr_0/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+          Z\top.pin_btn_pwr_0.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_btn_pwr_0.buf.buf_
+   Instance path: top/pin_btn_pwr_0/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_clk12_0_
+   Instance path: top/pin_clk12_0
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+                Z\top.pin_clk12_0.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_clk12_0.buf_
+   Instance path: top/pin_clk12_0/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+            Z\top.pin_clk12_0.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_clk12_0.buf.buf_
+   Instance path: top/pin_clk12_0/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_dc_0_
+   Instance path: top/pin_dc_0
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+                   Z\top.pin_dc_0.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_dc_0.buf_
+   Instance path: top/pin_dc_0/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+               Z\top.pin_dc_0.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_dc_0.buf.buf_
+   Instance path: top/pin_dc_0/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_i2c_0__scl_
+   Instance path: top/pin_i2c_0__scl
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+             Z\top.pin_i2c_0__scl.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_i2c_0__scl.buf_
+   Instance path: top/pin_i2c_0__scl/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+         Z\top.pin_i2c_0__scl.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_i2c_0__scl.buf.buf_
+   Instance path: top/pin_i2c_0__scl/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_i2c_0__sda_
+   Instance path: top/pin_i2c_0__sda
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+             Z\top.pin_i2c_0__sda.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_i2c_0__sda.buf_
+   Instance path: top/pin_i2c_0__sda/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+         Z\top.pin_i2c_0__sda.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_i2c_0__sda.buf.buf_
+   Instance path: top/pin_i2c_0__sda/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_led_0_
+   Instance path: top/pin_led_0
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+                  Z\top.pin_led_0.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_led_0.buf_
+   Instance path: top/pin_led_0/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+              Z\top.pin_led_0.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_led_0.buf.buf_
+   Instance path: top/pin_led_0/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_mic_0__clk_
+   Instance path: top/pin_mic_0__clk
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+             Z\top.pin_mic_0__clk.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_mic_0__clk.buf_
+   Instance path: top/pin_mic_0__clk/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+         Z\top.pin_mic_0__clk.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_mic_0__clk.buf.buf_
+   Instance path: top/pin_mic_0__clk/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_mic_0__data_
+   Instance path: top/pin_mic_0__data
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+            Z\top.pin_mic_0__data.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_mic_0__data.buf_
+   Instance path: top/pin_mic_0__data/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+        Z\top.pin_mic_0__data.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_mic_0__data.buf.buf_
+   Instance path: top/pin_mic_0__data/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_mic_0__lrclk_
+   Instance path: top/pin_mic_0__lrclk
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+           Z\top.pin_mic_0__lrclk.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_mic_0__lrclk.buf_
+   Instance path: top/pin_mic_0__lrclk/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+       Z\top.pin_mic_0__lrclk.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_mic_0__lrclk.buf.buf_
+   Instance path: top/pin_mic_0__lrclk/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_pwr_en_0_
+   Instance path: top/pin_pwr_en_0
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+               Z\top.pin_pwr_en_0.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_pwr_en_0.buf_
+   Instance path: top/pin_pwr_en_0/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+           Z\top.pin_pwr_en_0.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_pwr_en_0.buf.buf_
+   Instance path: top/pin_pwr_en_0/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_spi_0__clk_
+   Instance path: top/pin_spi_0__clk
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+             Z\top.pin_spi_0__clk.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_spi_0__clk.buf_
+   Instance path: top/pin_spi_0__clk/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+         Z\top.pin_spi_0__clk.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_spi_0__clk.buf.buf_
+   Instance path: top/pin_spi_0__clk/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_spi_0__copi_
+   Instance path: top/pin_spi_0__copi
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOREG	          1        25.0
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+            Z\top.pin_spi_0__copi.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_spi_0__copi.buf_
+   Instance path: top/pin_spi_0__copi/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOREG	          1        25.0
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+        Z\top.pin_spi_0__copi.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_spi_0__copi.buf.buf_
+   Instance path: top/pin_spi_0__copi/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOREG	          1        25.0
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_spi_0__cs_
+   Instance path: top/pin_spi_0__cs
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+              Z\top.pin_spi_0__cs.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_spi_0__cs.buf_
+   Instance path: top/pin_spi_0__cs/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+          Z\top.pin_spi_0__cs.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_spi_0__cs.buf.buf_
+   Instance path: top/pin_spi_0__cs/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_uart_0__rx_
+   Instance path: top/pin_uart_0__rx
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+             Z\top.pin_uart_0__rx.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_uart_0__rx.buf_
+   Instance path: top/pin_uart_0__rx/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+         Z\top.pin_uart_0__rx.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_uart_0__rx.buf.buf_
+   Instance path: top/pin_uart_0__rx/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pin_uart_0__tx_
+   Instance path: top/pin_uart_0__tx
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOREG	          1        25.0
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+             Z\top.pin_uart_0__tx.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_uart_0__tx.buf_
+   Instance path: top/pin_uart_0__tx/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOREG	          1        25.0
+                                 IOBUF	          1         5.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+         Z\top.pin_uart_0__tx.buf.buf_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.pin_uart_0__tx.buf.buf_
+   Instance path: top/pin_uart_0__tx/buf_cZ/buf_cZ
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                 IOREG	          1        25.0
+                                 IOBUF	          1         5.0
+---------------------------------------------------
+Report for cell Z\top.pll_
+   Instance path: top/pll
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+---------------------------------------------------
+Report for cell Z\top.soc_
+   Instance path: top/soc
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	      20.00        100.0
+                                  LUT4	      13485        100.0
+                               LUTGATE	      10849        100.0
+                                LUTRAM	         90        100.0
+                                LUTCCU	       2546        100.0
+                                 IOREG	          1        25.0
+                                PFUREG	       8053        100.0
+                                   EBR	         11        100.0
+                                  LRAM	          4        100.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+                        Z\top.soc.cpu_	          1        30.6
+                Z\top.soc.csr_decoder_	          1         0.1
+               Z\top.soc.envelope_csr_	          1         1.3
+                       Z\top.soc.gpo1_	          1         0.1
+                       Z\top.soc.i2c0_	          1         0.0
+                     Z\top.soc.i2s_rx_	          1         0.3
+                     Z\top.soc.i2s_tx_	          1         0.3
+                       Z\top.soc.led0_	          1         0.2
+                    Z\top.soc.mainram_	          1         0.6
+                       Z\top.soc.spi0_	          1         1.1
+                   Z\top.soc.spi0_phy_	          1         2.6
+                     Z\top.soc.timer0_	          1         1.2
+                      Z\top.soc.uart0_	          1         2.2
+                    Z\top.soc.vocoder_	          1        57.0
+                 Z\top.soc.wb_arbiter_	          1         0.5
+                 Z\top.soc.wb_decoder_	          1         0.5
+                  Z\top.soc.wb_to_csr_	          1         0.8
+                 Z\top.soc.wb_to_lmmi_	          1         0.4
+---------------------------------------------------
+Report for cell Z\top.soc.cpu_
+   Instance path: top/soc/cpu
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       6.00        30.0
+                                  LUT4	       4125        30.6
+                               LUTGATE	       3433        31.6
+                                LUTCCU	        692        27.2
+                                PFUREG	       1802        22.4
+                                   EBR	         10        90.9
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+                              VexRiscv	          1        30.6
+---------------------------------------------------
+Report for cell VexRiscv
+   Instance path: top/soc/cpu/vexriscv
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       6.00        30.0
+                                  LUT4	       4125        30.6
+                               LUTGATE	       3433        31.6
+                                LUTCCU	        692        27.2
+                                PFUREG	       1802        22.4
+                                   EBR	         10        90.9
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+                             DataCache	          1        11.2
+                      InstructionCache	          1         8.3
+---------------------------------------------------
+Report for cell InstructionCache
+   Instance path: top/soc/cpu/vexriscv/IBusCachedPlugin_cache
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	       1119         8.3
+                               LUTGATE	        999         9.2
+                                LUTCCU	        120         4.7
+                                PFUREG	         42         0.5
+                                   EBR	          3        27.3
+---------------------------------------------------
+Report for cell DataCache
+   Instance path: top/soc/cpu/vexriscv/dataCache_1
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	       1514        11.2
+                               LUTGATE	       1408        13.0
+                                LUTCCU	        106         4.2
+                                PFUREG	        152         1.9
+                                   EBR	          5        45.5
+---------------------------------------------------
+Report for cell Z\top.soc.csr_decoder_
+   Instance path: top/soc/csr_decoder
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         18         0.1
+                               LUTGATE	         18         0.2
+---------------------------------------------------
+Report for cell Z\top.soc.envelope_csr_
+   Instance path: top/soc/envelope_csr
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        176         1.3
+                               LUTGATE	        176         1.6
+                                PFUREG	        269         3.3
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+        Z\top.soc.envelope_csr.bridge_	          1         1.2
+---------------------------------------------------
+Report for cell Z\top.soc.envelope_csr.bridge_
+   Instance path: top/soc/envelope_csr/bridge
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        162         1.2
+                               LUTGATE	        162         1.5
+                                PFUREG	         17         0.2
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+    Z\top.soc.envelope_csr.bridge.mux_	          1         1.2
+---------------------------------------------------
+Report for cell Z\top.soc.envelope_csr.bridge.mux_
+   Instance path: top/soc/envelope_csr/bridge/mux
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        162         1.2
+                               LUTGATE	        162         1.5
+                                PFUREG	         17         0.2
+---------------------------------------------------
+Report for cell Z\top.soc.gpo1_
+   Instance path: top/soc/gpo1
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         20         0.1
+                               LUTGATE	         20         0.2
+                                PFUREG	         18         0.2
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+                Z\top.soc.gpo1.bridge_	          1         0.1
+---------------------------------------------------
+Report for cell Z\top.soc.gpo1.bridge_
+   Instance path: top/soc/gpo1/bridge
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         19         0.1
+                               LUTGATE	         19         0.2
+                                PFUREG	         18         0.2
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+           Z\top.soc.gpo1.bridge.Mode_	          1         0.0
+         Z\top.soc.gpo1.bridge.Output_	          1         0.0
+            Z\top.soc.gpo1.bridge.mux_	          1         0.1
+---------------------------------------------------
+Report for cell Z\top.soc.gpo1.bridge.Mode_
+   Instance path: top/soc/gpo1/bridge/Mode
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	          1         0.0
+                               LUTGATE	          1         0.0
+                                PFUREG	          4         0.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+    Z\top.soc.gpo1.bridge.Mode.pin__0_	          1         0.0
+    Z\top.soc.gpo1.bridge.Mode.pin__1_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.gpo1.bridge.Mode.pin__0_
+   Instance path: top/soc/gpo1/bridge/Mode/pin__0
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                PFUREG	          2         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.gpo1.bridge.Mode.pin__1_
+   Instance path: top/soc/gpo1/bridge/Mode/pin__1
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	          1         0.0
+                               LUTGATE	          1         0.0
+                                PFUREG	          2         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.gpo1.bridge.Output_
+   Instance path: top/soc/gpo1/bridge/Output
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	          3         0.0
+                               LUTGATE	          3         0.0
+                                PFUREG	          2         0.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+  Z\top.soc.gpo1.bridge.Output.pin__0_	          1         0.0
+  Z\top.soc.gpo1.bridge.Output.pin__1_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.gpo1.bridge.Output.pin__0_
+   Instance path: top/soc/gpo1/bridge/Output/pin__0
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	          1         0.0
+                               LUTGATE	          1         0.0
+                                PFUREG	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.gpo1.bridge.Output.pin__1_
+   Instance path: top/soc/gpo1/bridge/Output/pin__1
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	          2         0.0
+                               LUTGATE	          2         0.0
+                                PFUREG	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.gpo1.bridge.mux_
+   Instance path: top/soc/gpo1/bridge/mux
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         15         0.1
+                               LUTGATE	         15         0.1
+                                PFUREG	         12         0.1
+---------------------------------------------------
+Report for cell Z\top.soc.i2c0_
+   Instance path: top/soc/i2c0
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+---------------------------------------------------
+Report for cell Z\top.soc.i2s_rx_
+   Instance path: top/soc/i2s_rx
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         42         0.3
+                               LUTGATE	         36         0.3
+                                LUTCCU	          6         0.2
+                                PFUREG	         45         0.6
+---------------------------------------------------
+Report for cell Z\top.soc.i2s_tx_
+   Instance path: top/soc/i2s_tx
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         37         0.3
+                               LUTGATE	         31         0.3
+                                LUTCCU	          6         0.2
+                                PFUREG	         29         0.4
+---------------------------------------------------
+Report for cell Z\top.soc.led0_
+   Instance path: top/soc/led0
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         27         0.2
+                               LUTGATE	         27         0.2
+                                PFUREG	         11         0.1
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+                Z\top.soc.led0.bridge_	          1         0.2
+---------------------------------------------------
+Report for cell Z\top.soc.led0.bridge_
+   Instance path: top/soc/led0/bridge
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         26         0.2
+                               LUTGATE	         26         0.2
+                                PFUREG	         11         0.1
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+           Z\top.soc.led0.bridge.Mode_	          1         0.0
+         Z\top.soc.led0.bridge.Output_	          1         0.0
+            Z\top.soc.led0.bridge.mux_	          1         0.2
+---------------------------------------------------
+Report for cell Z\top.soc.led0.bridge.Mode_
+   Instance path: top/soc/led0/bridge/Mode
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                PFUREG	          2         0.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+    Z\top.soc.led0.bridge.Mode.pin__0_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.led0.bridge.Mode.pin__0_
+   Instance path: top/soc/led0/bridge/Mode/pin__0
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                PFUREG	          2         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.led0.bridge.Output_
+   Instance path: top/soc/led0/bridge/Output
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	          1         0.0
+                               LUTGATE	          1         0.0
+                                PFUREG	          1         0.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+  Z\top.soc.led0.bridge.Output.pin__0_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.led0.bridge.Output.pin__0_
+   Instance path: top/soc/led0/bridge/Output/pin__0
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	          1         0.0
+                               LUTGATE	          1         0.0
+                                PFUREG	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.led0.bridge.mux_
+   Instance path: top/soc/led0/bridge/mux
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         25         0.2
+                               LUTGATE	         25         0.2
+                                PFUREG	          8         0.1
+---------------------------------------------------
+Report for cell Z\top.soc.mainram_
+   Instance path: top/soc/mainram
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         75         0.6
+                               LUTGATE	         75         0.7
+                                PFUREG	          1         0.0
+                                  LRAM	          4        100.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+                Z\top.soc.mainram.U$0_	          1         0.0
+                Z\top.soc.mainram.U$1_	          1         0.0
+                Z\top.soc.mainram.U$2_	          1         0.0
+                Z\top.soc.mainram.U$3_	          1         0.5
+---------------------------------------------------
+Report for cell Z\top.soc.mainram.U$0_
+   Instance path: top/soc/mainram/U$0
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LRAM	          1        25.0
+---------------------------------------------------
+Report for cell Z\top.soc.mainram.U$1_
+   Instance path: top/soc/mainram/U$1
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LRAM	          1        25.0
+---------------------------------------------------
+Report for cell Z\top.soc.mainram.U$2_
+   Instance path: top/soc/mainram/U$2
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LRAM	          1        25.0
+---------------------------------------------------
+Report for cell Z\top.soc.mainram.U$3_
+   Instance path: top/soc/mainram/U$3
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         66         0.5
+                               LUTGATE	         66         0.6
+                                  LRAM	          1        25.0
+---------------------------------------------------
+Report for cell Z\top.soc.spi0_
+   Instance path: top/soc/spi0
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        153         1.1
+                               LUTGATE	         87         0.8
+                                LUTRAM	         66        73.3
+                                PFUREG	        159         2.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+                Z\top.soc.spi0.bridge_	          1         0.3
+                Z\top.soc.spi0.cs_cdc_	          1         0.0
+               Z\top.soc.spi0.tx_fifo_	          1         0.8
+---------------------------------------------------
+Report for cell Z\top.soc.spi0.bridge_
+   Instance path: top/soc/spi0/bridge
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         42         0.3
+                               LUTGATE	         42         0.4
+                                PFUREG	         73         0.9
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+            Z\top.soc.spi0.bridge.mux_	          1         0.3
+            Z\top.soc.spi0.bridge.phy_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.spi0.bridge.mux_
+   Instance path: top/soc/spi0/bridge/mux
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         42         0.3
+                               LUTGATE	         42         0.4
+                                PFUREG	         55         0.7
+---------------------------------------------------
+Report for cell Z\top.soc.spi0.bridge.phy_
+   Instance path: top/soc/spi0/bridge/phy
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                PFUREG	         18         0.2
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+     Z\top.soc.spi0.bridge.phy.length_	          1         0.0
+       Z\top.soc.spi0.bridge.phy.mask_	          1         0.0
+      Z\top.soc.spi0.bridge.phy.width_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.spi0.bridge.phy.length_
+   Instance path: top/soc/spi0/bridge/phy/length
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                PFUREG	          6         0.1
+---------------------------------------------------
+Report for cell Z\top.soc.spi0.bridge.phy.mask_
+   Instance path: top/soc/spi0/bridge/phy/mask
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                PFUREG	          8         0.1
+---------------------------------------------------
+Report for cell Z\top.soc.spi0.bridge.phy.width_
+   Instance path: top/soc/spi0/bridge/phy/width
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                PFUREG	          4         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.spi0.cs_cdc_
+   Instance path: top/soc/spi0/cs_cdc
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                PFUREG	          2         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.spi0.tx_fifo_
+   Instance path: top/soc/spi0/tx_fifo
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        110         0.8
+                               LUTGATE	         44         0.4
+                                LUTRAM	         66        73.3
+                                PFUREG	         83         1.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+   Z\top.soc.spi0.tx_fifo.consume_cdc_	          1         0.0
+   Z\top.soc.spi0.tx_fifo.produce_cdc_	          1         0.0
+       Z\top.soc.spi0.tx_fifo.rst_cdc_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.spi0.tx_fifo.consume_cdc_
+   Instance path: top/soc/spi0/tx_fifo/consume_cdc
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                PFUREG	         10         0.1
+---------------------------------------------------
+Report for cell Z\top.soc.spi0.tx_fifo.produce_cdc_
+   Instance path: top/soc/spi0/tx_fifo/produce_cdc
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                PFUREG	         10         0.1
+---------------------------------------------------
+Report for cell Z\top.soc.spi0.tx_fifo.rst_cdc_
+   Instance path: top/soc/spi0/tx_fifo/rst_cdc
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                PFUREG	          2         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.spi0_phy_
+   Instance path: top/soc/spi0_phy
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        353         2.6
+                               LUTGATE	        335         3.1
+                                LUTCCU	         18         0.7
+                                PFUREG	         46         0.6
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+            Z\top.soc.spi0_phy.clkgen_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.spi0_phy.clkgen_
+   Instance path: top/soc/spi0_phy/clkgen
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	          2         0.0
+                               LUTGATE	          2         0.0
+                                PFUREG	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.timer0_
+   Instance path: top/soc/timer0
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        159         1.2
+                               LUTGATE	        125         1.2
+                                LUTCCU	         34         1.3
+                                PFUREG	        146         1.8
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+                 Z\top.soc.timer0.U$0_	          1         0.4
+                 Z\top.soc.timer0.U$1_	          1         0.0
+                 Z\top.soc.timer0.U$2_	          1         0.1
+---------------------------------------------------
+Report for cell Z\top.soc.timer0.U$0_
+   Instance path: top/soc/timer0/U$0
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         60         0.4
+                               LUTGATE	         60         0.6
+                                PFUREG	        105         1.3
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+          Z\top.soc.timer0.U$0.enable_	          1         0.0
+            Z\top.soc.timer0.U$0.mode_	          1         0.0
+             Z\top.soc.timer0.U$0.mux_	          1         0.4
+          Z\top.soc.timer0.U$0.reload_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.timer0.U$0.enable_
+   Instance path: top/soc/timer0/U$0/enable
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                PFUREG	          1         0.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+   Z\top.soc.timer0.U$0.enable.enable_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.timer0.U$0.enable.enable_
+   Instance path: top/soc/timer0/U$0/enable/enable
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                PFUREG	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.timer0.U$0.mode_
+   Instance path: top/soc/timer0/U$0/mode
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	          1         0.0
+                               LUTGATE	          1         0.0
+                                PFUREG	          1         0.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+   Z\top.soc.timer0.U$0.mode.periodic_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.timer0.U$0.mode.periodic_
+   Instance path: top/soc/timer0/U$0/mode/periodic
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	          1         0.0
+                               LUTGATE	          1         0.0
+                                PFUREG	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.timer0.U$0.mux_
+   Instance path: top/soc/timer0/U$0/mux
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         59         0.4
+                               LUTGATE	         59         0.5
+                                PFUREG	         71         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.timer0.U$0.reload_
+   Instance path: top/soc/timer0/U$0/reload
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                PFUREG	         32         0.4
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+    Z\top.soc.timer0.U$0.reload.value_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.timer0.U$0.reload.value_
+   Instance path: top/soc/timer0/U$0/reload/value
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                PFUREG	         32         0.4
+---------------------------------------------------
+Report for cell Z\top.soc.timer0.U$1_
+   Instance path: top/soc/timer0/U$1
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	          6         0.0
+                               LUTGATE	          6         0.1
+                                PFUREG	          8         0.1
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+         Z\top.soc.timer0.U$1.monitor_	          1         0.0
+             Z\top.soc.timer0.U$1.mux_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.timer0.U$1.monitor_
+   Instance path: top/soc/timer0/U$1/monitor
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	          2         0.0
+                               LUTGATE	          2         0.0
+                                PFUREG	          2         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.timer0.U$1.mux_
+   Instance path: top/soc/timer0/U$1/mux
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	          3         0.0
+                               LUTGATE	          3         0.0
+                                PFUREG	          5         0.1
+---------------------------------------------------
+Report for cell Z\top.soc.timer0.U$2_
+   Instance path: top/soc/timer0/U$2
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         14         0.1
+                               LUTGATE	         14         0.1
+---------------------------------------------------
+Report for cell Z\top.soc.uart0_
+   Instance path: top/soc/uart0
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        295         2.2
+                               LUTGATE	        217         2.0
+                                LUTCCU	         78         3.1
+                                 IOREG	          1        25.0
+                                PFUREG	        172         2.1
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+               Z\top.soc.uart0.bridge_	          1         0.3
+                   Z\top.soc.uart0.rx_	          1         0.9
+                   Z\top.soc.uart0.tx_	          1         1.0
+---------------------------------------------------
+Report for cell Z\top.soc.uart0.bridge_
+   Instance path: top/soc/uart0/bridge
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         37         0.3
+                               LUTGATE	         37         0.3
+                                PFUREG	         77         1.0
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+       Z\top.soc.uart0.bridge.divisor_	          1         0.0
+           Z\top.soc.uart0.bridge.mux_	          1         0.3
+---------------------------------------------------
+Report for cell Z\top.soc.uart0.bridge.divisor_
+   Instance path: top/soc/uart0/bridge/divisor
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	          1         0.0
+                               LUTGATE	          1         0.0
+                                PFUREG	         24         0.3
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+   Z\top.soc.uart0.bridge.divisor.div_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.uart0.bridge.divisor.div_
+   Instance path: top/soc/uart0/bridge/divisor/div
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	          1         0.0
+                               LUTGATE	          1         0.0
+                                PFUREG	         24         0.3
+---------------------------------------------------
+Report for cell Z\top.soc.uart0.bridge.mux_
+   Instance path: top/soc/uart0/bridge/mux
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         36         0.3
+                               LUTGATE	         36         0.3
+                                PFUREG	         53         0.7
+---------------------------------------------------
+Report for cell Z\top.soc.uart0.rx_
+   Instance path: top/soc/uart0/rx
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        118         0.9
+                               LUTGATE	         92         0.8
+                                LUTCCU	         26         1.0
+                                 IOREG	          1        25.0
+                                PFUREG	         47         0.6
+---------------------------------------------------
+Report for cell Z\top.soc.uart0.tx_
+   Instance path: top/soc/uart0/tx
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        139         1.0
+                               LUTGATE	         87         0.8
+                                LUTCCU	         52         2.0
+                                PFUREG	         39         0.5
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder_
+   Instance path: top/soc/vocoder
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	      14.00        70.0
+                                  LUT4	       7684        57.0
+                               LUTGATE	       5966        55.0
+                                LUTRAM	         24        26.7
+                                LUTCCU	       1694        66.5
+                                PFUREG	       5266        65.4
+                                   EBR	          1         9.1
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+               Z\top.soc.vocoder.U$10_	          1         3.8
+               Z\top.soc.vocoder.U$11_	          1         3.7
+               Z\top.soc.vocoder.U$12_	          1         3.7
+               Z\top.soc.vocoder.U$13_	          1         3.9
+               Z\top.soc.vocoder.U$14_	          1         3.8
+               Z\top.soc.vocoder.U$15_	          1         3.7
+               Z\top.soc.vocoder.U$16_	          1         3.7
+                Z\top.soc.vocoder.U$3_	          1         3.7
+                Z\top.soc.vocoder.U$4_	          1         3.9
+                Z\top.soc.vocoder.U$5_	          1         3.8
+                Z\top.soc.vocoder.U$6_	          1         3.8
+                Z\top.soc.vocoder.U$7_	          1         3.8
+                Z\top.soc.vocoder.U$8_	          1         3.9
+                Z\top.soc.vocoder.U$9_	          1         3.8
+                Z\top.soc.vocoder.mux_	          1         2.8
+              Z\top.soc.vocoder.synth_	          1         1.0
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$10_
+   Instance path: top/soc/vocoder/U$10
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	        506         3.8
+                               LUTGATE	        390         3.6
+                                LUTCCU	        116         4.6
+                                PFUREG	        378         4.7
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+      Z\top.soc.vocoder.U$10.bandpass_	          1         1.6
+      Z\top.soc.vocoder.U$10.envelope_	          1         1.5
+          Z\top.soc.vocoder.U$10.mult_	          1         0.4
+           Z\top.soc.vocoder.U$10.vga_	          1         0.3
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$10.bandpass_
+   Instance path: top/soc/vocoder/U$10/bandpass
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        211         1.6
+                               LUTGATE	        163         1.5
+                                LUTCCU	         48         1.9
+                                PFUREG	        145         1.8
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$10.envelope_
+   Instance path: top/soc/vocoder/U$10/envelope
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        200         1.5
+                               LUTGATE	        132         1.2
+                                LUTCCU	         68         2.7
+                                PFUREG	         96         1.2
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$10.mult_
+   Instance path: top/soc/vocoder/U$10/mult
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	         57         0.4
+                               LUTGATE	         57         0.5
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$10.vga_
+   Instance path: top/soc/vocoder/U$10/vga
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         38         0.3
+                               LUTGATE	         38         0.4
+                                PFUREG	         68         0.8
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$11_
+   Instance path: top/soc/vocoder/U$11
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	        503         3.7
+                               LUTGATE	        387         3.6
+                                LUTCCU	        116         4.6
+                                PFUREG	        365         4.5
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+      Z\top.soc.vocoder.U$11.bandpass_	          1         1.4
+      Z\top.soc.vocoder.U$11.envelope_	          1         1.6
+          Z\top.soc.vocoder.U$11.mult_	          1         0.5
+           Z\top.soc.vocoder.U$11.vga_	          1         0.3
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$11.bandpass_
+   Instance path: top/soc/vocoder/U$11/bandpass
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        190         1.4
+                               LUTGATE	        142         1.3
+                                LUTCCU	         48         1.9
+                                PFUREG	        146         1.8
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$11.envelope_
+   Instance path: top/soc/vocoder/U$11/envelope
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        212         1.6
+                               LUTGATE	        144         1.3
+                                LUTCCU	         68         2.7
+                                PFUREG	         82         1.0
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$11.mult_
+   Instance path: top/soc/vocoder/U$11/mult
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	         63         0.5
+                               LUTGATE	         63         0.6
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$11.vga_
+   Instance path: top/soc/vocoder/U$11/vga
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         38         0.3
+                               LUTGATE	         38         0.4
+                                PFUREG	         68         0.8
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$12_
+   Instance path: top/soc/vocoder/U$12
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	        505         3.7
+                               LUTGATE	        389         3.6
+                                LUTCCU	        116         4.6
+                                PFUREG	        363         4.5
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+      Z\top.soc.vocoder.U$12.bandpass_	          1         1.4
+      Z\top.soc.vocoder.U$12.envelope_	          1         1.6
+          Z\top.soc.vocoder.U$12.mult_	          1         0.5
+           Z\top.soc.vocoder.U$12.vga_	          1         0.3
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$12.bandpass_
+   Instance path: top/soc/vocoder/U$12/bandpass
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        190         1.4
+                               LUTGATE	        142         1.3
+                                LUTCCU	         48         1.9
+                                PFUREG	        147         1.8
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$12.envelope_
+   Instance path: top/soc/vocoder/U$12/envelope
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        211         1.6
+                               LUTGATE	        143         1.3
+                                LUTCCU	         68         2.7
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$12.mult_
+   Instance path: top/soc/vocoder/U$12/mult
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	         65         0.5
+                               LUTGATE	         65         0.6
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$12.vga_
+   Instance path: top/soc/vocoder/U$12/vga
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         39         0.3
+                               LUTGATE	         39         0.4
+                                PFUREG	         78         1.0
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$13_
+   Instance path: top/soc/vocoder/U$13
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	        520         3.9
+                               LUTGATE	        404         3.7
+                                LUTCCU	        116         4.6
+                                PFUREG	        365         4.5
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+      Z\top.soc.vocoder.U$13.bandpass_	          1         1.5
+      Z\top.soc.vocoder.U$13.envelope_	          1         1.6
+          Z\top.soc.vocoder.U$13.mult_	          1         0.5
+           Z\top.soc.vocoder.U$13.vga_	          1         0.3
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$13.bandpass_
+   Instance path: top/soc/vocoder/U$13/bandpass
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        202         1.5
+                               LUTGATE	        154         1.4
+                                LUTCCU	         48         1.9
+                                PFUREG	        151         1.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$13.envelope_
+   Instance path: top/soc/vocoder/U$13/envelope
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        215         1.6
+                               LUTGATE	        147         1.4
+                                LUTCCU	         68         2.7
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$13.mult_
+   Instance path: top/soc/vocoder/U$13/mult
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	         65         0.5
+                               LUTGATE	         65         0.6
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$13.vga_
+   Instance path: top/soc/vocoder/U$13/vga
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         38         0.3
+                               LUTGATE	         38         0.4
+                                PFUREG	         76         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$14_
+   Instance path: top/soc/vocoder/U$14
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	        518         3.8
+                               LUTGATE	        402         3.7
+                                LUTCCU	        116         4.6
+                                PFUREG	        366         4.5
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+      Z\top.soc.vocoder.U$14.bandpass_	          1         1.4
+      Z\top.soc.vocoder.U$14.envelope_	          1         1.6
+          Z\top.soc.vocoder.U$14.mult_	          1         0.5
+           Z\top.soc.vocoder.U$14.vga_	          1         0.4
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$14.bandpass_
+   Instance path: top/soc/vocoder/U$14/bandpass
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        189         1.4
+                               LUTGATE	        141         1.3
+                                LUTCCU	         48         1.9
+                                PFUREG	        147         1.8
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$14.envelope_
+   Instance path: top/soc/vocoder/U$14/envelope
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        210         1.6
+                               LUTGATE	        142         1.3
+                                LUTCCU	         68         2.7
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$14.mult_
+   Instance path: top/soc/vocoder/U$14/mult
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	         65         0.5
+                               LUTGATE	         65         0.6
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$14.vga_
+   Instance path: top/soc/vocoder/U$14/vga
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         54         0.4
+                               LUTGATE	         54         0.5
+                                PFUREG	         81         1.0
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$15_
+   Instance path: top/soc/vocoder/U$15
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	        505         3.7
+                               LUTGATE	        389         3.6
+                                LUTCCU	        116         4.6
+                                PFUREG	        357         4.4
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+      Z\top.soc.vocoder.U$15.bandpass_	          1         1.4
+      Z\top.soc.vocoder.U$15.envelope_	          1         1.5
+          Z\top.soc.vocoder.U$15.mult_	          1         0.5
+           Z\top.soc.vocoder.U$15.vga_	          1         0.3
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$15.bandpass_
+   Instance path: top/soc/vocoder/U$15/bandpass
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        195         1.4
+                               LUTGATE	        147         1.4
+                                LUTCCU	         48         1.9
+                                PFUREG	        149         1.8
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$15.envelope_
+   Instance path: top/soc/vocoder/U$15/envelope
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        209         1.5
+                               LUTGATE	        141         1.3
+                                LUTCCU	         68         2.7
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$15.mult_
+   Instance path: top/soc/vocoder/U$15/mult
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	         62         0.5
+                               LUTGATE	         62         0.6
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$15.vga_
+   Instance path: top/soc/vocoder/U$15/vga
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         39         0.3
+                               LUTGATE	         39         0.4
+                                PFUREG	         70         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$16_
+   Instance path: top/soc/vocoder/U$16
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	        501         3.7
+                               LUTGATE	        385         3.5
+                                LUTCCU	        116         4.6
+                                PFUREG	        351         4.4
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+      Z\top.soc.vocoder.U$16.bandpass_	          1         1.4
+      Z\top.soc.vocoder.U$16.envelope_	          1         1.6
+          Z\top.soc.vocoder.U$16.mult_	          1         0.5
+           Z\top.soc.vocoder.U$16.vga_	          1         0.3
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$16.bandpass_
+   Instance path: top/soc/vocoder/U$16/bandpass
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        184         1.4
+                               LUTGATE	        136         1.3
+                                LUTCCU	         48         1.9
+                                PFUREG	        147         1.8
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$16.envelope_
+   Instance path: top/soc/vocoder/U$16/envelope
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        215         1.6
+                               LUTGATE	        147         1.4
+                                LUTCCU	         68         2.7
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$16.mult_
+   Instance path: top/soc/vocoder/U$16/mult
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	         63         0.5
+                               LUTGATE	         63         0.6
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$16.vga_
+   Instance path: top/soc/vocoder/U$16/vga
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         39         0.3
+                               LUTGATE	         39         0.4
+                                PFUREG	         66         0.8
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$3_
+   Instance path: top/soc/vocoder/U$3
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	        503         3.7
+                               LUTGATE	        387         3.6
+                                LUTCCU	        116         4.6
+                                PFUREG	        376         4.7
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+       Z\top.soc.vocoder.U$3.bandpass_	          1         1.4
+       Z\top.soc.vocoder.U$3.envelope_	          1         1.6
+           Z\top.soc.vocoder.U$3.mult_	          1         0.5
+            Z\top.soc.vocoder.U$3.vga_	          1         0.3
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$3.bandpass_
+   Instance path: top/soc/vocoder/U$3/bandpass
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        189         1.4
+                               LUTGATE	        141         1.3
+                                LUTCCU	         48         1.9
+                                PFUREG	        141         1.8
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$3.envelope_
+   Instance path: top/soc/vocoder/U$3/envelope
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        213         1.6
+                               LUTGATE	        145         1.3
+                                LUTCCU	         68         2.7
+                                PFUREG	         94         1.2
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$3.mult_
+   Instance path: top/soc/vocoder/U$3/mult
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	         63         0.5
+                               LUTGATE	         63         0.6
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$3.vga_
+   Instance path: top/soc/vocoder/U$3/vga
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         38         0.3
+                               LUTGATE	         38         0.4
+                                PFUREG	         72         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$4_
+   Instance path: top/soc/vocoder/U$4
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	        521         3.9
+                               LUTGATE	        405         3.7
+                                LUTCCU	        116         4.6
+                                PFUREG	        371         4.6
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+       Z\top.soc.vocoder.U$4.bandpass_	          1         1.3
+       Z\top.soc.vocoder.U$4.envelope_	          1         1.6
+           Z\top.soc.vocoder.U$4.mult_	          1         0.5
+            Z\top.soc.vocoder.U$4.vga_	          1         0.4
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$4.bandpass_
+   Instance path: top/soc/vocoder/U$4/bandpass
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        181         1.3
+                               LUTGATE	        133         1.2
+                                LUTCCU	         48         1.9
+                                PFUREG	        152         1.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$4.envelope_
+   Instance path: top/soc/vocoder/U$4/envelope
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        216         1.6
+                               LUTGATE	        148         1.4
+                                LUTCCU	         68         2.7
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$4.mult_
+   Instance path: top/soc/vocoder/U$4/mult
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	         65         0.5
+                               LUTGATE	         65         0.6
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$4.vga_
+   Instance path: top/soc/vocoder/U$4/vga
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         59         0.4
+                               LUTGATE	         59         0.5
+                                PFUREG	         81         1.0
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$5_
+   Instance path: top/soc/vocoder/U$5
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	        510         3.8
+                               LUTGATE	        394         3.6
+                                LUTCCU	        116         4.6
+                                PFUREG	        355         4.4
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+       Z\top.soc.vocoder.U$5.bandpass_	          1         1.4
+       Z\top.soc.vocoder.U$5.envelope_	          1         1.6
+           Z\top.soc.vocoder.U$5.mult_	          1         0.5
+            Z\top.soc.vocoder.U$5.vga_	          1         0.3
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$5.bandpass_
+   Instance path: top/soc/vocoder/U$5/bandpass
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        195         1.4
+                               LUTGATE	        147         1.4
+                                LUTCCU	         48         1.9
+                                PFUREG	        147         1.8
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$5.envelope_
+   Instance path: top/soc/vocoder/U$5/envelope
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        214         1.6
+                               LUTGATE	        146         1.3
+                                LUTCCU	         68         2.7
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$5.mult_
+   Instance path: top/soc/vocoder/U$5/mult
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	         62         0.5
+                               LUTGATE	         62         0.6
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$5.vga_
+   Instance path: top/soc/vocoder/U$5/vga
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         39         0.3
+                               LUTGATE	         39         0.4
+                                PFUREG	         70         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$6_
+   Instance path: top/soc/vocoder/U$6
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	        518         3.8
+                               LUTGATE	        402         3.7
+                                LUTCCU	        116         4.6
+                                PFUREG	        363         4.5
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+       Z\top.soc.vocoder.U$6.bandpass_	          1         1.5
+       Z\top.soc.vocoder.U$6.envelope_	          1         1.6
+           Z\top.soc.vocoder.U$6.mult_	          1         0.5
+            Z\top.soc.vocoder.U$6.vga_	          1         0.3
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$6.bandpass_
+   Instance path: top/soc/vocoder/U$6/bandpass
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        202         1.5
+                               LUTGATE	        154         1.4
+                                LUTCCU	         48         1.9
+                                PFUREG	        148         1.8
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$6.envelope_
+   Instance path: top/soc/vocoder/U$6/envelope
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        213         1.6
+                               LUTGATE	        145         1.3
+                                LUTCCU	         68         2.7
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$6.mult_
+   Instance path: top/soc/vocoder/U$6/mult
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	         65         0.5
+                               LUTGATE	         65         0.6
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$6.vga_
+   Instance path: top/soc/vocoder/U$6/vga
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         38         0.3
+                               LUTGATE	         38         0.4
+                                PFUREG	         77         1.0
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$7_
+   Instance path: top/soc/vocoder/U$7
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	        517         3.8
+                               LUTGATE	        401         3.7
+                                LUTCCU	        116         4.6
+                                PFUREG	        370         4.6
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+       Z\top.soc.vocoder.U$7.bandpass_	          1         1.5
+       Z\top.soc.vocoder.U$7.envelope_	          1         1.6
+           Z\top.soc.vocoder.U$7.mult_	          1         0.5
+            Z\top.soc.vocoder.U$7.vga_	          1         0.3
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$7.bandpass_
+   Instance path: top/soc/vocoder/U$7/bandpass
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        200         1.5
+                               LUTGATE	        152         1.4
+                                LUTCCU	         48         1.9
+                                PFUREG	        145         1.8
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$7.envelope_
+   Instance path: top/soc/vocoder/U$7/envelope
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        214         1.6
+                               LUTGATE	        146         1.3
+                                LUTCCU	         68         2.7
+                                PFUREG	         79         1.0
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$7.mult_
+   Instance path: top/soc/vocoder/U$7/mult
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	         65         0.5
+                               LUTGATE	         65         0.6
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$7.vga_
+   Instance path: top/soc/vocoder/U$7/vga
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         38         0.3
+                               LUTGATE	         38         0.4
+                                PFUREG	         77         1.0
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$8_
+   Instance path: top/soc/vocoder/U$8
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	        521         3.9
+                               LUTGATE	        405         3.7
+                                LUTCCU	        116         4.6
+                                PFUREG	        369         4.6
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+       Z\top.soc.vocoder.U$8.bandpass_	          1         1.3
+       Z\top.soc.vocoder.U$8.envelope_	          1         1.5
+           Z\top.soc.vocoder.U$8.mult_	          1         0.5
+            Z\top.soc.vocoder.U$8.vga_	          1         0.5
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$8.bandpass_
+   Instance path: top/soc/vocoder/U$8/bandpass
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        181         1.3
+                               LUTGATE	        133         1.2
+                                LUTCCU	         48         1.9
+                                PFUREG	        150         1.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$8.envelope_
+   Instance path: top/soc/vocoder/U$8/envelope
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        207         1.5
+                               LUTGATE	        139         1.3
+                                LUTCCU	         68         2.7
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$8.mult_
+   Instance path: top/soc/vocoder/U$8/mult
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	         65         0.5
+                               LUTGATE	         65         0.6
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$8.vga_
+   Instance path: top/soc/vocoder/U$8/vga
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         68         0.5
+                               LUTGATE	         68         0.6
+                                PFUREG	         81         1.0
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$9_
+   Instance path: top/soc/vocoder/U$9
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	        516         3.8
+                               LUTGATE	        400         3.7
+                                LUTCCU	        116         4.6
+                                PFUREG	        385         4.8
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+       Z\top.soc.vocoder.U$9.bandpass_	          1         1.4
+       Z\top.soc.vocoder.U$9.envelope_	          1         1.6
+           Z\top.soc.vocoder.U$9.mult_	          1         0.5
+            Z\top.soc.vocoder.U$9.vga_	          1         0.3
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$9.bandpass_
+   Instance path: top/soc/vocoder/U$9/bandpass
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        192         1.4
+                               LUTGATE	        144         1.3
+                                LUTCCU	         48         1.9
+                                PFUREG	        149         1.8
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$9.envelope_
+   Instance path: top/soc/vocoder/U$9/envelope
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        222         1.6
+                               LUTGATE	        154         1.4
+                                LUTCCU	         68         2.7
+                                PFUREG	         90         1.1
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$9.mult_
+   Instance path: top/soc/vocoder/U$9/mult
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                MULT18	       1.00         5.0
+                                  LUT4	         64         0.5
+                               LUTGATE	         64         0.6
+                                PFUREG	         69         0.9
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.U$9.vga_
+   Instance path: top/soc/vocoder/U$9/vga
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         38         0.3
+                               LUTGATE	         38         0.4
+                                PFUREG	         77         1.0
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.mux_
+   Instance path: top/soc/vocoder/mux
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        382         2.8
+                               LUTGATE	        364         3.4
+                                LUTCCU	         18         0.7
+                                PFUREG	         40         0.5
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.synth_
+   Instance path: top/soc/vocoder/synth
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        138         1.0
+                               LUTGATE	         62         0.6
+                                LUTRAM	         24        26.7
+                                LUTCCU	         52         2.0
+                                PFUREG	         92         1.1
+                                   EBR	          1         9.1
+SUB MODULES
+                                  cell	      count    LUT4 Usage(%)
+          Z\top.soc.vocoder.synth.ram_	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.vocoder.synth.ram_
+   Instance path: top/soc/vocoder/synth/ram
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	          2         0.0
+                               LUTGATE	          2         0.0
+                                PFUREG	         15         0.2
+                                   EBR	          1         9.1
+---------------------------------------------------
+Report for cell Z\top.soc.wb_arbiter_
+   Instance path: top/soc/wb_arbiter
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         64         0.5
+                               LUTGATE	         64         0.6
+                                PFUREG	          1         0.0
+---------------------------------------------------
+Report for cell Z\top.soc.wb_decoder_
+   Instance path: top/soc/wb_decoder
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         73         0.5
+                               LUTGATE	         73         0.7
+---------------------------------------------------
+Report for cell Z\top.soc.wb_to_csr_
+   Instance path: top/soc/wb_to_csr
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	        102         0.8
+                               LUTGATE	        102         0.9
+                                PFUREG	         36         0.4
+---------------------------------------------------
+Report for cell Z\top.soc.wb_to_lmmi_
+   Instance path: top/soc/wb_to_lmmi
+                     Cell usage:
+                                  cell	      count    Res Usage(%)
+                                  LUT4	         56         0.4
+                               LUTGATE	         56         0.5
+                                PFUREG	         36         0.4

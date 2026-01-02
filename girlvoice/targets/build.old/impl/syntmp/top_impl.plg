@@ -1,0 +1,27 @@
+@P:  Worst Slack : -3.007
+@P:  _top_pll_|clk_inferred_clock - Estimated Frequency : 124.9 MHz
+@P:  _top_pll_|clk_inferred_clock - Requested Frequency : 200.0 MHz
+@P:  _top_pll_|clk_inferred_clock - Estimated Period : 8.007
+@P:  _top_pll_|clk_inferred_clock - Requested Period : 5.000
+@P:  _top_pll_|clk_inferred_clock - Slack : -3.007
+@P:  _top_pll_|fast_clk_inferred_clock - Estimated Frequency : 216.4 MHz
+@P:  _top_pll_|fast_clk_inferred_clock - Requested Frequency : 200.0 MHz
+@P:  _top_pll_|fast_clk_inferred_clock - Estimated Period : 4.620
+@P:  _top_pll_|fast_clk_inferred_clock - Requested Period : 5.000
+@P:  _top_pll_|fast_clk_inferred_clock - Slack : 0.380
+@P:  clk12_0__io - Estimated Frequency : NA
+@P:  clk12_0__io - Requested Frequency : 12.0 MHz
+@P:  clk12_0__io - Estimated Period : NA
+@P:  clk12_0__io - Requested Period : 83.333
+@P:  clk12_0__io - Slack : NA
+@P:  clk12_clk - Estimated Frequency : NA
+@P:  clk12_clk - Requested Frequency : 12.0 MHz
+@P:  clk12_clk - Estimated Period : NA
+@P:  clk12_clk - Requested Period : 83.333
+@P:  clk12_clk - Slack : NA
+@P:  System - Estimated Frequency : 144.8 MHz
+@P:  System - Requested Frequency : 200.0 MHz
+@P:  System - Estimated Period : 6.908
+@P:  System - Requested Period : 5.000
+@P:  System - Slack : -1.908
+@P:  CPU Time : 0h:01m:46s

@@ -1,0 +1,1 @@
+ -link  -top  top  -multisrs  /build/impl/synwork/top_impl_comp.srs  -osyn  /build/impl/synwork/top_impl_mult.srs  -log  /build/impl/synlog/top_impl_multi_srs_gen.srr 

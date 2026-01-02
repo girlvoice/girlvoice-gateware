@@ -1,0 +1,1198 @@
+
+                         Lattice Mapping Report File
+
+Design:  top
+Family:  LIFCL
+Device:  LIFCL-17
+Package: QFN72
+Performance Grade:  8_High-Performance_1.0V
+
+Mapper:    version Radiant Software (64-bit) 2025.1.0.39.0
+Mapped on: Fri Jan  2 22:28:27 2026
+
+Design Information
+------------------
+
+Command line:   map -pdc /build/top.pdc -i top_impl_syn.udb -o top_impl_map.udb
+     -mp top_impl.mrp -hierrpt -gui -msgset /build/promote.xml
+
+Design Summary
+--------------
+
+   Number of registers:        8059 out of 13941 (58%)
+      Number of SLICE         registers: 8055 out of 13824 (58%)
+      Number of PIO Input     registers:    2 out of    39 (5%)
+      Number of PIO Output    registers:    2 out of    39 (5%)
+      Number of PIO Tri-State registers:    0 out of    39 (0%)
+   Number of LUT4s:            13488 out of 13824 (98%)
+      Number used as logic LUT4s:                       10852
+      Number used as distributed RAM:                     90 (6 per 16X4 RAM)
+      Number used as ripple logic:                      2546 (2 per CCU2)
+   Number of PIOs used/reserved:   23 out of    39 (59%)
+      Number of PIOs reserved:      3 (per sysConfig and/or prohibit constraint)
+      Number of PIOs used:         20
+        Number of PIOs used for single ended IO:        20
+        Number of PIO pairs used for differential IO:    0
+        Number allocated to regular speed PIOs:     8 out of   17 (47%)
+        Number allocated to high speed PIOs:       12 out of   22 (55%)
+   Number of Dedicated IO used for ADC/DPHY:    0 out of   10 (0%)
+   Number of IDDR/ODDR/TDDR functions used:      0 out of   100 (0%)
+   Number of IOs using at least one DDR function: 0 (0 differential)
+   Number of Block RAMs:          11 out of 24 (46%)
+   Number of Large RAMs:          4 out of 5 (80%)
+   Number of Logical DSP Functions:
+      Number of Pre-Adders (9+9):    0 out of 48 (0%)
+      Number of Multipliers (18x18): 20 out of 24 (83%)
+         Number of 9X9:        0 (1 18x18 = 2   9x9)
+         Number of 18x18:     16 (1 18x18 = 1 18x18)
+         Number of 18x36:      2 (2 18x18 = 1 18x36)
+         Number of 36x36:      0 (4 18x18 = 1 36x36)
+      Number of 54-bit Accumulators: 0 out of 12 (0%)
+      Number of 18-bit Registers:    2 out of 48 (4%)
+   Number of Physical DSP Components:
+      Number of PREADD9:             40 out of 48 (83%)
+         Used PREADD9:               0
+         Bypassed PREADD9:           40
+      Number of MULT9:               40 out of 48 (83%)
+         Used MULT9:                 40
+         Bypassed MULT9:             0
+      Number of MULT18:              20 out of 24 (83%)
+         Used MULT18:                20
+         Disabled MULT18:            0
+      Number of MULT18X36:           2 out of 12 (17%)
+
+                                    Page 1
+
+
+
+
+
+Design Summary (cont)
+---------------------
+         Used MULT18X36:             2
+         Disabled MULT18X36:         0
+      Number of MULT36:              0 out of 6 (0%)
+      Number of ACC54:               0 out of 12 (0%)
+      Number of REG18:               38 out of 48 (79%)
+         Used REG18:                 2
+         Bypassed REG18:             36
+   Number of PLLs:                1 out of 2 (50%)
+   Number of DDRDLLs:             0 out of 2 (0%)
+   Number of DLLDELs:             0 out of 7 (0%)
+   Number of DQSs:                0 out of 3 (0%)
+   Number of DCSs:                0 out of 1 (0%)
+   Number of DCCs:                0 out of 62 (0%)
+   Number of PCLKDIVs:            0 out of 1 (0%)
+   Number of ECLKDIVs:            0 out of 12 (0%)
+   Number of ECLKSYNCs:           0 out of 12 (0%)
+   Number of ADC Blocks:          0 out of 1 (0%)
+   Number of SGMIICDRs:           0 out of 2 (0%)
+   Number of PMUs:                0 out of 1 (0%)
+   Number of BNKREF18s:           0 out of 3 (0%)
+   Number of BNKREF33s:           0 out of 2 (0%)
+   Number of I2CFIFOs:            1 out of 1 (100%)
+   Number of DPHYs:               0 out of 1 (0%)
+   Number of Oscillator:          0 out of 1 (0%)
+   Number of GSR:                 0 out of 1 (0%)
+   Number of Cryptographic Block: 0 out of 1 (0%)
+   Number of Config IP:           0 out of 1 (0%)
+                 TSALL:           0 out of 1 (0%)
+   Number of JTAG:                0 out of 1 (0%)
+   Number of Config LMMI:         0 out of 1 (0%)
+   Number of Config MULTIBOOT:    1 out of 1 (100%)
+   Number of SED:                 0 out of 1 (0%)
+   Number of Config WDT:          0 out of 1 (0%)
+   Number of Clocks:  3
+      Net clk12_clk: 1 loads, 1 rising, 0 falling (Driver: Port clk12_0__io)
+      Net fast_clk[0]: 113 loads, 113 rising, 0 falling (Driver: Pin
+     pll.U$0.PLL_inst/CLKOP)
+      Net clk[0]: 7993 loads, 7993 rising, 0 falling (Driver: Pin
+     pll.U$0.PLL_inst/CLKOS)
+   Number of Clock Enables:  266
+      Net VCC: 14 loads, 0 SLICEs
+      Net soc.i2s_tx.un2_$5_axb3: 5 loads, 5 SLICEs
+      Net $4_20_RNIEQNTE_0: 1 loads, 0 SLICEs
+      Net soc.N_255_i: 15 loads, 15 SLICEs
+      Net soc.cpu.vexriscv.memory_arbitration_isStuck_i: 358 loads, 354 SLICEs
+      Net soc.cpu.vexriscv.toplevel_dataCache_1_io_mem_cmd_rValidN: 70 loads, 70
+     SLICEs
+      Net soc.cpu.vexriscv.memory_DivPlugin_div_result_0_sqmuxa: 32 loads, 32
+     SLICEs
+      Net soc.cpu.vexriscv.IBusCachedPlugin_cache.lineLoader_valid_RNO: 1 loads,
+     1 SLICEs
+      Net soc.cpu.vexriscv.IBusCachedPlugin_cache.lineLoader_flushPending_1_sqmu
+     xa_i: 1 loads, 1 SLICEs
+      Net soc.cpu.vexriscv.IBusCachedPlugin_cache.lineLoader_cmdSent_1_sqmuxa_i:
+     1 loads, 1 SLICEs
+      Net soc.cpu.vexriscv.memory_DivPlugin_accumulator_2_sqmuxa_i: 32 loads, 32
+     SLICEs
+
+                                    Page 2
+
+
+
+
+
+Design Summary (cont)
+---------------------
+      Net soc.cpu.vexriscv.CsrPlugin_pipelineLiberator_pcValids_0_1_sqmuxa_i: 1
+     loads, 1 SLICEs
+      Net soc.cpu.vexriscv.CsrPlugin_pipelineLiberator_pcValids_1_1_sqmuxa_i: 1
+     loads, 1 SLICEs
+      Net soc.cpu.vexriscv.CsrPlugin_pipelineLiberator_pcValids_2_1_sqmuxa_i: 1
+     loads, 1 SLICEs
+      Net soc.cpu.vexriscv.when_Fetcher_l133: 1 loads, 1 SLICEs
+      Net soc.cpu.vexriscv.IBusCachedPlugin_fetchPc_pcReg_1_sqmuxa_i: 49 loads,
+     49 SLICEs
+      Net soc.cpu.vexriscv._zz_iBus_rsp_valid: 2 loads, 0 SLICEs
+      Net soc.cpu.vexriscv.IBusCachedPlugin_cache.IBusCachedPlugin_iBusRsp_stage
+     s_1_input_ready: 3 loads, 0 SLICEs
+      Net soc.cpu.vexriscv._zz_IBusCachedPlugin_iBusRsp_stages_1_input_valid_1_1
+     _sqmuxa_i: 1 loads, 1 SLICEs
+      Net soc.cpu.vexriscv.IBusCachedPlugin_iBusRsp_stages_1_output_valid: 2
+     loads, 2 SLICEs
+      Net
+     soc.cpu.vexriscv.IBusCachedPlugin_decompressor_throw2BytesReg_1_sqmuxa_i: 1
+     loads, 1 SLICEs
+      Net soc.cpu.vexriscv.when_Fetcher_l288: 16 loads, 16 SLICEs
+      Net soc.cpu.vexriscv.IBusCachedPlugin_decompressor_bufferValid_1_sqmuxa_i:
+     1 loads, 1 SLICEs
+      Net soc.cpu.vexriscv.CsrPlugin_mstatus_MPP_2_sqmuxa_i: 1 loads, 1 SLICEs
+      Net soc.cpu.vexriscv._zz_IBusCachedPlugin_injector_decodeInput_valid_1_sqm
+     uxa_i: 1 loads, 1 SLICEs
+      Net soc.cpu.vexriscv.CsrPlugin_exceptionPortCtrl_exceptionContext_badAddr_
+     3_sqmuxa_i: 36 loads, 36 SLICEs
+      Net soc.cpu.vexriscv.CsrPlugin_mstatus_MIE_2_sqmuxa_i: 2 loads, 2 SLICEs
+      Net soc.cpu.vexriscv.decode_arbitration_isStuckByOthers_i: 37 loads, 37
+     SLICEs
+      Net soc.cpu.vexriscv.lastStageRegFileWrite_valid: 2 loads, 0 SLICEs
+      Net soc.cpu.vexriscv.when_Pipeline_l151: 2 loads, 2 SLICEs
+      Net soc.cpu.vexriscv.CsrPlugin_mie_MSIE_0_sqmuxa: 3 loads, 3 SLICEs
+      Net soc.cpu.vexriscv.CsrPlugin_mscratch_0_sqmuxa: 32 loads, 32 SLICEs
+      Net soc.cpu.vexriscv.CsrPlugin_mtvec_base_0_sqmuxa: 30 loads, 30 SLICEs
+      Net soc.cpu.vexriscv._zz_CsrPlugin_csrMapping_readDataInit_0_sqmuxa: 32
+     loads, 32 SLICEs
+      Net soc.cpu.vexriscv.toplevel_dataCache_1_io_mem_cmd_s2mPipe_ready: 71
+     loads, 71 SLICEs
+      Net soc.cpu.vexriscv.toplevel_dataCache_1_io_mem_cmd_rValidN_1_sqmuxa_i: 3
+     loads, 3 SLICEs
+      Net soc.cpu.vexriscv.when_Pipeline_l124_2: 32 loads, 32 SLICEs
+      Net soc.cpu.vexriscv.when_Pipeline_l151_1: 1 loads, 1 SLICEs
+      Net soc.cpu.vexriscv.when_DBusCachedPlugin_l554_i: 210 loads, 210 SLICEs
+      Net soc.cpu.vexriscv.IBusCachedPlugin_cache.lineLoader_write_tag_0_valid:
+     1 loads, 0 SLICEs
+      Net soc.cpu.vexriscv.CsrPlugin_interrupt_targetPrivilege_0_sqmuxa: 1
+     loads, 1 SLICEs
+      Net soc.cpu.vexriscv.when_Pipeline_l151_2: 1 loads, 1 SLICEs
+      Net soc.cpu.vexriscv.dataCache_1.ways_0_data_symbol0_ways_0_data_symbol0_0
+     _RNO_7: 1 loads, 0 SLICEs
+      Net soc.cpu.vexriscv.dataCache_1.ways_0_data_symbol1_ways_0_data_symbol1_0
+     _RNO_7: 1 loads, 0 SLICEs
+      Net soc.cpu.vexriscv.dataCache_1.ways_0_data_symbol2_ways_0_data_symbol2_0
+     _RNO_7: 1 loads, 0 SLICEs
+      Net soc.cpu.vexriscv.dataCache_1.ways_0_data_symbol3_ways_0_data_symbol3_0
+     _RNO_7: 1 loads, 0 SLICEs
+
+                                    Page 3
+
+
+
+
+
+Design Summary (cont)
+---------------------
+      Net soc.cpu.vexriscv.dataCache_1.stageB_flusher_counter_1_sqmuxa_i: 1
+     loads, 1 SLICEs
+      Net soc.cpu.vexriscv.CsrPlugin_mcause_interrupt_1_sqmuxa_i: 5 loads, 5
+     SLICEs
+      Net soc.cpu.vexriscv.CsrPlugin_mtval_1_sqmuxa_i: 32 loads, 32 SLICEs
+      Net soc.cpu.vexriscv.CsrPlugin_mepc_1_sqmuxa_i: 32 loads, 32 SLICEs
+      Net soc.cpu.vexriscv.dataCache_1.memCmdSent_1_sqmuxa_i: 1 loads, 1 SLICEs
+      Net soc.cpu.vexriscv.dataCache_1.when_DataCache_l667: 5 loads, 0 SLICEs
+      Net soc.cpu.vexriscv.execute_arbitration_isStuck_i: 193 loads, 193 SLICEs
+      Net soc.cpu.vexriscv.dataCache_1.tagsWriteCmd_valid: 1 loads, 0 SLICEs
+      Net soc.cpu.vexriscv.dataCache_1.stageB_flusher_waitDone_en: 1 loads, 1
+     SLICEs
+      Net soc.cpu.vexriscv.dataCache_1.when_DataCache_l829: 1 loads, 1 SLICEs
+      Net soc.cpu.vexriscv.dataCache_1.un1_tagsWriteCmd_valid_0_sqmuxa_3_i: 1
+     loads, 1 SLICEs
+      Net soc.cpu.vexriscv.dataCache_1.loader_valid_1_sqmuxa_i: 1 loads, 1
+     SLICEs
+      Net soc.envelope_csr.Z$8: 15 loads, 15 SLICEs
+      Net soc.envelope_csr.Z$10: 15 loads, 15 SLICEs
+      Net soc.envelope_csr.Z$14: 15 loads, 15 SLICEs
+      Net soc.envelope_csr.Z$16: 15 loads, 15 SLICEs
+      Net soc.envelope_csr.Z$18: 15 loads, 15 SLICEs
+      Net soc.envelope_csr.Z$20: 15 loads, 15 SLICEs
+      Net soc.envelope_csr.Z$24: 15 loads, 15 SLICEs
+      Net soc.envelope_csr.Z$26: 15 loads, 15 SLICEs
+      Net soc.envelope_csr.Z$28: 15 loads, 15 SLICEs
+      Net soc.envelope_csr.Z$6: 15 loads, 15 SLICEs
+      Net soc.envelope_csr.Z$12: 15 loads, 15 SLICEs
+      Net soc.envelope_csr.Z$4: 15 loads, 15 SLICEs
+      Net soc.envelope_csr.Z$2: 15 loads, 15 SLICEs
+      Net soc.envelope_csr.Z$22: 15 loads, 15 SLICEs
+      Net soc.envelope_csr.bridge.mux.N_589_i: 15 loads, 15 SLICEs
+      Net soc.gpo1.bridge.element__w_stb: 4 loads, 4 SLICEs
+      Net soc.gpo1.bridge.Output.pin__0.un1_port__w_stb: 1 loads, 1 SLICEs
+      Net soc.gpo1.bridge.Output.pin__1.un1_port__w_stb_0: 1 loads, 1 SLICEs
+      Net soc.gpo1.bridge.mux.Z$10: 4 loads, 4 SLICEs
+      Net soc.gpo1.bridge.mux.N_562_i: 4 loads, 4 SLICEs
+      Net soc.Z$11: 142 loads, 142 SLICEs
+      Net soc.i2s_rx.bit_count_RNI9HF6B[4]: 16 loads, 16 SLICEs
+      Net soc.Z$11_1: 530 loads, 530 SLICEs
+      Net soc.i2s_rx.N_442_i: 5 loads, 5 SLICEs
+      Net soc.i2s_tx.Z$16_1_sqmuxa_i: 16 loads, 16 SLICEs
+      Net soc.led0.bridge.element__w_stb: 2 loads, 2 SLICEs
+      Net soc.led0.bridge.Output.pin__0.un1_port__w_stb_1: 1 loads, 1 SLICEs
+      Net soc.led0.bridge.mux.N_539_i: 2 loads, 2 SLICEs
+      Net soc.led0.bridge.mux.N_1163_i: 2 loads, 2 SLICEs
+      Net soc.spi0.bridge.mux.Z$31: 10 loads, 10 SLICEs
+      Net soc.spi0.bridge.mux.w_shadow__2__w_en: 8 loads, 8 SLICEs
+      Net soc.spi0.bridge.mux.w_shadow__1__w_en: 8 loads, 8 SLICEs
+      Net soc.spi0.bridge.mux.w_shadow__3__w_en: 8 loads, 8 SLICEs
+      Net soc.spi0.bridge.mux.N_518_i: 8 loads, 8 SLICEs
+      Net soc.spi0.bridge.mux.r_shadow__1__w_en: 8 loads, 8 SLICEs
+      Net soc.spi0.bridge.element__w_stb: 18 loads, 18 SLICEs
+      Net soc.Z$23_1_3_1: 1 loads, 1 SLICEs
+      Net soc.fsm_state_0[1]: 8 loads, 8 SLICEs
+      Net soc.timer0.Z$6_0_sqmuxa_1_i: 1 loads, 1 SLICEs
+      Net soc.timer0.U$0.element__w_stb: 1 loads, 1 SLICEs
+
+                                    Page 4
+
+
+
+
+
+Design Summary (cont)
+---------------------
+      Net soc.timer0.r_datae: 32 loads, 32 SLICEs
+      Net soc.timer0.U$0.element__w_stb$20: 1 loads, 1 SLICEs
+      Net soc.timer0.U$0.mux.Z$47: 8 loads, 8 SLICEs
+      Net soc.timer0.U$0.mux.r_shadow__2__w_en: 16 loads, 16 SLICEs
+      Net soc.timer0.U$0.mux.r_shadow__1__w_en: 8 loads, 8 SLICEs
+      Net soc.timer0.U$0.mux.N_494_i: 8 loads, 8 SLICEs
+      Net soc.timer0.U$0.mux.w_shadow__2__w_en: 8 loads, 8 SLICEs
+      Net soc.timer0.U$0.mux.w_shadow__1__w_en: 8 loads, 8 SLICEs
+      Net soc.timer0.U$0.mux.w_shadow__0__w_en: 8 loads, 8 SLICEs
+      Net soc.timer0.U$0.element__w_stb$25: 32 loads, 32 SLICEs
+      Net soc.timer0.N_460_i: 1 loads, 1 SLICEs
+      Net soc.timer0.N_463_i: 1 loads, 1 SLICEs
+      Net soc.timer0.U$1.element__w_stb$23: 1 loads, 1 SLICEs
+      Net soc.uart0.rx_avail: 1 loads, 1 SLICEs
+      Net soc.uart0.rdy$32: 8 loads, 8 SLICEs
+      Net soc.uart0.bridge.element__w_stb$29: 24 loads, 24 SLICEs
+      Net soc.uart0.bridge.mux.N_454_i: 8 loads, 8 SLICEs
+      Net soc.uart0.bridge.mux.N_452_i: 16 loads, 16 SLICEs
+      Net soc.uart0.bridge.mux.w_shadow__2__w_en: 8 loads, 8 SLICEs
+      Net soc.uart0.bridge.mux.w_shadow__1__w_en: 8 loads, 8 SLICEs
+      Net soc.uart0.bridge.mux.w_shadow__0__w_en: 8 loads, 8 SLICEs
+      Net soc.uart0.rx.fsm_state[1]: 24 loads, 24 SLICEs
+      Net soc.uart0.rx.N_422_i: 4 loads, 4 SLICEs
+      Net soc.uart0.rx.fsm_state_RNI36J49_0[1]: 9 loads, 8 SLICEs
+      Net soc.uart0.rx.un1_$17_0: 2 loads, 2 SLICEs
+      Net soc.uart0.rx.fsm_state_RNIAACFB[1]: 8 loads, 8 SLICEs
+      Net soc.uart0.tx.bitnoe: 4 loads, 4 SLICEs
+      Net soc.vocoder.U$10.bandpass.N_167_i: 17 loads, 17 SLICEs
+      Net soc.vocoder.U$10.bandpass.fsm_state_RNIOFFE6[1]: 6 loads, 6 SLICEs
+      Net soc.vocoder.U$10.bandpass.fsm_state_RNI5G7IA_0[1]: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$10.N_306: 38 loads, 38 SLICEs
+      Net soc.vocoder.U$10.envelope.N_783_i: 4 loads, 4 SLICEs
+      Net soc.vocoder.U$10.fsm_state: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$10.envelope.un1_$2513_1_0: 59 loads, 59 SLICEs
+      Net soc.vocoder.source_7__ready: 33 loads, 33 SLICEs
+      Net soc.vocoder.U$10.vga.fsm_state_RNIOPJP6: 16 loads, 16 SLICEs
+      Net soc.vocoder.U$11.bandpass.N_189_i: 22 loads, 22 SLICEs
+      Net soc.vocoder.U$11.bandpass.sink__ready_0_o4_RNI3QBAJ: 6 loads, 6 SLICEs
+      Net soc.vocoder.U$11.Z$6_i_i_0_a4okb: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$11.N_317: 34 loads, 34 SLICEs
+      Net soc.vocoder.U$11.fsm_state_scalar: 31 loads, 31 SLICEs
+      Net soc.vocoder.U$11.envelope.N_319_i: 4 loads, 4 SLICEs
+      Net soc.vocoder.U$11.envelope.un1_$2513_1: 46 loads, 46 SLICEs
+      Net soc.vocoder.source_8__ready: 34 loads, 34 SLICEs
+      Net soc.vocoder.U$11.vga.fsm_state_RNIQKT87: 16 loads, 16 SLICEs
+      Net soc.vocoder.U$12.bandpass.fsm_state_RNINSD51_0[1]: 3 loads, 3 SLICEs
+      Net soc.vocoder.U$12.Z$17_2_3_i_a2_1okb: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$12.bandpass.N_525_i_0_i: 37 loads, 37 SLICEs
+      Net soc.vocoder.U$12.bandpass.N_38256[0]: 23 loads, 23 SLICEs
+      Net soc.vocoder.U$12.envelope.Z$23_sn_N_3_i: 4 loads, 4 SLICEs
+      Net soc.vocoder.U$12.fsm_state: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$12.envelope.un1_$2513_1_0_0: 33 loads, 33 SLICEs
+      Net soc.vocoder.source_9__ready: 43 loads, 43 SLICEs
+      Net soc.vocoder.U$12.vga.N_846: 16 loads, 16 SLICEs
+      Net soc.vocoder.U$13.bandpass.fsm_state_RNIQLBSB[1]: 2 loads, 2 SLICEs
+      Net soc.vocoder.U$13.bandpass.fsm_state_RNI1AS2E[1]: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$13.bandpass.N_8: 37 loads, 37 SLICEs
+
+                                    Page 5
+
+
+
+
+
+Design Summary (cont)
+---------------------
+      Net soc.vocoder.U$13.bandpass.N_284_i: 28 loads, 28 SLICEs
+      Net soc.vocoder.U$13.fsm_state_scalar: 31 loads, 31 SLICEs
+      Net soc.vocoder.U$13.envelope.Z$23_sn_N_3_i: 4 loads, 4 SLICEs
+      Net soc.vocoder.U$13.envelope.un1_$2513_1_0_0_0: 33 loads, 33 SLICEs
+      Net soc.vocoder.source_10__ready: 42 loads, 42 SLICEs
+      Net soc.vocoder.U$13.vga.N_599: 16 loads, 16 SLICEs
+      Net soc.vocoder.U$14.bandpass.fsm_state_RNITE9JE_0[1]: 2 loads, 2 SLICEs
+      Net soc.vocoder.U$14.bandpass.fsm_state_RNI5O0OI[1]: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$14.bandpass.N_861_i: 37 loads, 37 SLICEs
+      Net soc.vocoder.U$14.bandpass.un1_source__valid7_1_0_x3_0_x2: 24 loads, 24
+     SLICEs
+      Net soc.vocoder.U$14.envelope.Z$23_sn_N_3_i: 4 loads, 4 SLICEs
+      Net soc.vocoder.fsm_state: 46 loads, 46 SLICEs
+      Net soc.vocoder.U$14.envelope.un1_$2513_1_0_0_1: 33 loads, 33 SLICEs
+      Net soc.vocoder.U$14.N_380_i: 15 loads, 15 SLICEs
+      Net soc.vocoder.U$14.vga.fsm_state_RNILRTKE: 17 loads, 17 SLICEs
+      Net soc.vocoder.U$14.vga.N_923: 16 loads, 16 SLICEs
+      Net soc.vocoder.U$15.bandpass.fsm_state_RNI087A9_0[1]: 3 loads, 3 SLICEs
+      Net soc.vocoder.U$15.bandpass.fsm_state_RNILEHT9_0[1]: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$15.source__valid_i_0_o2: 36 loads, 36 SLICEs
+      Net soc.vocoder.U$15.bandpass.un1_source__valid7_1_0: 26 loads, 26 SLICEs
+      Net soc.vocoder.U$15.envelope.N_274: 4 loads, 4 SLICEs
+      Net soc.vocoder.U$15.fsm_state: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$15.envelope.un1_$2513_1_0_1: 33 loads, 33 SLICEs
+      Net soc.vocoder.source_12__ready: 35 loads, 35 SLICEs
+      Net soc.vocoder.U$15.vga.fsm_state_RNI21569: 16 loads, 16 SLICEs
+      Net soc.vocoder.U$16.bandpass.sink_b_0_RNO[10]: 1 loads, 1 SLICEs
+      Net soc.vocoder.U$16.N_1011: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$16.bandpass.sink__valid$10_i: 34 loads, 34 SLICEs
+      Net soc.vocoder.U$16.bandpass.un1_source__valid7_1_0_0: 28 loads, 28
+     SLICEs
+      Net soc.vocoder.U$16.fsm_state_scalar: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$16.envelope.Z$23_sn_m2_i_a2: 4 loads, 4 SLICEs
+      Net soc.vocoder.U$16.envelope.un1_$2513_1_0_2: 33 loads, 33 SLICEs
+      Net soc.vocoder.source_13__ready: 31 loads, 31 SLICEs
+      Net soc.vocoder.U$16.vga.fsm_state_RNI4SEL1: 16 loads, 16 SLICEs
+      Net soc.vocoder.U$3.bandpass.fsm_state_RNI7HHUM_0[1]: 2 loads, 2 SLICEs
+      Net soc.vocoder.U$3.Z$17_2_3_i_a2_1okb: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$3.bandpass.N_61_i_0_i: 34 loads, 34 SLICEs
+      Net soc.vocoder.U$3.bandpass.N_38252[0]: 21 loads, 21 SLICEs
+      Net soc.vocoder.U$3.envelope.N_584_i: 4 loads, 4 SLICEs
+      Net soc.vocoder.U$3.fsm_state_scalar: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$3.envelope.un1_$2513_1_0_3: 58 loads, 58 SLICEs
+      Net soc.vocoder.source_0__ready: 37 loads, 37 SLICEs
+      Net soc.vocoder.U$3.vga.fsm_state_RNIS2KMC: 16 loads, 16 SLICEs
+      Net soc.vocoder.U$4.N_1572: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$4.bandpass.N_571_i: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$4.bandpass.N_961: 36 loads, 36 SLICEs
+      Net soc.vocoder.U$4.envelope.N_301: 4 loads, 4 SLICEs
+      Net soc.vocoder.U$4.fsm_state_scalar: 47 loads, 47 SLICEs
+      Net soc.vocoder.U$4.envelope.un1_$2513_1_0_0_2: 33 loads, 33 SLICEs
+      Net soc.vocoder.source_1__ready: 31 loads, 31 SLICEs
+      Net soc.vocoder.U$4.vga.fsm_state_RNIUTT55: 16 loads, 16 SLICEs
+      Net soc.vocoder.U$5.bandpass.sink_b_0_RNO[7]: 1 loads, 1 SLICEs
+      Net soc.vocoder.U$5.Z$6_i_i_a2okb: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$5.N_318: 36 loads, 36 SLICEs
+      Net soc.vocoder.U$5.bandpass.N_38250[0]: 26 loads, 26 SLICEs
+
+                                    Page 6
+
+
+
+
+
+Design Summary (cont)
+---------------------
+      Net soc.vocoder.U$5.envelope.Z$23_sn_m1_0_o4_i_o4_RNIOD4UQ: 4 loads, 4
+     SLICEs
+      Net soc.vocoder.U$5.fsm_state_scalar: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$5.envelope.N_877_i: 33 loads, 33 SLICEs
+      Net soc.vocoder.source_2__ready: 35 loads, 35 SLICEs
+      Net soc.vocoder.U$5.vga.fsm_state_RNI0P7LD: 16 loads, 16 SLICEs
+      Net soc.vocoder.U$6.bandpass.fsm_state_RNIUOVG6_0[1]: 2 loads, 2 SLICEs
+      Net soc.vocoder.U$6.Z$6_i_i_a2okb: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$6.N_205: 37 loads, 37 SLICEs
+      Net soc.vocoder.U$6.bandpass.un1_source__valid7_1: 25 loads, 25 SLICEs
+      Net soc.vocoder.U$6.envelope.N_25: 4 loads, 4 SLICEs
+      Net soc.vocoder.U$6.fsm_state_scalar: 31 loads, 31 SLICEs
+      Net soc.vocoder.U$6.envelope.un1_$2513_1_0_0_3: 33 loads, 33 SLICEs
+      Net soc.vocoder.source_3__ready: 43 loads, 43 SLICEs
+      Net soc.vocoder.U$6.vga.N_307: 16 loads, 16 SLICEs
+      Net soc.vocoder.U$7.bandpass.fsm_state_RNIJL8QH_0[1]: 2 loads, 2 SLICEs
+      Net soc.vocoder.U$7.Z$17_2_3_i_a2_1okb: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$7.bandpass.N_38248[0]: 23 loads, 23 SLICEs
+      Net soc.vocoder.U$7.sink__valid$10_i: 34 loads, 34 SLICEs
+      Net soc.vocoder.U$7.fsm_state: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$7.envelope.Z$23_sn_N_3_i: 4 loads, 4 SLICEs
+      Net soc.vocoder.U$7.envelope.un1_$2513_1_0_4: 42 loads, 42 SLICEs
+      Net soc.vocoder.source_4__ready: 42 loads, 42 SLICEs
+      Net soc.vocoder.U$7.vga.fsm_state_RNI4FRJE: 16 loads, 16 SLICEs
+      Net soc.vocoder.U$8.N_1549: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$8.bandpass.N_203_i: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$8.bandpass.N_938: 34 loads, 34 SLICEs
+      Net soc.vocoder.U$8.envelope.N_188: 4 loads, 4 SLICEs
+      Net soc.vocoder.U$8.fsm_state_scalar: 47 loads, 47 SLICEs
+      Net soc.vocoder.U$8.envelope.un1_$2513_1_0_0_4: 33 loads, 33 SLICEs
+      Net soc.vocoder.source_5__ready: 31 loads, 31 SLICEs
+      Net soc.vocoder.U$8.vga.fsm_state_RNI6A537: 16 loads, 16 SLICEs
+      Net soc.vocoder.U$9.bandpass.fsm_state_RNIP748F_0[1]: 2 loads, 2 SLICEs
+      Net soc.vocoder.U$9.N_85: 38 loads, 38 SLICEs
+      Net soc.vocoder.U$9.bandpass.Z$6_i_0_o2_0_o2_RNIA3QP01: 32 loads, 32
+     SLICEs
+      Net soc.vocoder.U$9.bandpass.un1_source__valid7_1_0_1: 25 loads, 25 SLICEs
+      Net soc.vocoder.NN_1: 32 loads, 32 SLICEs
+      Net soc.vocoder.U$9.envelope.Z$23_sn_N_3_i: 4 loads, 4 SLICEs
+      Net soc.vocoder.U$9.envelope.un1_$2513_1_0_0_5: 54 loads, 54 SLICEs
+      Net soc.vocoder.U$9.source_6__ready: 42 loads, 42 SLICEs
+      Net soc.vocoder.U$9.vga.fsm_state_RNI85FI7: 16 loads, 16 SLICEs
+      Net soc.vocoder.mux.fsm_state[1]: 17 loads, 17 SLICEs
+      Net soc.vocoder.mux.un1_$1012_i: 17 loads, 17 SLICEs
+      Net soc.vocoder.mux.Z$1013: 4 loads, 4 SLICEs
+      Net soc.vocoder.mux.fsm_state_RNIJP7LB[1]: 2 loads, 2 SLICEs
+      Net soc.vocoder.synth.N_42089[0]: 14 loads, 14 SLICEs
+      Net soc.vocoder.synth.Z$194: 17 loads, 16 SLICEs
+      Net soc.wb_arbiter.N_831_i: 1 loads, 1 SLICEs
+      Net soc.N_1145_i: 1 loads, 1 SLICEs
+      Net soc.wb_to_csr.cycle_RNIHBJVE[2]: 8 loads, 8 SLICEs
+      Net soc.wb_to_csr.cycle_RNIVQN3K[0]: 8 loads, 8 SLICEs
+      Net soc.wb_to_csr.cycle_RNIVQN3K_1[0]: 8 loads, 8 SLICEs
+      Net soc.wb_to_csr.cycle_RNIVQN3K_0[0]: 8 loads, 8 SLICEs
+      Net soc.wb_to_lmmi.cycle_RNI0DQGU[2]: 7 loads, 7 SLICEs
+      Net soc.wb_to_lmmi.cycle_RNI54T9E1[0]: 8 loads, 8 SLICEs
+      Net soc.wb_to_lmmi.cycle_RNIGJIJE1[0]: 8 loads, 8 SLICEs
+
+                                    Page 7
+
+
+
+
+
+Design Summary (cont)
+---------------------
+      Net soc.wb_to_lmmi.lmmi__wdata_i_o2_RNIPAG7R[0]: 8 loads, 8 SLICEs
+   Number of LSRs:  29
+      Net VCC: 73 loads, 0 SLICEs
+      Net soc.N_255_13: 1 loads, 1 SLICEs
+      Net soc.N_11096[0]: 134 loads, 134 SLICEs
+      Net soc.cpu.vexriscv.fb: 1 loads, 1 SLICEs
+      Net soc.cpu.vexriscv.Z$1lto31_6_i: 1 loads, 1 SLICEs
+      Net soc.cpu.vexriscv.CsrPlugin_mip_MSIPc_i: 1 loads, 1 SLICEs
+      Net soc.cpu.vexriscv.memory_arbitration_isStuck_i: 1 loads, 1 SLICEs
+      Net soc.cpu.vexriscv._zz_5c_RNI4TNR8: 6 loads, 6 SLICEs
+      Net soc.cpu.vexriscv.CsrPlugin_interrupt_code_0_sqmuxa: 1 loads, 1 SLICEs
+      Net soc.cpu.vexriscv.IBusCachedPlugin_cache.when_InstructionCache_l351: 8
+     loads, 8 SLICEs
+      Net soc.i2s_rx.dsp_split_kb_1060_i: 1 loads, 1 SLICEs
+      Net soc.i2s_tx.dsp_split_kb_1061_i: 1 loads, 1 SLICEs
+      Net soc.spi0.tx_fifo.N_38260[0]: 11 loads, 11 SLICEs
+      Net soc.vocoder.U$11.mult.input_a_ring0s: 1 loads, 1 SLICEs
+      Net soc.vocoder.U$13.mult.input_a_ring0s: 1 loads, 1 SLICEs
+      Net soc.vocoder.U$14.mult.input_a_ring0s: 1 loads, 1 SLICEs
+      Net soc.vocoder.U$15.mult.N_133: 4 loads, 4 SLICEs
+      Net soc.vocoder.U$16.mult.input_a_ring0s: 1 loads, 1 SLICEs
+      Net soc.vocoder.U$16.mult.N_491: 3 loads, 3 SLICEs
+      Net soc.vocoder.U$3.mult.N_791: 3 loads, 3 SLICEs
+      Net soc.vocoder.U$4.mult.input_a_ring0s: 1 loads, 1 SLICEs
+      Net soc.vocoder.U$5.mult.input_a_ring0s: 1 loads, 1 SLICEs
+      Net soc.vocoder.U$5.mult.N_811: 4 loads, 4 SLICEs
+      Net soc.vocoder.U$8.mult.input_a_ring0s: 1 loads, 1 SLICEs
+      Net soc.vocoder.U$9.mult.N_852: 2 loads, 2 SLICEs
+      Net soc.vocoder.synth.N_42089[0]: 4 loads, 4 SLICEs
+      Net soc.vocoder.synth.valid_regs_RNIV7PLH[13]: 13 loads, 13 SLICEs
+      Net soc.vocoder.synth.ram._1__1[0]: 15 loads, 15 SLICEs
+      Net soc.wb_bus__ack$198: 3 loads, 3 SLICEs
+   Top 10 highest fanout non-clock nets:
+      Net VCC: 1005 loads
+      Net soc.Z$11: 532 loads
+      Net soc.Z$11_1: 530 loads
+      Net soc.cpu.vexriscv.memory_arbitration_isStuck_i: 454 loads
+      Net soc.N_11096[0]: 264 loads
+      Net soc.cpu.vexriscv.when_DBusCachedPlugin_l554_i: 210 loads
+      Net soc.vocoder.mux.idx_Z[3]: 198 loads
+      Net soc.cpu.vexriscv.execute_arbitration_isStuck_i: 193 loads
+      Net soc.vocoder.CO0: 144 loads
+      Net soc.cpu.vexriscv.N_38245[0]: 140 loads
+
+
+
+
+
+   Number of warnings:  0
+   Number of criticals: 3
+   Number of errors:    0
+
+Design Errors/Criticals/Warnings
+--------------------------------
+
+CRITICAL <52281053> - map: There is no set_clock_uncertainty constraint on the
+     PLL clock output 'CLKOP' of instance 'pll/U$0.PLL_inst', or a
+     generate_uncertainty constraint for the entire design. Please see
+
+                                    Page 8
+
+
+
+
+
+Design Errors/Criticals/Warnings (cont)
+---------------------------------------
+     FPGA-AN-02059-1.0 - Lattice Radiant Timing Constraints Methodology for
+     further details.
+CRITICAL <52281053> - map: There is no set_clock_uncertainty constraint on the
+     PLL clock output 'CLKOS' of instance 'pll/U$0.PLL_inst', or a
+     generate_uncertainty constraint for the entire design. Please see
+     FPGA-AN-02059-1.0 - Lattice Radiant Timing Constraints Methodology for
+     further details.
+CRITICAL <52281053> - map: There is no set_clock_uncertainty constraint on the
+     PLL clock output 'CLKOS5' of instance 'pll/U$0.PLL_inst', or a
+     generate_uncertainty constraint for the entire design. Please see
+     FPGA-AN-02059-1.0 - Lattice Radiant Timing Constraints Methodology for
+     further details.
+
+IO (PIO) Attributes
+-------------------
+
++---------------------+-----------+-----------+-------+-------+-----------+
+| IO Name             | Direction | Levelmode |  IO   |  IO   | Special   |
+|                     |           |  IO_TYPE  |  REG  |  DDR  | IO Buffer |
++---------------------+-----------+-----------+-------+-------+-----------+
+| amp_0__clk__io      | OUTPUT    | LVCMOS18H |       |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| amp_0__data__io     | OUTPUT    | LVCMOS18H |       |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| amp_0__en__io       | OUTPUT    | LVCMOS18H |       |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| amp_0__lrclk__io    | OUTPUT    | LVCMOS18H |       |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| bl_0__io            | OUTPUT    | LVCMOS18H |       |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| btn_pwr_0__io       | INPUT     | LVCMOS18H | I     |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| clk12_0__io         | INPUT     | LVCMOS18H |       |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| dc_0__io            | OUTPUT    | LVCMOS33  |       |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| i2c_0__scl__io      | BIDIR     | LVCMOS33  |       |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| i2c_0__sda__io      | BIDIR     | LVCMOS33  |       |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| led_0__io           | OUTPUT    | LVCMOS18H |       |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| mic_0__clk__io      | OUTPUT    | LVCMOS18H |       |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| mic_0__data__io     | INPUT     | LVCMOS18H |       |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| mic_0__lrclk__io    | OUTPUT    | LVCMOS18H |       |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| pwr_en_0__io        | OUTPUT    | LVCMOS18H |       |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| spi_0__clk__io      | OUTPUT    | LVCMOS33  |       |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| spi_0__copi__io     | BIDIR     | LVCMOS33  | O     |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| spi_0__cs__io       | OUTPUT    | LVCMOS33  |       |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+| uart_0__rx__io      | INPUT     | LVCMOS33  | I     |       |           |
+
+                                    Page 9
+
+
+
+
+
+IO (PIO) Attributes (cont)
+--------------------------
++---------------------+-----------+-----------+-------+-------+-----------+
+| uart_0__tx__io      | OUTPUT    | LVCMOS33  | O     |       |           |
++---------------------+-----------+-----------+-------+-------+-----------+
+
+Removed logic
+-------------
+
+Block GSR_INST undriven or does not drive anything - clipped.
+Block VCC_cZ was optimized away.
+Block soc/vocoder/mux/fsm_state_RNIATJQ5[1] was optimized away.
+Block soc/vocoder/U$9/vga/fsm_state_RNI56P5 was optimized away.
+Block soc/vocoder/U$8/vga/fsm_state_RNI4OTM3 was optimized away.
+Block soc/vocoder/U$7/vga/fsm_state_RNI3A287 was optimized away.
+Block soc/vocoder/U$6/vga/fsm_state_RNI2S6P2 was optimized away.
+Block soc/vocoder/U$5/vga/fsm_state_RNI1EBA6 was optimized away.
+Block soc/vocoder/U$4/vga/fsm_state_RNI00GR1 was optimized away.
+Block soc/vocoder/U$3/vga/fsm_state_RNIVHKC5 was optimized away.
+Block soc/vocoder/U$16/vga/fsm_state_RNIJ83I was optimized away.
+Block soc/vocoder/U$15/vga/fsm_state_RNIIQ734 was optimized away.
+Block soc/vocoder/U$14/vga/fsm_state_RNIHCCK7 was optimized away.
+Block soc/vocoder/U$13/vga/fsm_state_RNIGUG53 was optimized away.
+Block soc/vocoder/U$12/vga/fsm_state_RNIFGLM6 was optimized away.
+Block soc/vocoder/U$11/vga/fsm_state_RNIE2Q72 was optimized away.
+Block soc/vocoder/U$10/vga/fsm_state_RNIDKUO5 was optimized away.
+Block soc/uart0/rx/fsm_state_RNIK5QU3[1] was optimized away.
+Block soc/uart0/rx/rdy_RNO was optimized away.
+Block soc/spi0_phy/fsm_state_RNIS4DP[1] was optimized away.
+Block soc/spi0_phy/pins__dq__oe_RNIC63Q4 was optimized away.
+Block soc/i2s_tx/clk_div_RNI1VE22[3] was optimized away.
+Block soc/cpu/vexriscv/dataCache_1/g0_sx_rn was optimized away.
+
+PLL/DLL Summary
+---------------
+
+PLL 1:                                 Pin/Node Value
+  PLL Instance Name:                            pll/U$0.PLL_inst
+  Input Reference Clock:               PIN      clk12_clk
+  Output Clock(P):                     NODE     fast_clk[0]
+  Output Clock(S):                     NODE     clk[0]
+  Output Clock(S2):                             NONE
+  Output Clock(S3):                             NONE
+  Output Clock(S4):                             NONE
+  Output Clock(S5):                    NODE     pll.Z$2
+  Feedback Signal:                     NODE     pll.Z$2
+  Reset Signal:                        NODE     GND
+  Standby Signal:                      NODE     GND
+  PLL LOCK signal:                              NONE
+  PLL Internal LOCK Signal:                     NONE
+  A Divider:                                    6
+  B Divider:                                    13
+  C Divider:                                    0
+  D Divider:                                    0
+  E Divider:                                    0
+  F Divider:                                    69
+  A Post Divider Shift:                         6
+  B Post Divider Shift:                         13
+  C Post Divider Shift:                         0
+
+                                   Page 10
+
+
+
+
+
+PLL/DLL Summary (cont)
+----------------------
+  D Post Divider Shift:                         0
+  E Post Divider Shift:                         0
+  F Post Divider Shift:                         69
+  A Section VCO Phase Shift:                    0
+  B Section VCO Phase Shift:                    0
+  C Section VCO Phase Shift:                    0
+  D Section VCO Phase Shift:                    0
+  E Section VCO Phase Shift:                    0
+  F Section VCO Phase Shift:                    0
+  CLKOP Trim Setting:                           0000
+  CLKOS Trim Setting:                           0000
+  CLKOS2 Trim Setting:                          0000
+  CLKOS3 Trim Setting:                          0000
+  CLKOS4 Trim Setting:                          0000
+  CLKOS5 Trim Setting:                          0000
+
+ASIC Components
+---------------
+
+Instance Name: pll/U$0.PLL_inst
+         Type: PLL_CORE
+Instance Name: soc/cpu/vexriscv/IBusCachedPlugin_cache/ways_0_tags_ways_0_tags_0
+     _0.PDPSC16K_MODE_inst
+         Type: EBR_CORE
+Instance Name: soc/cpu/vexriscv/IBusCachedPlugin_cache/banks_0_banks_0_0_0.PDPSC
+     16K_MODE_inst
+         Type: EBR_CORE
+Instance Name: soc/cpu/vexriscv/IBusCachedPlugin_cache/banks_0_banks_0_0_1.PDPSC
+     16K_MODE_inst
+         Type: EBR_CORE
+Instance Name: soc/cpu/vexriscv/dataCache_1/ways_0_tags_ways_0_tags_0_0.PDPSC16K
+     _MODE_inst
+         Type: EBR_CORE
+Instance Name: soc/cpu/vexriscv/dataCache_1/ways_0_data_symbol3_ways_0_data_symb
+     ol3_0_0.PDPSC16K_MODE_inst
+         Type: EBR_CORE
+Instance Name: soc/cpu/vexriscv/dataCache_1/ways_0_data_symbol2_ways_0_data_symb
+     ol2_0_0.PDPSC16K_MODE_inst
+         Type: EBR_CORE
+Instance Name: soc/cpu/vexriscv/dataCache_1/ways_0_data_symbol1_ways_0_data_symb
+     ol1_0_0.PDPSC16K_MODE_inst
+         Type: EBR_CORE
+Instance Name: soc/cpu/vexriscv/dataCache_1/ways_0_data_symbol0_ways_0_data_symb
+     ol0_0_0.PDPSC16K_MODE_inst
+         Type: EBR_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LL_0_31_0_.DSP_GUT[35:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LL_0_31_0_.DSP_GUT[35:0].PREADD9_H0
+         Type: PREADD9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LL_0_31_0_.DSP_GUT[35:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LL_0_31_0_.DSP_GUT[35:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LL_0_31_0_.DSP_GUT[35:0].MULT18_0
+         Type: MULT18_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LL_0_31_0_.DSP_GUT[35:0].REG18_L0_0
+         Type: REG18_CORE
+
+                                   Page 11
+
+
+
+
+
+ASIC Components (cont)
+----------------------
+Instance Name: soc/cpu/vexriscv/execute_MUL_LL_0_31_0_.DSP_GUT[35:0].REG18_L0_1
+         Type: REG18_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LH_0_48_0_.DSP_GUT[53:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LH_0_48_0_.DSP_GUT[53:0].PREADD9_H0
+         Type: PREADD9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LH_0_48_0_.DSP_GUT[53:0].PREADD9_L1
+         Type: PREADD9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LH_0_48_0_.DSP_GUT[53:0].PREADD9_H1
+         Type: PREADD9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LH_0_48_0_.DSP_GUT[53:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LH_0_48_0_.DSP_GUT[53:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LH_0_48_0_.DSP_GUT[53:0].MULT9_L1
+         Type: MULT9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LH_0_48_0_.DSP_GUT[53:0].MULT9_H1
+         Type: MULT9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LH_0_48_0_.DSP_GUT[53:0].MULT18_0
+         Type: MULT18_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LH_0_48_0_.DSP_GUT[53:0].MULT18_1
+         Type: MULT18_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LH_0_48_0_.DSP_GUT[53:0].MULT18X36_0
+         Type: MULT18X36_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LH_0_48_0_.DSP_GUT[53:0].REG18_L0_0
+         Type: REG18_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LH_0_48_0_.DSP_GUT[53:0].REG18_L0_1
+         Type: REG18_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_LH_0_48_0_.DSP_GUT[53:0].REG18_L1_0
+         Type: REG18_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HL_0_48_0_.DSP_GUT[53:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HL_0_48_0_.DSP_GUT[53:0].PREADD9_H0
+         Type: PREADD9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HL_0_48_0_.DSP_GUT[53:0].PREADD9_L1
+         Type: PREADD9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HL_0_48_0_.DSP_GUT[53:0].PREADD9_H1
+         Type: PREADD9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HL_0_48_0_.DSP_GUT[53:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HL_0_48_0_.DSP_GUT[53:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HL_0_48_0_.DSP_GUT[53:0].MULT9_L1
+         Type: MULT9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HL_0_48_0_.DSP_GUT[53:0].MULT9_H1
+         Type: MULT9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HL_0_48_0_.DSP_GUT[53:0].MULT18_0
+         Type: MULT18_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HL_0_48_0_.DSP_GUT[53:0].MULT18_1
+         Type: MULT18_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HL_0_48_0_.DSP_GUT[53:0].MULT18X36_0
+         Type: MULT18X36_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HL_0_48_0_.DSP_GUT[53:0].REG18_L0_0
+         Type: REG18_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HL_0_48_0_.DSP_GUT[53:0].REG18_L0_1
+         Type: REG18_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HL_0_48_0_.DSP_GUT[53:0].REG18_L1_0
+
+                                   Page 12
+
+
+
+
+
+ASIC Components (cont)
+----------------------
+         Type: REG18_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HH_0_31_0_.DSP_GUT[35:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HH_0_31_0_.DSP_GUT[35:0].PREADD9_H0
+         Type: PREADD9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HH_0_31_0_.DSP_GUT[35:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HH_0_31_0_.DSP_GUT[35:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HH_0_31_0_.DSP_GUT[35:0].MULT18_0
+         Type: MULT18_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HH_0_31_0_.DSP_GUT[35:0].REG18_L0_0
+         Type: REG18_CORE
+Instance Name: soc/cpu/vexriscv/execute_MUL_HH_0_31_0_.DSP_GUT[35:0].REG18_L0_1
+         Type: REG18_CORE
+Instance Name: soc/cpu/vexriscv/RegFilePlugin_regFile_1_RegFilePlugin_regFile_1_
+     0_0.PDPSC16K_MODE_inst
+         Type: EBR_CORE
+Instance Name: soc/cpu/vexriscv/RegFilePlugin_regFile_RegFilePlugin_regFile_0_0.
+     PDPSC16K_MODE_inst
+         Type: EBR_CORE
+Instance Name: soc/i2c0/i2c_fifo.I2CFIFO_inst
+         Type: I2CFIFO_CORE
+Instance Name: soc/mainram/U$0/lram.LRAM_inst
+         Type: LRAM_CORE
+Instance Name: soc/mainram/U$1/lram.LRAM_inst
+         Type: LRAM_CORE
+Instance Name: soc/mainram/U$2/lram.LRAM_inst
+         Type: LRAM_CORE
+Instance Name: soc/mainram/U$3/lram.LRAM_inst
+         Type: LRAM_CORE
+Instance Name:
+     soc/vocoder/U$10/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$10/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_H0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$10/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name:
+     soc/vocoder/U$10/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name:
+     soc/vocoder/U$10/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT18_0
+         Type: MULT18_CORE
+Instance Name:
+     soc/vocoder/U$10/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_0
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$10/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_1
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$11/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$11/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_H0
+
+                                   Page 13
+
+
+
+
+
+ASIC Components (cont)
+----------------------
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$11/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name:
+     soc/vocoder/U$11/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name:
+     soc/vocoder/U$11/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT18_0
+         Type: MULT18_CORE
+Instance Name:
+     soc/vocoder/U$11/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_0
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$11/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_1
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$12/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$12/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_H0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$12/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name:
+     soc/vocoder/U$12/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name:
+     soc/vocoder/U$12/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT18_0
+         Type: MULT18_CORE
+Instance Name:
+     soc/vocoder/U$12/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_0
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$12/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_1
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$13/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$13/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_H0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$13/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name:
+     soc/vocoder/U$13/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name:
+     soc/vocoder/U$13/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT18_0
+         Type: MULT18_CORE
+Instance Name:
+     soc/vocoder/U$13/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_0
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$13/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_1
+
+                                   Page 14
+
+
+
+
+
+ASIC Components (cont)
+----------------------
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$14/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$14/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_H0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$14/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name:
+     soc/vocoder/U$14/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name:
+     soc/vocoder/U$14/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT18_0
+         Type: MULT18_CORE
+Instance Name:
+     soc/vocoder/U$14/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_0
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$14/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_1
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$15/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$15/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_H0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$15/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name:
+     soc/vocoder/U$15/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name:
+     soc/vocoder/U$15/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT18_0
+         Type: MULT18_CORE
+Instance Name:
+     soc/vocoder/U$15/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_0
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$15/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_1
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$16/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$16/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_H0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$16/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name:
+     soc/vocoder/U$16/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name:
+     soc/vocoder/U$16/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT18_0
+
+                                   Page 15
+
+
+
+
+
+ASIC Components (cont)
+----------------------
+         Type: MULT18_CORE
+Instance Name:
+     soc/vocoder/U$16/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_0
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$16/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_1
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$3/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$3/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_H0
+         Type: PREADD9_CORE
+Instance Name: soc/vocoder/U$3/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name: soc/vocoder/U$3/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name: soc/vocoder/U$3/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT18_0
+         Type: MULT18_CORE
+Instance Name:
+     soc/vocoder/U$3/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_0
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$3/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_1
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$4/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$4/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_H0
+         Type: PREADD9_CORE
+Instance Name: soc/vocoder/U$4/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name: soc/vocoder/U$4/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name: soc/vocoder/U$4/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT18_0
+         Type: MULT18_CORE
+Instance Name:
+     soc/vocoder/U$4/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_0
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$4/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_1
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$5/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$5/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_H0
+         Type: PREADD9_CORE
+Instance Name: soc/vocoder/U$5/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name: soc/vocoder/U$5/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name: soc/vocoder/U$5/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT18_0
+         Type: MULT18_CORE
+Instance Name:
+     soc/vocoder/U$5/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_0
+
+                                   Page 16
+
+
+
+
+
+ASIC Components (cont)
+----------------------
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$5/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_1
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$6/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$6/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_H0
+         Type: PREADD9_CORE
+Instance Name: soc/vocoder/U$6/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name: soc/vocoder/U$6/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name: soc/vocoder/U$6/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT18_0
+         Type: MULT18_CORE
+Instance Name:
+     soc/vocoder/U$6/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_0
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$6/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_1
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$7/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$7/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_H0
+         Type: PREADD9_CORE
+Instance Name: soc/vocoder/U$7/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name: soc/vocoder/U$7/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name: soc/vocoder/U$7/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT18_0
+         Type: MULT18_CORE
+Instance Name:
+     soc/vocoder/U$7/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_0
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$7/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_1
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$8/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$8/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_H0
+         Type: PREADD9_CORE
+Instance Name: soc/vocoder/U$8/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name: soc/vocoder/U$8/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name: soc/vocoder/U$8/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT18_0
+         Type: MULT18_CORE
+Instance Name:
+     soc/vocoder/U$8/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_0
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$8/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_1
+
+                                   Page 17
+
+
+
+
+
+ASIC Components (cont)
+----------------------
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$9/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_L0
+         Type: PREADD9_CORE
+Instance Name:
+     soc/vocoder/U$9/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].PREADD9_H0
+         Type: PREADD9_CORE
+Instance Name: soc/vocoder/U$9/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_L0
+         Type: MULT9_CORE
+Instance Name: soc/vocoder/U$9/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT9_H0
+         Type: MULT9_CORE
+Instance Name: soc/vocoder/U$9/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].MULT18_0
+         Type: MULT18_CORE
+Instance Name:
+     soc/vocoder/U$9/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_0
+         Type: REG18_CORE
+Instance Name:
+     soc/vocoder/U$9/mult/mult_out_node_0_30_0_.DSP_GUT[35:0].REG18_L0_1
+         Type: REG18_CORE
+Instance Name: soc/vocoder/synth/ram/_1__cnst_0_0.SP16K_MODE_inst
+         Type: EBR_CORE
+Instance Name: soc/multiboot.CONFIG_MULTIBOOT_inst
+         Type: CONFIG_MULTIBOOT_CORE
+
+Constraint Summary
+------------------
+
+   Total number of constraints: 44
+   Total number of constraints dropped: 0
+
+Run Time and Memory Usage
+-------------------------
+
+   Total CPU Time: 6 secs
+   Total REAL Time: 7 secs
+   Peak Memory Usage: 1406 MB
+Checksum -- map: bbf2c4c58c0d5cae9c87b940f81c7e01f32e9cb4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                   Page 18
+
+
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+Copyright (c) 1995
+     AT&T Corp.   All rights reserved.
+Copyright (c) 1995-2001 Lucent
+     Technologies Inc.  All rights reserved.
+Copyright (c) 2001 Agere Systems
+     All rights reserved.
+Copyright (c) 2002-2025 Lattice Semiconductor
+     Corporation,  All rights reserved.

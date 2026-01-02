@@ -6,16 +6,71 @@ use crate::ui::{
 
 const MAX_CHANNELS: usize = crate::ui::MAX_CHANNELS;
 
-// available visualizers (one for now)
+// available visualizers
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ModeKind {
-    HarmonicLoop
+    HarmonicLoop,
+    BarMeter,
 }
 
 impl ModeKind {
     pub fn name(&self) -> &'static str {
         match self {
-            ModeKind::HarmonicLoop => "Harmonic Loop"
+            ModeKind::HarmonicLoop => "Harmonic Loop",
+            ModeKind::BarMeter => "Bar Meter",
+        }
+    }
+}
+
+// Simple bar meter for debugging - shows vertical bars for each channel
+pub struct BarMeter {
+    num_channels: usize,
+    energies: [f32; MAX_CHANNELS],
+}
+
+impl BarMeter {
+    pub fn new(num_channels: usize) -> Self {
+        Self {
+            num_channels,
+            energies: [0.0; MAX_CHANNELS],
+        }
+    }
+
+    pub fn update(&mut self, _dt: f32, energies: &[f32]) {
+        for i in 0..self.num_channels.min(MAX_CHANNELS) {
+            self.energies[i] = energies.get(i).copied().unwrap_or(0.0);
+        }
+    }
+
+    pub fn render<F>(&self, mut set_pixel: F, pal: &ColorPalette)
+    where
+        F: FnMut(usize, usize, Color),
+    {
+        let num_bars = self.num_channels.min(14);
+        let bar_width = (DISPLAY_SIZE - 20) / num_bars; // fit all bars with margin
+        let gap = 2;
+        let max_height = DISPLAY_SIZE - 60; // leave margin top and bottom
+        let min_height = 10; // minimum bar height
+
+        for i in 0..num_bars {
+            let energy = self.energies[i].clamp(0.0, 1.0);
+            let bar_height = min_height + (energy * (max_height - min_height) as f32) as usize;
+
+            let x_start = 10 + i * bar_width;
+            let x_end = x_start + bar_width - gap;
+            let y_bottom = DISPLAY_SIZE - 80;
+            let y_top = y_bottom.saturating_sub(bar_height);
+
+            // get color from palette based on channel index
+            let color = pal.sample(i as f32 / num_bars as f32);
+
+            // draw filled bar
+            for x in x_start..x_end.min(DISPLAY_SIZE) {
+                for y in y_top..y_bottom.min(DISPLAY_SIZE) {
+                    let brightness = 0.4 + 0.6 * (1.0 - (y - y_top) as f32 / bar_height.max(1) as f32);
+                    set_pixel(x, y, color.scale(brightness));
+                }
+            }
         }
     }
 }
@@ -179,6 +234,7 @@ impl HarmonicLoop {
 // main visualizer mode switching
 pub struct Visualizer {
     harmonic_loop: HarmonicLoop,
+    bar_meter: BarMeter,
     current_mode: ModeKind,
     palette: ColorPalette
 }
@@ -187,14 +243,16 @@ impl Visualizer {
     pub fn new(num_channels: usize) -> Self {
         Self {
             harmonic_loop: HarmonicLoop::new(num_channels),
-            current_mode: ModeKind::HarmonicLoop,
+            bar_meter: BarMeter::new(num_channels),
+            current_mode: ModeKind::BarMeter,
             palette: ColorPalette::default(),
         }
     }
 
     pub fn update(&mut self, dt: f32, energies: &[f32]) {
         match self.current_mode {
-            ModeKind::HarmonicLoop => self.harmonic_loop.update(dt, energies)
+            ModeKind::HarmonicLoop => self.harmonic_loop.update(dt, energies),
+            ModeKind::BarMeter => self.bar_meter.update(dt, energies),
         }
     }
 
@@ -203,7 +261,8 @@ impl Visualizer {
         F: FnMut(usize, usize, Color),
     {
         match self.current_mode {
-            ModeKind::HarmonicLoop => self.harmonic_loop.render(set_pixel, &self.palette)
+            ModeKind::HarmonicLoop => self.harmonic_loop.render(set_pixel, &self.palette),
+            ModeKind::BarMeter => self.bar_meter.render(set_pixel, &self.palette),
         }
     }
 

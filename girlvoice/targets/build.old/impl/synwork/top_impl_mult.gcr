@@ -1,0 +1,304 @@
+i pll.clk
+m 0 0
+u 4678 7871
+n ckid0_0 {t:soc.wb_to_lmmi.wb_bus__ack.C} Clock Optimization not enabled
+p {p:soc.wb_to_lmmi.clk}{t:soc.wb_to_lmmi.wb_bus__ack.C}
+e ckid0_0 {t:soc.wb_to_lmmi.wb_bus__ack.C} dffr
+p {p:soc.wb_to_csr.clk}{t:soc.wb_to_csr.cycle[2].C}
+e ckid0_1 {t:soc.wb_to_csr.cycle[2].C} dffr
+p {p:soc.wb_arbiter.clk}{t:soc.wb_arbiter.grant.C}
+e ckid0_2 {t:soc.wb_arbiter.grant.C} dffre
+p {p:soc.vocoder.synth.ram.clk}{t:soc.vocoder.synth.ram.mem\[0\][31].C}
+e ckid0_3 {t:soc.vocoder.synth.ram.mem\[0\][31].C} dffr
+p {p:soc.vocoder.synth.clk}{t:soc.vocoder.synth.samp_valid.C}
+e ckid0_4 {t:soc.vocoder.synth.samp_valid.C} dffr
+p {p:soc.vocoder.mux.clk}{t:soc.vocoder.mux.fsm_state[1].C}
+e ckid0_5 {t:soc.vocoder.mux.fsm_state[1].C} dffre
+p {p:soc.vocoder.U\$9.vga.clk}{t:soc.vocoder.U\$9.vga.source__payload[15].C}
+e ckid0_6 {t:soc.vocoder.U\$9.vga.source__payload[15].C} dffre
+p {p:soc.vocoder.U\$9.mult.clk}{t:soc.vocoder.U\$9.mult.input_b_ring0[15].C}
+e ckid0_7 {t:soc.vocoder.U\$9.mult.input_b_ring0[15].C} dffr
+p {p:soc.vocoder.U\$9.envelope.clk}{t:soc.vocoder.U\$9.envelope.sink_a_2_1[14].C}
+e ckid0_8 {t:soc.vocoder.U\$9.envelope.sink_a_2_1[14].C} dffr
+p {p:soc.vocoder.U\$9.bandpass.clk}{t:soc.vocoder.U\$9.bandpass.sink_a_0[15].C}
+e ckid0_9 {t:soc.vocoder.U\$9.bandpass.sink_a_0[15].C} dffre
+p {p:soc.vocoder.U\$8.vga.clk}{t:soc.vocoder.U\$8.vga.source__payload[15].C}
+e ckid0_10 {t:soc.vocoder.U\$8.vga.source__payload[15].C} dffre
+p {p:soc.vocoder.U\$8.mult.clk}{t:soc.vocoder.U\$8.mult.input_b_ring0[15].C}
+e ckid0_11 {t:soc.vocoder.U\$8.mult.input_b_ring0[15].C} dffr
+p {p:soc.vocoder.U\$8.envelope.clk}{t:soc.vocoder.U\$8.envelope.sink_a_2_1[14].C}
+e ckid0_12 {t:soc.vocoder.U\$8.envelope.sink_a_2_1[14].C} dffr
+p {p:soc.vocoder.U\$8.bandpass.clk}{t:soc.vocoder.U\$8.bandpass.sink_a_0[15].C}
+e ckid0_13 {t:soc.vocoder.U\$8.bandpass.sink_a_0[15].C} dffre
+p {p:soc.vocoder.U\$7.vga.clk}{t:soc.vocoder.U\$7.vga.source__payload[15].C}
+e ckid0_14 {t:soc.vocoder.U\$7.vga.source__payload[15].C} dffre
+p {p:soc.vocoder.U\$7.mult.clk}{t:soc.vocoder.U\$7.mult.input_b_ring0[15].C}
+e ckid0_15 {t:soc.vocoder.U\$7.mult.input_b_ring0[15].C} dffr
+p {p:soc.vocoder.U\$7.envelope.clk}{t:soc.vocoder.U\$7.envelope.sink_a_2_1[14].C}
+e ckid0_16 {t:soc.vocoder.U\$7.envelope.sink_a_2_1[14].C} dffr
+p {p:soc.vocoder.U\$7.bandpass.clk}{t:soc.vocoder.U\$7.bandpass.sink_a_0[15].C}
+e ckid0_17 {t:soc.vocoder.U\$7.bandpass.sink_a_0[15].C} dffre
+p {p:soc.vocoder.U\$6.vga.clk}{t:soc.vocoder.U\$6.vga.source__payload[15].C}
+e ckid0_18 {t:soc.vocoder.U\$6.vga.source__payload[15].C} dffre
+p {p:soc.vocoder.U\$6.mult.clk}{t:soc.vocoder.U\$6.mult.input_b_ring0[15].C}
+e ckid0_19 {t:soc.vocoder.U\$6.mult.input_b_ring0[15].C} dffr
+p {p:soc.vocoder.U\$6.envelope.clk}{t:soc.vocoder.U\$6.envelope.sink_a_2_1[14].C}
+e ckid0_20 {t:soc.vocoder.U\$6.envelope.sink_a_2_1[14].C} dffr
+p {p:soc.vocoder.U\$6.bandpass.clk}{t:soc.vocoder.U\$6.bandpass.sink_a_0[15].C}
+e ckid0_21 {t:soc.vocoder.U\$6.bandpass.sink_a_0[15].C} dffre
+p {p:soc.vocoder.U\$5.vga.clk}{t:soc.vocoder.U\$5.vga.source__payload[15].C}
+e ckid0_22 {t:soc.vocoder.U\$5.vga.source__payload[15].C} dffre
+p {p:soc.vocoder.U\$5.mult.clk}{t:soc.vocoder.U\$5.mult.input_b_ring0[15].C}
+e ckid0_23 {t:soc.vocoder.U\$5.mult.input_b_ring0[15].C} dffr
+p {p:soc.vocoder.U\$5.envelope.clk}{t:soc.vocoder.U\$5.envelope.sink_a_2_1[14].C}
+e ckid0_24 {t:soc.vocoder.U\$5.envelope.sink_a_2_1[14].C} dffr
+p {p:soc.vocoder.U\$5.bandpass.clk}{t:soc.vocoder.U\$5.bandpass.sink_a_0[15].C}
+e ckid0_25 {t:soc.vocoder.U\$5.bandpass.sink_a_0[15].C} dffre
+p {p:soc.vocoder.U\$4.vga.clk}{t:soc.vocoder.U\$4.vga.source__payload[15].C}
+e ckid0_26 {t:soc.vocoder.U\$4.vga.source__payload[15].C} dffre
+p {p:soc.vocoder.U\$4.mult.clk}{t:soc.vocoder.U\$4.mult.input_b_ring0[15].C}
+e ckid0_27 {t:soc.vocoder.U\$4.mult.input_b_ring0[15].C} dffr
+p {p:soc.vocoder.U\$4.envelope.clk}{t:soc.vocoder.U\$4.envelope.sink_a_2_1[14].C}
+e ckid0_28 {t:soc.vocoder.U\$4.envelope.sink_a_2_1[14].C} dffr
+p {p:soc.vocoder.U\$4.bandpass.clk}{t:soc.vocoder.U\$4.bandpass.sink_a_0[15].C}
+e ckid0_29 {t:soc.vocoder.U\$4.bandpass.sink_a_0[15].C} dffre
+p {p:soc.vocoder.U\$3.vga.clk}{t:soc.vocoder.U\$3.vga.source__payload[15].C}
+e ckid0_30 {t:soc.vocoder.U\$3.vga.source__payload[15].C} dffre
+p {p:soc.vocoder.U\$3.mult.clk}{t:soc.vocoder.U\$3.mult.input_b_ring0[15].C}
+e ckid0_31 {t:soc.vocoder.U\$3.mult.input_b_ring0[15].C} dffr
+p {p:soc.vocoder.U\$3.envelope.clk}{t:soc.vocoder.U\$3.envelope.sink_a_2_1[14].C}
+e ckid0_32 {t:soc.vocoder.U\$3.envelope.sink_a_2_1[14].C} dffr
+p {p:soc.vocoder.U\$3.bandpass.clk}{t:soc.vocoder.U\$3.bandpass.sink_a_0[15].C}
+e ckid0_33 {t:soc.vocoder.U\$3.bandpass.sink_a_0[15].C} dffre
+p {p:soc.vocoder.U\$16.vga.clk}{t:soc.vocoder.U\$16.vga.source__payload[15].C}
+e ckid0_34 {t:soc.vocoder.U\$16.vga.source__payload[15].C} dffre
+p {p:soc.vocoder.U\$16.mult.clk}{t:soc.vocoder.U\$16.mult.input_b_ring0[15].C}
+e ckid0_35 {t:soc.vocoder.U\$16.mult.input_b_ring0[15].C} dffr
+p {p:soc.vocoder.U\$16.envelope.clk}{t:soc.vocoder.U\$16.envelope.sink_a_2_1[14].C}
+e ckid0_36 {t:soc.vocoder.U\$16.envelope.sink_a_2_1[14].C} dffr
+p {p:soc.vocoder.U\$16.bandpass.clk}{t:soc.vocoder.U\$16.bandpass.sink_a_0[15].C}
+e ckid0_37 {t:soc.vocoder.U\$16.bandpass.sink_a_0[15].C} dffre
+p {p:soc.vocoder.U\$15.vga.clk}{t:soc.vocoder.U\$15.vga.source__payload[15].C}
+e ckid0_38 {t:soc.vocoder.U\$15.vga.source__payload[15].C} dffre
+p {p:soc.vocoder.U\$15.mult.clk}{t:soc.vocoder.U\$15.mult.input_b_ring0[15].C}
+e ckid0_39 {t:soc.vocoder.U\$15.mult.input_b_ring0[15].C} dffr
+p {p:soc.vocoder.U\$15.envelope.clk}{t:soc.vocoder.U\$15.envelope.sink_a_2_1[14].C}
+e ckid0_40 {t:soc.vocoder.U\$15.envelope.sink_a_2_1[14].C} dffr
+p {p:soc.vocoder.U\$15.bandpass.clk}{t:soc.vocoder.U\$15.bandpass.sink_a_0[15].C}
+e ckid0_41 {t:soc.vocoder.U\$15.bandpass.sink_a_0[15].C} dffre
+p {p:soc.vocoder.U\$14.vga.clk}{t:soc.vocoder.U\$14.vga.source__payload[15].C}
+e ckid0_42 {t:soc.vocoder.U\$14.vga.source__payload[15].C} dffre
+p {p:soc.vocoder.U\$14.mult.clk}{t:soc.vocoder.U\$14.mult.input_b_ring0[15].C}
+e ckid0_43 {t:soc.vocoder.U\$14.mult.input_b_ring0[15].C} dffr
+p {p:soc.vocoder.U\$14.envelope.clk}{t:soc.vocoder.U\$14.envelope.sink_a_2_1[14].C}
+e ckid0_44 {t:soc.vocoder.U\$14.envelope.sink_a_2_1[14].C} dffr
+p {p:soc.vocoder.U\$14.bandpass.clk}{t:soc.vocoder.U\$14.bandpass.sink_a_0[15].C}
+e ckid0_45 {t:soc.vocoder.U\$14.bandpass.sink_a_0[15].C} dffre
+p {p:soc.vocoder.U\$13.vga.clk}{t:soc.vocoder.U\$13.vga.source__payload[15].C}
+e ckid0_46 {t:soc.vocoder.U\$13.vga.source__payload[15].C} dffre
+p {p:soc.vocoder.U\$13.mult.clk}{t:soc.vocoder.U\$13.mult.input_b_ring0[15].C}
+e ckid0_47 {t:soc.vocoder.U\$13.mult.input_b_ring0[15].C} dffr
+p {p:soc.vocoder.U\$13.envelope.clk}{t:soc.vocoder.U\$13.envelope.sink_a_2_1[14].C}
+e ckid0_48 {t:soc.vocoder.U\$13.envelope.sink_a_2_1[14].C} dffr
+p {p:soc.vocoder.U\$13.bandpass.clk}{t:soc.vocoder.U\$13.bandpass.sink_a_0[15].C}
+e ckid0_49 {t:soc.vocoder.U\$13.bandpass.sink_a_0[15].C} dffre
+p {p:soc.vocoder.U\$12.vga.clk}{t:soc.vocoder.U\$12.vga.source__payload[15].C}
+e ckid0_50 {t:soc.vocoder.U\$12.vga.source__payload[15].C} dffre
+p {p:soc.vocoder.U\$12.mult.clk}{t:soc.vocoder.U\$12.mult.input_b_ring0[15].C}
+e ckid0_51 {t:soc.vocoder.U\$12.mult.input_b_ring0[15].C} dffr
+p {p:soc.vocoder.U\$12.envelope.clk}{t:soc.vocoder.U\$12.envelope.sink_a_2_1[14].C}
+e ckid0_52 {t:soc.vocoder.U\$12.envelope.sink_a_2_1[14].C} dffr
+p {p:soc.vocoder.U\$12.bandpass.clk}{t:soc.vocoder.U\$12.bandpass.sink_a_0[15].C}
+e ckid0_53 {t:soc.vocoder.U\$12.bandpass.sink_a_0[15].C} dffre
+p {p:soc.vocoder.U\$11.vga.clk}{t:soc.vocoder.U\$11.vga.source__payload[15].C}
+e ckid0_54 {t:soc.vocoder.U\$11.vga.source__payload[15].C} dffre
+p {p:soc.vocoder.U\$11.mult.clk}{t:soc.vocoder.U\$11.mult.input_b_ring0[15].C}
+e ckid0_55 {t:soc.vocoder.U\$11.mult.input_b_ring0[15].C} dffr
+p {p:soc.vocoder.U\$11.envelope.clk}{t:soc.vocoder.U\$11.envelope.sink_a_2_1[14].C}
+e ckid0_56 {t:soc.vocoder.U\$11.envelope.sink_a_2_1[14].C} dffr
+p {p:soc.vocoder.U\$11.bandpass.clk}{t:soc.vocoder.U\$11.bandpass.sink_a_0[15].C}
+e ckid0_57 {t:soc.vocoder.U\$11.bandpass.sink_a_0[15].C} dffre
+p {p:soc.vocoder.U\$10.vga.clk}{t:soc.vocoder.U\$10.vga.source__payload[15].C}
+e ckid0_58 {t:soc.vocoder.U\$10.vga.source__payload[15].C} dffre
+p {p:soc.vocoder.U\$10.mult.clk}{t:soc.vocoder.U\$10.mult.input_b_ring0[15].C}
+e ckid0_59 {t:soc.vocoder.U\$10.mult.input_b_ring0[15].C} dffr
+p {p:soc.vocoder.U\$10.envelope.clk}{t:soc.vocoder.U\$10.envelope.sink_a_2_1[14].C}
+e ckid0_60 {t:soc.vocoder.U\$10.envelope.sink_a_2_1[14].C} dffr
+p {p:soc.vocoder.U\$10.bandpass.clk}{t:soc.vocoder.U\$10.bandpass.sink_a_0[15].C}
+e ckid0_61 {t:soc.vocoder.U\$10.bandpass.sink_a_0[15].C} dffre
+p {p:soc.uart0.tx.clk}{t:soc.uart0.tx.timer[23].C}
+e ckid0_62 {t:soc.uart0.tx.timer[23].C} dffr
+p {p:soc.uart0.rx.clk}{t:soc.uart0.rx.timer[23].C}
+e ckid0_63 {t:soc.uart0.rx.timer[23].C} dffre
+p {p:soc.uart0.bridge.mux.clk}{t:soc.uart0.bridge.mux.r_shadow__0__data[7].C}
+e ckid0_64 {t:soc.uart0.bridge.mux.r_shadow__0__data[7].C} dffre
+p {p:soc.uart0.bridge.divisor.div.clk}{t:soc.uart0.bridge.divisor.div._storage[23].C}
+e ckid0_65 {t:soc.uart0.bridge.divisor.div._storage[23].C} dffre
+p {p:soc.uart0.clk}{t:soc.uart0.rx_avail.C}
+e ckid0_66 {t:soc.uart0.rx_avail.C} dffr
+p {p:soc.timer0.U\$1.mux.clk}{t:soc.timer0.U\$1.mux.r_shadow__0__data[0].C}
+e ckid0_67 {t:soc.timer0.U\$1.mux.r_shadow__0__data[0].C} dffre
+p {p:soc.timer0.U\$1.monitor.clk}{t:soc.timer0.U\$1.monitor.pending.C}
+e ckid0_68 {t:soc.timer0.U\$1.monitor.pending.C} dffr
+p {p:soc.timer0.U\$1.clk}{t:soc.timer0.U\$1.element__r_data.C}
+e ckid0_69 {t:soc.timer0.U\$1.element__r_data.C} dffre
+p {p:soc.timer0.U\$0.reload.value.clk}{t:soc.timer0.U\$0.reload.value._storage[31].C}
+e ckid0_70 {t:soc.timer0.U\$0.reload.value._storage[31].C} dffre
+p {p:soc.timer0.U\$0.mux.clk}{t:soc.timer0.U\$0.mux.r_shadow__1__data[7].C}
+e ckid0_71 {t:soc.timer0.U\$0.mux.r_shadow__1__data[7].C} dffre
+p {p:soc.timer0.U\$0.mode.periodic.clk}{t:soc.timer0.U\$0.mode.periodic._storage.C}
+e ckid0_72 {t:soc.timer0.U\$0.mode.periodic._storage.C} dffre
+p {p:soc.timer0.U\$0.enable.enable.clk}{t:soc.timer0.U\$0.enable.enable._storage.C}
+e ckid0_73 {t:soc.timer0.U\$0.enable.enable._storage.C} dffre
+p {p:soc.timer0.clk}{t:soc.timer0.finish.C}
+e ckid0_74 {t:soc.timer0.finish.C} dffre
+p {p:soc.spi0.tx_fifo.consume_cdc.clk}{t:soc.spi0.tx_fifo.consume_cdc.stage1[4].C}
+e ckid0_75 {t:soc.spi0.tx_fifo.consume_cdc.stage1[4].C} dffr
+p {p:soc.spi0.tx_fifo.clk}{t:soc.spi0.tx_fifo.produce_w_gry[4].C}
+e ckid0_76 {t:soc.spi0.tx_fifo.produce_w_gry[4].C} dffr
+p {p:soc.spi0.bridge.phy.width.clk}{t:soc.spi0.bridge.phy.width._storage[3].C}
+e ckid0_77 {t:soc.spi0.bridge.phy.width._storage[3].C} dffre
+p {p:soc.spi0.bridge.phy.mask.clk}{t:soc.spi0.bridge.phy.mask._storage[7].C}
+e ckid0_78 {t:soc.spi0.bridge.phy.mask._storage[7].C} dffre
+p {p:soc.spi0.bridge.phy.length.clk}{t:soc.spi0.bridge.phy.length._storage[5].C}
+e ckid0_79 {t:soc.spi0.bridge.phy.length._storage[5].C} dffre
+p {p:soc.spi0.bridge.mux.clk}{t:soc.spi0.bridge.mux.r_shadow__1__data[7].C}
+e ckid0_80 {t:soc.spi0.bridge.mux.r_shadow__1__data[7].C} dffre
+p {p:soc.spi0.clk}{t:soc.spi0.fsm_state.C}
+e ckid0_81 {t:soc.spi0.fsm_state.C} dffr
+p {p:soc.mainram.U\$3.clk}{t:soc.mainram.U\$3.lram.CLK}
+e ckid0_82 {t:soc.mainram.U\$3.lram.CLK} SP512K
+p {p:soc.mainram.U\$2.clk}{t:soc.mainram.U\$2.lram.CLK}
+e ckid0_83 {t:soc.mainram.U\$2.lram.CLK} SP512K
+p {p:soc.mainram.U\$1.clk}{t:soc.mainram.U\$1.lram.CLK}
+e ckid0_84 {t:soc.mainram.U\$1.lram.CLK} SP512K
+p {p:soc.mainram.U\$0.clk}{t:soc.mainram.U\$0.lram.CLK}
+e ckid0_85 {t:soc.mainram.U\$0.lram.CLK} SP512K
+p {p:soc.mainram.clk}{t:soc.mainram.wb_bus__ack.C}
+e ckid0_86 {t:soc.mainram.wb_bus__ack.C} dffr
+p {p:soc.led0.bridge.mux.clk}{t:soc.led0.bridge.mux.r_shadow__0__data[1].C}
+e ckid0_87 {t:soc.led0.bridge.mux.r_shadow__0__data[1].C} dffre
+p {p:soc.led0.bridge.Output.pin__0.clk}{t:soc.led0.bridge.Output.pin__0._storage.C}
+e ckid0_88 {t:soc.led0.bridge.Output.pin__0._storage.C} dffre
+p {p:soc.led0.bridge.Mode.pin__0.clk}{t:soc.led0.bridge.Mode.pin__0._storage[1].C}
+e ckid0_89 {t:soc.led0.bridge.Mode.pin__0._storage[1].C} dffre
+p {p:soc.i2s_tx.clk}{t:soc.i2s_tx.shift_out[15].C}
+e ckid0_90 {t:soc.i2s_tx.shift_out[15].C} dffre
+p {p:soc.i2s_rx.clk}{t:soc.i2s_rx.sclk_last.C}
+e ckid0_91 {t:soc.i2s_rx.sclk_last.C} dffr
+p {p:soc.gpo1.bridge.mux.clk}{t:soc.gpo1.bridge.mux.r_shadow__0__data[3].C}
+e ckid0_92 {t:soc.gpo1.bridge.mux.r_shadow__0__data[3].C} dffre
+p {p:soc.gpo1.bridge.Output.pin__1.clk}{t:soc.gpo1.bridge.Output.pin__1._storage.C}
+e ckid0_93 {t:soc.gpo1.bridge.Output.pin__1._storage.C} dffre
+p {p:soc.gpo1.bridge.Output.pin__0.clk}{t:soc.gpo1.bridge.Output.pin__0._storage.C}
+e ckid0_94 {t:soc.gpo1.bridge.Output.pin__0._storage.C} dffre
+p {p:soc.gpo1.bridge.Mode.pin__1.clk}{t:soc.gpo1.bridge.Mode.pin__1._storage[1].C}
+e ckid0_95 {t:soc.gpo1.bridge.Mode.pin__1._storage[1].C} dffre
+p {p:soc.gpo1.bridge.Mode.pin__0.clk}{t:soc.gpo1.bridge.Mode.pin__0._storage[1].C}
+e ckid0_96 {t:soc.gpo1.bridge.Mode.pin__0._storage[1].C} dffre
+p {p:soc.envelope_csr.bridge.mux.clk}{t:soc.envelope_csr.bridge.mux.r_shadow__1__data[7].C}
+e ckid0_97 {t:soc.envelope_csr.bridge.mux.r_shadow__1__data[7].C} dffre
+p {p:soc.envelope_csr.clk}{t:soc.envelope_csr.r_data\$12[14].C}
+e ckid0_98 {t:soc.envelope_csr.r_data\$12[14].C} dffre
+p {p:soc.cpu.vexriscv.dataCache_1.clk}{t:soc.cpu.vexriscv.dataCache_1.stageB_dataColisions[0].C}
+e ckid0_99 {t:soc.cpu.vexriscv.dataCache_1.stageB_dataColisions[0].C} dffe
+p {p:soc.cpu.vexriscv.IBusCachedPlugin_cache.clk}{t:soc.cpu.vexriscv.IBusCachedPlugin_cache._zz_when_InstructionCache_l342.C}
+e ckid0_100 {t:soc.cpu.vexriscv.IBusCachedPlugin_cache._zz_when_InstructionCache_l342.C} dff
+p {p:soc.cpu.vexriscv.clk}{t:soc.cpu.vexriscv.execute_to_memory_PC[31:0].C}
+e ckid0_101 {t:soc.cpu.vexriscv.execute_to_memory_PC[31:0].C} dffe
+p {p:soc.clk}{t:soc.on_delay[31:0].C}
+e ckid0_102 {t:soc.on_delay[31:0].C} dff
+p {p:pll.clk}{t:pll.clk}{t:btn_rising.C}
+e ckid0_103 {t:btn_rising.C} dffr
+d ckid0_0,ckid0_1,ckid0_2,ckid0_3,ckid0_4,ckid0_5,ckid0_6,ckid0_7,ckid0_8,ckid0_9,ckid0_10,ckid0_11,ckid0_12,ckid0_13,ckid0_14,ckid0_15,ckid0_16,ckid0_17,ckid0_18,ckid0_19,ckid0_20,ckid0_21,ckid0_22,ckid0_23,ckid0_24,ckid0_25,ckid0_26,ckid0_27,ckid0_28,ckid0_29,ckid0_30,ckid0_31,ckid0_32,ckid0_33,ckid0_34,ckid0_35,ckid0_36,ckid0_37,ckid0_38,ckid0_39,ckid0_40,ckid0_41,ckid0_42,ckid0_43,ckid0_44,ckid0_45,ckid0_46,ckid0_47,ckid0_48,ckid0_49,ckid0_50,ckid0_51,ckid0_52,ckid0_53,ckid0_54,ckid0_55,ckid0_56,ckid0_57,ckid0_58,ckid0_59,ckid0_60,ckid0_61,ckid0_62,ckid0_63,ckid0_64,ckid0_65,ckid0_66,ckid0_67,ckid0_68,ckid0_69,ckid0_70,ckid0_71,ckid0_72,ckid0_73,ckid0_74,ckid0_75,ckid0_76,ckid0_77,ckid0_78,ckid0_79,ckid0_80,ckid0_81,ckid0_82,ckid0_83,ckid0_84,ckid0_85,ckid0_86,ckid0_87,ckid0_88,ckid0_89,ckid0_90,ckid0_91,ckid0_92,ckid0_93,ckid0_94,ckid0_95,ckid0_96,ckid0_97,ckid0_98,ckid0_99,ckid0_100,ckid0_101,ckid0_102,ckid0_103 {t:pll.U\$0.CLKOS} PLL Clock Optimization not enabled
+i pll.fast_clk
+m 0 0
+u 58 122
+n ckid0_104 {t:soc.spi0_phy.clkgen.sample.C} Clock Optimization not enabled
+p {p:soc.spi0_phy.clkgen.fast_clk}{t:soc.spi0_phy.clkgen.sample.C}
+e ckid0_104 {t:soc.spi0_phy.clkgen.sample.C} dffr
+p {p:soc.spi0_phy.fast_clk}{t:soc.spi0_phy.sr_out[31].C}
+e ckid0_105 {t:soc.spi0_phy.sr_out[31].C} dffr
+p {p:soc.spi0.tx_fifo.rst_cdc.async_ff_clk}{t:soc.spi0.tx_fifo.rst_cdc.stage0.C}
+e ckid0_106 {t:soc.spi0.tx_fifo.rst_cdc.stage0.C} dffs
+p {p:soc.spi0.tx_fifo.produce_cdc.fast_clk}{t:soc.spi0.tx_fifo.produce_cdc.stage1[4].C}
+e ckid0_107 {t:soc.spi0.tx_fifo.produce_cdc.stage1[4].C} dffr
+p {p:soc.spi0.tx_fifo.fast_clk}{t:soc.spi0.tx_fifo.consume_r_bin[4:0].C}
+e ckid0_108 {t:soc.spi0.tx_fifo.consume_r_bin[4:0].C} dff
+p {p:soc.spi0.cs_cdc.fast_clk}{t:soc.spi0.cs_cdc.stage1.C}
+e ckid0_109 {t:soc.spi0.cs_cdc.stage1.C} dffr
+d ckid0_104,ckid0_105,ckid0_106,ckid0_107,ckid0_108,ckid0_109 {t:pll.U\$0.CLKOP} PLL Clock Optimization not enabled
+i clk12_0__io
+m 0 0
+u 0 0
+i clk12_clk
+m 0 0
+u 0 0
+i soc.i2s_tx.clk_div[3]
+m 0 0
+u 0 0
+i pll.clk_i
+m 0 0
+u 0 0
+i soc.i2s_tx.sdout
+m 0 0
+u 0 0
+i soc.i2s_tx.lrclk
+m 0 0
+u 0 0
+i soc.gpo1.bridge.Mode.pin__1._storage[0]
+m 0 0
+u 0 0
+i soc.gpo1.bridge.Mode.pin__1._storage[1]
+m 0 0
+u 0 0
+i soc.gpo1.bridge.Output.pin__1._storage
+m 0 0
+u 0 0
+i pin_clk12_0.buf.buf.i
+m 0 0
+u 0 0
+i soc.gpo1.bridge.Mode.pin__0._storage[0]
+m 0 0
+u 0 0
+i soc.gpo1.bridge.Mode.pin__0._storage[1]
+m 0 0
+u 0 0
+i soc.gpo1.bridge.Output.pin__0._storage
+m 0 0
+u 0 0
+i soc.led0.bridge.Mode.pin__0._storage[0]
+m 0 0
+u 0 0
+i soc.led0.bridge.Mode.pin__0._storage[1]
+m 0 0
+u 0 0
+i soc.led0.bridge.Output.pin__0._storage
+m 0 0
+u 0 0
+i soc.i2s_rx.clk_div[3]
+m 0 0
+u 0 0
+i soc.i2s_rx.lrclk
+m 0 0
+u 0 0
+i pwr_en_0__o
+m 0 0
+u 0 0
+i soc.spi0_phy.sck
+m 0 0
+u 0 0
+i pll.fast_clk_i
+m 0 0
+u 0 0
+i soc.spi0_phy.pins__cs__o
+m 0 0
+u 0 0
+i soc.uart0.tx.o
+m 0 0
+u 0 0
+i pll.¤2
+m 0 0
+u 0 0
+l 0 0 0 0 0 0
+r 0 0 0 0 0 0 0 0

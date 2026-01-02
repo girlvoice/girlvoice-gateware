@@ -1,0 +1,49 @@
+#OPTIONS:"|-modgen|-top|MULT18X36|-I|/home/dev/lscc/radiant/synpbase/lib|-devicelib|/home/dev/lscc/radiant/synpbase/lib/xilinx/unisim.v|-encrypt|-pro|-sysv|-dw|-primux|-ram|-fixsmult|-tri_compatible|-autosm|-fid2|-sharing|on|-ll|2000|-params|/build/impl/syntmp/MULT18X36.param"
+#CUR:"/home/dev/lscc/radiant/synpbase/linux_a_64/c_ver":1749710397
+#CUR:"/home/dev/lscc/radiant/synpbase/lib/vlog/hypermods.v":1749710290
+#CUR:"/home/dev/lscc/radiant/synpbase/lib/vlog/scemi_objects.v":1749710290
+#CUR:"/home/dev/lscc/radiant/synpbase/lib/vlog/scemi_pipes.svh":1749710290
+#CUR:"/build/impl/syntmp/MULT18X36.v":1767392831
+#CUR:"/build/impl/syntmp/MULT18X36.param":1767392831
+#numinternalfiles:3
+#defaultlanguage:verilog
+0			"/build/impl/syntmp/MULT18X36.v" verilog
+#Dependency Lists(Uses List)
+0 -1
+#Dependency Lists(Users Of)
+0 -1
+#Design Unit to File Association
+module work VHI 0
+module work VLO 0
+module work MULT18X18 0
+module work PREADD9_CORE 0
+module work MULT9_CORE 0
+module work MULT18_CORE 0
+module work REG18_CORE 0
+module work MULT18X36 0
+module work MULT18X36_CORE 0
+module work MULT36X36 0
+module work MULT36_CORE 0
+module work MULT9X9 0
+module work MULTADDSUB18X18 0
+module work ACC54_CORE 0
+module work MULTADDSUB18X36 0
+module work MULTADDSUB36X36 0
+module work MULTPREADD18X18 0
+module work MULTPREADD9X9 0
+module work MULTADDSUB18X18WIDE 0
+module work MULTADDSUB9X9WIDE 0
+module work MULT18_hw 0
+module work REG18_hw_sync 0
+module work REG18_hw 0
+module work PREADD9_hw_sync 0
+module work PREADD9_hw 0
+module work MULT9_hw_sync 0
+module work MULT9_hw 0
+module work MULT18X36_hw 0
+module work MULT36_hw 0
+module work ACC54_hw_sync 0
+module work ACC54_hw 0
+
+#identified top module
+top_module MULT18X36

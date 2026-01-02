@@ -169,10 +169,10 @@ class GirlvoiceSoc(Component):
             self.gpo_1 = gpio.Peripheral(pin_count=2, addr_width=4, data_width=8)
             self.csr_decoder.add(self.gpo_1.bus, addr=self.gpo1_base, name="gpo1")
 
-            # Envelope CSR - exposes vocoder envelope values to CPU
+            # envelope CSRs config
             self.envelope_csr = envelope_csr.Peripheral(
-                num_channels=14,
-                sample_width=16,  # matches vocoder sample_width
+                num_channels=12,
+                sample_width=16,
                 addr_width=8,
                 data_width=8,
             )
@@ -207,7 +207,7 @@ class GirlvoiceSoc(Component):
         self.vocoder = StaticVocoder(
             start_freq=100,
             end_freq=5000,
-            num_channels=14,
+            num_channels=12,
             clk_sync_freq=sys_clk_freq,
             fs=fs,
             sample_width=sample_width,
@@ -338,7 +338,7 @@ class GirlvoiceSoc(Component):
         wiring.connect(m, self.vocoder.sink, self.i2s_rx.source)
         wiring.connect(m, self.vocoder.source, self.i2s_tx.sink)
 
-        # Envelope CSR - connect envelope values from vocoder channels
+        # envelope output CSRs
         if not self.sim:
             m.submodules.envelope_csr = self.envelope_csr
             for i, ch in enumerate(self.vocoder.channels):

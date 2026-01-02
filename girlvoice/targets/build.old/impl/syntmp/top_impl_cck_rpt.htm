@@ -1,0 +1,146 @@
+<html><body><samp><pre>
+<!@TC:1767392769>
+
+Copyright (C) 1994-2025 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: W-2024.09LR-SP1-1
+Install: /home/dev/lscc/radiant/synpbase
+OS: Ubuntu 22.04.5 LTS
+Hostname: ed1f83f45e99
+max virtual memory: unlimited (bytes)
+max user processes: unlimited
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl
+
+# Written on Fri Jan  2 22:26:23 2026
+
+##### DESIGN INFO #######################################################
+
+Top View:                "top"
+Constraint File(s):      "/home/dev/lscc/radiant/scripts/tcl/flow/radiant_synplify_vars.tcl"
+                         "/build/top.sdc"
+
+
+
+
+##### SUMMARY ############################################################
+
+Found 5 issues in 4 out of 6 constraints
+
+
+##### DETAILS ############################################################
+
+
+Clock Summary
+*************
+
+          Start                                 Requested     Requested     Clock        Clock                     Clock
+Level     Clock                                 Frequency     Period        Type         Group                     Load 
+------------------------------------------------------------------------------------------------------------------------
+0 -       clk12_0__io                           12.0 MHz      83.333        declared     default_clkgroup          0    
+                                                                                                                        
+0 -       clk12_clk                             12.0 MHz      83.333        declared     default_clkgroup          0    
+                                                                                                                        
+0 -       _top_pll_|clk_inferred_clock          200.0 MHz     5.000         inferred     Inferred_clkgroup_0_1     8096 
+                                                                                                                        
+0 -       _top_pll_|fast_clk_inferred_clock     200.0 MHz     5.000         inferred     Inferred_clkgroup_0_2     122  
+========================================================================================================================
+
+
+Clock Load Summary
+******************
+
+                                      Clock     Source                             Clock Pin              Non-clock Pin     Non-clock Pin                 
+Clock                                 Load      Pin                                Seq Example            Seq Example       Comb Example                  
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+clk12_0__io                           0         clk12_0__io(port)                  -                      -                 pin_clk12_0.buf.buf.buf0.I(IB)
+                                                                                                                                                          
+clk12_clk                             0         pin_clk12_0.buf.buf.buf0.O(IB)     -                      -                 -                             
+                                                                                                                                                          
+_top_pll_|clk_inferred_clock          8096      pll.U\$0.CLKOS(PLL)                btn_last.C             -                 -                             
+                                                                                                                                                          
+_top_pll_|fast_clk_inferred_clock     122       pll.U\$0.CLKOP(PLL)                soc.spi0_phy.sck.C     -                 -                             
+==========================================================================================================================================================
+
+
+
+Clock Relationships
+*******************
+
+Starting                              Ending                                |     rise to rise     |     fall to fall     |     rise to fall     |     fall to rise                     
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+System                                System                                |     5.000            |     No paths         |     No paths         |     No paths                         
+System                                _top_pll_|clk_inferred_clock          |     5.000            |     No paths         |     No paths         |     No paths                         
+_top_pll_|clk_inferred_clock          System                                |     5.000            |     No paths         |     No paths         |     No paths                         
+_top_pll_|clk_inferred_clock          _top_pll_|clk_inferred_clock          |     5.000            |     No paths         |     No paths         |     No paths                         
+_top_pll_|clk_inferred_clock          _top_pll_|fast_clk_inferred_clock     |     Diff grp         |     No paths         |     No paths         |     No paths                         
+_top_pll_|fast_clk_inferred_clock     _top_pll_|clk_inferred_clock          |     Diff grp         |     No paths         |     No paths         |     No paths                         
+_top_pll_|fast_clk_inferred_clock     _top_pll_|fast_clk_inferred_clock     |     5.000            |     No paths         |     No paths         |     No paths                         
+=======================================================================================================================================================================================
+ Note: 'No paths' indicates there are no paths in the design for that pair of clock edges.
+       'Diff grp' indicates that paths exist but the starting clock and ending clock are in different clock groups.
+
+
+<a name=UnconstrainedStartEndPointsCCK48></a>Unconstrained Start/End Points</a>
+******************************
+
+p:amp_0__clk__io
+p:amp_0__data__io
+p:amp_0__en__io
+p:amp_0__lrclk__io
+p:bl_0__io
+p:btn_pwr_0__io
+p:dc_0__io
+p:i2c_0__scl__io (bidir end point)
+p:i2c_0__scl__io (bidir start point)
+p:i2c_0__sda__io (bidir end point)
+p:i2c_0__sda__io (bidir start point)
+p:led_0__io
+p:mic_0__clk__io
+p:mic_0__data__io
+p:mic_0__lrclk__io
+p:pwr_en_0__io
+p:spi_0__clk__io
+p:spi_0__copi__io (bidir end point)
+p:spi_0__copi__io (bidir start point)
+p:spi_0__cs__io
+p:uart_0__rx__io
+p:uart_0__tx__io
+
+
+<a name=InapplicableconstraintsCCK49></a>Inapplicable constraints</a>
+************************
+
+create_clock -name clk -period 16.666666666666668 [get_nets soc/wb_to_csr/clk]
+	@E:MT548:"/build/top.sdc":2:0:2:0|Source for clock clk not found in netlist.
+create_clock -name fast_clk -period 8.333333333333334 [get_nets soc/spi0/cs_cdc/fast_clk]
+	@E:MT548:"/build/top.sdc":3:0:3:0|Source for clock fast_clk not found in netlist.
+ldc_set_attribute USE_PRIMARY=FALSE [get_ports i2c_0__scl__io]
+	@E:MF896:"/build/top.sdc":6:0:6:0|Object "USE_PRIMARY=FALSE" does not exist
+	@E::"/build/top.sdc":6:0:6:0|object "USE_PRIMARY=FALSE" is missing qualifier which may result in undesired results; objects must be of type library cell (x:), view (v: ), clock (get_clocks), port (get_ports), cell (get_cells), pin (get_pins), or net (get_nets)
+
+<a name=ApplicableConstraintsWithIssuesCCK50></a>Applicable constraints with issues</a>
+**********************************
+
+create_clock -name clk12_clk -period 83.33333333333333 [get_nets clk12_clk]
+	@W:Z241:"/build/top.sdc":1:0:1:0|Source for clock clk12_clk should be moved to net pin_clk12_0.buf.buf.i connected to driving cell pin pin_clk12_0.buf.buf.buf0.O
+
+<a name=ConstraintsWithMatchingWildcardExpressionsCCK51></a>Constraints with matching wildcard expressions</a>
+**********************************************
+
+(none)
+
+
+<a name=LibraryReportCCK52></a>Library Report</a>
+**************
+
+
+# End of Constraint Checker Report
+
+</pre></samp></body></html>

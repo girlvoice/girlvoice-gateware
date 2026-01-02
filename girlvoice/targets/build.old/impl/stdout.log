@@ -1,0 +1,106 @@
+Option definition override for: enable_hydra_infer_clocks_from_latch_data
+Running in Lattice mode
+
+                               Synplify Pro (R) 
+
+             Version W-2024.09LR-SP1-1 for linux64 - Jun 12, 2025 
+
+                    Copyright (c) 1988 - 2025 Synopsys, Inc.
+   This software and the associated documentation are proprietary to Synopsys,
+ Inc. This software may only be used in accordance with the terms and conditions
+ of a written license agreement with Synopsys, Inc. All other use, reproduction,
+   or distribution of this software is strictly prohibited.  Licensed Products
+     communicate with Synopsys servers for the purpose of providing software
+    updates, detecting software piracy and verifying that customers are using
+    Licensed Products in conformity with the applicable License Key for such
+  Licensed Products. Synopsys will use information gathered in connection with
+    this process to deliver software updates and pursue software pirates and
+                                   infringers.
+
+ Inclusivity & Diversity - Visit SolvNetPlus to read the "Synopsys Statement on
+            Inclusivity and Diversity" (Refer to article 000036315 at
+                        https://solvnetplus.synopsys.com)
+
+Starting:    /home/dev/lscc/radiant/synpbase/linux_a_64/mbin/synbatch
+Install:     /home/dev/lscc/radiant/synpbase
+Hostname:    ed1f83f45e99
+Date:        Fri Jan  2 22:26:08 2026
+Version:     W-2024.09LR-SP1-1
+
+Arguments:   -product synplify_base -batch top_impl_synplify.tcl
+ProductType: synplify_pro
+
+
+
+
+
+
+
+log file: "/build/impl/top_impl.srr"
+Running: impl in foreground
+
+Running proj_1|impl
+
+Running Flow: compile (Compile) on proj_1|impl
+# Fri Jan  2 22:26:09 2026
+
+Running Flow: compile_flow (Compile Process) on proj_1|impl
+# Fri Jan  2 22:26:09 2026
+
+Running: compiler (Compile Input) on proj_1|impl
+# Fri Jan  2 22:26:09 2026
+Process ID: 53
+Copied /build/impl/synwork/top_impl_comp.srs to /build/impl/top_impl.srs
+
+compiler completed
+# Fri Jan  2 22:26:19 2026
+
+Return Code: 0
+Run Time:00h:00m:09s
+
+Running: multi_srs_gen (Multi-srs Generator) on proj_1|impl
+# Fri Jan  2 22:26:19 2026
+Process ID: 133
+
+multi_srs_gen completed
+# Fri Jan  2 22:26:19 2026
+
+Return Code: 0
+Run Time:00h:00m:00s
+Copied /build/impl/synwork/top_impl_mult.srs to /build/impl/top_impl.srs
+Copied /build/impl/top_impl.srr to /build/impl/top_impl.srf
+Complete: Compile Process on proj_1|impl
+
+Running: premap (Premap) on proj_1|impl
+# Fri Jan  2 22:26:19 2026
+Process ID: 149
+
+premap completed with warnings
+# Fri Jan  2 22:26:23 2026
+
+Return Code: 1
+Run Time:00h:00m:04s
+Complete: Compile on proj_1|impl
+
+Running Flow: map (Map) on proj_1|impl
+# Fri Jan  2 22:26:23 2026
+
+Running: fpga_mapper (Map & Optimize) on proj_1|impl
+# Fri Jan  2 22:26:23 2026
+Process ID: 164
+Copied /build/impl/synwork/top_impl_m.srm to /build/impl/top_impl.srm
+
+fpga_mapper completed with warnings
+# Fri Jan  2 22:28:10 2026
+
+Return Code: 1
+Run Time:00h:01m:47s
+Complete: Map on proj_1|impl
+Copied /build/impl/top_impl.srr to /build/impl/top_impl.srf
+Complete: Logic Synthesis on proj_1|impl
+TCL script complete: "top_impl_synplify.tcl"
+exit status=0
+exit status=0
+Save changes for project:
+/build/impl/proj_1.prj
+batch mode default:no

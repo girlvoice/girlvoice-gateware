@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RadiantProject version="4.2" radiant="2025.1.0.39.0" title="top" device="LIFCL-17-8SG72C" performance_grade="8_High-Performance_1.0V" family_int="je5d00" device_int="je5d15" package_int="QFN72" operation_int="COM" speed_int="11" default_implementation="impl">
+    <Options/>
+    <Implementation title="impl" dir="impl" description="impl" synthesis="synplify" default_strategy="Strategy1">
+        <Options top="&quot;top&quot;"/>
+        <Source name="vexriscv_imac+dcache.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="top.v" type="Verilog" type_short="Verilog">
+            <Options/>
+        </Source>
+        <Source name="top.pdc" type="Physical Constraints File" type_short="PDC">
+            <Options/>
+        </Source>
+        <Source name="top.sdc" type="Pre-Synthesis Constraints File" type_short="SDC">
+            <Options/>
+        </Source>
+    </Implementation>
+    <Strategy name="Strategy1" file="top1.sty"/>
+</RadiantProject>

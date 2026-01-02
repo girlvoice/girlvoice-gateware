@@ -1,0 +1,2 @@
+Library, Design Unit ,Compile time , Hardware Gen ,Optimization Stg1 ,Optimization Stg2 , Peak Mem Usage, Incr Mem Usage, Hardware Gen ,Optimization Stg1 ,Optimization Stg2
+work, VexRiscv,0h:00m:03s,0h:00m:00s,0h:00m:00s,0h:00m:03s,  1102 MB,    97 MB,     0 MB,    42 MB,    55 MB

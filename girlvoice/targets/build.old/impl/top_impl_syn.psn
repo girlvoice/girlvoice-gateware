@@ -1,0 +1,240 @@
+POSTSYN: Post Synthesis Process Radiant Software (64-bit) 2025.1.0.39.0
+Command Line: postsyn -a LIFCL -p LIFCL-17 -t QFN72 -sp 8_High-Performance_1.0V -oc Commercial -top -w -o top_impl_syn.udb -ldc top_impl.ldc -msgset /build/promote.xml top_impl.vm 
+   Architecture:     LIFCL
+   Device:           LIFCL-17
+   Package:          QFN72
+   Performance:      8_High-Performance_1.0V
+Reading input file 'top_impl.vm' ...
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40310[32]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40310[31]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40310[30]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40310[29]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40310[28]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40310[27]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40310[26]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40310[25]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40310[24]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40310[23]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40310[22]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40310[21]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40310[20]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40310[19]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40310[18]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40310[17]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40310[16]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[31]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[30]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[29]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[28]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[27]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[26]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[25]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[24]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[23]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[22]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[21]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[20]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[19]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[18]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[17]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[16]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[15]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[14]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[13]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[12]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[11]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[10]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[9]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[8]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[7]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[6]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[5]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[4]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[3]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[2]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[1]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_45786[0]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40343_0[15]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40343_0[14]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40343_0[13]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40343_0[12]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40343_0[11]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40343_0[10]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40343_0[9]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40343_0[8]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40359[32]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40359[31]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40359[30]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40359[29]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40359[28]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40359[27]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40359[26]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40359[25]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40359[24]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40359[23]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40359[22]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40359[21]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40359[20]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40359[19]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40359[18]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40359[17]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40359[16]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40392_0[15]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40392_0[14]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40392_0[13]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40392_0[12]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40392_0[11]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40392_0[10]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40392_0[9]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40392_0[8]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40392_0[7]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40392_0[6]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40392_0[5]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40392_0[4]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40392_0[3]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40392_0[2]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40392_0[1]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'N_40392_0[0]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[31]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[30]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[29]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[28]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[27]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[26]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[25]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[24]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[23]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[22]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[21]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[20]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[19]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[18]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[17]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[16]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[15]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[14]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[13]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[12]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[11]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[10]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[9]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[8]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[7]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[6]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[5]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[4]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[3]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[2]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[1]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'IBusCachedPlugin_predictionJumpInterface_payload[0]' in Module 'VexRiscv' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'lineLoader_address_4[4]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'lineLoader_address_4[3]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'lineLoader_address_4[2]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'lineLoader_address_4[1]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'lineLoader_address_4[0]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'lineLoader_wordIndex_5[2]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'lineLoader_wordIndex_5[1]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Wire 'lineLoader_wordIndex_5[0]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_wordIndex_reg[0]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_wordIndex_reg[1]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_wordIndex_reg[2]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[0]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[1]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[2]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[3]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[4]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[5]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[6]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[7]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[8]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[9]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[10]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[11]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[12]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[13]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[14]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[15]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[16]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[17]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[18]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[19]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[20]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[21]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[22]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[23]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[24]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[25]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[26]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[27]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[28]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[29]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[30]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'keep' on Instance 'lineLoader_address_reg[31]' in Module 'InstructionCache' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_11' on Instance '_storage[0]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_10' on Instance '_storage[0]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_01' on Instance '_storage[0]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_00' on Instance '_storage[0]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_base_type' on Instance '_storage[0]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_11' on Instance '_storage[1]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_10' on Instance '_storage[1]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_01' on Instance '_storage[1]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_00' on Instance '_storage[1]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_base_type' on Instance '_storage[1]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_11' on Instance '_storage[0]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__1_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_10' on Instance '_storage[0]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__1_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_01' on Instance '_storage[0]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__1_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_00' on Instance '_storage[0]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__1_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_base_type' on Instance '_storage[0]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__1_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_11' on Instance '_storage[1]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__1_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_10' on Instance '_storage[1]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__1_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_01' on Instance '_storage[1]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__1_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_00' on Instance '_storage[1]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__1_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_base_type' on Instance '_storage[1]' in Module 'Z\top.soc.gpo1.bridge.Mode.pin__1_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_11' on Instance '_storage[0]' in Module 'Z\top.soc.led0.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_10' on Instance '_storage[0]' in Module 'Z\top.soc.led0.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_01' on Instance '_storage[0]' in Module 'Z\top.soc.led0.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_00' on Instance '_storage[0]' in Module 'Z\top.soc.led0.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_base_type' on Instance '_storage[0]' in Module 'Z\top.soc.led0.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_11' on Instance '_storage[1]' in Module 'Z\top.soc.led0.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_10' on Instance '_storage[1]' in Module 'Z\top.soc.led0.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_01' on Instance '_storage[1]' in Module 'Z\top.soc.led0.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_value_00' on Instance '_storage[1]' in Module 'Z\top.soc.led0.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+WARNING <35811117> - Attribute 'enum_base_type' on Instance '_storage[1]' in Module 'Z\top.soc.led0.bridge.Mode.pin__0_' cannot be supported. It will be ignored.
+Reading constraint file 'top_impl.ldc' ...
+CRITICAL <35811124> - In constraint 'ldc_set_attribute {USE_PRIMARY=FALSE} [get_ports i2c_0__scl__io]', attribute 'USE_PRIMARY' cannot be supported on the specified object. It will be ignored.
+Removing unused logic ...
+INFO <35811145> - Instance pin_spi_0__copi/buf_cZ/buf_cZ/buf0.PIC_inst_in is optimized away.
+INFO <35811145> - Instance pin_spi_0__copi/buf_cZ/buf_cZ/buf0.PIC_inst_tristate is optimized away.
+INFO <35811145> - Instance pin_uart_0__tx/buf_cZ/buf_cZ/buf0.PIC_inst_in is optimized away.
+INFO <35811145> - Instance pin_uart_0__tx/buf_cZ/buf_cZ/buf0.PIC_inst_tristate is optimized away.
+INFO <35811145> - Instance soc/cpu/vexriscv/IBusCachedPlugin_cache/lineLoader_address_RNO[0] is optimized away.
+INFO <35811145> - Instance soc/cpu/vexriscv/IBusCachedPlugin_cache/lineLoader_address_RNO[1] is optimized away.
+INFO <35811145> - Instance soc/cpu/vexriscv/IBusCachedPlugin_cache/lineLoader_address_RNO[4] is optimized away.
+INFO <35811145> - Instance soc/cpu/vexriscv/IBusCachedPlugin_cache/lineLoader_address_RNO[3] is optimized away.
+INFO <35811145> - Instance soc/cpu/vexriscv/IBusCachedPlugin_cache/lineLoader_address_RNO[2] is optimized away.
+INFO <35811145> - Instance soc/cpu/vexriscv/IBusCachedPlugin_cache/lineLoader_address_reg[0].ff_inst is optimized away.
+INFO <35811148> - ... More instances are optimized away.
+INFO <35811146> - Signal soc/cpu/vexriscv/IBusCachedPlugin_cache/lineLoader_address_4[4] undriven or does not drive anything - clipped
+INFO <35811146> - Signal soc/cpu/vexriscv/IBusCachedPlugin_cache/lineLoader_address_4[3] undriven or does not drive anything - clipped
+INFO <35811146> - Signal soc/cpu/vexriscv/IBusCachedPlugin_cache/lineLoader_address_4[2] undriven or does not drive anything - clipped
+INFO <35811146> - Signal soc/cpu/vexriscv/IBusCachedPlugin_cache/lineLoader_address_4[1] undriven or does not drive anything - clipped
+INFO <35811146> - Signal soc/cpu/vexriscv/IBusCachedPlugin_cache/lineLoader_address_4[0] undriven or does not drive anything - clipped
+INFO <35811146> - Signal soc/cpu/vexriscv/IBusCachedPlugin_cache/lineLoader_address_3[4] undriven or does not drive anything - clipped
+INFO <35811146> - Signal soc/cpu/vexriscv/IBusCachedPlugin_cache/lineLoader_address_3[3] undriven or does not drive anything - clipped
+INFO <35811146> - Signal soc/cpu/vexriscv/IBusCachedPlugin_cache/lineLoader_address_3[2] undriven or does not drive anything - clipped
+INFO <35811146> - Signal soc/cpu/vexriscv/IBusCachedPlugin_cache/lineLoader_address_3[1] undriven or does not drive anything - clipped
+INFO <35811146> - Signal soc/cpu/vexriscv/IBusCachedPlugin_cache/lineLoader_address_3[0] undriven or does not drive anything - clipped
+INFO <35811149> - ... More signals are undriven or does not drive anything - clipped
+Starting design annotation....
+ 
+Constraint Summary:
+   Total number of constraints: 7
+   Total number of constraints dropped: 0
+   Total number of constraints duplicated: 1
+ 
+Writing output file 'top_impl_syn.udb'.
+POSTSYN finished successfully.
+Total CPU Time: 7 secs 
+Total REAL Time: 7 secs 
+Peak Memory Usage: 1154 MB
+Checksum -- postsyn: 8a715e0f2cd8471c7e19bfd82570f634c80ff1a6

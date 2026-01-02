@@ -1,0 +1,8 @@
+/home/dev/lscc/radiant/synpbase/bin/syn_nfilter  -link  -top  top  -multisrs  /build/impl/synwork/top_impl_comp.srs  -osyn  /build/impl/synwork/top_impl_mult.srs  -log  /build/impl/synlog/top_impl_multi_srs_gen.srr 
+relcom:/home/dev/lscc/radiant/synpbase/bin/syn_nfilter -link -top top -multisrs ../synwork/top_impl_comp.srs -osyn ../synwork/top_impl_mult.srs -log ../synlog/top_impl_multi_srs_gen.srr
+rc:0 success:1 runtime:0
+file:../synwork/top_impl_comp.srs|io:i|time:1767392778|size:436208|exec:0|csum:5727026673467FFE071659A486F60045
+file:../synwork/top_impl_mult.srs|io:o|time:1767392779|size:7962|exec:0|csum:
+file:../synlog/top_impl_multi_srs_gen.srr|io:o|time:1767392779|size:1196|exec:0|csum:
+file:/home/dev/lscc/radiant/synpbase/linux_a_64/syn_nfilter|io:i|time:1749710407|size:13476336|exec:1|csum:5DF14944CC34F723D07826F53A5BD86C
+file:/home/dev/lscc/radiant/synpbase/bin/syn_nfilter|io:i|time:1749710052|size:368|exec:1|csum:004E4455B64BA10AD6A92FB2301610E0

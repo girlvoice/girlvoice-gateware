@@ -1,0 +1,6 @@
+"/home/dev/lscc/radiant/ip/pmi/pmi_lifcl.vhd"
+"/home/dev/lscc/radiant/synpbase/lib/lucent/lifcl.v"
+"/home/dev/lscc/radiant/synpbase/lib/lucent/pmi_def.v"
+"/home/dev/lscc/radiant/ip/pmi/pmi_lifcl.v"
+"/build/vexriscv_imac+dcache.v"
+"/build/top.v"

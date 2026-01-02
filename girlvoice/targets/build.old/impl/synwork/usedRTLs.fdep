@@ -1,0 +1,6 @@
+#List of actual used RTLs.
+
+File                                                                                            Type     IN_PROJECT/INCLUDED/LIBRARY
+
+"/build/top.v"                                                                               verilog                      IN PROJECT
+"/build/vexriscv_imac+dcache.v"                                                              verilog                      IN PROJECT

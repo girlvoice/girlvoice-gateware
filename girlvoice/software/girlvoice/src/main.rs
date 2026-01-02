@@ -28,7 +28,7 @@ mod term;
 mod ui;
 
 use hal::i2c::I2c0;
-use ui::math::fx_to_f32;
+use ui::math::{Fixed, fx_to_f32};
 
 const SYS_CLK_FREQ: u32 = 60_000_000;
 
@@ -119,11 +119,13 @@ fn main() -> ! {
         { buffer_size::<Rgb565>(DISPLAY_WIDTH, DISPLAY_HEIGHT) }
     >::new();
 
-    // create the visualizer with 14 channels (matching vocoder)
-    let mut visualizer = ui::Visualizer::new(14);
+    // create the visualizer with 12 channels
+    let mut visualizer = ui::Visualizer::new(12);
 
-    // envelope energies from vocoder (14 channels)
-    let mut energies = [0.0f32; 14];
+    // envelope energies from vocoder
+    let mut energies = [Fixed::ZERO; 12];
+    // f32 copy for visualizer (which expects f32)
+    let mut energies_f32 = [0.0f32; 12];
     let mut frame_counter: u32 = 0;
 
     // access envelope registers
@@ -143,10 +145,16 @@ fn main() -> ! {
     // ~10 fps, delay based for now
     const FRAME_DELAY_MS: u32 = 100;
 
-    let dt_fixed = ui::math::Fixed::from_num(FRAME_DELAY_MS) / ui::math::Fixed::from_num(1000);
+    let dt = Fixed::from_num(FRAME_DELAY_MS) / Fixed::from_num(1000);
 
-    // max envelope value for normalization (16-bit signed, so max positive is 32767)
-    const ENVELOPE_MAX: f32 = 32767.0;
+    // AGC state
+    let mut agc_gain = Fixed::ONE;
+    let agc_target: Fixed = Fixed::from_num(7) / Fixed::from_num(10);  // 0.7
+    let agc_min_gain = Fixed::ONE;
+    let agc_max_gain = Fixed::from_num(32);
+    let agc_attack = Fixed::from_num(2);
+    let agc_release: Fixed = Fixed::from_num(3) / Fixed::from_num(10);  // 0.3
+    let agc_threshold_low = agc_target >> 1;
 
     loop {
         //term.handle_char();
@@ -154,24 +162,56 @@ fn main() -> ! {
         frame_counter = frame_counter.wrapping_add(1);
 
         // read envelope values from hardware registers
-        energies[0] = envelope.ch0().read().value().bits() as f32 / ENVELOPE_MAX;
-        energies[1] = envelope.ch1().read().value().bits() as f32 / ENVELOPE_MAX;
-        energies[2] = envelope.ch2().read().value().bits() as f32 / ENVELOPE_MAX;
-        energies[3] = envelope.ch3().read().value().bits() as f32 / ENVELOPE_MAX;
-        energies[4] = envelope.ch4().read().value().bits() as f32 / ENVELOPE_MAX;
-        energies[5] = envelope.ch5().read().value().bits() as f32 / ENVELOPE_MAX;
-        energies[6] = envelope.ch6().read().value().bits() as f32 / ENVELOPE_MAX;
-        energies[7] = envelope.ch7().read().value().bits() as f32 / ENVELOPE_MAX;
-        energies[8] = envelope.ch8().read().value().bits() as f32 / ENVELOPE_MAX;
-        energies[9] = envelope.ch9().read().value().bits() as f32 / ENVELOPE_MAX;
-        energies[10] = envelope.ch10().read().value().bits() as f32 / ENVELOPE_MAX;
-        energies[11] = envelope.ch11().read().value().bits() as f32 / ENVELOPE_MAX;
-        energies[12] = envelope.ch12().read().value().bits() as f32 / ENVELOPE_MAX;
-        energies[13] = envelope.ch13().read().value().bits() as f32 / ENVELOPE_MAX;
+        energies[0] = Fixed::from_bits(envelope.ch0().read().value().bits() as i32);
+        energies[1] = Fixed::from_bits(envelope.ch1().read().value().bits() as i32);
+        energies[2] = Fixed::from_bits(envelope.ch2().read().value().bits() as i32);
+        energies[3] = Fixed::from_bits(envelope.ch3().read().value().bits() as i32);
+        energies[4] = Fixed::from_bits(envelope.ch4().read().value().bits() as i32);
+        energies[5] = Fixed::from_bits(envelope.ch5().read().value().bits() as i32);
+        energies[6] = Fixed::from_bits(envelope.ch6().read().value().bits() as i32);
+        energies[7] = Fixed::from_bits(envelope.ch7().read().value().bits() as i32);
+        energies[8] = Fixed::from_bits(envelope.ch8().read().value().bits() as i32);
+        energies[9] = Fixed::from_bits(envelope.ch9().read().value().bits() as i32);
+        energies[10] = Fixed::from_bits(envelope.ch10().read().value().bits() as i32);
+        energies[11] = Fixed::from_bits(envelope.ch11().read().value().bits() as i32);
+
+        let mut peak = Fixed::ZERO;
+        for e in energies.iter() {
+            if *e > peak {
+                peak = *e;
+            }
+        }
+
+        let current_output = peak.saturating_mul(agc_gain);
+        if current_output > agc_target {
+            // decrease gain
+            let delta = agc_attack.saturating_mul(dt).saturating_mul(current_output.saturating_sub(agc_target));
+            agc_gain = agc_gain.saturating_sub(delta);
+        } else if current_output < agc_threshold_low {
+            // increase gain
+            let delta = agc_release.saturating_mul(dt);
+            agc_gain = agc_gain.saturating_add(delta);
+        }
+        // clamp gain to valid range
+        if agc_gain < agc_min_gain {
+            agc_gain = agc_min_gain;
+        }
+        if agc_gain > agc_max_gain {
+            agc_gain = agc_max_gain;
+        }
+
+        for (i, e) in energies.iter().enumerate() {
+            let scaled = e.saturating_mul(agc_gain).min(Fixed::ONE);
+            energies_f32[i] = fx_to_f32(scaled);
+        }
 
         // update visualizer
-        fade_framebuffer(fb.data_mut());
-        visualizer.update(fx_to_f32(dt_fixed), &energies);
+        // fade_framebuffer(fb.data_mut()); // disabled for debugging bar meter
+        // clear framebuffer instead
+        for byte in fb.data_mut().iter_mut() {
+            *byte = 0;
+        }
+        visualizer.update(fx_to_f32(dt), &energies_f32);
 
         // render visualizer to our local framebuffer
         visualizer.render(|x, y, color| {

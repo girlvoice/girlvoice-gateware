@@ -1,0 +1,91 @@
+#--  Synopsys, Inc.
+#--  Version W-2024.09LR-SP1-1
+#--  Project file /build/impl/scratchproject.prs
+
+#project files
+add_file -constraint "/home/dev/lscc/radiant/scripts/tcl/flow/radiant_synplify_vars.tcl"
+add_file -constraint "/build/top.sdc"
+add_file -verilog "/home/dev/lscc/radiant/ip/pmi/pmi_lifcl.v"
+add_file -vhdl -lib pmi "/home/dev/lscc/radiant/ip/pmi/pmi_lifcl.vhd"
+add_file -verilog -vlog_std v2001 "/build/vexriscv_imac+dcache.v"
+add_file -verilog -vlog_std v2001 "/build/top.v"
+
+
+#implementation: "impl"
+impl -add /build/impl -type fpga
+
+#
+#implementation attributes
+
+set_option -vlog_std v2001
+set_option -project_relative_includes 1
+set_option -include_path {/build/impl/}
+set_option -include_path {/build}
+
+#device options
+set_option -technology LIFCL
+set_option -part LIFCL_17
+set_option -package QFN72C
+set_option -speed_grade -8
+
+#compilation/mapping options
+set_option -top_module "top"
+
+# hdl_compiler_options
+set_option -hdl_strict_syntax 0
+
+# mapper_without_write_options
+set_option -frequency 200
+set_option -srs_instrumentation 1
+
+# mapper_options
+set_option -write_verilog 0
+set_option -write_structural_verilog 0
+set_option -write_vhdl 0
+
+# Lattice XP
+set_option -maxfan 1000
+set_option -disable_io_insertion 0
+set_option -retiming 0
+set_option -pipe 1
+set_option -infer_seqShift 1
+set_option -forcegsr false
+set_option -fix_gated_and_generated_clocks 0
+set_option -rw_check_on_ram 0
+set_option -update_models_cp 0
+set_option -syn_edif_array_rename 0
+set_option -Write_declared_clocks_only 1
+set_option -seqshift_no_replicate 0
+set_option -run_design_rule_checker 0
+set_option -design_rule_fanout_limit 0
+
+# cdc_analysis_option
+set_option -min_cdc_sync_flops 2
+set_option -unsafe_cdc_netlist_property 0
+
+# Lattice LIFCL
+set_option -s44_optimization 0
+set_option -infer_widefn 1
+set_option -const_mult_threshold 3
+set_option -pack_rst_largeram 1
+
+# NFilter
+set_option -no_sequential_opt 0
+
+# sequential_optimization_options
+set_option -symbolic_fsm_compiler 1
+
+# Compiler Options
+set_option -compiler_compatible 0
+set_option -resource_sharing 1
+set_option -multi_file_compilation_unit 1
+
+#automatic place and route (vendor) options
+set_option -write_apr_constraint 1
+
+#set result format/file last
+project -result_file "/build/impl/top_impl.vm"
+
+#set log file 
+set_option log_file "/build/impl/top_impl.srf" 
+impl -active "impl"

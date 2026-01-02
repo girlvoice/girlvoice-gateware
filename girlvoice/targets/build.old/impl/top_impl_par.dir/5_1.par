@@ -1,0 +1,50 @@
+
+PAR: Place And Route Radiant Software (64-bit) 2025.1.0.39.0.
+PARed on: Fri Jan  2 22:28:39 2026
+
+Command Line: par -w -t 1 -cores 1 -hsp m -exp parPathBased=OFF \
+	top_impl_map.udb top_impl_par.dir/5_1.udb 
+
+Loading top_impl_map.udb ...
+Loading device for application GENERIC from file 'je5d15.nph' in environment: /home/dev/lscc/radiant/ispfpga.
+Package Status:                     Final          Version 23.
+Performance Hardware Data Status:   Final          Version 118.1.
+
+
+
+Design:  top
+Family:  LIFCL
+Device:  LIFCL-17
+Package: QFN72
+Performance Grade:   8_High-Performance_1.0V
+
+Constraint Summary
+   Total number of constraints: 27
+   Total number of constraints dropped: 0
+
+ERROR <72001024> - par: ERROR: This design with 6973 slices cannot be packed into this device with 6912 slice capacity.
+
+
+
+PAR_SUMMARY::Run status = Failed
+PAR_SUMMARY::Number of unrouted conns = <n/a>
+PAR_SUMMARY::Estimated worst slack<setup/<ns>> = <n/a>
+PAR_SUMMARY::Timing score<setup/<ns>> = <n/a>
+PAR_SUMMARY::Estimated worst slack<hold/<ns>> = <n/a>
+PAR_SUMMARY::Timing score<hold/<ns>> = <n/a>
+PAR_SUMMARY::Number of errors = 1
+
+Note: user must run 'timing' for timing closure signoff.
+
+Total CPU  Time: 6 secs 
+Total REAL Time: 6 secs 
+Peak Memory Usage: 1358.11 MB
+
+
+par done!
+
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+Copyright (c) 1995 AT&T Corp.   All rights reserved.
+Copyright (c) 1995-2001 Lucent Technologies Inc.  All rights reserved.
+Copyright (c) 2001 Agere Systems   All rights reserved.
+Copyright (c) 2002-2025 Lattice Semiconductor Corporation,  All rights reserved.

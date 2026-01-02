@@ -1,0 +1,25 @@
+                         Lattice PAR Report File
+Radiant Software (64-bit) 2025.1.0.39.0
+Fri Jan  2 22:28:39 2026
+
+Command Line: par -w -n 1 -t 1 -s 1 -cores 1 -hsp m -exp parPathBased=OFF \
+	top_impl_map.udb top_impl.udb 
+
+
+Level/       Number       Estimated       Timing       Estimated Worst    Timing          Run      Run
+Cost [udb]   Unrouted     Worst Slack     Score        Slack(hold)        Score(hold)     Time     Status
+----------   --------     -----------     ------       ---------------    -----------     ----     ------
+5_1          -            -               -            -                  -               06       Failed
+
+* : Design saved.
+
+INFO <60001137> - par: Iteration 5_1 failed due to design error(s).
+
+ERROR <60001149> - par: All 1 iterations failed with design error(s).
+It is recommended to correct all design errors before running multiple iterations.
+Please check the Place and Route reports (.par) for the individual iterations under the directory
+ "/build/impl/top_impl_par.dir/5_1.par".
+
+Total (real) run time for 1-seed: 6 secs 
+
+par failed!

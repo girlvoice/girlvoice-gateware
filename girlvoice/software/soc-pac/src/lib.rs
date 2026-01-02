@@ -2326,8 +2326,6 @@ pub mod envelope {
         ch9: Ch9,
         ch10: Ch10,
         ch11: Ch11,
-        ch12: Ch12,
-        ch13: Ch13,
     }
     impl RegisterBlock {
         #[doc = "0x00 - Channel 0 envelope value"]
@@ -2366,12 +2364,6 @@ pub mod envelope {
         #[doc = "0x16 - Channel 11 envelope value"]
         #[inline(always)]
         pub const fn ch11(&self) -> &Ch11 { &self.ch11 }
-        #[doc = "0x18 - Channel 12 envelope value"]
-        #[inline(always)]
-        pub const fn ch12(&self) -> &Ch12 { &self.ch12 }
-        #[doc = "0x1a - Channel 13 envelope value"]
-        #[inline(always)]
-        pub const fn ch13(&self) -> &Ch13 { &self.ch13 }
     }
     pub type Ch0 = crate::Reg<ch0::Ch0Spec>;
     pub mod ch0 {
@@ -2528,32 +2520,6 @@ pub mod envelope {
         impl crate::RegisterSpec for Ch11Spec { type Ux = u16; }
         impl crate::Readable for Ch11Spec {}
         impl crate::Resettable for Ch11Spec { const RESET_VALUE: u16 = 0; }
-    }
-    pub type Ch12 = crate::Reg<ch12::Ch12Spec>;
-    pub mod ch12 {
-        pub type R = crate::R<Ch12Spec>;
-        pub type ValueR = crate::FieldReader<u16>;
-        impl R {
-            #[inline(always)]
-            pub fn value(&self) -> ValueR { ValueR::new(self.bits) }
-        }
-        pub struct Ch12Spec;
-        impl crate::RegisterSpec for Ch12Spec { type Ux = u16; }
-        impl crate::Readable for Ch12Spec {}
-        impl crate::Resettable for Ch12Spec { const RESET_VALUE: u16 = 0; }
-    }
-    pub type Ch13 = crate::Reg<ch13::Ch13Spec>;
-    pub mod ch13 {
-        pub type R = crate::R<Ch13Spec>;
-        pub type ValueR = crate::FieldReader<u16>;
-        impl R {
-            #[inline(always)]
-            pub fn value(&self) -> ValueR { ValueR::new(self.bits) }
-        }
-        pub struct Ch13Spec;
-        impl crate::RegisterSpec for Ch13Spec { type Ux = u16; }
-        impl crate::Readable for Ch13Spec {}
-        impl crate::Resettable for Ch13Spec { const RESET_VALUE: u16 = 0; }
     }
 }
 #[doc = "I2CFIFO"]
