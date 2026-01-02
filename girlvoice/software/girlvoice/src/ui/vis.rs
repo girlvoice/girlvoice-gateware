@@ -20,7 +20,7 @@ impl ModeKind {
     }
 }
 
-// Harmonic Loop. A single closed figure where each channel adds harmonic deformation
+// harmonic Loop. A single closed figure where each channel adds harmonic deformation
 // - Base shape of a circle, x = cos(t), y = sin(t)
 // - Each channel adds x += A_n * cos(n*t + phi), y += A_n * sin(n*t + phi')
 pub struct HarmonicLoop {
@@ -46,7 +46,7 @@ impl HarmonicLoop {
                 LFO::new_with_phase(0.08 + (i as f32 * 0.03), i as f32 * 0.4)
             }),
             total_energy: EnvelopeSmoother::new(60.0, 2.0, 50.0),
-            resolution: 200,
+            resolution: 80, // reduced from 200 for better performance
             circular_mask: true,
             glow: false, // Disable glow by default on embedded (saves CPU)
         }
@@ -109,19 +109,17 @@ impl HarmonicLoop {
         self.total_energy.process(total / self.num_channels as f32);
     }
 
-    pub fn render<F>(&self, set_pixel: F)
+    pub fn render<F>(&self, set_pixel: F, pal: &ColorPalette)
     where
         F: FnMut(usize, usize, Color),
     {
-        self.render_with_palette(set_pixel, &ColorPalette::default());
+        self.render_with_palette(set_pixel, pal);
     }
 
     pub fn render_with_palette<F>(&self, mut set_pixel: F, pal: &ColorPalette)
     where
         F: FnMut(usize, usize, Color),
     {
-        // trails are handled by framebuffer fading now - just draw the current frame
-
         // draw main figure using palette colors
         let rotation = self.rotation.phase;
         for i in 0..self.resolution {
@@ -144,34 +142,36 @@ impl HarmonicLoop {
             }
         }
 
-        // draw bright spots at high-energy harmonics
-        for i in 0..self.num_channels {
-            if self.energies[i] > 0.4 {
+        // draw bright spots at high-energy harmonics (simplified for performance)
+        /*for i in 0..self.num_channels {
+            if self.energies[i] > 0.5 {
                 let harmonic = (i + 2) as f32;
                 let t = self.harmonic_phases[i].phase / harmonic;
                 let point = self.sample_point(t, rotation);
                 let (sx, sy) = point.to_screen();
                 let color = pal.sample(i as f32 / self.num_channels as f32);
+                let energy = self.energies[i];
 
-                for dy in -2..=2i32 {
-                    for dx in -2..=2i32 {
-                        let (px, py) = (sx + dx, sy + dy);
+                // simplified 3x3 bright spot (no sqrt, uses lookup table for brightness)
+                const BRIGHTNESS: [[f32; 3]; 3] = [
+                    [0.3, 0.6, 0.3],
+                    [0.6, 1.0, 0.6],
+                    [0.3, 0.6, 0.3],
+                ];
+                for dy in 0..3i32 {
+                    for dx in 0..3i32 {
+                        let (px, py) = (sx + dx - 1, sy + dy - 1);
                         if px >= 0 && px < DISPLAY_SIZE as i32 && py >= 0 && py < DISPLAY_SIZE as i32 {
                             let (ux, uy) = (px as usize, py as usize);
                             if !self.circular_mask || is_in_circle(ux, uy) {
-                                let dist_sq = dx * dx + dy * dy;
-                                // 2.5^2 = 6.25, so compare squared distances
-                                if dist_sq <= 6 {
-                                    let dist = math::fx_to_f32(math::fx_sqrt(math::fx_from_f32(dist_sq as f32)));
-                                    let b = (1.0 - dist / 2.5) * self.energies[i];
-                                    set_pixel(ux, uy, color.scale(b));
-                                }
+                                let b = BRIGHTNESS[dy as usize][dx as usize] * energy;
+                                set_pixel(ux, uy, color.scale(b));
                             }
                         }
                     }
                 }
             }
-        }
+        }*/
     }
 }
 
@@ -203,7 +203,7 @@ impl Visualizer {
         F: FnMut(usize, usize, Color),
     {
         match self.current_mode {
-            ModeKind::HarmonicLoop => self.harmonic_loop.render_with_palette(set_pixel, &self.palette)
+            ModeKind::HarmonicLoop => self.harmonic_loop.render(set_pixel, &self.palette)
         }
     }
 

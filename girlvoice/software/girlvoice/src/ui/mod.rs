@@ -82,11 +82,13 @@ impl Color {
         }
     }
 
+    #[inline(always)]
     pub fn scale(self, factor: f32) -> Color {
+        let f = (factor * 256.0) as u32;
         Color {
-            r: (self.r as f32 * factor) as u8,
-            g: (self.g as f32 * factor) as u8,
-            b: (self.b as f32 * factor) as u8,
+            r: ((self.r as u32 * f) >> 8) as u8,
+            g: ((self.g as u32 * f) >> 8) as u8,
+            b: ((self.b as u32 * f) >> 8) as u8,
         }
     }
 }

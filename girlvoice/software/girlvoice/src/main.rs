@@ -8,12 +8,12 @@ use sgtl5000::regmap::LineOutBiasCurrent;
 use riscv_rt::entry;
 use soc_pac as pac;
 
-use gc9a01::{prelude::*, Gc9a01, SPIDisplayInterface};
+use mipidsi::interface::SpiInterface;
+use mipidsi::{Builder, models::GC9A01, options::ColorInversion};
 
 use embedded_graphics::{
     pixelcolor::Rgb565,
     pixelcolor::raw::BigEndian,
-    pixelcolor::IntoStorage,
     prelude::*,
     framebuffer::{Framebuffer, buffer_size},
 };
@@ -97,17 +97,16 @@ fn main() -> ! {
     let gpo1 = Gpo1::new(peripherals.gpo1);
 
     let spi0 = Spi0::new(peripherals.spiflash_ctrl);
-    let interface = SPIDisplayInterface::new(spi0, gpo1);
 
+    let mut spi_buffer = [0_u8; 512];
+    let interface = SpiInterface::new(spi0, gpo1, &mut spi_buffer);
 
+    let mut display = Builder::new(GC9A01, interface)
+        .display_size(240, 240)
+        .invert_colors(ColorInversion::Inverted)
+        .init(&mut delay).unwrap();
 
-    let mut display = Gc9a01::new(
-        interface,
-        DisplayResolution240x240,
-        DisplayRotation::Rotate0
-    );
-
-    display.init_with_addr_mode(&mut delay).ok();
+    display.clear(Rgb565::BLACK).unwrap();
 
     // create the local framebuffer
     let mut fb = Framebuffer::<
@@ -137,8 +136,8 @@ fn main() -> ! {
 
     let mut term = term::Terminal::new(serial, amp, delay);
 
-    // ~30 fps, delay based for now
-    const FRAME_DELAY_MS: u32 = 33;
+    // ~10 fps, delay based for now
+    const FRAME_DELAY_MS: u32 = 100;
 
     // constants for demo pattern
     use ui::math::{Fixed, fx_sin, fx_to_f32, consts::HALF};
@@ -165,9 +164,8 @@ fn main() -> ! {
         }
 
         // update visualizer (dt = 1/30 sec)
-        visualizer.update(fx_to_f32(dt_fixed), &demo_energies);
-
         fade_framebuffer(fb.data_mut());
+        visualizer.update(fx_to_f32(dt_fixed), &demo_energies);
 
         // render visualizer to our local framebuffer
         visualizer.render(|x, y, color| {
@@ -177,29 +175,32 @@ fn main() -> ! {
             );
         });
 
-        // write framebuffer to display
-        display.set_draw_area((0, 0), (DISPLAY_WIDTH as u16 - 1, DISPLAY_HEIGHT as u16 - 1)).ok();
-        display.set_write_mode().ok();
-        #[allow(deprecated)]
-        display.draw(fb.data()).ok();
+        // write framebuffer to display using mipidsi's set_pixels
+        let pixels = fb.data().chunks_exact(2).map(|chunk| {
+            let raw = ((chunk[0] as u16) << 8) | (chunk[1] as u16);
+            Rgb565::from(embedded_graphics::pixelcolor::raw::RawU16::new(raw))
+        });
+        display.set_pixels(0, 0, DISPLAY_WIDTH as u16 - 1, DISPLAY_HEIGHT as u16 - 1, pixels).ok();
 
         //term.delay_ms(FRAME_DELAY_MS);
     }
 }
 
-// fade all pixels in the framebuffer by multiplying each channel by 0.7
+// fade all pixels in the framebuffer by multiplying each channel by 7/8
+#[inline(always)]
 fn fade_framebuffer(data: &mut [u8]) {
     for chunk in data.chunks_exact_mut(2) {
         let pixel = ((chunk[0] as u16) << 8) | (chunk[1] as u16);
 
-        let r = ((pixel >> 11) & 0x1F) as u32;
-        let g = ((pixel >> 5) & 0x3F) as u32;
-        let b = (pixel & 0x1F) as u32;
+        // extract channels
+        let r = (pixel >> 11) & 0x1F;
+        let g = (pixel >> 5) & 0x3F;
+        let b = pixel & 0x1F;
 
-        // Multiply by 179/256 ~= 0.7
-        let r_faded = ((r * 179) >> 8) as u16;
-        let g_faded = ((g * 179) >> 8) as u16;
-        let b_faded = ((b * 179) >> 8) as u16;
+        // multiply by 7/8: (x * 7) >> 3
+        let r_faded = (r * 7) >> 3;
+        let g_faded = (g * 7) >> 3;
+        let b_faded = (b * 7) >> 3;
 
         let faded = (r_faded << 11) | (g_faded << 5) | b_faded;
         chunk[0] = (faded >> 8) as u8;
