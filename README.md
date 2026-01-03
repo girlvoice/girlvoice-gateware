@@ -1,6 +1,6 @@
 # girlvoice
 
-The gateware repo for girlvoice, the real-time FPGA vocoder.
+The gateware and firmware repo for girlvoice, the real-time FPGA vocoder.
 
 # Overview
 
