@@ -49,20 +49,10 @@ class GirlTop(Elaboratable):
         m.submodules.soc = self.soc
 
         ## Power On/Off
-        pwr_button = platform.request("btn_pwr", 0).i
         pwr_en = platform.request("pwr_en", 0)
 
         pwr_on = Signal(init=1)
         m.d.comb += pwr_en.o.eq(pwr_on)
-
-        btn_last = Signal(init=1)
-        btn_rising = Signal()
-        m.d.sync += btn_last.eq(pwr_button)
-        m.d.sync += btn_rising.eq(pwr_button & ~btn_last)
-
-
-        with m.If(btn_rising):
-            m.d.sync += pwr_on.eq(0)
 
         return m
 
