@@ -55,6 +55,7 @@ from luna_soc.gateware.core               import spiflash, timer, uart
 from luna_soc.gateware.cpu                import InterruptController, VexRiscv
 from luna_soc.util                        import readbin
 from luna_soc.generate.svd                import SVD
+from numpy import add
 
 from girlvoice.dsp import vocoder
 import girlvoice.platform.nexus_utils.lmmi as lmmi
@@ -88,6 +89,8 @@ class GirlvoiceSoc(Component):
         self.csr_base             = 0xf0000000
         self.lmmi_base            = 0xa0000000
         self.wavetable_base       = 0xb0000000
+
+        self.spi_data_base        = 0xc0000000
         # offsets from csr_base
         self.spiflash_ctrl_base   = 0x00000100
         self.uart0_base           = 0x00000200
@@ -172,11 +175,12 @@ class GirlvoiceSoc(Component):
             self.spi0_phy        = spiflash.SPIPHYController(
                 pads = self.spi_pads.pins,
                 domain="fast",
-                divisor=0
+                divisor=1
             )
             self.spi0            = spi.SPIController(name="spi_ctrl")
 
             self.csr_decoder.add(self.spi0.bus, addr=self.spiflash_ctrl_base, name="spiflash_ctrl")
+            self.wb_decoder.add(self.spi0.wb_bus, addr=self.spi_data_base, name="spi_fifo")
 
         # lattice i2c
         self.i2c = I2CFIFO(scl_freq=400e3, use_hard_io=True, sim=sim)

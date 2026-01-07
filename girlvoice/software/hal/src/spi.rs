@@ -28,6 +28,8 @@ macro_rules! impl_spi {
                 type Error = SpiError;
             }
 
+            use core::ptr;
+
             impl $SPIX {
                 pub fn new(registers: $PACSPIX) -> Self {
                     registers.phy().write(|w| unsafe {
@@ -52,12 +54,34 @@ macro_rules! impl_spi {
                 }
 
                 fn write_priv(&mut self, words: &[$WORD]) -> Result<(), SpiError> {
+                    self.registers.phy().write(|w| unsafe { w.length().bits(32) });
                     self.registers.cs().write(|w| w.select().bit(true));
-                    for word in words.iter() {
-                        while ! self.tx_ready() {}
-                        self.registers.data().write(|w| unsafe {w.tx().bits(*word as u32)});
-                    }
 
+                    const SPI_FIFO_ADDR: u32 = 0xc0000000;
+                    // unsafe {
+                    //     core::ptr::write_volatile(SPI_FIFO_ADDR as *mut u32, words[0] as u32);
+                    // }
+                    for chunk in words.chunks(4) {
+                        if chunk.len() == 4 {
+                            let mut full_word: u32 = 0;
+                            for byte in chunk {
+                                full_word = full_word << 8;
+                                full_word = full_word | *byte as u32;
+                            }
+                            while ! self.tx_ready() {}
+                            unsafe {
+                                core::ptr::write_volatile(SPI_FIFO_ADDR as *mut u32, full_word as u32);
+                            }
+                        } else {
+                            self.registers.phy().write(|w| unsafe { w.length().bits(8) });
+                            for byte in chunk {
+                                while ! self.tx_ready() {}
+                                unsafe {
+                                    core::ptr::write_volatile(SPI_FIFO_ADDR as *mut u32, *byte as u32);
+                                }
+                            }
+                        }
+                    }
                     self.registers.cs().write(|w| w.select().bit(false));
                     Ok(())
                 }

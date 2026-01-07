@@ -2,6 +2,7 @@
 #![no_main]
 
 use embedded_hal::delay::DelayNs;
+use embedded_hal::spi::SpiDevice;
 use aw88395::Aw88395;
 use sgtl5000::{Sgtl5000};
 use sgtl5000::regmap::LineOutBiasCurrent;
@@ -96,8 +97,18 @@ fn main() -> ! {
     peripherals.gpo1.output().write(|w| w.pin_1().bit(true));
     let gpo1 = Gpo1::new(peripherals.gpo1);
 
-    let spi0 = Spi0::new(peripherals.spiflash_ctrl);
-    // let interface = SPIDisplayInterface::new(spi0, gpo1);
+    let mut spi0 = Spi0::new(peripherals.spiflash_ctrl);
+
+    // let first_buf: [u8; 1] = [0x00];
+    let second_buf: [u8; 8] = [0xC0, 0xFF, 0xEE, 0x00, 0xDE, 0xAD, 0xBE, 0xEF];
+    // spi0.write(&second_buf).ok();
+    spi0.write(&second_buf).ok();
+    delay.delay_us(5);
+    spi0.write(&second_buf).ok();
+    delay.delay_us(5);
+    spi0.write(&second_buf).ok();
+    delay.delay_us(5);
+    spi0.write(&second_buf).ok();
     let mut buffer = [0_u8; 512];
     let interface = SpiInterface::new(spi0, gpo1, &mut buffer);
 
@@ -114,11 +125,9 @@ fn main() -> ! {
         .invert_colors(ColorInversion::Inverted)
         .init(&mut delay).unwrap();
 
-    // display.init(&mut delay).ok();
 
     display.clear(Rgb565::BLACK).unwrap();
 
-    // display.flush().ok();
 
     // Create styles used by the drawing operations.
     let thin_stroke = PrimitiveStyle::with_stroke(Rgb565::GREEN, 2);
@@ -134,29 +143,29 @@ fn main() -> ! {
     let yoffset = 50;
 
     // Draw a 3px wide outline around the display.
-    display
-        .bounding_box()
-        .into_styled(border_stroke)
-        .draw(&mut display).unwrap();
+    // display
+    //     .bounding_box()
+    //     .into_styled(border_stroke)
+    //     .draw(&mut display).unwrap();
 
     // Draw a triangle.
-    Triangle::new(
-        Point::new(16, 16 + yoffset),
-        Point::new(16 + 16, 16 + yoffset),
-        Point::new(16 + 8, yoffset),
-    )
-    .into_styled(thin_stroke)
-    .draw(&mut display).unwrap();
+    // Triangle::new(
+    //     Point::new(16, 16 + yoffset),
+    //     Point::new(16 + 16, 16 + yoffset),
+    //     Point::new(16 + 8, yoffset),
+    // )
+    // .into_styled(thin_stroke)
+    // .draw(&mut display).unwrap();
 
      // Draw centered text.
     let text = "girlvoice!";
-    Text::with_alignment(
-        text,
-        display.bounding_box().center() + Point::new(0, 15),
-        character_style,
-        Alignment::Center,
-    )
-    .draw(&mut display).unwrap();
+    // Text::with_alignment(
+    //     text,
+    //     display.bounding_box().center() + Point::new(0, 15),
+    //     character_style,
+    //     Alignment::Center,
+    // )
+    // .draw(&mut display).unwrap();
 
     // let mut led = Led0::new(peripherals.led0);
 
@@ -169,8 +178,9 @@ fn main() -> ! {
     let mut term = term::Terminal::new(serial, amp, delay);
 
     let img = TestImage::new();
+    img.draw(&mut display).unwrap();
     loop {
-        // term.handle_char();
         img.draw(&mut display).unwrap();
+        term.handle_char();
     }
 }
