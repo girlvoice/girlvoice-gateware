@@ -175,7 +175,7 @@ class GirlvoiceSoc(Component):
             self.spi0_phy        = spiflash.SPIPHYController(
                 pads = self.spi_pads.pins,
                 domain="fast",
-                divisor=1
+                divisor=0
             )
             self.spi0            = spi.SPIController(name="spi_ctrl")
 

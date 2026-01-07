@@ -57,6 +57,7 @@ class SPIController(wiring.Component):
         """
         # rx_ready : csr.Field(csr.action.R, unsigned(1))
         tx_ready : csr.Field(csr.action.R, unsigned(1))
+        bus_busy : csr.Field(csr.action.R, unsigned(1))
 
     class Data(csr.Register, access="rw"):
         """Data register
@@ -131,6 +132,7 @@ class SPIController(wiring.Component):
 
         # Chip select generation.
         cs = Signal()
+        m.d.comb += self._status.f.bus_busy.r_data.eq(cs)
         with m.FSM():
             with m.State("RISE"):
                 # Enable chip select when the CSR is set to 1 and the TX FIFO contains something.

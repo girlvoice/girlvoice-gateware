@@ -99,17 +99,7 @@ fn main() -> ! {
 
     let mut spi0 = Spi0::new(peripherals.spiflash_ctrl);
 
-    // let first_buf: [u8; 1] = [0x00];
-    let second_buf: [u8; 8] = [0xC0, 0xFF, 0xEE, 0x00, 0xDE, 0xAD, 0xBE, 0xEF];
-    // spi0.write(&second_buf).ok();
-    spi0.write(&second_buf).ok();
-    delay.delay_us(5);
-    spi0.write(&second_buf).ok();
-    delay.delay_us(5);
-    spi0.write(&second_buf).ok();
-    delay.delay_us(5);
-    spi0.write(&second_buf).ok();
-    let mut buffer = [0_u8; 512];
+    let mut buffer = [0_u8; 1024];
     let interface = SpiInterface::new(spi0, gpo1, &mut buffer);
 
 

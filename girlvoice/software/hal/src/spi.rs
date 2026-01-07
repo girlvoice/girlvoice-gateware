@@ -93,9 +93,15 @@ macro_rules! impl_spi {
                 fn transfer_in_place_priv(&mut self, words: &mut [$WORD]) -> Result<(), SpiError> {
                     Err(SpiError::InvalidState)
                 }
+
+                fn flush(&mut self) -> Result<(), SpiError> {
+                    while self.registers.status().read().bus_busy().bit() {}
+                    Ok(())
+                }
             }
 
             impl $crate::hal::spi::SpiDevice<$WORD> for $SPIX {
+
 
                 fn transaction(&mut self, operations: &mut [$crate::hal::spi::Operation<'_, $WORD>]) -> Result<(), Self::Error> {
                     for op in operations {
@@ -107,6 +113,7 @@ macro_rules! impl_spi {
                             $crate::hal::spi::Operation::DelayNs(_) => continue,
                         }
                     }
+                    self.flush()?;
                     Ok(())
                 }
             }
