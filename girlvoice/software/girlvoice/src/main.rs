@@ -97,18 +97,10 @@ fn main() -> ! {
     peripherals.gpo1.output().write(|w| w.pin_1().bit(true));
     let gpo1 = Gpo1::new(peripherals.gpo1);
 
-    let mut spi0 = Spi0::new(peripherals.spiflash_ctrl);
+    let spi0 = Spi0::new(peripherals.spiflash_ctrl);
 
     let mut buffer = [0_u8; 1024];
     let interface = SpiInterface::new(spi0, gpo1, &mut buffer);
-
-
-
-    // let mut display = Gc9a01::new(
-    //     interface,
-    //     DisplayResolution240x240,
-    //     DisplayRotation::Rotate0
-    // ).into_buffered_graphics();
 
     let mut display = Builder::new(GC9A01, interface)
         .display_size(240, 240)

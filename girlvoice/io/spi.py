@@ -54,8 +54,8 @@ class SPIController(wiring.Component):
         """Status register
 
              tx_ready : TX FIFO ready to receive data.
+             bus_busy : SPI bus currently doing a transaction
         """
-        # rx_ready : csr.Field(csr.action.R, unsigned(1))
         tx_ready : csr.Field(csr.action.R, unsigned(1))
         bus_busy : csr.Field(csr.action.R, unsigned(1))
 
@@ -149,8 +149,6 @@ class SPIController(wiring.Component):
         tx_fifo_payload = View(self.tx_fifo_layout, tx_fifo.w_data)
         m.d.comb += [
             # CSRs to TX FIFO.
-            # tx_fifo.w_en                   .eq(self._data.f.tx.w_stb),
-            # tx_fifo_payload.data           .eq(self._data.f.tx.w_data),
             tx_fifo_payload.len            .eq(self._phy.f.length.data),
             tx_fifo_payload.width          .eq(1),
             tx_fifo_payload.mask           .eq(1),
@@ -175,9 +173,7 @@ class SPIController(wiring.Component):
 
         wb_bus: wishbone.Interface = self.wb_bus
 
-        # m.d.comb += [
-        #     tx_fifo_payload.data.eq(wb_bus.dat_w),
-        # ]
+        # Basic wishbone to FIFO adapter
         with m.FSM():
             with m.State("IDLE"):
                 with m.If(wb_bus.cyc & wb_bus.stb & wb_bus.we & tx_fifo.w_rdy):
