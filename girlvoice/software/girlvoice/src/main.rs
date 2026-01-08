@@ -97,7 +97,10 @@ fn main() -> ! {
     peripherals.gpo1.output().write(|w| w.pin_1().bit(true));
     let gpo1 = Gpo1::new(peripherals.gpo1);
 
-    let spi0 = Spi0::new(peripherals.spiflash_ctrl);
+    // This should be a part of the PAC but wishbone memory resource locations are not
+    // properly included in the SVD generation yet
+    const SPI_FIFO_ADDR: usize = 0xc0000000;
+    let spi0 = Spi0::new(peripherals.spiflash_ctrl, SPI_FIFO_ADDR);
 
     let mut buffer = [0_u8; 1024];
     let interface = SpiInterface::new(spi0, gpo1, &mut buffer);

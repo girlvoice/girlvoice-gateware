@@ -5,9 +5,12 @@ macro_rules! impl_spi {
         $SPIX:ident: ($PACSPIX:ty, $WORD:ty, $LENGTH:tt),
     )+) => {
         $(
+            use core::ptr;
+
             #[derive(Debug)]
             pub struct $SPIX {
                 registers: $PACSPIX,
+                spi_fifo_ptr: *mut u32
             }
 
             #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -28,17 +31,17 @@ macro_rules! impl_spi {
                 type Error = SpiError;
             }
 
-            use core::ptr;
 
             impl $SPIX {
-                pub fn new(registers: $PACSPIX) -> Self {
+                pub fn new(registers: $PACSPIX, fifo_addr: usize) -> Self {
                     registers.phy().write(|w| unsafe {
                         w.length().bits($LENGTH);
                         w.width().bits(0x1);
                         w.mask().bits(0x1)
                     });
                     registers.cs().write(|w| w.select().bit(false));
-                    Self { registers }
+
+                    Self { registers , spi_fifo_ptr: fifo_addr as *mut u32}
                 }
 
                 pub fn free(self) -> $PACSPIX {
@@ -57,10 +60,8 @@ macro_rules! impl_spi {
                     self.registers.phy().write(|w| unsafe { w.length().bits(32) });
                     self.registers.cs().write(|w| w.select().bit(true));
 
-                    const SPI_FIFO_ADDR: u32 = 0xc0000000;
-                    // unsafe {
-                    //     core::ptr::write_volatile(SPI_FIFO_ADDR as *mut u32, words[0] as u32);
-                    // }
+                    // Chunk outgoing buffers into 32-bit words to ensure optimal usage of the
+                    // 32-bit wide memory bus
                     for chunk in words.chunks(4) {
                         if chunk.len() == 4 {
                             let mut full_word: u32 = 0;
@@ -70,14 +71,14 @@ macro_rules! impl_spi {
                             }
                             while ! self.tx_ready() {}
                             unsafe {
-                                core::ptr::write_volatile(SPI_FIFO_ADDR as *mut u32, full_word as u32);
+                                self.spi_fifo_ptr.write_volatile(full_word as u32)
                             }
                         } else {
                             self.registers.phy().write(|w| unsafe { w.length().bits(8) });
                             for byte in chunk {
                                 while ! self.tx_ready() {}
                                 unsafe {
-                                    core::ptr::write_volatile(SPI_FIFO_ADDR as *mut u32, *byte as u32);
+                                    self.spi_fifo_ptr.write_volatile(*byte as u32)
                                 }
                             }
                         }
@@ -94,6 +95,7 @@ macro_rules! impl_spi {
                     Err(SpiError::InvalidState)
                 }
 
+                // Wait for the SPI peripheral to indicate that there is no ongoing transaction
                 fn flush(&mut self) -> Result<(), SpiError> {
                     while self.registers.status().read().bus_busy().bit() {}
                     Ok(())
@@ -101,7 +103,6 @@ macro_rules! impl_spi {
             }
 
             impl $crate::hal::spi::SpiDevice<$WORD> for $SPIX {
-
 
                 fn transaction(&mut self, operations: &mut [$crate::hal::spi::Operation<'_, $WORD>]) -> Result<(), Self::Error> {
                     for op in operations {
