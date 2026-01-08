@@ -31,7 +31,6 @@ macro_rules! impl_spi {
                 type Error = SpiError;
             }
 
-
             impl $SPIX {
                 pub fn new(registers: $PACSPIX, fifo_addr: usize) -> Self {
                     registers.phy().write(|w| unsafe {
