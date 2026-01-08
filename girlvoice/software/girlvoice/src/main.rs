@@ -9,13 +9,11 @@ use sgtl5000::regmap::LineOutBiasCurrent;
 use riscv_rt::entry;
 use soc_pac as pac;
 
-// use gc9a01::{prelude::*, Gc9a01, SPIDisplayInterface};
 use mipidsi::interface::SpiInterface;
 use mipidsi::{Builder, models::GC9A01, options::ColorInversion, TestImage};
 
 use embedded_graphics::{
     mono_font::{ascii::FONT_6X10, MonoTextStyle},
-    pixelcolor::BinaryColor,
     pixelcolor::Rgb565,
     prelude::*,
     primitives::{
