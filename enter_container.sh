@@ -9,6 +9,7 @@ docker_username="dev"
 username=$(whoami)
 workdir="$1"
 
+xhost +local: # allow for non-network local connections to the X11 server
 docker run -it --rm -e HOST_UID=$(id -u) \
                     --mac-address 8c:8c:aa:e3:74:08 \
                     -v $workdir:/home/"$docker_username"/shared `# Empty shared directory between host and container` \
