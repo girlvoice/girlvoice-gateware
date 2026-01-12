@@ -89,25 +89,28 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             "aux_clk",
             0,
             Pins("MCLK", dir="o", conn=("aux_i2s", 0)),
-            Attrs(IO_TYPE="LVCMOS18"),
+            Attrs(IO_TYPE="LVCMOS18H"),
         ),
         Resource(
             "aux_dout",
             0,
             Pins("SDOUT", dir="o", conn=("aux_i2s", 0)),
-            Attrs(IO_TYPE="LVCMOS18"),
+            Attrs(IO_TYPE="LVCMOS18H"),
         ),
         Resource(
             "aux_din",
             0,
             Pins("SDIN", dir="i", conn=("aux_i2s", 0)),
-            Attrs(IO_TYPE="LVCMOS18"),
+            Attrs(IO_TYPE="LVCMOS18H"),
         ),
         Resource("led", 0, Pins("13", dir="o"), Attrs(IO_TYPE="LVCMOS18H")),
 
         Resource(
             "mic",
             0,
+
+            # BCLK/SCLK and LRCLK for microphones is shared with
+            # the aux audio codec
             Subsignal(
                 "clk",
                 Pins("SCLK", dir="o", conn=("mic_i2s", 0)),
@@ -186,11 +189,11 @@ class GirlvoiceRevAPlatform(LatticePlatform):
                 "INT": "37",
             },
         ),
-        # Connector("aux_i2s", 0, {
-        #     "MCLK": "22",
-        #     "SDIN": "10",
-        #     "SDOUT": "27",
-        # })
+        Connector("aux_i2s", 0, {
+            "MCLK": "22",
+            "SDIN": "10",
+            "SDOUT": "27",
+        })
     ]
 
     def has_required_tools(self):
@@ -274,9 +277,37 @@ if __name__ == "__main__":
 
     m = Module()
 
+    from girlvoice.platform.nexus_utils.pll import NXPLL
+
+
+    m.domains.audio = cd_audio = ClockDomain("audio")
+    m.submodules.pll = pll = NXPLL(
+        clkin=ClockSignal("sync"),
+        clkin_freq=24e6,
+        cd_out=cd_audio,
+        clkout=cd_audio.clk,
+        clkout_freq=24.576e6)
+
+    pll.params.update(
+        p_FBK_INTEGER_MODE="DISABLED",
+        p_SSC_EN_SDM="ENABLED",
+        p_SSC_ORDER="SDM_ORDER2",
+        p_SSC_N_CODE=66,
+        p_SSC_F_CODE=0b100011110110000,
+        p_FBK_MASK = 0b00010000,
+        p_FBK_CUR_BLE=0b00001000,
+        p_FBK_PI_RC=0b0010,
+        p_FBK_PR_CC=0b1000,
+        p_FBK_PR_IC=0b1000
+    )
+
+    # pll.params["p_MMD_PULS_CTL"]=0b0111
+
     count = Signal(24)
     m.d.sync += count.eq(count + 1)
     m.d.comb += p.request("led", 0).o.eq(count[-1])
     m.d.comb += p.request("pwr_en", 0).o.eq(1)
+
+    m.d.comb += p.request("aux_clk").o.eq(cd_audio.clk)
 
     p.build(m)
