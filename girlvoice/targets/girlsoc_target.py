@@ -20,15 +20,15 @@ class GirlTop(Elaboratable):
 
         ## Clock Defs
 
-        source_clk_freq = 12e6
+        source_clk_freq = 24e6
         sync_freq = 60e6
         fast_clk_freq = 2 * sync_freq
 
 
-        clkin = platform.request("clk12", dir="i").i
-        m.domains.clk12 = cd_clk12 = ClockDomain("clk12")
-        m.d.comb += cd_clk12.clk.eq(clkin)
-        platform.add_clock_constraint(cd_clk12.clk, source_clk_freq)
+        clkin = platform.request("clk24", dir="i").i
+        m.domains.clk24 = cd_clk24 = ClockDomain("clk24")
+        m.d.comb += cd_clk24.clk.eq(clkin)
+        platform.add_clock_constraint(cd_clk24.clk, source_clk_freq)
 
         m.domains.sync = cd_sync = ClockDomain("sync")
         m.domains.fast = cd_fast = ClockDomain("fast")
