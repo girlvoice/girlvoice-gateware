@@ -1,11 +1,10 @@
 use core::u8;
 
-use soc_pac::I2cfifo;
 use embedded_hal::i2c::SevenBitAddress;
 use embedded_hal::i2c::{self, I2c, Operation};
+use soc_pac::I2cfifo;
 
 #[allow(dead_code)]
-
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Error {
     TransactionFailed,
@@ -27,7 +26,7 @@ pub struct I2c0 {
 
 impl I2c0 {
     pub fn new(registers: I2cfifo) -> Self {
-        Self { registers}
+        Self { registers }
     }
 
     fn is_read_complete(&mut self) -> bool {
@@ -53,12 +52,16 @@ impl I2c0 {
 
     // RX FIFO can be reset to known-good state by writing anything to it.
     fn reset_rx_fifo(&mut self) {
-        self.registers.i2crxfifo().write(|w| unsafe{ w.bits(0) });
+        self.registers.i2crxfifo().write(|w| unsafe { w.bits(0) });
     }
 
-    fn push_tx_byte(&mut self, byte: u8, cmd: TxCmd){
-        self.registers.i2ctxfifo_lsb().write(|w| unsafe{ w.txlsb().bits(byte) });
-        self.registers.i2ctxfifo_msb().write(|w| unsafe{ w.cmd().bits(cmd as u8)} );
+    fn push_tx_byte(&mut self, byte: u8, cmd: TxCmd) {
+        self.registers
+            .i2ctxfifo_lsb()
+            .write(|w| unsafe { w.txlsb().bits(byte) });
+        self.registers
+            .i2ctxfifo_msb()
+            .write(|w| unsafe { w.cmd().bits(cmd as u8) });
     }
 
     fn pop_rx_byte(&mut self) -> u8 {
@@ -91,22 +94,33 @@ impl I2c0 {
     //     Ok(())
     // }
 
-    fn write_internal( &mut self, address: SevenBitAddress, bytes: &[u8]) -> Result<(), Error> {
+    fn write_internal(&mut self, address: SevenBitAddress, bytes: &[u8]) -> Result<(), Error> {
         let len = bytes.len();
         let bytes = bytes.into_iter();
         self.reset_tx_fifo();
 
-        if self.is_bus_busy() {return Err(Error::InvalidState);}
+        if self.is_bus_busy() {
+            return Err(Error::InvalidState);
+        }
 
         self.push_tx_byte(0, TxCmd::RestartCount);
         self.push_tx_byte(address << 1, TxCmd::DataByte);
 
         for (i, byte) in bytes.enumerate() {
             let last = i == len - 1;
-            self.push_tx_byte(*byte, if last { TxCmd::LastByte } else { TxCmd::DataByte });
+            self.push_tx_byte(
+                *byte,
+                if last {
+                    TxCmd::LastByte
+                } else {
+                    TxCmd::DataByte
+                },
+            );
         }
 
-        if self.received_nack() { return Err(Error::TransactionFailed) }
+        if self.received_nack() {
+            return Err(Error::TransactionFailed);
+        }
 
         while self.is_bus_busy() {}
 
@@ -130,8 +144,11 @@ impl i2c::ErrorType for I2c0 {
 }
 
 impl I2c<SevenBitAddress> for I2c0 {
-    fn transaction(&mut self, address: SevenBitAddress, operations: &mut [Operation]) -> Result<(), Self::Error> {
-
+    fn transaction(
+        &mut self,
+        address: SevenBitAddress,
+        operations: &mut [Operation],
+    ) -> Result<(), Self::Error> {
         for op in operations {
             match op {
                 Operation::Read(buf) => continue,
@@ -142,7 +159,12 @@ impl I2c<SevenBitAddress> for I2c0 {
         Ok(())
     }
 
-    fn write_read(&mut self, address: SevenBitAddress, write: &[u8], read: &mut [u8]) -> Result<(), Self::Error> {
+    fn write_read(
+        &mut self,
+        address: SevenBitAddress,
+        write: &[u8],
+        read: &mut [u8],
+    ) -> Result<(), Self::Error> {
         let buf_len = read.len() as u8;
         // if buf_len > 31 {
         //     return Err(Error::RxUnderflow);
@@ -150,7 +172,9 @@ impl I2c<SevenBitAddress> for I2c0 {
 
         self.reset_tx_fifo();
 
-        if self.is_bus_busy() {return Err(Error::InvalidState);}
+        if self.is_bus_busy() {
+            return Err(Error::InvalidState);
+        }
 
         self.push_tx_byte(0, TxCmd::RestartCount);
         self.push_tx_byte(address << 1, TxCmd::DataByte);
@@ -182,8 +206,7 @@ impl I2c<SevenBitAddress> for I2c0 {
             }
         }
         // Block until transaction is finished
-        while self.is_bus_busy() {
-        }
+        while self.is_bus_busy() {}
 
         self.reset_rx_fifo();
 

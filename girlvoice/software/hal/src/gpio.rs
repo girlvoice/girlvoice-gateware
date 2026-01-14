@@ -13,7 +13,7 @@ pub enum PinMode {
     InputOnly = 0b00,
     PushPull = 0b01,
     OpenDrain = 0b10,
-    Alternative = 0b11
+    Alternative = 0b11,
 }
 
 /**

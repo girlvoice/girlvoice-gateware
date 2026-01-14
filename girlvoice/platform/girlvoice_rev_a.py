@@ -13,14 +13,14 @@ class GirlvoiceRevAPlatform(LatticePlatform):
     device = "LIFCL-17"
     package = "SG72"
     speed = "8"
-    default_clk = "clk12"
+    default_clk = "clk24"
     name = "girlvoice_rev_a"
 
     constraints:str = ""
 
     resources = [
         Resource(
-            "clk12", 0, Pins("11", dir="i"), Clock(12e6), Attrs(IO_TYPE="LVCMOS18H")
+            "clk24", 0, Pins("11", dir="i"), Clock(24e6), Attrs(IO_TYPE="LVCMOS18H")
         ),
         UARTResource(0, rx="USB_DP", tx="USB_DN", conn=("usb", 0)),
 
