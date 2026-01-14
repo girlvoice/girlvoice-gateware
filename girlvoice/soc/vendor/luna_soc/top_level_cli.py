@@ -156,7 +156,7 @@ def top_level_cli(fragment, *pos_args, **kwargs):
         soc        = introspect.soc(fragment)
         memory_map = introspect.memory_map(soc)
         interrupts = introspect.interrupts(soc)
-        with open("girlsoc.svd", "w") as f:
+        with open("../software/soc-pac/girlsoc.svd", "w") as f:
             svd.SVD(memory_map, interrupts).generate(file=f)
         sys.exit(0)
 

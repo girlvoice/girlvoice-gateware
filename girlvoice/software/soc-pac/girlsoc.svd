@@ -190,6 +190,14 @@
               <bitRange>[0:0]</bitRange>
               <access>read-only</access>
             </field>
+            <field>
+              <name>bus_busy</name>
+              <description>bus_busy field</description>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+              <bitRange>[1:1]</bitRange>
+              <access>read-only</access>
+            </field>
           </fields>
         </register>
         <register>

@@ -1007,11 +1007,18 @@ module"]
         pub type W = crate::W<StatusSpec>;
         #[doc = "Field `tx_ready` reader - tx_ready field"]
         pub type TxReadyR = crate::BitReader;
+        #[doc = "Field `bus_busy` reader - bus_busy field"]
+        pub type BusBusyR = crate::BitReader;
         impl R {
             #[doc = "Bit 0 - tx_ready field"]
             #[inline(always)]
             pub fn tx_ready(&self) -> TxReadyR {
                 TxReadyR::new((self.bits & 1) != 0)
+            }
+            #[doc = "Bit 1 - bus_busy field"]
+            #[inline(always)]
+            pub fn bus_busy(&self) -> BusBusyR {
+                BusBusyR::new(((self.bits >> 1) & 1) != 0)
             }
         }
         impl W {}

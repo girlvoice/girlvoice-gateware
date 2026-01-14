@@ -2,18 +2,18 @@
 #![no_main]
 
 use embedded_hal::delay::DelayNs;
+use embedded_hal::spi::SpiDevice;
 use aw88395::Aw88395;
 use sgtl5000::{Sgtl5000};
 use sgtl5000::regmap::LineOutBiasCurrent;
 use riscv_rt::entry;
 use soc_pac as pac;
 
-use gc9a01::{prelude::*, Gc9a01, SPIDisplayInterface};
-
+use mipidsi::interface::SpiInterface;
+use mipidsi::{Builder, models::GC9A01, options::ColorInversion, TestImage};
 
 use embedded_graphics::{
     mono_font::{ascii::FONT_6X10, MonoTextStyle},
-    pixelcolor::BinaryColor,
     pixelcolor::Rgb565,
     prelude::*,
     primitives::{
@@ -95,22 +95,22 @@ fn main() -> ! {
     peripherals.gpo1.output().write(|w| w.pin_1().bit(true));
     let gpo1 = Gpo1::new(peripherals.gpo1);
 
-    let spi0 = Spi0::new(peripherals.spiflash_ctrl);
-    let interface = SPIDisplayInterface::new(spi0, gpo1);
+    // This should be a part of the PAC but wishbone memory resource locations are not
+    // properly included in the SVD generation yet
+    const SPI_FIFO_ADDR: usize = 0xc0000000;
+    let spi0 = Spi0::new(peripherals.spiflash_ctrl, SPI_FIFO_ADDR);
+
+    let mut buffer = [0_u8; 1024];
+    let interface = SpiInterface::new(spi0, gpo1, &mut buffer);
+
+    let mut display = Builder::new(GC9A01, interface)
+        .display_size(240, 240)
+        .invert_colors(ColorInversion::Inverted)
+        .init(&mut delay).unwrap();
 
 
+    display.clear(Rgb565::BLACK).unwrap();
 
-    let mut display = Gc9a01::new(
-        interface,
-        DisplayResolution240x240,
-        DisplayRotation::Rotate0
-    ).into_buffered_graphics();
-
-    display.init(&mut delay).ok();
-
-    display.clear();
-
-    display.flush().ok();
 
     // Create styles used by the drawing operations.
     let thin_stroke = PrimitiveStyle::with_stroke(Rgb565::GREEN, 2);
@@ -126,33 +126,29 @@ fn main() -> ! {
     let yoffset = 50;
 
     // Draw a 3px wide outline around the display.
-    display
-        .bounding_box()
-        .into_styled(border_stroke)
-        .draw(&mut display).unwrap();
+    // display
+    //     .bounding_box()
+    //     .into_styled(border_stroke)
+    //     .draw(&mut display).unwrap();
 
     // Draw a triangle.
-    Triangle::new(
-        Point::new(16, 16 + yoffset),
-        Point::new(16 + 16, 16 + yoffset),
-        Point::new(16 + 8, yoffset),
-    )
-    .into_styled(thin_stroke)
-    .draw(&mut display).unwrap();
+    // Triangle::new(
+    //     Point::new(16, 16 + yoffset),
+    //     Point::new(16 + 16, 16 + yoffset),
+    //     Point::new(16 + 8, yoffset),
+    // )
+    // .into_styled(thin_stroke)
+    // .draw(&mut display).unwrap();
 
      // Draw centered text.
     let text = "girlvoice!";
-    Text::with_alignment(
-        text,
-        display.bounding_box().center() + Point::new(0, 15),
-        character_style,
-        Alignment::Center,
-    )
-    .draw(&mut display).unwrap();
-
-
-    display.flush().ok();
-
+    // Text::with_alignment(
+    //     text,
+    //     display.bounding_box().center() + Point::new(0, 15),
+    //     character_style,
+    //     Alignment::Center,
+    // )
+    // .draw(&mut display).unwrap();
 
     // let mut led = Led0::new(peripherals.led0);
 
@@ -164,7 +160,10 @@ fn main() -> ! {
 
     let mut term = term::Terminal::new(serial, amp, delay);
 
+    let img = TestImage::new();
+    img.draw(&mut display).unwrap();
     loop {
+        img.draw(&mut display).unwrap();
         term.handle_char();
     }
 }
