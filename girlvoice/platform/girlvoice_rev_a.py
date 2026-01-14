@@ -225,14 +225,23 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             "XDG_RUNTIME_DIR=/run/user/$(id -u)",
             "-e",
             f"HOST_UID={HOST_UID}",
+        ]
+
+        # Wayland passthrough (only if both variables are set)
+        if WAYLAND_DISPLAY and XDG_RUNTIME_DIR:
+            docker_args += [
+                "-e",
+                f"WAYLAND_DISPLAY={WAYLAND_DISPLAY}",
+                "-v",
+                f"{XDG_RUNTIME_DIR}/{WAYLAND_DISPLAY}:{XDG_RUNTIME_DIR}/{WAYLAND_DISPLAY}",
+            ]
+
+        # X11 passthrough
+        docker_args += [
             "-e",
-            f"WAYLAND_DISPLAY={WAYLAND_DISPLAY}",  # Wayland passthrough
+            f"DISPLAY={DISPLAY}",
             "-v",
-            f"{XDG_RUNTIME_DIR}/{WAYLAND_DISPLAY}:{XDG_RUNTIME_DIR}/{WAYLAND_DISPLAY}",  # Wayland passthrough
-            "-e",
-            f"DISPLAY={DISPLAY}",  # X11 passthrough
-            "-v",
-            "/tmp/.X11-unix:/tmp/.X11-unix:rw",  # X11 passthrough
+            "/tmp/.X11-unix:/tmp/.X11-unix:rw",
             "--ipc=host",  # X11 passthrough (MIT-SHM)
         ]
 
