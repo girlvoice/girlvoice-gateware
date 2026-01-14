@@ -244,7 +244,7 @@ impl Visualizer {
         Self {
             harmonic_loop: HarmonicLoop::new(num_channels),
             bar_meter: BarMeter::new(num_channels),
-            current_mode: ModeKind::BarMeter,
+            current_mode: ModeKind::HarmonicLoop,
             palette: ColorPalette::default(),
         }
     }

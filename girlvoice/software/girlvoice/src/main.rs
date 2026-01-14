@@ -29,6 +29,7 @@ mod ui;
 
 use hal::i2c::I2c0;
 use ui::math::{Fixed, fx_to_f32};
+use ui::ModeKind;
 
 const SYS_CLK_FREQ: u32 = 60_000_000;
 
@@ -144,6 +145,8 @@ fn main() -> ! {
 
     // ~10 fps, delay based for now
     const FRAME_DELAY_MS: u32 = 100;
+    // switch visualizer every 5 seconds (50 frames at 10fps)
+    const MODE_SWITCH_FRAMES: u32 = 50;
 
     let dt = Fixed::from_num(FRAME_DELAY_MS) / Fixed::from_num(1000);
 
@@ -161,8 +164,17 @@ fn main() -> ! {
 
         frame_counter = frame_counter.wrapping_add(1);
 
+        // switch visualizer mode every 5 seconds
+        if frame_counter % MODE_SWITCH_FRAMES == 0 {
+            let new_mode = match visualizer.current_mode() {
+                ModeKind::BarMeter => ModeKind::HarmonicLoop,
+                ModeKind::HarmonicLoop => ModeKind::BarMeter,
+            };
+            visualizer.set_mode(new_mode);
+        }
+
         // read envelope values from hardware registers
-        energies[0] = Fixed::from_bits(envelope.ch0().read().value().bits() as i32);
+        energies[0] = Fixed::ZERO; // ch0 disabled - something wrong with this channel
         energies[1] = Fixed::from_bits(envelope.ch1().read().value().bits() as i32);
         energies[2] = Fixed::from_bits(envelope.ch2().read().value().bits() as i32);
         energies[3] = Fixed::from_bits(envelope.ch3().read().value().bits() as i32);
@@ -205,12 +217,16 @@ fn main() -> ! {
             energies_f32[i] = fx_to_f32(scaled);
         }
 
-        // update visualizer
-        // fade_framebuffer(fb.data_mut()); // disabled for debugging bar meter
-        // clear framebuffer instead
-        for byte in fb.data_mut().iter_mut() {
-            *byte = 0;
+        // update visualizer - fade for HarmonicLoop, clear for BarMeter
+        match visualizer.current_mode() {
+            ModeKind::HarmonicLoop => fade_framebuffer(fb.data_mut()),
+            ModeKind::BarMeter => {
+                for byte in fb.data_mut().iter_mut() {
+                    *byte = 0;
+                }
+            }
         }
+
         visualizer.update(fx_to_f32(dt), &energies_f32);
 
         // render visualizer to our local framebuffer
