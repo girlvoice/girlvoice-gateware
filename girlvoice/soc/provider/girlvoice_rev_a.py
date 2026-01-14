@@ -24,11 +24,22 @@ class SPIFlashProvider(Component):
         except:
             logging.warning(f"Platform does not support {self.id} {self.index}")
             return m
-        m.d.comb += [
-            spi.copi.oe.eq(self.pins.dq.oe),
-            spi.copi.o.eq(self.pins.dq.o),
-            self.pins.dq.i.eq(spi.copi.i),
-            spi.cs.o.eq(self.pins.cs.o),
-            spi.clk.o.eq(self.pins.sck)
-        ]
+
+        # This is the LCD display SPI interface
+        if self.id == "spi":
+            m.d.comb += [
+                spi.copi.oe.eq(self.pins.dq.oe),
+                spi.copi.o.eq(self.pins.dq.o),
+                self.pins.dq.i.eq(spi.copi.i),
+                spi.cs.o.eq(self.pins.cs.o),
+                spi.clk.o.eq(self.pins.sck)
+            ]
+        if self.id == "spi_flash_4x":
+            m.d.comb += [
+                self.pins.dq.i.eq(spi.dq.i),
+                spi.dq.o.eq(self.pins.dq.o),
+                spi.dq.oe.eq(self.pins.dq.oe),
+                spi.cs.o.eq(self.pins.cs.o)
+            ]
         return m
+
