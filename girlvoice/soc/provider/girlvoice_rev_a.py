@@ -39,7 +39,8 @@ class SPIFlashProvider(Component):
                 self.pins.dq.i.eq(spi.dq.i),
                 spi.dq.o.eq(self.pins.dq.o),
                 spi.dq.oe.eq(self.pins.dq.oe),
-                spi.cs.o.eq(self.pins.cs.o)
+                spi.cs.o.eq(self.pins.cs.o),
+                spi.clk.o.eq(self.pins.sck)
             ]
         return m
 
