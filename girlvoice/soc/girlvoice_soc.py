@@ -186,7 +186,7 @@ class GirlvoiceSoc(Component):
             self.spiflash_pads = provider.SPIFlashProvider(id="spi_flash_4x")
             self.spi1_phy = spiflash.SPIPHYController(
                 pads = self.spiflash_pads.pins,
-                domain="fast",
+                domain="sync",
                 divisor=0
             )
 
