@@ -55,7 +55,6 @@ from luna_soc.gateware.core               import spiflash, timer, uart
 from luna_soc.gateware.cpu                import InterruptController, VexRiscv
 from luna_soc.util                        import readbin
 from luna_soc.generate.svd                import SVD
-from numpy import add
 
 from girlvoice.dsp import vocoder
 import girlvoice.platform.nexus_utils.lmmi as lmmi
