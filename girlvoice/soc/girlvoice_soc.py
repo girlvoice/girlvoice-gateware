@@ -54,6 +54,7 @@ from amaranth_soc.wishbone.sram                  import WishboneSRAM
 from luna_soc.gateware.core               import spiflash, timer, uart
 from luna_soc.gateware.cpu                import InterruptController, VexRiscv
 from luna_soc.util                        import readbin
+from luna_soc.generate import introspect, rust
 from luna_soc.generate.svd                import SVD
 
 from girlvoice.dsp import vocoder
@@ -72,12 +73,11 @@ mB = 1024*kB
 
 class GirlvoiceSoc(Component):
     def __init__(self, *, sys_clk_freq=60e6, audio_clk_freq=24e6, finalize_csr_bridge=True,
-                 mainram_size=256*kB, cpu_variant="imac+dcache", use_spi_flash = False, sim = False):
+                 mainram_size=256*kB, cpu_variant="imac+dcache", use_spi_flash = True, sim = False):
 
         super().__init__({})
 
         self.enable_dsp = False
-
         self.firmware_path = ""
         self.sim = sim
 
@@ -86,7 +86,7 @@ class GirlvoiceSoc(Component):
 
         self.enable_vocoder = True
 
-        self.use_spi_flash        = False
+        self.use_spi_flash        = True
         self.mainram_base         = 0x00000000
         self.mainram_size         = mainram_size
         self.spiflash_base        = 0x10000000
@@ -106,9 +106,12 @@ class GirlvoiceSoc(Component):
         self.gpo1_base            = 0x00000600
         self.gpi0_base            = 0x00000700
 
-        if not use_spi_flash:
+        if not self.use_spi_flash:
             self.reset_addr  = self.mainram_base
             self.fw_base     = None
+        else:
+            self.fw_base     = 0x00100000
+            self.reset_addr  = self.spiflash_base + self.fw_base
 
         # cpu
         self.cpu = VexRiscv(
@@ -513,7 +516,10 @@ class GirlvoiceSoc(Component):
         """Generate top-level SVD."""
         print("Generating SVD ...", dst_svd)
         with open(dst_svd, "w") as f:
-            SVD(self).generate(file=f)
+            soc        = introspect.soc(self)
+            memory_map = introspect.memory_map(soc)
+            interrupts = introspect.interrupts(soc)
+            SVD(memory_map, interrupts).generate(file=f)
         print("Wrote SVD ...", dst_svd)
 
     def genmem(self, dst_mem):
@@ -532,9 +538,13 @@ class GirlvoiceSoc(Component):
             "REGION_ALIAS(\"REGION_STACK\", mainram);\n"
         )
         with open(dst_mem, "w") as f:
-            f.write(memory_x.format(mainram_base=hex(self.mainram_base),
-                                    mainram_size=hex(self.mainram.size),
-                                    ))
+            soc        = introspect.soc(self)
+            memory_map = introspect.memory_map(soc)
+            reset_addr = introspect.reset_addr(soc)
+            rust.LinkerScript(memory_map, reset_addr).generate(file=f)
+            # f.write(memory_x.format(mainram_base=hex(self.mainram_base),
+            #                         mainram_size=hex(self.mainram.size),
+            #                         ))
 
     def genconst(self, dst):
         """Generate some high-level constants used by application code."""
