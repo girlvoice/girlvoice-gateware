@@ -51,7 +51,7 @@ from amaranth_soc                                import csr, gpio, wishbone
 from amaranth_soc.csr.wishbone                   import WishboneCSRBridge
 from amaranth_soc.wishbone.sram                  import WishboneSRAM
 
-from luna_soc.gateware.core               import spiflash, timer, uart
+from luna_soc.gateware.core               import spiflash, timer, uart, blockram
 from luna_soc.gateware.cpu                import InterruptController, VexRiscv
 from luna_soc.util                        import readbin
 from luna_soc.generate import introspect, rust
@@ -67,12 +67,14 @@ from girlvoice.io.i2s import i2s_rx, i2s_tx
 from girlvoice.io import spi
 from girlvoice.platform.nexus_utils.i2c_fifo import I2CFIFO
 
+from girlvoice.soc.vendor.vexiiriscv.vexiiriscv import VexiiRiscv
+
 kB = 1024
 mB = 1024*kB
 
 class GirlvoiceSoc(Component):
     def __init__(self, *, sys_clk_freq=60e6, finalize_csr_bridge=True,
-                 mainram_size=256*kB, cpu_variant="imac+dcache", use_spi_flash = True, sim = False):
+                 mainram_size=256*kB, cpu_variant="tiliqua_rv32imac", use_spi_flash = False, sim = False):
 
         super().__init__({})
 
@@ -82,7 +84,7 @@ class GirlvoiceSoc(Component):
 
         self.sys_clk_freq = sys_clk_freq
 
-        self.use_spi_flash        = True
+        self.use_spi_flash        = False
         self.mainram_base         = 0x00000000
         self.mainram_size         = mainram_size
         self.spiflash_base        = 0x10000000
@@ -109,7 +111,19 @@ class GirlvoiceSoc(Component):
             self.reset_addr  = self.spiflash_base + self.fw_base
 
         # cpu
-        self.cpu = VexRiscv(
+        # self.cpu = VexRiscv(
+        #     variant=cpu_variant,
+        #     reset_addr=self.reset_addr,
+        # )
+
+        self.cpu = VexiiRiscv(
+            regions = [
+                VexiiRiscv.MemoryRegion(base=self.mainram_base, size=self.mainram_size, cacheable=True, executable=True),
+                # VexiiRiscv.MemoryRegion(base=self.spiflash_base, size=self.spiflash_size, cacheable=True, executable=True),
+                VexiiRiscv.MemoryRegion(base=self.lmmi_base, size=0x1000, cacheable=False, executable=False),
+                VexiiRiscv.MemoryRegion(base=self.csr_base, size=0x10000, cacheable=False, executable=False),
+                # VexiiRiscv.MemoryRegion(base=self.wavetable_base, size=0x2000, cacheable=False, executable=False),
+            ],
             variant=cpu_variant,
             reset_addr=self.reset_addr,
         )
@@ -137,41 +151,46 @@ class GirlvoiceSoc(Component):
                 size=self.mainram_size,
                 data_width=wb_data_width,
             )
+            self.wb_decoder.add(self.mainram.wb_bus, addr=self.mainram_base, name="blockram")
         else:
-            self.mainram = WishboneSRAM(
-                size=mainram_size,
-                data_width=wb_data_width,
-                granularity=8
+            self.mainram = blockram.Peripheral(
+                size=mainram_size
             )
-        self.wb_decoder.add(self.mainram.wb_bus, addr=self.mainram_base, name="blockram")
+            self.wb_decoder.add(self.mainram.bus, addr=self.mainram_base, name="blockram")
+            # self.mainram = WishboneSRAM(
+            #     size=mainram_size,
+            #     data_width=wb_data_width,
+            #     granularity=8
+            # )
 
 
         # csr decoder
-        if not self.sim:
-            csr_addr_width = 28
-            csr_data_width = 8
-            self.csr_decoder = csr.Decoder(addr_width=csr_addr_width, data_width=csr_data_width)
+        csr_addr_width = 28
+        csr_data_width = 8
+        self.csr_decoder = csr.Decoder(addr_width=csr_addr_width, data_width=csr_data_width)
 
-            # uart0
-            uart_baud_rate = 115200
-            divisor = int(self.sys_clk_freq // uart_baud_rate)
-            self.uart0 = uart.Peripheral(divisor=divisor)
-            self.csr_decoder.add(self.uart0.bus, addr=self.uart0_base, name="uart0")
+        # uart0
+        uart_baud_rate = 115200
+        divisor = int(self.sys_clk_freq // uart_baud_rate)
+        self.uart0 = uart.Peripheral(divisor=divisor)
+        self.csr_decoder.add(self.uart0.bus, addr=self.uart0_base, name="uart0")
+
+        # timer0
+        self.timer0 = timer.Peripheral(width=32)
+        self.csr_decoder.add(self.timer0.bus, addr=self.timer0_base, name="timer0")
+        self.interrupt_controller.add(self.timer0, number=self.timer0_irq, name="timer0")
+
+        # led
+        self.led0 = gpio.Peripheral(pin_count=1, addr_width=4, data_width=8)
+        self.csr_decoder.add(self.led0.bus, addr=self.led0_base, name="led0")
+
+        self.gpo_1 = gpio.Peripheral(pin_count=2, addr_width=4, data_width=8)
+        self.csr_decoder.add(self.gpo_1.bus, addr=self.gpo1_base, name="gpo1")
+        if not self.sim:
 
             # FIXME: timer events / isrs currently not implemented, adding the event
             # bus to the csr decoder segfaults yosys somehow ...
 
-            # timer0
-            self.timer0 = timer.Peripheral(width=32)
-            self.csr_decoder.add(self.timer0.bus, addr=self.timer0_base, name="timer0")
-            self.interrupt_controller.add(self.timer0, number=self.timer0_irq, name="timer0")
-
-            # led
-            self.led0 = gpio.Peripheral(pin_count=1, addr_width=4, data_width=8)
-            self.csr_decoder.add(self.led0.bus, addr=self.led0_base, name="led0")
-
-            self.gpo_1 = gpio.Peripheral(pin_count=2, addr_width=4, data_width=8)
-            self.csr_decoder.add(self.gpo_1.bus, addr=self.gpo1_base, name="gpo1")
 
             # LCD SPI control
             self.spi_pads = provider.SPIFlashProvider(id="spi")
@@ -186,20 +205,21 @@ class GirlvoiceSoc(Component):
             self.wb_decoder.add(self.spi0.wb_bus, addr=self.spi_data_base, name="spi_fifo")
 
             # SPI Flash
-            self.spiflash_pads = provider.SPIFlashProvider(id="spi_flash_4x")
-            self.spi1_phy = spiflash.SPIPHYController(
-                pads = self.spiflash_pads.pins,
-                domain="sync",
-                divisor=0
-            )
+            if self.use_spi_flash:
+                self.spiflash_pads = provider.SPIFlashProvider(id="spi_flash_4x")
+                self.spi1_phy = spiflash.SPIPHYController(
+                    pads = self.spiflash_pads.pins,
+                    domain="sync",
+                    divisor=0
+                )
 
-            self.spi1_mmap = spiflash.mmap.SPIFlashMemoryMap(
-                size=self.spiflash_size,
-                data_width=wb_data_width,
-                name="spiflash",
+                self.spi1_mmap = spiflash.mmap.SPIFlashMemoryMap(
+                    size=self.spiflash_size,
+                    data_width=wb_data_width,
+                    name="spiflash",
 
-            )
-            self.wb_decoder.add(self.spi1_mmap.bus, addr=self.spiflash_base, name="spiflash")
+                )
+                self.wb_decoder.add(self.spi1_mmap.bus, addr=self.spiflash_base, name="spiflash")
 
             # self.spi1_cdc = spiflash.port.SPIControlPortCDC(
             #     data_width=wb_data_width,
@@ -235,11 +255,10 @@ class GirlvoiceSoc(Component):
             # Add vocoder wavetable to wb bus
             self.wb_decoder.add(self.vocoder.synth.wb_bus, addr=self.wavetable_base, name="wavetable")
 
-        self.permit_bus_traffic = Signal()
 
         self.extra_rust_constants = []
 
-        if finalize_csr_bridge and not self.sim:
+        if finalize_csr_bridge:
             self.finalize_csr_bridge()
 
     def finalize_csr_bridge(self):
@@ -259,6 +278,7 @@ class GirlvoiceSoc(Component):
         m = Module()
 
         # mainram
+        print(f"loading firmware from: {self.firmware_path}")
         maybe_fw_init = readbin.get_mem_data(self.firmware_path, data_width=32, endianness="little")
         if maybe_fw_init is None:
             raise RuntimeError("No firmware found to initialize")
@@ -275,6 +295,7 @@ class GirlvoiceSoc(Component):
         m.submodules.cpu = self.cpu
         self.wb_arbiter.add(self.cpu.ibus)
         self.wb_arbiter.add(self.cpu.dbus)
+        self.wb_arbiter.add(self.cpu.pbus)
 
         # interrupt controller
         m.submodules.interrupt_controller = self.interrupt_controller
@@ -285,72 +306,74 @@ class GirlvoiceSoc(Component):
         m.submodules.mainram = self.mainram
 
         # csr decoder
-        if not self.sim:
-            m.submodules.csr_decoder = self.csr_decoder
+        # if not self.sim:
+        m.submodules.csr_decoder = self.csr_decoder
 
+        # timer0
+        m.submodules.timer0 = self.timer0
         # uart0
+        m.submodules.uart0 = self.uart0
+
+        m.submodules.gpo1 = self.gpo_1
+
+        # led0
+        m.submodules.led0 = self.led0
         if not self.sim:
-            m.submodules.uart0 = self.uart0
             uart = platform.request("uart")
             m.d.comb += self.uart0.pins.rx.eq(uart.rx.i)
             m.d.comb += uart.tx.o.eq(self.uart0.pins.tx.o)
 
-            # timer0
-            m.submodules.timer0 = self.timer0
-
-            # led0
-            m.submodules.led0 = self.led0
             led_io = platform.request("led")
             m.d.comb += led_io.o.eq(self.led0.pins[0].o)
 
-            m.submodules.gpo1 = self.gpo_1
             dc_pin = platform.request("dc")
             bl_pin = platform.request("bl")
 
             m.d.comb += dc_pin.o.eq(self.gpo_1.pins[0].o)
             m.d.comb += bl_pin.o.eq(self.gpo_1.pins[1].o)
 
+
+
+            # Multiboot module is required to unlock use of
+            # SPI pins for the LCD
+            m.submodules.multiboot = Instance(
+                "MULTIBOOT",
+                p_SOURCESEL="EN",
+                i_AUTOREBOOT=0,
+                i_MSPIMADDR=0
+            )
+
+            # lcd spi controller
+            m.submodules.spi0_phy = self.spi0_phy
+            m.submodules.spi0 = self.spi0
+            m.submodules.spi_provider = self.spi_pads
+
+            wiring.connect(m, self.spi0.source, self.spi0_phy.source)
+            m.d.comb += self.spi0_phy.sink.ready.eq(1)
+            m.d.comb += self.spi0_phy.cs.eq(self.spi0.cs)
+
         # i2c0
         m.submodules.i2c0 = self.i2c
         m.submodules.wb_to_lmmi = self.lmmi_to_wb
 
-
-        # Multiboot module is required to unlock use of
-        # SPI pins for the LCD
-        m.submodules.multiboot = Instance(
-            "MULTIBOOT",
-            p_SOURCESEL="EN",
-            i_AUTOREBOOT=0,
-            i_MSPIMADDR=0
-        )
-
-        # lcd spi controller
-        m.submodules.spi0_phy = self.spi0_phy
-        m.submodules.spi0 = self.spi0
-        m.submodules.spi_provider = self.spi_pads
-
-        wiring.connect(m, self.spi0.source, self.spi0_phy.source)
-        m.d.comb += self.spi0_phy.sink.ready.eq(1)
-        m.d.comb += self.spi0_phy.cs.eq(self.spi0.cs)
-
-
         # SPI Flash chip
-        m.submodules.spi1_phy = self.spi1_phy
-        m.submodules.spi1 = self.spi1_mmap
-        m.submodules.spiflash_provider = self.spiflash_pads
+        if self.use_spi_flash:
+            m.submodules.spi1_phy = self.spi1_phy
+            m.submodules.spi1 = self.spi1_mmap
+            m.submodules.spiflash_provider = self.spiflash_pads
 
-        # With CDC
-        # m.submodules.spi1_cdc = self.spi1_cdc
-        # wiring.connect(m, self.spi1_mmap.source, self.spi1_cdc.a.source)
-        # wiring.connect(m, self.spi1_mmap.sink, self.spi1_cdc.a.sink)
-        # m.d.comb += self.spi1_cdc.a.cs.eq(self.spi1_mmap.cs)
-        # wiring.connect(m, self.spi1_phy, self.spi1_cdc.b)
+            # With CDC
+            # m.submodules.spi1_cdc = self.spi1_cdc
+            # wiring.connect(m, self.spi1_mmap.source, self.spi1_cdc.a.source)
+            # wiring.connect(m, self.spi1_mmap.sink, self.spi1_cdc.a.sink)
+            # m.d.comb += self.spi1_cdc.a.cs.eq(self.spi1_mmap.cs)
+            # wiring.connect(m, self.spi1_phy, self.spi1_cdc.b)
 
-        # Without CDC
-        wiring.connect(m, self.spi1_mmap.source, self.spi1_phy.source)
-        wiring.connect(m, self.spi1_mmap.sink, self.spi1_phy.sink)
-        m.d.comb += self.spi1_phy.cs.eq(self.spi1_mmap.cs)
-        # wiring.connect(m, self.spi1_phy, self.spi1_phy.)
+            # Without CDC
+            wiring.connect(m, self.spi1_mmap.source, self.spi1_phy.source)
+            wiring.connect(m, self.spi1_mmap.sink, self.spi1_phy.sink)
+            m.d.comb += self.spi1_phy.cs.eq(self.spi1_mmap.cs)
+            # wiring.connect(m, self.spi1_phy, self.spi1_phy.)
 
 
         # I2S TX/RX
@@ -380,17 +403,14 @@ class GirlvoiceSoc(Component):
             wiring.connect(m, self.i2s_rx.source, self.i2s_tx.sink)
 
         # wishbone csr bridge
-        if not self.sim:
-            m.submodules.wb_to_csr = self.wb_to_csr
+        # if not self.sim:
+        m.submodules.wb_to_csr = self.wb_to_csr
 
         # Memory controller hangs if we start making requests to it straight away.
         on_delay = Signal(32)
-        with m.If(on_delay < 0xFF):
-            m.d.comb += self.cpu.ext_reset.eq(1)
         with m.If(on_delay < 0xFFFF):
+            m.d.comb += self.cpu.ext_reset.eq(1)
             m.d.sync += on_delay.eq(on_delay+1)
-        with m.Else():
-            m.d.sync += self.permit_bus_traffic.eq(1)
 
         return m
 

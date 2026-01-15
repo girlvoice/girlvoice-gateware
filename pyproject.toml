@@ -20,6 +20,8 @@ dependencies = [
     "luna-usb>=0.2.0",
     "luna-soc @ git+https://github.com/greatscottgadgets/luna-soc.git@7fa1cc16ddbaf8608efa515efc7f4ef32454299c",
     "cocotb>=2.0.1",
+    "GitPython>=3.1.46",
+    "portalocker>=3.2.0",
 ]
 requires-python = ">=3.10"
 readme = "README.md"

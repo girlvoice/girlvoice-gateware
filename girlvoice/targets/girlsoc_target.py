@@ -13,7 +13,7 @@ from girlvoice.soc.girlvoice_soc import GirlvoiceSoc
 class GirlTop(Elaboratable):
 
     def __init__(self):
-        self.soc = GirlvoiceSoc()
+        self.soc = GirlvoiceSoc(sim=False)
 
     def elaborate(self, platform:Platform):
         m = Module()

@@ -91,66 +91,66 @@ fn main() -> ! {
     let mut delay = DELAY::new(peripherals.timer0, SYS_CLK_FREQ);
     let mut serial = Serial0::new(peripherals.uart0);
 
-    peripherals.gpo1.mode().write(|w| unsafe { w.pin_1().bits(0x1)});
-    peripherals.gpo1.output().write(|w| w.pin_1().bit(true));
-    let gpo1 = Gpo1::new(peripherals.gpo1);
+    // peripherals.gpo1.mode().write(|w| unsafe { w.pin_1().bits(0x1)});
+    // peripherals.gpo1.output().write(|w| w.pin_1().bit(true));
+    // let gpo1 = Gpo1::new(peripherals.gpo1);
 
-    // This should be a part of the PAC but wishbone memory resource locations are not
-    // properly included in the SVD generation yet
-    const SPI_FIFO_ADDR: usize = 0xc0000000;
-    let spi0 = Spi0::new(peripherals.spiflash_ctrl, SPI_FIFO_ADDR);
+    // // This should be a part of the PAC but wishbone memory resource locations are not
+    // // properly included in the SVD generation yet
+    // const SPI_FIFO_ADDR: usize = 0xc0000000;
+    // let spi0 = Spi0::new(peripherals.spiflash_ctrl, SPI_FIFO_ADDR);
 
-    let mut buffer = [0_u8; 1024];
-    let interface = SpiInterface::new(spi0, gpo1, &mut buffer);
+    // let mut buffer = [0_u8; 1024];
+    // let interface = SpiInterface::new(spi0, gpo1, &mut buffer);
 
-    let mut display = Builder::new(GC9A01, interface)
-        .display_size(240, 240)
-        .invert_colors(ColorInversion::Inverted)
-        .init(&mut delay).unwrap();
-
-
-    display.clear(Rgb565::BLACK).unwrap();
+    // let mut display = Builder::new(GC9A01, interface)
+        // .display_size(240, 240)
+        // .invert_colors(ColorInversion::Inverted)
+        // .init(&mut delay).unwrap();
 
 
-    // Create styles used by the drawing operations.
-    let thin_stroke = PrimitiveStyle::with_stroke(Rgb565::GREEN, 2);
-    let thick_stroke = PrimitiveStyle::with_stroke(Rgb565::CSS_CRIMSON, 3);
-    let border_stroke = PrimitiveStyleBuilder::new()
-        .stroke_color(Rgb565::CSS_AQUA)
-        .stroke_width(3)
-        .stroke_alignment(StrokeAlignment::Inside)
-        .build();
-    let fill = PrimitiveStyle::with_fill(Rgb565::BLUE);
-    let character_style = MonoTextStyle::new(&FONT_6X10, Rgb565::CSS_PINK);
+    // display.clear(Rgb565::BLACK).unwrap();
 
-    let yoffset = 50;
 
-    // Draw a 3px wide outline around the display.
-    // display
-    //     .bounding_box()
-    //     .into_styled(border_stroke)
-    //     .draw(&mut display).unwrap();
+    // // Create styles used by the drawing operations.
+    // let thin_stroke = PrimitiveStyle::with_stroke(Rgb565::GREEN, 2);
+    // let thick_stroke = PrimitiveStyle::with_stroke(Rgb565::CSS_CRIMSON, 3);
+    // let border_stroke = PrimitiveStyleBuilder::new()
+        // .stroke_color(Rgb565::CSS_AQUA)
+        // .stroke_width(3)
+        // .stroke_alignment(StrokeAlignment::Inside)
+        // .build();
+    // let fill = PrimitiveStyle::with_fill(Rgb565::BLUE);
+    // let character_style = MonoTextStyle::new(&FONT_6X10, Rgb565::CSS_PINK);
 
-    // Draw a triangle.
-    // Triangle::new(
-    //     Point::new(16, 16 + yoffset),
-    //     Point::new(16 + 16, 16 + yoffset),
-    //     Point::new(16 + 8, yoffset),
-    // )
-    // .into_styled(thin_stroke)
-    // .draw(&mut display).unwrap();
+    // let yoffset = 50;
 
-     // Draw centered text.
-    let text = "girlvoice!";
-    // Text::with_alignment(
-    //     text,
-    //     display.bounding_box().center() + Point::new(0, 15),
-    //     character_style,
-    //     Alignment::Center,
-    // )
-    // .draw(&mut display).unwrap();
+    // // Draw a 3px wide outline around the display.
+    // // display
+    // //     .bounding_box()
+    // //     .into_styled(border_stroke)
+    // //     .draw(&mut display).unwrap();
 
-    // let mut led = Led0::new(peripherals.led0);
+    // // Draw a triangle.
+    // // Triangle::new(
+    // //     Point::new(16, 16 + yoffset),
+    // //     Point::new(16 + 16, 16 + yoffset),
+    // //     Point::new(16 + 8, yoffset),
+    // // )
+    // // .into_styled(thin_stroke)
+    // // .draw(&mut display).unwrap();
+
+     // // Draw centered text.
+    // let text = "girlvoice!";
+    // // Text::with_alignment(
+    // //     text,
+    // //     display.bounding_box().center() + Point::new(0, 15),
+    // //     character_style,
+    // //     Alignment::Center,
+    // // )
+    // // .draw(&mut display).unwrap();
+
+    let mut led = Led0::new(peripherals.led0);
 
     let i2c0 = I2c0::new(peripherals.i2cfifo);
 
@@ -160,10 +160,10 @@ fn main() -> ! {
 
     let mut term = term::Terminal::new(serial, amp, delay);
 
-    let img = TestImage::new();
-    img.draw(&mut display).unwrap();
+    // let img = TestImage::new();
+    // img.draw(&mut display).unwrap();
     loop {
-        img.draw(&mut display).unwrap();
+        // img.draw(&mut display).unwrap();
         term.handle_char();
     }
 }
