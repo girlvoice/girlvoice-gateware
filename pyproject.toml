@@ -34,6 +34,8 @@ distribution = true
 
 [tool.pdm.scripts]
 '_'.env_file = ".env.toolchain"
+build = {cmd = "python girlsoc_target.py --keep-files --toolchain radiant --dry-run", working_dir = "girlvoice/targets"}
+flash = {cmd = "iceprog build/impl/top_impl.bit", working_dir = "girlvoice/targets"}
 
 [tool.ruff]
 line-length = 100

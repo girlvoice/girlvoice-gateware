@@ -346,7 +346,7 @@ class GirlvoiceSoc(Component):
         return m
 
     def build(self, name, build_dir):
-        firmware_root = os.path.join( os.getcwd(),"../software/girlvoice")
+        firmware_root = os.path.join(os.path.dirname(__file__), "../software/girlvoice")
         firmware_bin_path = os.path.join(firmware_root, "girlvoice.bin")
         GirlvoiceSoc.compile_firmware(firmware_root, firmware_bin_path)
         self.firmware_path = firmware_bin_path

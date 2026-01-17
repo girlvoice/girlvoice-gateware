@@ -27,7 +27,7 @@ MANIFEST
 
 # pdm
 #   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
-#pdm.lock
+pdm.lock
 #   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
 #   in version control.
 #   https://pdm-project.org/#use-with-ide
@@ -41,6 +41,9 @@ MANIFEST
 .venv
 .devenv
 .buildenv
+bin/
+pyvenv.cfg
+__pypackages__/
 
 # GTKwave traces
 *.vcd
@@ -52,3 +55,6 @@ girlvoice/targets/*.v
 
 # Test bench audio outputs
 *.wav
+
+# Build artifacts
+init_params.txt

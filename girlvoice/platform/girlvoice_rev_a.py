@@ -213,9 +213,6 @@ class GirlvoiceRevAPlatform(LatticePlatform):
     ):
         docker_image = "radiant-container:latest"
 
-        WAYLAND_DISPLAY = os.environ.get("WAYLAND_DISPLAY", "")
-        XDG_RUNTIME_DIR = os.environ.get("XDG_RUNTIME_DIR", "")
-        DISPLAY = os.environ.get("DISPLAY", "")
         HOST_UID = os.getuid()
 
         docker_args = [
@@ -225,15 +222,6 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             "XDG_RUNTIME_DIR=/run/user/$(id -u)",
             "-e",
             f"HOST_UID={HOST_UID}",
-            "-e",
-            f"WAYLAND_DISPLAY={WAYLAND_DISPLAY}",  # Wayland passthrough
-            "-v",
-            f"{XDG_RUNTIME_DIR}/{WAYLAND_DISPLAY}:{XDG_RUNTIME_DIR}/{WAYLAND_DISPLAY}",  # Wayland passthrough
-            "-e",
-            f"DISPLAY={DISPLAY}",  # X11 passthrough
-            "-v",
-            "/tmp/.X11-unix:/tmp/.X11-unix:rw",  # X11 passthrough
-            "--ipc=host",  # X11 passthrough (MIT-SHM)
         ]
 
         kwargs["add_constraints"] = "ldc_set_sysconfig {{CONFIGIO_VOLTAGE_BANK0=3.3 CONFIGIO_VOLTAGE_BANK1=3.3 JTAG_PORT=DISABLE SLAVE_SPI_PORT=DISABLE MASTER_SPI_PORT=DISABLE}}\n"
@@ -263,10 +251,12 @@ class GirlvoiceRevAPlatform(LatticePlatform):
 
     def toolchain_program(self, products, name):
         ecpprog = os.environ.get("ECPPROG", "ecpprog")
-        with products.extract("{}.bit".format(name)) as bitstream_filename:
-            if self.toolchain == "Radiant":
-                bitstream_filename = f"build/impl/{name}_impl.bit"
-            subprocess.check_call(ecpprog, "-S", bitstream_filename)
+        if self.toolchain == "Radiant":
+            bitstream_filename = f"build/impl/{name}_impl.bit"
+            subprocess.check_call([ecpprog, "-S", bitstream_filename])
+        else:
+            with products.extract("{}.bit".format(name)) as bitstream_filename:
+                subprocess.check_call([ecpprog, "-S", bitstream_filename])
 
 
 if __name__ == "__main__":
