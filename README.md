@@ -19,21 +19,59 @@ The platform-specific configuration and gateware is in `girlvoice/platform`. Thi
 
 The rust firmware for the SoC is in `girlvoice/software`.
 
+# Prerequisites
+
+## Radiant Docker Setup
+
+The build uses Lattice Radiant running in Docker. Set up the radiant-docker container first:
+
+1. Clone the `radiant-docker` repo alongside this repo:
+   ```
+   girlvoice/
+   ├── girlvoice-gateware/
+   └── radiant-docker/
+   ```
+
+2. Obtain `2025.1.0.39.0_Radiant_lin.run` and place it in `radiant-docker/`.
+
+3. Build the Docker container:
+   ```bash
+   cd radiant-docker
+   docker build --tag radiant-container -f Dockerfile.base .
+   # On Apple Silicon, add: --platform linux/amd64
+   ```
+
 # Setup
-After creating and entering a new python 3.11 venv do `pdm install` to install all required dependencies.
 
-# Build
-
-Run the following command to build the Litex softcore target for the Rev A board:
-```
-pdm run girlvoice/targets/girlvoice_litex.py --cpu-variant imac --toolchain=radiant --synth-mode=lse --csr-svd girlsoc.svd --build
+```bash
+python -m venv .
+pdm install
 ```
 
-This will generate a `.svd` file that must then be processed into a Peripheral Access Crate (PAC) for the rust-based firmware.
-run: `svd2rust -i girlsoc.svd --target riscv` to create the PAC `lib.rs` file.
+# Build (for target LUNA-SOC)
 
+Make sure Docker is running, then:
+```bash
+pdm run build
+```
 
-`pdm run girlvoice/girlvoice_rev_a.py` to build for the girlvoice rev A PCB.
+Note: The build process can take several minutes.
 
+# Flash
 
-Use `pdm run girlvoice/targets/girlsoc_target.py --keep-files --toolchain radiant` to build the LUNA-SOC based design
+```bash
+pdm run flash
+```
+
+# Alternative Targets
+
+## LiteX Target
+
+```bash
+pdm run python girlvoice/targets/girlvoice_litex.py --cpu-variant imac --toolchain=radiant --synth-mode=lse --csr-svd girlsoc.svd --build
+```
+
+This generates a `.svd` file for the Peripheral Access Crate (PAC):
+```bash
+svd2rust -i girlsoc.svd --target riscv
+```
