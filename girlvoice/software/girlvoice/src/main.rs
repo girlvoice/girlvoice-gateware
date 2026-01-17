@@ -175,8 +175,7 @@ fn main() -> ! {
             visualizer.set_mode(new_mode);
         }
 
-        // read envelope values from hardware registers
-        energies[0] = Fixed::ZERO; // ch0 disabled - something wrong with this channel
+        energies[0] = Fixed::from_bits(envelope.ch0().read().value().bits() as i32);
         energies[1] = Fixed::from_bits(envelope.ch1().read().value().bits() as i32);
         energies[2] = Fixed::from_bits(envelope.ch2().read().value().bits() as i32);
         energies[3] = Fixed::from_bits(envelope.ch3().read().value().bits() as i32);
@@ -188,6 +187,7 @@ fn main() -> ! {
         energies[9] = Fixed::from_bits(envelope.ch9().read().value().bits() as i32);
         energies[10] = Fixed::from_bits(envelope.ch10().read().value().bits() as i32);
         energies[11] = Fixed::from_bits(envelope.ch11().read().value().bits() as i32);
+        envelope.clear().write(|w| unsafe { w.bits(1) });
 
         let mut peak = Fixed::ZERO;
         for e in energies.iter() {

@@ -6,31 +6,32 @@ from amaranth_soc import csr
 
 
 class Peripheral(wiring.Component):
-    """Envelope CSR peripheral.
+    """
+    envelope CSR peripheral with peak-hold.
 
-    Exposes envelope follower values from vocoder channels as read-only CSR registers.
-    Each channel envelope value is captured when valid and exposed to the CPU.
+    exposes envelope follower peak values as read-only CSR registers.
+    write to Clear register to reset all peaks.
 
-    Parameters:
+    parameters:
     num_channels : :class:`int`
-        Number of vocoder channels (envelope values to expose).
+        number of vocoder channels.
     sample_width : :class:`int`
-        Width of each envelope sample in bits.
+        width of each envelope sample in bits.
     addr_width : :class:`int`
         CSR bus address width.
     data_width : :class:`int`
         CSR bus data width.
     input_stages : :class:`int`
-        Number of synchronization stages between envelope inputs and the regitster
+        number of synchronization stages between envelope inputs and the register.
         Optional. Defaults to ``2``.
 
-    Attributes:
+    attributes:
     bus : :class:`csr.Interface`
         CSR bus interface providing access to registers.
     envelopes : array of :class:`Signal`
-        Envelope value inputs from vocoder channels.
+        envelope value inputs from vocoder channels.
     valids : array of :class:`Signal`
-        Valid signals indicating when envelope values should be captured.
+        valid signals indicating when envelope values should be captured.
     """
 
     def __init__(self, *, num_channels, sample_width, addr_width, data_width, input_stages=2):
@@ -47,6 +48,8 @@ class Peripheral(wiring.Component):
 
         regs = csr.Builder(addr_width=addr_width, data_width=data_width)
 
+        self._clear_reg = regs.add("Clear", self._ClearReg())
+
         self._channel_regs = []
         for i in range(num_channels):
             reg = regs.add(f"Ch{i}", self._ChannelReg(sample_width))
@@ -61,12 +64,13 @@ class Peripheral(wiring.Component):
         })
         self.bus.memory_map = self._bridge.bus.memory_map
 
+    class _ClearReg(csr.Register, access="w"):
+        def __init__(self):
+            super().__init__({"clear": csr.Field(csr.action.W, unsigned(1))})
+
     class _ChannelReg(csr.Register, access="r"):
-        """Read-only register for a single channel's envelope value."""
         def __init__(self, sample_width):
-            super().__init__({
-                "value": csr.Field(csr.action.R, unsigned(sample_width)),
-            })
+            super().__init__({"value": csr.Field(csr.action.R, unsigned(sample_width))})
 
     @property
     def num_channels(self):
@@ -86,24 +90,31 @@ class Peripheral(wiring.Component):
 
         connect(m, flipped(self.bus), self._bridge.bus)
 
+        clear_all = self._clear_reg.f.clear.w_stb
+
         for n in range(self._num_channels):
             envelope_in = self.envelopes[n]
             valid_in = self.valids[n]
 
+            # valid signal synchronizer
             valid_sync = valid_in
             for stage in range(self._input_stages):
                 valid_sync_ff = Signal(reset_less=True, name=f"ch_{n}_valid_sync_ff_{stage}")
                 m.d.sync += valid_sync_ff.eq(valid_sync)
                 valid_sync = valid_sync_ff
 
-            latched_value = Signal(self._sample_width, name=f"ch_{n}_latched")
+            peak_value = Signal(self._sample_width, name=f"ch_{n}_peak")
 
             valid_prev = Signal(name=f"ch_{n}_valid_prev")
             m.d.sync += valid_prev.eq(valid_sync)
+            valid_rising = valid_sync & ~valid_prev
 
-            with m.If(valid_sync & ~valid_prev):
-                m.d.sync += latched_value.eq(envelope_in)
+            with m.If(clear_all):
+                m.d.sync += peak_value.eq(0)
+            with m.Elif(valid_rising):
+                with m.If(envelope_in > peak_value):
+                    m.d.sync += peak_value.eq(envelope_in)
 
-            m.d.comb += self._channel_regs[n].f.value.r_data.eq(latched_value)
+            m.d.comb += self._channel_regs[n].f.value.r_data.eq(peak_value)
 
         return m

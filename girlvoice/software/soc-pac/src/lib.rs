@@ -2316,11 +2316,12 @@ impl core::fmt::Debug for Envelope {
         f.debug_struct("Envelope").finish()
     }
 }
-#[doc = "Envelope follower CSR registers"]
+#[doc = "envelope follower CSR registers"]
 pub mod envelope {
     #[repr(C)]
-    #[doc = "Register block"]
     pub struct RegisterBlock {
+        clear: Clear,
+        _reserved0: u8,
         ch0: Ch0,
         ch1: Ch1,
         ch2: Ch2,
@@ -2335,42 +2336,45 @@ pub mod envelope {
         ch11: Ch11,
     }
     impl RegisterBlock {
-        #[doc = "0x00 - Channel 0 envelope value"]
+        #[inline(always)]
+        pub const fn clear(&self) -> &Clear { &self.clear }
         #[inline(always)]
         pub const fn ch0(&self) -> &Ch0 { &self.ch0 }
-        #[doc = "0x02 - Channel 1 envelope value"]
         #[inline(always)]
         pub const fn ch1(&self) -> &Ch1 { &self.ch1 }
-        #[doc = "0x04 - Channel 2 envelope value"]
         #[inline(always)]
         pub const fn ch2(&self) -> &Ch2 { &self.ch2 }
-        #[doc = "0x06 - Channel 3 envelope value"]
         #[inline(always)]
         pub const fn ch3(&self) -> &Ch3 { &self.ch3 }
-        #[doc = "0x08 - Channel 4 envelope value"]
         #[inline(always)]
         pub const fn ch4(&self) -> &Ch4 { &self.ch4 }
-        #[doc = "0x0a - Channel 5 envelope value"]
         #[inline(always)]
         pub const fn ch5(&self) -> &Ch5 { &self.ch5 }
-        #[doc = "0x0c - Channel 6 envelope value"]
         #[inline(always)]
         pub const fn ch6(&self) -> &Ch6 { &self.ch6 }
-        #[doc = "0x0e - Channel 7 envelope value"]
         #[inline(always)]
         pub const fn ch7(&self) -> &Ch7 { &self.ch7 }
-        #[doc = "0x10 - Channel 8 envelope value"]
         #[inline(always)]
         pub const fn ch8(&self) -> &Ch8 { &self.ch8 }
-        #[doc = "0x12 - Channel 9 envelope value"]
         #[inline(always)]
         pub const fn ch9(&self) -> &Ch9 { &self.ch9 }
-        #[doc = "0x14 - Channel 10 envelope value"]
         #[inline(always)]
         pub const fn ch10(&self) -> &Ch10 { &self.ch10 }
-        #[doc = "0x16 - Channel 11 envelope value"]
         #[inline(always)]
         pub const fn ch11(&self) -> &Ch11 { &self.ch11 }
+    }
+    pub type Clear = crate::Reg<clear::ClearSpec>;
+    pub mod clear {
+        pub type W = crate::W<ClearSpec>;
+        impl W {}
+        pub struct ClearSpec;
+        impl crate::RegisterSpec for ClearSpec { type Ux = u8; }
+        impl crate::Writable for ClearSpec {
+            type Safety = crate::Unsafe;
+            const ZERO_TO_MODIFY_FIELDS_BITMAP: u8 = 0;
+            const ONE_TO_MODIFY_FIELDS_BITMAP: u8 = 0;
+        }
+        impl crate::Resettable for ClearSpec { const RESET_VALUE: u8 = 0; }
     }
     pub type Ch0 = crate::Reg<ch0::Ch0Spec>;
     pub mod ch0 {

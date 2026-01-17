@@ -22,7 +22,7 @@ impl ModeKind {
     }
 }
 
-// Simple bar meter for debugging - shows vertical bars for each channel
+// simple bar meter for debugging
 pub struct BarMeter {
     num_channels: usize,
     energies: [f32; MAX_CHANNELS],
