@@ -1,7 +1,7 @@
 use crate::ui::{
     math::{self, Fixed, FxPoint2D},
     Color, ColorPalette, EnvelopeSmoother, LFO, Point2D,
-    DISPLAY_SIZE, draw_line, draw_thick_line, is_in_circle,
+    DISPLAY_SIZE, draw_line, draw_thick_line,
 };
 
 const MAX_CHANNELS: usize = crate::ui::MAX_CHANNELS;
@@ -86,8 +86,6 @@ pub struct HarmonicLoop {
     harmonic_phases: [LFO; MAX_CHANNELS],
     total_energy: EnvelopeSmoother,
     resolution: usize,
-    circular_mask: bool,
-    glow: bool,
 }
 
 impl HarmonicLoop {
@@ -102,8 +100,6 @@ impl HarmonicLoop {
             }),
             total_energy: EnvelopeSmoother::new(60.0, 2.0, 50.0),
             resolution: 80, // reduced from 200 for better performance
-            circular_mask: true,
-            glow: false, // Disable glow by default on embedded (saves CPU)
         }
     }
 
@@ -138,14 +134,6 @@ impl HarmonicLoop {
         let scale = math::fx_from_f32(0.45 + 0.35 * self.total_energy.value());
         let fx_point = FxPoint2D::new(x * scale, y * scale).rotate(math::fx_from_f32(rotation));
         Point2D::new(math::fx_to_f32(fx_point.x), math::fx_to_f32(fx_point.y))
-    }
-
-    pub fn set_circular_mask(&mut self, enabled: bool) {
-        self.circular_mask = enabled;
-    }
-
-    pub fn set_glow(&mut self, enabled: bool) {
-        self.glow = enabled;
     }
 
     pub fn update(&mut self, dt: f32, energies: &[f32]) {
@@ -188,13 +176,9 @@ impl HarmonicLoop {
 
             // use palette gradient around the figure
             let color = pal.sample(i as f32 / self.resolution as f32);
-            let brightness = 0.7 + 0.3 * self.total_energy.value();
+            let brightness = 1.0; // 0.7 + 0.3 * self.total_energy.value();
 
-            if self.glow {
-                draw_thick_line(sx0, sy0, sx1, sy1, 2, color.scale(brightness), self.circular_mask, &mut set_pixel);
-            } else {
-                draw_line(sx0, sy0, sx1, sy1, color.scale(brightness), self.circular_mask, &mut set_pixel);
-            }
+            draw_line(sx0, sy0, sx1, sy1, color.scale(brightness), &mut set_pixel);
         }
 
         // draw bright spots at high-energy harmonics (simplified for performance)

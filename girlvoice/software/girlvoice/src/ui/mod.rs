@@ -211,8 +211,15 @@ impl LFO {
 }
 
 
+pub fn is_in_circle(x: usize, y: usize) -> bool {
+    let center = (DISPLAY_SIZE / 2) as i32;
+    let dx = x as i32 - center;
+    let dy = y as i32 - center;
+    (dx * dx + dy * dy) <= (center * center)
+}
+
 // draw a line using Bresenham's algorithm
-pub fn draw_line<F>(x0: i32, y0: i32, x1: i32, y1: i32, color: Color, circular_mask: bool, mut set_pixel: F)
+pub fn draw_line<F>(x0: i32, y0: i32, x1: i32, y1: i32, color: Color, mut set_pixel: F)
 where
     F: FnMut(usize, usize, Color),
 {
@@ -226,9 +233,9 @@ where
     loop {
         if x >= 0 && x < DISPLAY_SIZE as i32 && y >= 0 && y < DISPLAY_SIZE as i32 {
             let (ux, uy) = (x as usize, y as usize);
-            if !circular_mask || is_in_circle(ux, uy) {
+            //if !circular_mask || is_in_circle(ux, uy) {
                 set_pixel(ux, uy, color);
-            }
+            //}
         }
         if x == x1 && y == y1 { break; }
         let e2 = 2 * err;
@@ -237,8 +244,7 @@ where
     }
 }
 
-// draw a thick line with glow effect
-pub fn draw_thick_line<F>(x0: i32, y0: i32, x1: i32, y1: i32, thickness: i32, color: Color, circular_mask: bool, mut set_pixel: F)
+pub fn draw_thick_line<F>(x0: i32, y0: i32, x1: i32, y1: i32, thickness: i32, color: Color, mut set_pixel: F)
 where
     F: FnMut(usize, usize, Color),
 {
@@ -248,16 +254,8 @@ where
         let len = math::fx_to_f32(math::fx_sqrt(len_sq)).max(1.0);
         let (nx, ny) = ((-dy as f32 / len * offset as f32) as i32, (dx as f32 / len * offset as f32) as i32);
         let fade = 1.0 - (offset.abs() as f32 / (thickness + 1) as f32);
-        draw_line(x0 + nx, y0 + ny, x1 + nx, y1 + ny, color.scale(fade * fade), circular_mask, &mut set_pixel);
+        draw_line(x0 + nx, y0 + ny, x1 + nx, y1 + ny, color.scale(fade * fade), &mut set_pixel);
     }
-}
-
-// check if a screen point is within the display area (integer math)
-pub fn is_in_circle(x: usize, y: usize) -> bool {
-    let center = (DISPLAY_SIZE / 2) as i32;
-    let dx = x as i32 - center;
-    let dy = y as i32 - center;
-    (dx * dx + dy * dy) <= (center * center)
 }
 
 

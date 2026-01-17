@@ -130,7 +130,6 @@ fn main() -> ! {
     let mut energies = [Fixed::ZERO; 12];
     // f32 copy for visualizer (which expects f32)
     let mut energies_f32 = [0.0f32; 12];
-    let mut frame_counter: u32 = 0;
 
     // access envelope registers
     let envelope = &peripherals.envelope;
@@ -141,16 +140,19 @@ fn main() -> ! {
 
     let amp = Aw88395::new(i2c0);
 
-    write!(serial, "[girlvoice (^O^)~] ").unwrap();
+    write!(serial, "[girlvoice (^O^)~]").unwrap();
 
-    let mut term = term::Terminal::new(serial, amp, delay);
+    // Set up timer for elapsed time tracking
+    delay.set_mode(hal::timer::Mode::Periodic);
+    delay.set_timeout_ticks(u32::MAX);
+    delay.enable();
 
-    // ~10 fps, delay based for now
-    const FRAME_DELAY_MS: u32 = 100;
-    // switch visualizer every 5 seconds (50 frames at 10fps)
-    const MODE_SWITCH_FRAMES: u32 = 50;
-
-    let dt = Fixed::from_num(FRAME_DELAY_MS) / Fixed::from_num(1000);
+    // timing state
+    let mut fps_frame_count: u32 = 0;
+    let mut fps_ticks_elapsed: u64 = 0;
+    let mut mode_ticks_elapsed: u64 = 0;
+    let mut last_counter = delay.counter();
+    const MODE_SWITCH_TICKS: u64 = 5 * SYS_CLK_FREQ as u64;
 
     // AGC state
     let mut agc_gain = Fixed::ONE;
@@ -164,18 +166,17 @@ fn main() -> ! {
     loop {
         //term.handle_char();
 
-        frame_counter = frame_counter.wrapping_add(1);
+        // measure elapsed time since last frame
+        let current_counter = delay.counter();
+        let elapsed_ticks = if current_counter <= last_counter {
+            last_counter - current_counter
+        } else {
+            last_counter.wrapping_add(u32::MAX - current_counter)
+        };
+        last_counter = current_counter;
+        let dt = Fixed::from_num(elapsed_ticks) / Fixed::from_num(SYS_CLK_FREQ);
 
-        // switch visualizer mode every 5 seconds
-        if frame_counter % MODE_SWITCH_FRAMES == 0 {
-            let new_mode = match visualizer.current_mode() {
-                ModeKind::BarMeter => ModeKind::HarmonicLoop,
-                ModeKind::HarmonicLoop => ModeKind::BarMeter,
-            };
-            visualizer.set_mode(new_mode);
-        }
-
-        energies[0] = Fixed::from_bits(envelope.ch0().read().value().bits() as i32);
+        energies[0] = Fixed::ZERO; // Fixed::from_bits(envelope.ch0().read().value().bits() as i32);
         energies[1] = Fixed::from_bits(envelope.ch1().read().value().bits() as i32);
         energies[2] = Fixed::from_bits(envelope.ch2().read().value().bits() as i32);
         energies[3] = Fixed::from_bits(envelope.ch3().read().value().bits() as i32);
@@ -220,13 +221,18 @@ fn main() -> ! {
         }
 
         // update visualizer - fade for HarmonicLoop, clear for BarMeter
-        match visualizer.current_mode() {
+        /* match visualizer.current_mode() {
             ModeKind::HarmonicLoop => fade_framebuffer(fb.data_mut()),
             ModeKind::BarMeter => {
                 for byte in fb.data_mut().iter_mut() {
                     *byte = 0;
                 }
             }
+        } */
+
+        // clear fb 
+        for byte in fb.data_mut().iter_mut() {
+            *byte = 0;
         }
 
         visualizer.update(fx_to_f32(dt), &energies_f32);
@@ -246,7 +252,25 @@ fn main() -> ! {
         });
         display.set_pixels(0, 0, DISPLAY_WIDTH as u16 - 1, DISPLAY_HEIGHT as u16 - 1, pixels).ok();
 
-        //term.delay_ms(FRAME_DELAY_MS);
+        // timing
+        fps_frame_count += 1;
+        fps_ticks_elapsed += elapsed_ticks as u64;
+        mode_ticks_elapsed += elapsed_ticks as u64;
+
+        if fps_ticks_elapsed >= SYS_CLK_FREQ as u64 {
+            write!(serial, "FPS: {}\r\n", fps_frame_count).unwrap();
+            fps_frame_count = 0;
+            fps_ticks_elapsed = 0;
+        }
+
+        if mode_ticks_elapsed >= MODE_SWITCH_TICKS {
+            let new_mode = match visualizer.current_mode() {
+                ModeKind::BarMeter => ModeKind::HarmonicLoop,
+                ModeKind::HarmonicLoop => ModeKind::BarMeter,
+            };
+            visualizer.set_mode(new_mode);
+            mode_ticks_elapsed = 0;
+        }
     }
 }
 
