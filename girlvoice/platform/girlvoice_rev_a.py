@@ -213,9 +213,6 @@ class GirlvoiceRevAPlatform(LatticePlatform):
     ):
         docker_image = "radiant-container:latest"
 
-        WAYLAND_DISPLAY = os.environ.get("WAYLAND_DISPLAY", "")
-        XDG_RUNTIME_DIR = os.environ.get("XDG_RUNTIME_DIR", "")
-        DISPLAY = os.environ.get("DISPLAY", "")
         HOST_UID = os.getuid()
 
         docker_args = [
@@ -225,24 +222,6 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             "XDG_RUNTIME_DIR=/run/user/$(id -u)",
             "-e",
             f"HOST_UID={HOST_UID}",
-        ]
-
-        # Wayland passthrough (only if both variables are set)
-        if WAYLAND_DISPLAY and XDG_RUNTIME_DIR:
-            docker_args += [
-                "-e",
-                f"WAYLAND_DISPLAY={WAYLAND_DISPLAY}",
-                "-v",
-                f"{XDG_RUNTIME_DIR}/{WAYLAND_DISPLAY}:{XDG_RUNTIME_DIR}/{WAYLAND_DISPLAY}",
-            ]
-
-        # X11 passthrough
-        docker_args += [
-            "-e",
-            f"DISPLAY={DISPLAY}",
-            "-v",
-            "/tmp/.X11-unix:/tmp/.X11-unix:rw",
-            "--ipc=host",  # X11 passthrough (MIT-SHM)
         ]
 
         kwargs["add_constraints"] = "ldc_set_sysconfig {{CONFIGIO_VOLTAGE_BANK0=3.3 CONFIGIO_VOLTAGE_BANK1=3.3 JTAG_PORT=DISABLE SLAVE_SPI_PORT=DISABLE MASTER_SPI_PORT=DISABLE}}\n"
