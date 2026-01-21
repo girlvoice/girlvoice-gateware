@@ -94,6 +94,7 @@ class WishboneNXLRAM(wiring.Component):
         granularity = 8
         self.data_width = data_width
         self.size = size
+        self.writable=writable
 
         if data_width == 32:
             assert size in [64*kB, 128*kB, 192*kB, 256*kB, 320*kB]
@@ -110,7 +111,8 @@ class WishboneNXLRAM(wiring.Component):
             "wb_bus": In(wishbone.Signature(
                             addr_width=exact_log2(depth),
                             data_width=data_width,
-                            granularity=granularity
+                            granularity=granularity,
+                            features={"cti", "bte"}
                       ))
         })
         self.wb_bus.memory_map = MemoryMap(addr_width=exact_log2(size), data_width=granularity)
@@ -151,14 +153,47 @@ class WishboneNXLRAM(wiring.Component):
 
     def elaborate(self, platform):
         m = Module()
-        for d in range(self.depth_cascading):
 
+        data_r = Signal(self.data_width)
+        data_w = Signal(self.data_width)
+
+        addr = Signal(self.addr_width)
+        incr = Signal.like(self.wb_bus.adr)
+
+        m.d.comb += [
+            self.wb_bus.dat_r.eq(data_r),
+        ]
+
+        with m.Switch(self.wb_bus.bte):
+            with m.Case(wishbone.BurstTypeExt.LINEAR):
+                m.d.comb += incr.eq(self.wb_bus.adr + 1)
+            with m.Case(wishbone.BurstTypeExt.WRAP_4):
+                m.d.comb += incr[:2].eq(self.wb_bus.adr[:2] + 1)
+                m.d.comb += incr[2:].eq(self.wb_bus.adr[2:])
+            with m.Case(wishbone.BurstTypeExt.WRAP_8):
+                m.d.comb += incr[:3].eq(self.wb_bus.adr[:3] + 1)
+                m.d.comb += incr[3:].eq(self.wb_bus.adr[3:])
+            with m.Case(wishbone.BurstTypeExt.WRAP_16):
+                m.d.comb += incr[:4].eq(self.wb_bus.adr[:4] + 1)
+                m.d.comb += incr[4:].eq(self.wb_bus.adr[4:])
+
+        if self.writable:
+            m.d.comb += data_w.eq(self.wb_bus.dat_w)
+
+        with m.If(self.wb_bus.cyc & self.wb_bus.stb):
+            m.d.sync += self.wb_bus.ack.eq(1)
+            with m.If((self.wb_bus.cti == wishbone.CycleType.INCR_BURST) & self.wb_bus.ack):
+                m.d.comb += addr.eq(incr)
+            with m.Else():
+                m.d.comb += addr.eq(self.wb_bus.adr)
+
+        for d in range(self.depth_cascading):
             # Combine RAMs to increase Width.
             for w in range(self.width_cascading):
                 lram    = self._lram_blocks[d][w]
                 m.d.comb += [
-                    lram.DI.eq(self.wb_bus.dat_w[32*w:32*(w+1)]),
-                    lram.AD.eq(self.wb_bus.adr[:14]),
+                    lram.DI.eq(data_w[32*w:32*(w+1)]),
+                    lram.AD.eq(addr[:14]),
                     lram.CE.eq(1),
                     lram.BYTEEN_N.eq(~Mux(self.wb_bus.we, self.wb_bus.sel[4*w:4*(w+1)], 0))
                 ]
@@ -167,12 +202,16 @@ class WishboneNXLRAM(wiring.Component):
                     m.d.comb += [
                         lram.CS.eq(1),
                         lram.WE.eq(self.wb_bus.we & self.wb_bus.stb & self.wb_bus.cyc),
-                        self.wb_bus.dat_r[32*w:32*(w+1)].eq(lram.DO)
+                        data_r[32*w:32*(w+1)].eq(lram.DO)
                     ]
 
                 m.submodules += lram
 
-        m.d.sync += self.wb_bus.ack.eq(self.wb_bus.stb & self.wb_bus.cyc & ~self.wb_bus.ack)
+        m.d.sync += self.wb_bus.ack.eq(
+            self.wb_bus.stb &
+            self.wb_bus.cyc &
+            ~self.wb_bus.ack
+        )
 
         return m
 
