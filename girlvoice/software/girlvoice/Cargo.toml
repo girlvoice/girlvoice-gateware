@@ -13,7 +13,7 @@ soc-pac = { path = "../soc-pac", features = ["rt", "critical-section"] }
 girlvoice-hal = { path = "../hal" }
 panic-halt = "1.0.0"
 riscv = {version = "0.11.1" }
-riscv-rt = "0.12.2"
+riscv-rt = {version = "*", features = ["single-hart", "device"]}
 
 aw88395 = { path = "../aw88395" }
 sgtl5000 = { path = "../sgtl5000" }

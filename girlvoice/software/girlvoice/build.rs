@@ -13,13 +13,9 @@ fn main() {
     f.write_all(include_bytes!("memory.x"))
         .expect("Could not write file");
 
-    let mut f = File::create(&dest_path.join("regions.ld"))
-        .expect("Could not create file");
-    f.write_all(include_bytes!("generated/regions.ld")).expect("Could not write file");
 
     println!("cargo:rustc-link-search={}", dest_path.display());
 
-    println!("cargo:rerun-if-changed=regions.ld");
     println!("cargo:rerun-if-changed=memory.x");
     println!("cargo:rerun-if-changed=build.rs");
 }
