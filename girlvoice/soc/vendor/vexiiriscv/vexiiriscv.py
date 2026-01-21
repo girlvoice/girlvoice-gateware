@@ -35,7 +35,7 @@ CPU_BASE = [
     '--lsu-l1',
     '--lsu-wishbone',
     '--lsu-l1-wishbone',
-    '--fetch-l1',
+    # '--fetch-l1',
     '--fetch-wishbone',
 ]
 
@@ -66,19 +66,19 @@ CPU_VARIANTS = {
     "tiliqua_rv32imac": CPU_BASE + [
         '--with-rvc',
         '--with-rva',
-        '--with-btb',
-        '--relaxed-btb',
-        '--relaxed-branch',
-        '--with-late-alu',
+        # '--with-btb',
+        # '--relaxed-btb',
+        # '--relaxed-branch',
+        # '--with-late-alu',
         '--lsu-l1-ways=1',
-        '--lsu-l1-sets=8',
-        '--fetch-l1-ways=1',
-        '--fetch-l1-sets=8',
+        '--lsu-l1-sets=16',
+        # '--fetch-l1-ways=2',
+        # '--fetch-l1-sets=32',
         # '--with-gshare',
         # '--with-ras',
-        '--regfile-async',
-        '--with-aligner-buffer',
-        '--with-dispatcher-buffer',
+        # '--regfile-async',
+        # '--with-aligner-buffer',
+        # '--with-dispatcher-buffer',
     ]
 }
 
