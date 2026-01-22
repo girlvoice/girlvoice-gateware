@@ -35,7 +35,7 @@ CPU_BASE = [
     '--lsu-l1',
     '--lsu-wishbone',
     '--lsu-l1-wishbone',
-    # '--fetch-l1',
+    '--fetch-l1',
     '--fetch-wishbone',
 ]
 
@@ -66,19 +66,19 @@ CPU_VARIANTS = {
     "tiliqua_rv32imac": CPU_BASE + [
         '--with-rvc',
         '--with-rva',
-        # '--with-btb',
-        # '--relaxed-btb',
-        # '--relaxed-branch',
-        # '--with-late-alu',
+        '--with-btb',
+        '--relaxed-btb',
+        '--relaxed-branch',
+        '--with-late-alu',
         '--lsu-l1-ways=1',
-        '--lsu-l1-sets=16',
-        # '--fetch-l1-ways=2',
-        # '--fetch-l1-sets=32',
+        '--lsu-l1-sets=8',
+        '--fetch-l1-ways=1',
+        '--fetch-l1-sets=8',
         # '--with-gshare',
         # '--with-ras',
-        # '--regfile-async',
-        # '--with-aligner-buffer',
-        # '--with-dispatcher-buffer',
+        '--regfile-async',
+        '--with-aligner-buffer',
+        '--with-dispatcher-buffer',
     ]
 }
 
@@ -156,6 +156,36 @@ class VexiiRiscv(Component):
         self._source_file = f"{netlist_name}.v"
         self._source_path = os.path.join(self.PATH_CACHE, self._source_file)
 
+        self._cpu_params = {}
+
+        if "--fetch-l1" in netlist_arguments:
+            self._cpu_params.update(
+                o_FetchL1WishbonePlugin_logic_bus_ADR       = self.ibus.adr,
+                o_FetchL1WishbonePlugin_logic_bus_DAT_MOSI  = self.ibus.dat_w,
+                o_FetchL1WishbonePlugin_logic_bus_SEL       = self.ibus.sel,
+                o_FetchL1WishbonePlugin_logic_bus_CYC       = self.ibus.cyc,
+                o_FetchL1WishbonePlugin_logic_bus_STB       = self.ibus.stb,
+                o_FetchL1WishbonePlugin_logic_bus_WE        = self.ibus.we,
+                o_FetchL1WishbonePlugin_logic_bus_CTI       = self.ibus.cti,
+                o_FetchL1WishbonePlugin_logic_bus_BTE       = self.ibus.bte,
+                i_FetchL1WishbonePlugin_logic_bus_DAT_MISO  = self.ibus.dat_r,
+                i_FetchL1WishbonePlugin_logic_bus_ACK       = self.ibus.ack,
+                i_FetchL1WishbonePlugin_logic_bus_ERR       = self.ibus.err,
+            )
+        else:
+            self._cpu_params.update(
+                o_FetchCachelessWishbonePlugin_logic_bridge_bus_ADR       = self.ibus.adr,
+                o_FetchCachelessWishbonePlugin_logic_bridge_bus_DAT_MOSI  = self.ibus.dat_w,
+                o_FetchCachelessWishbonePlugin_logic_bridge_bus_SEL       = self.ibus.sel,
+                o_FetchCachelessWishbonePlugin_logic_bridge_bus_CYC       = self.ibus.cyc,
+                o_FetchCachelessWishbonePlugin_logic_bridge_bus_STB       = self.ibus.stb,
+                o_FetchCachelessWishbonePlugin_logic_bridge_bus_WE        = self.ibus.we,
+                o_FetchCachelessWishbonePlugin_logic_bridge_bus_CTI       = self.ibus.cti,
+                o_FetchCachelessWishbonePlugin_logic_bridge_bus_BTE       = self.ibus.bte,
+                i_FetchCachelessWishbonePlugin_logic_bridge_bus_DAT_MISO  = self.ibus.dat_r,
+                i_FetchCachelessWishbonePlugin_logic_bridge_bus_ACK       = self.ibus.ack,
+                i_FetchCachelessWishbonePlugin_logic_bridge_bus_ERR       = self.ibus.err,
+            )
         # If it's missing, the user has changed some CPU flags - generate a new netlist.
         if not os.path.exists(self._source_path):
             logging.info(f"VexiiRiscv source file not cached at: {self._source_path}")
@@ -207,17 +237,17 @@ class VexiiRiscv(Component):
             i_PrivilegedPlugin_logic_harts_0_int_m_external = self.irq_external,
 
             # instruction bus
-            o_FetchL1WishbonePlugin_logic_bus_ADR       = self.ibus.adr,
-            o_FetchL1WishbonePlugin_logic_bus_DAT_MOSI  = self.ibus.dat_w,
-            o_FetchL1WishbonePlugin_logic_bus_SEL       = self.ibus.sel,
-            o_FetchL1WishbonePlugin_logic_bus_CYC       = self.ibus.cyc,
-            o_FetchL1WishbonePlugin_logic_bus_STB       = self.ibus.stb,
-            o_FetchL1WishbonePlugin_logic_bus_WE        = self.ibus.we,
-            o_FetchL1WishbonePlugin_logic_bus_CTI       = self.ibus.cti,
-            o_FetchL1WishbonePlugin_logic_bus_BTE       = self.ibus.bte,
-            i_FetchL1WishbonePlugin_logic_bus_DAT_MISO  = self.ibus.dat_r,
-            i_FetchL1WishbonePlugin_logic_bus_ACK       = self.ibus.ack,
-            i_FetchL1WishbonePlugin_logic_bus_ERR       = self.ibus.err,
+            # o_FetchL1WishbonePlugin_logic_bus_ADR       = self.ibus.adr,
+            # o_FetchL1WishbonePlugin_logic_bus_DAT_MOSI  = self.ibus.dat_w,
+            # o_FetchL1WishbonePlugin_logic_bus_SEL       = self.ibus.sel,
+            # o_FetchL1WishbonePlugin_logic_bus_CYC       = self.ibus.cyc,
+            # o_FetchL1WishbonePlugin_logic_bus_STB       = self.ibus.stb,
+            # o_FetchL1WishbonePlugin_logic_bus_WE        = self.ibus.we,
+            # o_FetchL1WishbonePlugin_logic_bus_CTI       = self.ibus.cti,
+            # o_FetchL1WishbonePlugin_logic_bus_BTE       = self.ibus.bte,
+            # i_FetchL1WishbonePlugin_logic_bus_DAT_MISO  = self.ibus.dat_r,
+            # i_FetchL1WishbonePlugin_logic_bus_ACK       = self.ibus.ack,
+            # i_FetchL1WishbonePlugin_logic_bus_ERR       = self.ibus.err,
 
             # data bus
             o_LsuL1WishbonePlugin_logic_bus_ADR       = self.dbus.adr,
@@ -244,6 +274,7 @@ class VexiiRiscv(Component):
             i_LsuCachelessWishbonePlugin_logic_bridge_down_DAT_MISO  = self.pbus.dat_r,
             i_LsuCachelessWishbonePlugin_logic_bridge_down_ACK       = self.pbus.ack,
             i_LsuCachelessWishbonePlugin_logic_bridge_down_ERR       = self.pbus.err,
+            **self._cpu_params,
         )
 
         m.submodules.vexriscv = self._cpu

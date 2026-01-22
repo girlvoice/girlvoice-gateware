@@ -150,20 +150,23 @@ fn main() -> ! {
     // // )
     // // .draw(&mut display).unwrap();
 
-    let mut led = Led0::new(peripherals.led0);
+    // let mut led = Led0::new(peripherals.led0);
 
-    let i2c0 = I2c0::new(peripherals.i2cfifo);
+    // let i2c0 = I2c0::new(peripherals.i2cfifo);
 
-    let amp = Aw88395::new(i2c0);
+    // let amp = Aw88395::new(i2c0);
 
-    write!(serial, "[girlvoice (^O^)~] ").unwrap();
 
-    let mut term = term::Terminal::new(serial, amp, delay);
+    // let mut term = term::Terminal::new(serial, amp, delay);
 
     // let img = TestImage::new();
     // img.draw(&mut display).unwrap();
     loop {
+        writeln!(serial, "weee\r").ok();
+        // write!(serial, "awa \r\n").unwrap();
+        delay.delay_ms(1000);
+
         // img.draw(&mut display).unwrap();
-        term.handle_char();
+        // term.handle_char();
     }
 }
