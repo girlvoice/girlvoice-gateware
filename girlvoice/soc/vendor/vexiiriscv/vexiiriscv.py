@@ -65,10 +65,10 @@ CPU_VARIANTS = {
     # performance comparable to a low-end STM32.
     "tiliqua_rv32imac": CPU_BASE + [
         '--with-rvc',
-        '--with-rva',
-        '--with-btb',
-        '--relaxed-btb',
-        '--relaxed-branch',
+        # '--with-rva',
+        # '--with-btb',
+        # '--relaxed-btb',
+        # '--relaxed-branch',
         '--with-late-alu',
         '--lsu-l1-ways=1',
         '--lsu-l1-sets=8',
@@ -76,9 +76,9 @@ CPU_VARIANTS = {
         '--fetch-l1-sets=8',
         # '--with-gshare',
         # '--with-ras',
-        '--regfile-async',
-        '--with-aligner-buffer',
-        '--with-dispatcher-buffer',
+        # '--regfile-async',
+        # '--with-aligner-buffer',
+        # '--with-dispatcher-buffer',
     ]
 }
 

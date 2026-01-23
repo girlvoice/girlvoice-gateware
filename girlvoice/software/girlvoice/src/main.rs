@@ -88,7 +88,7 @@ fn panic(info: &PanicInfo) -> ! {
 fn main() -> ! {
     let peripherals = pac::Peripherals::take().unwrap();
 
-    let mut delay = DELAY::new(peripherals.timer0, SYS_CLK_FREQ);
+    // let mut delay = DELAY::new(peripherals.timer0, SYS_CLK_FREQ);
     let mut serial = Serial0::new(peripherals.uart0);
 
     // peripherals.gpo1.mode().write(|w| unsafe { w.pin_1().bits(0x1)});
@@ -161,10 +161,64 @@ fn main() -> ! {
 
     // let img = TestImage::new();
     // img.draw(&mut display).unwrap();
+    let tim_reg = peripherals.timer0;
     loop {
-        writeln!(serial, "weee\r").ok();
+        writeln!(serial, "weee wooooooo {}\r", 5000).ok();
+
+        // reset timer
+        tim_reg.enable().write(|w| w.enable().bit(false));
+
+        // start timer
+
+        tim_reg.mode().write(|w| unsafe {
+            w.periodic().bit(false)
+        });
+        tim_reg.reload().write(|w| unsafe { w.value().bits(1_000) });
+
+        let reload = tim_reg.reload().read().value().bits();
+
+
+        writeln!(serial, "read back reload: {} \r", reload).ok();
+
+        let counter = tim_reg.counter().read().value().bits();
+        writeln!(serial, "read back counter: {} \r", counter).ok();
+
+        tim_reg.reload().write(|w| unsafe { w.value().bits(1_000_000) });
+
+        let reload = tim_reg.reload().read().value().bits();
+
+
+        writeln!(serial, "read back reload: {} \r", reload).ok();
+
+        let counter = tim_reg.counter().read().value().bits();
+        writeln!(serial, "read back counter: {} \r", counter).ok();
+
+        tim_reg.reload().write(|w| unsafe { w.value().bits(5_800_000) });
+
+        let reload = tim_reg.reload().read().value().bits();
+
+
+        writeln!(serial, "read back reload: {}\r", reload).ok();
+
+        let counter = tim_reg.counter().read().value().bits();
+        writeln!(serial, "read back counter: {}\r", counter).ok();
+
+        tim_reg.reload().write(|w| unsafe { w.value().bits(10_800_000) });
+
+        let reload = tim_reg.reload().read().value().bits();
+
+
+        writeln!(serial, "read back reload: {}\r", reload).ok();
+
+        let counter = tim_reg.counter().read().value().bits();
+        writeln!(serial, "read back counter: {}\r", counter).ok();
+        // self.registers.enable().write(|w| w.enable().bit(true));
+
+        // wait for timer to hit zero
+        // while self.registers.counter().read().value().bits() != 0 {}
+
         // write!(serial, "awa \r\n").unwrap();
-        delay.delay_ms(1000);
+        // delay.delay_ms(100);
 
         // img.draw(&mut display).unwrap();
         // term.handle_char();
