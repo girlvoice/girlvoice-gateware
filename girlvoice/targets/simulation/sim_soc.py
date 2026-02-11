@@ -9,7 +9,7 @@ async def soc_test(dut):
 
     c.start()
 
-    await Timer(5, unit="ms")
+    await Timer(2, unit="ms")
 
 
 

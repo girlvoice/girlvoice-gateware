@@ -124,7 +124,7 @@ dependencies = [
  "hex",
  "mipidsi",
  "panic-halt",
- "riscv 0.11.1",
+ "riscv",
  "riscv-rt",
  "sgtl5000",
  "soc-pac",
@@ -248,16 +248,6 @@ dependencies = [
 
 [[package]]
 name = "riscv"
-version = "0.11.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f5c1b8bf41ea746266cdee443d1d1e9125c86ce1447e1a2615abd34330d33a9"
-dependencies = [
- "critical-section",
- "embedded-hal",
-]
-
-[[package]]
-name = "riscv"
 version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9251433e48c39d2133cbaff3ae7809ce6a1ecbc8225ca7da33d96d10cf360582"
@@ -281,12 +271,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "riscv-peripheral"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e22a4ff621f3c512ec90bbbc5c668ba40a8d4636f879cec8752f65066fe65b94"
+dependencies = [
+ "embedded-hal",
+ "paste",
+ "riscv",
+]
+
+[[package]]
 name = "riscv-rt"
 version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "45609650ada38c712be90e463028a3d7e35569de139dd800aa62946b5a403374"
 dependencies = [
- "riscv 0.16.0",
+ "riscv",
  "riscv-rt-macros",
  "riscv-target-parser",
  "riscv-types",
@@ -327,7 +328,8 @@ name = "soc-pac"
 version = "0.1.0"
 dependencies = [
  "critical-section",
- "riscv 0.16.0",
+ "riscv",
+ "riscv-peripheral",
  "riscv-rt",
  "vcell",
 ]

@@ -153,7 +153,10 @@ macro_rules! impl_timer {
             // trait: hal::delay::DelayUs
             impl $crate::hal::delay::DelayNs for $TIMERX {
                 fn delay_ns(&mut self, ns: u32) {
-                    let ticks: u32 = (self.clk / 1_000_000) * (ns / 1_000);
+
+                    let nanos_per_clk: u32 = 1_000_000_000 / self.clk;
+                    // Round up to nearest clock cycle increment.
+                    let ticks: u32 =  (ns / nanos_per_clk) + 1;
 
                     // reset timer
                     self.registers.enable().write(|w| w.enable().bit(false));

@@ -1,42 +1,44 @@
 #![no_std]
 #![no_main]
 
-use embedded_hal::delay::DelayNs;
-use embedded_hal::spi::SpiDevice;
-use aw88395::Aw88395;
-use sgtl5000::{Sgtl5000};
-use sgtl5000::regmap::LineOutBiasCurrent;
+// use core::arch::asm;
+// use embedded_hal::delay::DelayNs;
+use embedded_hal::digital::OutputPin;
+// use embedded_hal::spi::SpiDevice;
+// use aw88395::Aw88395;
+// use sgtl5000::{Sgtl5000};
+// use sgtl5000::regmap::LineOutBiasCurrent;
 use riscv_rt::entry;
 use soc_pac as pac;
+extern crate panic_halt;
+// use mipidsi::interface::SpiInterface;
+// use mipidsi::{Builder, models::GC9A01, options::ColorInversion, TestImage};
 
-use mipidsi::interface::SpiInterface;
-use mipidsi::{Builder, models::GC9A01, options::ColorInversion, TestImage};
-
-use embedded_graphics::{
-    mono_font::{ascii::FONT_6X10, MonoTextStyle},
-    pixelcolor::Rgb565,
-    prelude::*,
-    primitives::{
-        Circle, PrimitiveStyle, PrimitiveStyleBuilder, Rectangle, StrokeAlignment, Triangle,
-    },
-    text::{Alignment, Text},
-};
+// use embedded_graphics::{
+//     mono_font::{ascii::FONT_6X10, MonoTextStyle},
+//     pixelcolor::Rgb565,
+//     prelude::*,
+//     primitives::{
+//         Circle, PrimitiveStyle, PrimitiveStyleBuilder, Rectangle, StrokeAlignment, Triangle,
+//     },
+//     text::{Alignment, Text},
+// };
 
 use girlvoice_hal as hal;
 use hal::hal_io::Write;
-mod term;
+// mod term;
 
 use hal::i2c::I2c0;
 
-const SYS_CLK_FREQ: u32 = 60_000_000;
+const SYS_CLK_FREQ: u32 = 48_000_000;
 
-hal::impl_gpio!{
-    Gpo1: pac::Gpo1,
-}
+// hal::impl_gpio!{
+//     Gpo1: pac::Gpo1,
+// }
 
-hal::impl_spi!{
-    Spi0: (pac::SpiflashCtrl, u8, 8),
-}
+// hal::impl_spi!{
+//     Spi0: (pac::SpiflashCtrl, u8, 8),
+// }
 
 hal::impl_gpio!{
     Led0: pac::Led0,
@@ -50,39 +52,39 @@ hal::impl_serial! {
     Serial0: pac::Uart0,
 }
 
-fn power_on_codec(mut sgtl5000: Sgtl5000<I2c0>) {
-    // Analog power up settings
-    sgtl5000.power_off_startup_power().unwrap();
-    sgtl5000.enable_int_osc().unwrap();
-    sgtl5000.enable_charge_pump().unwrap();
-    sgtl5000.set_bias(0x7).unwrap(); // Set bias current to 50% of nominal per data sheet
-    sgtl5000.set_analog_gnd(0x04).unwrap(); // Set analog gnd reference voltage to 0.9v (VDDA/2)
-    sgtl5000.set_line_out_ana_gnd(0x4).unwrap(); // Set line out analog ref voltage to 0.9v (VDDIO/2)
-    sgtl5000.set_line_out_bias_current(LineOutBiasCurrent::MicroAmp360).unwrap(); // Set line out bias current to 0.36mA for 10kOhm + 1.0nF load
-    sgtl5000.enable_small_pop().unwrap(); // Minimize pop
+// fn power_on_codec(mut sgtl5000: Sgtl5000<I2c0>) {
+//     // Analog power up settings
+//     sgtl5000.power_off_startup_power().unwrap();
+//     sgtl5000.enable_int_osc().unwrap();
+//     sgtl5000.enable_charge_pump().unwrap();
+//     sgtl5000.set_bias(0x7).unwrap(); // Set bias current to 50% of nominal per data sheet
+//     sgtl5000.set_analog_gnd(0x04).unwrap(); // Set analog gnd reference voltage to 0.9v (VDDA/2)
+//     sgtl5000.set_line_out_ana_gnd(0x4).unwrap(); // Set line out analog ref voltage to 0.9v (VDDIO/2)
+//     sgtl5000.set_line_out_bias_current(LineOutBiasCurrent::MicroAmp360).unwrap(); // Set line out bias current to 0.36mA for 10kOhm + 1.0nF load
+//     sgtl5000.enable_small_pop().unwrap(); // Minimize pop
 
-    // Note: here datasheet enables short detect for headphone out
+//     // Note: here datasheet enables short detect for headphone out
 
-    // Digital blocks and IO power on
-    sgtl5000.power_on_adc().unwrap();
-    sgtl5000.power_on_dac().unwrap();
-    sgtl5000.power_on_line_out().unwrap();
+//     // Digital blocks and IO power on
+//     sgtl5000.power_on_adc().unwrap();
+//     sgtl5000.power_on_dac().unwrap();
+//     sgtl5000.power_on_line_out().unwrap();
 
-    sgtl5000.set_line_out_left_vol(0x5).unwrap();
-    sgtl5000.set_line_out_right_vol(0x5).unwrap();
-}
+//     sgtl5000.set_line_out_left_vol(0x5).unwrap();
+//     sgtl5000.set_line_out_right_vol(0x5).unwrap();
+// }
 
-use core::panic::PanicInfo;
-#[inline(never)]
-#[panic_handler]
-fn panic(info: &PanicInfo) -> ! {
-    let mut serial = unsafe {Serial0::summon()};
-    let _ = writeln!(serial,"{}",  info.message());
-    if let Some(loc) = info.location() {
-        let _ = writeln!(serial, "Panic occurred at line: {}, file: {}", loc.line(), loc.file());
-    };
-    loop {}
-}
+// use core::panic::PanicInfo;
+// #[inline(never)]
+// #[panic_handler]
+// fn panic(info: &PanicInfo) -> ! {
+//     let mut serial = unsafe {Serial0::summon()};
+//     let _ = writeln!(serial,"{}",  info.message());
+//     if let Some(loc) = info.location() {
+//         let _ = writeln!(serial, "Panic occurred at line: {}, file: {}", loc.line(), loc.file());
+//     };
+//     loop {}
+// }
 
 #[entry]
 fn main() -> ! {
@@ -150,6 +152,19 @@ fn main() -> ! {
     // // )
     // // .draw(&mut display).unwrap();
 
+    // const LED_PTR: *mut u8 = 0xf0000503 as *mut u8;
+
+    // unsafe {
+    //     core::ptr::write_unaligned(LED_PTR, 0x1);
+    //     // *LED_PTR = 0x1;
+
+    //     core::ptr::write_unaligned(LED_PTR, 0x2);
+
+    //     core::ptr::write_unaligned(LED_PTR as *mut u32, 0x1);
+
+    //     core::ptr::write_unaligned(LED_PTR as *mut u32, 0x2);
+    // }
+
     // let mut led = Led0::new(peripherals.led0);
 
     // let i2c0 = I2c0::new(peripherals.i2cfifo);
@@ -157,61 +172,64 @@ fn main() -> ! {
     // let amp = Aw88395::new(i2c0);
 
 
+    // writeln!(serial, "beginning test:").unwrap();
     // let mut term = term::Terminal::new(serial, amp, delay);
+    // led.set_high().ok();
 
+    writeln!(serial, "weee wooooooo {}\r", 5000).ok();
     // let img = TestImage::new();
     // img.draw(&mut display).unwrap();
-    let tim_reg = peripherals.timer0;
+    // let tim_reg = peripherals.timer0;
     loop {
-        writeln!(serial, "weee wooooooo {}\r", 5000).ok();
+
 
         // reset timer
-        tim_reg.enable().write(|w| w.enable().bit(false));
+        // tim_reg.enable().write(|w| w.enable().bit(false));
 
-        // start timer
+        // // start timer
 
-        tim_reg.mode().write(|w| unsafe {
-            w.periodic().bit(false)
-        });
-        tim_reg.reload().write(|w| unsafe { w.value().bits(1_000) });
+        // tim_reg.mode().write(|w| unsafe {
+        //     w.periodic().bit(false)
+        // });
+        // tim_reg.reload().write(|w| unsafe { w.value().bits(1_000) });
 
-        let reload = tim_reg.reload().read().value().bits();
-
-
-        writeln!(serial, "read back reload: {} \r", reload).ok();
-
-        let counter = tim_reg.counter().read().value().bits();
-        writeln!(serial, "read back counter: {} \r", counter).ok();
-
-        tim_reg.reload().write(|w| unsafe { w.value().bits(1_000_000) });
-
-        let reload = tim_reg.reload().read().value().bits();
+        // let reload = tim_reg.reload().read().value().bits();
 
 
-        writeln!(serial, "read back reload: {} \r", reload).ok();
+        writeln!(serial, "Hello World!\r").ok();
 
-        let counter = tim_reg.counter().read().value().bits();
-        writeln!(serial, "read back counter: {} \r", counter).ok();
+        // let counter = tim_reg.counter().read().value().bits();
+        // writeln!(serial, "read back counter: {:x} \r", counter).ok();
 
-        tim_reg.reload().write(|w| unsafe { w.value().bits(5_800_000) });
+        // tim_reg.reload().write(|w| unsafe { w.value().bits(1_000_000) });
 
-        let reload = tim_reg.reload().read().value().bits();
-
-
-        writeln!(serial, "read back reload: {}\r", reload).ok();
-
-        let counter = tim_reg.counter().read().value().bits();
-        writeln!(serial, "read back counter: {}\r", counter).ok();
-
-        tim_reg.reload().write(|w| unsafe { w.value().bits(10_800_000) });
-
-        let reload = tim_reg.reload().read().value().bits();
+        // let reload = tim_reg.reload().read().value().bits();
 
 
-        writeln!(serial, "read back reload: {}\r", reload).ok();
+        // writeln!(serial, "read back reload: {} \r", reload).ok();
 
-        let counter = tim_reg.counter().read().value().bits();
-        writeln!(serial, "read back counter: {}\r", counter).ok();
+        // let counter = tim_reg.counter().read().value().bits();
+        // writeln!(serial, "read back counter: {} \r", counter).ok();
+
+        // tim_reg.reload().write(|w| unsafe { w.value().bits(5_800_000) });
+
+        // let reload = tim_reg.reload().read().value().bits();
+
+
+        // writeln!(serial, "read back reload: {}\r", reload).ok();
+
+        // let counter = tim_reg.counter().read().value().bits();
+        // writeln!(serial, "read back counter: {}\r", counter).ok();
+
+        // tim_reg.reload().write(|w| unsafe { w.value().bits(10_800_000) });
+
+        // let reload = tim_reg.reload().read().value().bits();
+
+
+        // writeln!(serial, "read back reload: {}\r", reload).ok();
+
+        // let counter = tim_reg.counter().read().value().bits();
+        // writeln!(serial, "read back counter: {}\r", counter).ok();
         // self.registers.enable().write(|w| w.enable().bit(true));
 
         // wait for timer to hit zero

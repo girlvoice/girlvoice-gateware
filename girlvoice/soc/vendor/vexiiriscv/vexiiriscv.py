@@ -14,6 +14,7 @@ repository will not be hit and `sbt` is invoked to generate a new core.
 """
 
 from amaranth             import *
+from amaranth.lib import wiring
 from amaranth.lib.wiring  import Component, In, Out
 
 from amaranth_soc         import wishbone
@@ -30,13 +31,17 @@ import shutil
 import subprocess
 
 CPU_BASE = [
+    # '--help',
     '--xlen=32',
     '--with-rvm',
-    '--lsu-l1',
+    # '--lsu-l1',
     '--lsu-wishbone',
-    '--lsu-l1-wishbone',
-    '--fetch-l1',
+    # '--lsu-l1-wishbone',
+    # '--fetch-l1',
+    '--fetch-fork-at 1',
     '--fetch-wishbone',
+    '--lsu-fork-at 1',
+    # '--debug-jtag-tap',
 ]
 
 CPU_VARIANTS = {
@@ -64,16 +69,16 @@ CPU_VARIANTS = {
     # ECP5-25, consumes about half the LUTs and has FPU
     # performance comparable to a low-end STM32.
     "tiliqua_rv32imac": CPU_BASE + [
-        '--with-rvc',
+        # '--with-rvc',
         # '--with-rva',
         # '--with-btb',
         # '--relaxed-btb',
         # '--relaxed-branch',
-        '--with-late-alu',
-        '--lsu-l1-ways=1',
-        '--lsu-l1-sets=8',
-        '--fetch-l1-ways=1',
-        '--fetch-l1-sets=8',
+        # '--with-late-alu',
+        # '--lsu-l1-ways=1',
+        # '--lsu-l1-sets=8',
+        # '--fetch-l1-ways=1',
+        # '--fetch-l1-sets=8',
         # '--with-gshare',
         # '--with-ras',
         # '--regfile-async',
@@ -138,6 +143,15 @@ class VexiiRiscv(Component):
                 granularity=8,
                 features=("err", "cti", "bte")
             )),
+
+            "jtag": Out(wiring.Signature(
+                {
+                    "tdo": Out(1),
+                    "tdi": In(1),
+                    "tck": In(1),
+                    "tms": In(1)
+                }
+            ))
         })
 
         if not variant in CPU_VARIANTS:
@@ -155,6 +169,28 @@ class VexiiRiscv(Component):
         # Where we expect the netlist to be, if it's already been generated.
         self._source_file = f"{netlist_name}.v"
         self._source_path = os.path.join(self.PATH_CACHE, self._source_file)
+
+        # If it's missing, the user has changed some CPU flags - generate a new netlist.
+        if not os.path.exists(self._source_path):
+            logging.info(f"VexiiRiscv source file not cached at: {self._source_path}")
+            logging.info(f"Generate VexiiRiscv using 'sbt' with {netlist_arguments}...")
+            cmd = self.CMD_GENERATE.format(args=' '.join(netlist_arguments))
+            # Prohibit simultaneous netlist generation when building multiple SoCs
+            # in parallel. This only affects the first time SoCs are built with
+            # new VexiiRiscv arguments or a bumped VexiiRiscv repository.
+            with portalocker.TemporaryFileLock(
+                    os.path.join(vexiiriscv_root, "tiliqua_sbt.lock"),
+                    fail_when_locked=False,
+                    timeout=60):
+                subprocess.check_call(cmd, shell=True, cwd=vexiiriscv_root)
+                logging.info(f"Copy netlist from {self.PATH_GENERATE} to {self._source_file}...")
+                shutil.copyfile(self.PATH_GENERATE, self._source_path)
+        else:
+            logging.info(f"VexiiRiscv verilog netlist already present: {self._source_path}")
+
+        with open(self._source_path, "r") as f:
+            logging.info(f"Reading VexiiRiscv netlist: {self._source_path}")
+            self._source_verilog = f.read()
 
         self._cpu_params = {}
 
@@ -186,27 +222,16 @@ class VexiiRiscv(Component):
                 i_FetchCachelessWishbonePlugin_logic_bridge_bus_ACK       = self.ibus.ack,
                 i_FetchCachelessWishbonePlugin_logic_bridge_bus_ERR       = self.ibus.err,
             )
-        # If it's missing, the user has changed some CPU flags - generate a new netlist.
-        if not os.path.exists(self._source_path):
-            logging.info(f"VexiiRiscv source file not cached at: {self._source_path}")
-            logging.info(f"Generate VexiiRiscv using 'sbt' with {netlist_arguments}...")
-            cmd = self.CMD_GENERATE.format(args=' '.join(netlist_arguments))
-            # Prohibit simultaneous netlist generation when building multiple SoCs
-            # in parallel. This only affects the first time SoCs are built with
-            # new VexiiRiscv arguments or a bumped VexiiRiscv repository.
-            with portalocker.TemporaryFileLock(
-                    os.path.join(vexiiriscv_root, "tiliqua_sbt.lock"),
-                    fail_when_locked=False,
-                    timeout=60):
-                subprocess.check_call(cmd, shell=True, cwd=vexiiriscv_root)
-                logging.info(f"Copy netlist from {self.PATH_GENERATE} to {self._source_file}...")
-                shutil.copyfile(self.PATH_GENERATE, self._source_path)
-        else:
-            logging.info(f"VexiiRiscv verilog netlist already present: {self._source_path}")
 
-        with open(self._source_path, "r") as f:
-            logging.info(f"Reading VexiiRiscv netlist: {self._source_path}")
-            self._source_verilog = f.read()
+        if "--debug-jtag-tap" in netlist_arguments:
+            self._cpu_params.update(
+                i_EmbeddedRiscvJtag_logic_jtag_tms = self.jtag.tms,
+                i_EmbeddedRiscvJtag_logic_jtag_tdi = self.jtag.tdi,
+                o_EmbeddedRiscvJtag_logic_jtag_tdo = self.jtag.tdo,
+                i_EmbeddedRiscvJtag_logic_jtag_tck = self.jtag.tck,
+                o_EmbeddedRiscvJtag_logic_ndmreset = ResetSignal("sync")
+            )
+
 
     @staticmethod
     def generate_netlist_name(vexii_hash, arguments):
@@ -236,31 +261,19 @@ class VexiiRiscv(Component):
             i_PrivilegedPlugin_logic_harts_0_int_m_timer    = self.irq_timer,
             i_PrivilegedPlugin_logic_harts_0_int_m_external = self.irq_external,
 
-            # instruction bus
-            # o_FetchL1WishbonePlugin_logic_bus_ADR       = self.ibus.adr,
-            # o_FetchL1WishbonePlugin_logic_bus_DAT_MOSI  = self.ibus.dat_w,
-            # o_FetchL1WishbonePlugin_logic_bus_SEL       = self.ibus.sel,
-            # o_FetchL1WishbonePlugin_logic_bus_CYC       = self.ibus.cyc,
-            # o_FetchL1WishbonePlugin_logic_bus_STB       = self.ibus.stb,
-            # o_FetchL1WishbonePlugin_logic_bus_WE        = self.ibus.we,
-            # o_FetchL1WishbonePlugin_logic_bus_CTI       = self.ibus.cti,
-            # o_FetchL1WishbonePlugin_logic_bus_BTE       = self.ibus.bte,
-            # i_FetchL1WishbonePlugin_logic_bus_DAT_MISO  = self.ibus.dat_r,
-            # i_FetchL1WishbonePlugin_logic_bus_ACK       = self.ibus.ack,
-            # i_FetchL1WishbonePlugin_logic_bus_ERR       = self.ibus.err,
 
             # data bus
-            o_LsuL1WishbonePlugin_logic_bus_ADR       = self.dbus.adr,
-            o_LsuL1WishbonePlugin_logic_bus_DAT_MOSI  = self.dbus.dat_w,
-            o_LsuL1WishbonePlugin_logic_bus_SEL       = self.dbus.sel,
-            o_LsuL1WishbonePlugin_logic_bus_CYC       = self.dbus.cyc,
-            o_LsuL1WishbonePlugin_logic_bus_STB       = self.dbus.stb,
-            o_LsuL1WishbonePlugin_logic_bus_WE        = self.dbus.we,
-            o_LsuL1WishbonePlugin_logic_bus_CTI       = self.dbus.cti,
-            o_LsuL1WishbonePlugin_logic_bus_BTE       = self.dbus.bte,
-            i_LsuL1WishbonePlugin_logic_bus_DAT_MISO  = self.dbus.dat_r,
-            i_LsuL1WishbonePlugin_logic_bus_ACK       = self.dbus.ack,
-            i_LsuL1WishbonePlugin_logic_bus_ERR       = self.dbus.err,
+            # o_LsuL1WishbonePlugin_logic_bus_ADR       = self.dbus.adr,
+            # o_LsuL1WishbonePlugin_logic_bus_DAT_MOSI  = self.dbus.dat_w,
+            # o_LsuL1WishbonePlugin_logic_bus_SEL       = self.dbus.sel,
+            # o_LsuL1WishbonePlugin_logic_bus_CYC       = self.dbus.cyc,
+            # o_LsuL1WishbonePlugin_logic_bus_STB       = self.dbus.stb,
+            # o_LsuL1WishbonePlugin_logic_bus_WE        = self.dbus.we,
+            # o_LsuL1WishbonePlugin_logic_bus_CTI       = self.dbus.cti,
+            # o_LsuL1WishbonePlugin_logic_bus_BTE       = self.dbus.bte,
+            # i_LsuL1WishbonePlugin_logic_bus_DAT_MISO  = self.dbus.dat_r,
+            # i_LsuL1WishbonePlugin_logic_bus_ACK       = self.dbus.ack,
+            # i_LsuL1WishbonePlugin_logic_bus_ERR       = self.dbus.err,
 
             # peripheral bus
             o_LsuCachelessWishbonePlugin_logic_bridge_down_ADR       = self.pbus.adr,

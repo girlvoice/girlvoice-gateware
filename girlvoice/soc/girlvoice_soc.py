@@ -73,8 +73,8 @@ kB = 1024
 mB = 1024*kB
 
 class GirlvoiceSoc(Component):
-    def __init__(self, *, sys_clk_freq=60e6, finalize_csr_bridge=True,
-                 mainram_size=256*kB, cpu_variant="tiliqua_rv32imac", use_spi_flash = False, sim = False):
+    def __init__(self, *, sys_clk_freq=48e6, finalize_csr_bridge=True,
+                 mainram_size=32*kB, cpu_variant="tiliqua_rv32imac", use_spi_flash = False, sim = False):
 
         super().__init__({})
 
@@ -111,6 +111,7 @@ class GirlvoiceSoc(Component):
             self.reset_addr  = self.spiflash_base + self.fw_base
 
         # cpu
+        # cpu_variant = "imac+dcache"
         # self.cpu = VexRiscv(
         #     variant=cpu_variant,
         #     reset_addr=self.reset_addr,
@@ -147,9 +148,15 @@ class GirlvoiceSoc(Component):
             features={"cti", "bte", "err"}
         )
         if not self.sim:
-            self.mainram = WishboneNXLRAM(
+            # self.mainram = WishboneNXLRAM(
+            #     size=self.mainram_size,
+            #     data_width=wb_data_width,
+            # )
+            # self.wb_decoder.add(self.mainram.wb_bus, addr=self.mainram_base, name="blockram")
+            self.mainram = WishboneSRAM(
                 size=self.mainram_size,
-                data_width=wb_data_width,
+                data_width=32,
+                granularity=8
             )
             self.wb_decoder.add(self.mainram.wb_bus, addr=self.mainram_base, name="blockram")
         else:
@@ -171,6 +178,7 @@ class GirlvoiceSoc(Component):
 
         # uart0
         uart_baud_rate = 115200
+        # uart_baud_rate = 9600
         divisor = int(self.sys_clk_freq // uart_baud_rate)
         self.uart0 = uart.Peripheral(divisor=divisor)
         self.csr_decoder.add(self.uart0.bus, addr=self.uart0_base, name="uart0")
@@ -187,11 +195,6 @@ class GirlvoiceSoc(Component):
         self.gpo_1 = gpio.Peripheral(pin_count=2, addr_width=4, data_width=8)
         self.csr_decoder.add(self.gpo_1.bus, addr=self.gpo1_base, name="gpo1")
         if not self.sim:
-
-            # FIXME: timer events / isrs currently not implemented, adding the event
-            # bus to the csr decoder segfaults yosys somehow ...
-
-
             # LCD SPI control
             self.spi_pads = provider.SPIFlashProvider(id="spi")
             self.spi0_phy        = spiflash.SPIPHYController(
@@ -297,10 +300,17 @@ class GirlvoiceSoc(Component):
         self.wb_arbiter.add(self.cpu.dbus)
         self.wb_arbiter.add(self.cpu.pbus)
 
+        # Memory controller hangs if we start making requests to it straight away.
+        on_delay = Signal(32)
+        with m.If(on_delay < 0xFFFF):
+            m.d.comb += self.cpu.ext_reset.eq(1)
+            m.d.sync += on_delay.eq(on_delay+1)
+        with m.Else():
+            m.d.comb += self.cpu.ext_reset.eq(0)
+
         # interrupt controller
         m.submodules.interrupt_controller = self.interrupt_controller
-        # TODO wiring.connect(m, self.cpu.irq_external, self.irqs.pending)
-        m.d.comb += self.cpu.irq_external.eq(self.interrupt_controller.pending)
+        # m.d.comb += self.cpu.irq_external.eq(self.interrupt_controller.pending)
 
         # mainram
         m.submodules.mainram = self.mainram
@@ -324,7 +334,7 @@ class GirlvoiceSoc(Component):
             m.d.comb += uart.tx.o.eq(self.uart0.pins.tx.o)
 
             led_io = platform.request("led")
-            m.d.comb += led_io.o.eq(self.led0.pins[0].o)
+            m.d.comb += led_io.o.eq(self.led0.pins[0].o ^ self.cpu.ext_reset)
 
             dc_pin = platform.request("dc")
             bl_pin = platform.request("bl")
@@ -374,6 +384,17 @@ class GirlvoiceSoc(Component):
             wiring.connect(m, self.spi1_mmap.sink, self.spi1_phy.sink)
             m.d.comb += self.spi1_phy.cs.eq(self.spi1_mmap.cs)
             # wiring.connect(m, self.spi1_phy, self.spi1_phy.)
+        else:
+
+            if not self.sim:
+                jtag = self.cpu.jtag
+                jtag_pins = platform.request("jtag")
+                m.d.comb += [
+                    jtag.tck.eq(jtag_pins.tck.i),
+                    jtag.tdi.eq(jtag_pins.tdi.i),
+                    jtag.tms.eq(jtag_pins.tms.i),
+                    jtag_pins.tdo.o.eq(jtag.tdo),
+                ]
 
 
         # I2S TX/RX
@@ -406,11 +427,6 @@ class GirlvoiceSoc(Component):
         # if not self.sim:
         m.submodules.wb_to_csr = self.wb_to_csr
 
-        # Memory controller hangs if we start making requests to it straight away.
-        on_delay = Signal(32)
-        with m.If(on_delay < 0xFFFF):
-            m.d.comb += self.cpu.ext_reset.eq(1)
-            m.d.sync += on_delay.eq(on_delay+1)
 
         return m
 
@@ -516,11 +532,17 @@ class GirlvoiceSoc(Component):
     def compile_firmware(rust_fw_root, rust_fw_bin):
         print("Building SoC firmware...")
         subprocess.check_call([
-            "cargo", "build", "--release"
+            "cargo", "build",
             ], env=os.environ, cwd=rust_fw_root)
         subprocess.check_call([
-            "cargo", "objcopy", "--release", "--", "-Obinary", rust_fw_bin
+            "cargo", "objcopy",  "--", "-Obinary", rust_fw_bin
             ], env=os.environ, cwd=rust_fw_root)
+        # subprocess.check_call([
+        #     "cargo", "build", "--release"
+        #     ], env=os.environ, cwd=rust_fw_root)
+        # subprocess.check_call([
+        #     "cargo", "objcopy", "--release", "--", "-Obinary", rust_fw_bin
+        #     ], env=os.environ, cwd=rust_fw_root)
 
 class VerilatorPlatform():
     def __init__(self):

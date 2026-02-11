@@ -41,6 +41,13 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             attrs=Attrs(IO_TYPE="LVCMOS33"),
         ),
 
+        Resource("jtag", 0,
+            Subsignal("tdi", Pins("57", dir="i"), Attrs(IO_TYPE="LVCMOS33")),
+            Subsignal("tdo", Pins("51", dir="o"), Attrs(IO_TYPE="LVCMOS33")),
+            Subsignal("tms", Pins("56", dir="i"), Attrs(IO_TYPE="LVCMOS33")),
+            Subsignal("tck", Pins("59", dir="i"), Attrs(IO_TYPE="LVCMOS33")),
+        ),
+
         # Display SPI
         Resource("spi", 0,
             Subsignal("cs",

@@ -13,7 +13,8 @@ from girlvoice.soc.girlvoice_soc import GirlvoiceSoc
 class GirlTop(Elaboratable):
 
     def __init__(self):
-        self.soc = GirlvoiceSoc(sim=False)
+        self.sync_clk_freq = 48e6
+        self.soc = GirlvoiceSoc(sim=False, sys_clk_freq=self.sync_clk_freq)
 
     def elaborate(self, platform:Platform):
         m = Module()
@@ -21,8 +22,7 @@ class GirlTop(Elaboratable):
         ## Clock Defs
 
         source_clk_freq = 24e6
-        sync_freq = 60e6
-        fast_clk_freq = 2 * sync_freq
+        fast_clk_freq = 2 * self.sync_clk_freq
 
 
         clkin = platform.request("clk24", dir="i").i
@@ -40,9 +40,9 @@ class GirlTop(Elaboratable):
             clkout=cd_fast.clk,
             clkout_freq=fast_clk_freq)
 
-        pll.create_clkout(cd_sync, sync_freq)
+        pll.create_clkout(cd_sync, self.sync_clk_freq)
 
-        platform.add_clock_constraint(cd_sync.clk, sync_freq)
+        platform.add_clock_constraint(cd_sync.clk, self.sync_clk_freq)
         platform.add_clock_constraint(cd_fast.clk, fast_clk_freq)
 
         ## Add SoC
