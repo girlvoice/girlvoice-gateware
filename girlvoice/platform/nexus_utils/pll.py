@@ -431,19 +431,22 @@ class NXPLL(Elaboratable):
             p_REF_INTEGER_MODE="ENABLED",  # Ref manual has a discrepency so lets always set this value just in case
             p_REF_MMD_DIG="1",  # Divider for the input clock, ie 'M'
             i_PLLRESET=self.reset,
+            i_PLLPOWERDOWN_N=1,
             i_REFCK=self.clkin,
             o_LOCK=self.locked,
             # Use CLKOS5 & divider for feedback
-            p_SEL_FBK="FBKCLK5",
-            p_ENCLK_CLKOS5="ENABLED",
-            p_DIVF=str(config["clkfb_div"] - 1),  # str(Actual value - 1)
-            p_DELF=str(config["clkfb_div"] - 1),
-            p_CLKMUX_FB="CMUX_CLKOS5",
+            p_SEL_FBK="DIVA",
+            p_ENCLK_CLKOS5="DISABLED",
+            p_SEL_OUTA="DISABLED",
+            # p_DIVF=str(config["clkfb_div"] - 1),  # str(Actual value - 1)
+            # p_DELF=str(config["clkfb_div"] - 1),
+            p_CLKMUX_FB="CMUX_CLKOP",
             i_FBKCK=clkfb,
-            o_CLKOS5=clkfb,
+            o_INTFBKOP=clkfb,
+            # o_CLKOS5=clkfb,
             # Set feedback divider to 1
-            p_FBK_INTEGER_MODE="ENABLED",
-            p_FBK_MASK="0b00000000",
+            # p_FBK_INTEGER_MODE="ENABLED",
+            # p_FBK_MASK="0b00000000",
             p_FBK_MMD_DIG="1",
         )
 
@@ -478,6 +481,27 @@ class NXPLL(Elaboratable):
                         n_to_l[n],
                     )
                 )
+        self.params.update(
+            p_REF_OSC_CTRL="3P2",
+            p_INTFBKDEL_SEL="DISABLED",
+            p_V2I_PP_RES="9K",
+            p_FBK_INTEGER_MODE="DISABLED",
+            p_SSC_EN_SDM="ENABLED",
+            p_SSC_ORDER="SDM_ORDER2",
+            p_SSC_N_CODE="0b001000010",
+            p_SSC_F_CODE="0b100011110110000",
+            p_FBK_MASK = "0b00010000",
+            p_FBK_MMD_PULS_CTL = "0b0111",
+            p_FBK_MMD_DIG="66",
+            p_FBK_CUR_BLE="0b00001000",
+            p_FBK_PI_RC="0b0010",
+            p_FBK_PR_CC="0b1000",
+            p_FBK_PR_IC="0b1000",
+            p_DIVA="64",
+            p_DELA="64",
+            p_DIV_DEL="0b1000000",
+            p_CRIPPLE="1P",
+        )
 
         if platform and self.create_output_port_clocks:
             i = 0

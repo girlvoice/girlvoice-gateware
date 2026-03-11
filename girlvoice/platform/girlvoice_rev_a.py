@@ -273,7 +273,7 @@ class GirlvoiceRevAPlatform(LatticePlatform):
 
 
 if __name__ == "__main__":
-    p: Platform = GirlvoiceRevAPlatform()
+    p: Platform = GirlvoiceRevAPlatform(toolchain="Radiant")
 
     m = Module()
 
@@ -294,18 +294,20 @@ if __name__ == "__main__":
         p_SSC_ORDER="SDM_ORDER2",
         p_SSC_N_CODE=66,
         p_SSC_F_CODE=0b100011110110000,
-        p_FBK_MASK = 0b00010000,
+        p_FBK_MASK = "0b00010000",
+        p_FBK_MMD_PULS_CTL = 0b0111,
         p_FBK_CUR_BLE=0b00001000,
         p_FBK_PI_RC=0b0010,
         p_FBK_PR_CC=0b1000,
-        p_FBK_PR_IC=0b1000
+        p_FBK_PR_IC=0b1000,
+        p_DIVA=64,
+        p_DIV_DEL=0b1000000,
     )
 
-    # pll.params["p_MMD_PULS_CTL"]=0b0111
 
     count = Signal(24)
     m.d.sync += count.eq(count + 1)
-    m.d.comb += p.request("led", 0).o.eq(count[-1])
+    m.d.comb += p.request("led", 0).o.eq(pll.locked)
     m.d.comb += p.request("pwr_en", 0).o.eq(1)
 
     m.d.comb += p.request("aux_clk").o.eq(cd_audio.clk)

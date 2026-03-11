@@ -22,6 +22,7 @@ class GirlTop(Elaboratable):
 
         source_clk_freq = 24e6
         sync_freq = 60e6
+        mclk_freq = 24e6
         fast_clk_freq = 2 * sync_freq
 
 
