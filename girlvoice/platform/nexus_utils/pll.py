@@ -435,14 +435,15 @@ class NXPLL(Elaboratable):
             i_REFCK=self.clkin,
             o_LOCK=self.locked,
             # Use CLKOS5 & divider for feedback
-            p_SEL_FBK="DIVA",
+            # p_SEL_FBK="DIVA",
+            p_SEL_FBK="FBKCLK0",
             p_ENCLK_CLKOS5="DISABLED",
             p_SEL_OUTA="DISABLED",
             # p_DIVF=str(config["clkfb_div"] - 1),  # str(Actual value - 1)
             # p_DELF=str(config["clkfb_div"] - 1),
             p_CLKMUX_FB="CMUX_CLKOP",
-            i_FBKCK=clkfb,
-            o_INTFBKOP=clkfb,
+            # i_FBKCK=clkfb,
+            # o_INTFBKOP=clkfb,
             # o_CLKOS5=clkfb,
             # Set feedback divider to 1
             # p_FBK_INTEGER_MODE="ENABLED",
@@ -465,6 +466,9 @@ class NXPLL(Elaboratable):
             self.params["p_PHI{}".format(letter)] = "0"
             self.params["p_DEL{}".format(letter)] = str(phase - 1)
             self.params["o_CLKO{}".format(n_to_l[n])] = clk
+
+            if n == 0:
+                self.params["i_FBKCK"] = clk
             # TODO: remove hardcode:
             # self.m.d.comb += self.clkout.eq(clk)
 
