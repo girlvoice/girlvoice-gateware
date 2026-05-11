@@ -82,6 +82,8 @@ class NXPLL(Elaboratable):
         self.register_clkin(clkin, clkin_freq)
         self.create_clkout(cd_out, clkout_freq, phase=clkout_phase)
 
+        self.is_fractional_synth = False
+
     def register_clkin(self, clkin, freq):
         (clki_freq_min, clki_freq_max) = self.clki_freq_range
         assert freq >= clki_freq_min
@@ -106,6 +108,17 @@ class NXPLL(Elaboratable):
         self.clkouts[self.nclkouts] = (cd.clk, freq, phase, margin)
         # create_clkout_log(self.logger, cd.name, freq, margin, self.nclkouts)
         self.nclkouts += 1
+
+    def create_clkout_fractional(self, cd):
+        (clko_freq_min, clko_freq_max) = self.clko_freq_range
+        assert freq >= clko_freq_min
+        assert freq <= clko_freq_max
+        assert self.nclkouts < self.nclkouts_max
+        self.clkouts[self.nclkouts] = (cd.clk, freq, phase, margin)
+        self.nclkouts += 1
+
+        self.is_fractional_synth = True
+
 
     def compute_config(self):
         config = {}
@@ -420,6 +433,8 @@ class NXPLL(Elaboratable):
         config = self.compute_config()
         clkfb = Signal()
 
+
+
         self.params.update(
             p_V2I_PP_ICTRL="0b11111",  # Hard coded in all reference files
             p_IPI_CMPN="0b0011",  # Hard coded in all reference files
@@ -435,21 +450,47 @@ class NXPLL(Elaboratable):
             i_REFCK=self.clkin,
             o_LOCK=self.locked,
             # Use CLKOS5 & divider for feedback
-            # p_SEL_FBK="DIVA",
-            p_SEL_FBK="FBKCLK0",
-            p_ENCLK_CLKOS5="DISABLED",
+            p_SEL_FBK="FBKCLK5",
+            p_ENCLK_CLKOS5="ENABLED",
             p_SEL_OUTA="DISABLED",
-            # p_DIVF=str(config["clkfb_div"] - 1),  # str(Actual value - 1)
-            # p_DELF=str(config["clkfb_div"] - 1),
-            p_CLKMUX_FB="CMUX_CLKOP",
-            # i_FBKCK=clkfb,
-            # o_INTFBKOP=clkfb,
-            # o_CLKOS5=clkfb,
+            p_DIVF=str(config["clkfb_div"] - 1),  # str(Actual value - 1)
+            p_DELF=str(config["clkfb_div"] - 1),
+            p_CLKMUX_FB="CMUX_CLKOS5",
+            i_FBKCK=clkfb,
+            o_CLKOS5=clkfb,
             # Set feedback divider to 1
-            # p_FBK_INTEGER_MODE="ENABLED",
-            # p_FBK_MASK="0b00000000",
+            p_FBK_INTEGER_MODE="ENABLED",
+            p_FBK_MASK="0b00000000",
             p_FBK_MMD_DIG="1",
         )
+
+        if self.is_fractional_synth:
+            self.params.update(
+                p_FBK_INTEGER_MODE="DISABLED", # Disable integer feedback
+                p_ENCLK_CLKOS5="DISABLED", # Disable our integer feedback clock
+
+                p_REF_OSC_CTRL="3P2",
+                p_INTFBKDEL_SEL="DISABLED",
+                p_V2I_PP_RES="9K",
+                p_SSC_EN_SDM="ENABLED", # Enable the sigma-delta modulation block
+                p_SSC_ORDER="SDM_ORDER2",
+                p_SEL_FBK="FBKCLK0", # Set clock 0 for feedback
+                p_FBK_MASK = "0b00010000",
+                p_FBK_MMD_PULS_CTL = "0b0111",
+                p_FBK_MMD_DIG="66",
+                p_FBK_CUR_BLE="0b00001000",
+                p_FBK_PI_RC="0b0010",
+                p_FBK_PR_CC="0b1000",
+                p_FBK_PR_IC="0b1000",
+                p_DIV_DEL="0b1000000",
+                p_CRIPPLE="1P",
+
+                p_SSC_N_CODE="0b001000010",       # Fractional synth integer part
+                p_SSC_F_CODE="0b100011110110000", # Fractional synth fractional part
+                p_DIVA="64",
+                p_DELA="64",
+                p_CLKMUX_FB="CMUX_CLKOP",
+            )
 
         analog_params = self.calculate_analog_parameters(
             self.clkin_freq, config["clkfb_div"]
