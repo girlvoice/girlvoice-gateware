@@ -288,23 +288,6 @@ if __name__ == "__main__":
         clkout=cd_audio.clk,
         clkout_freq=24.576e6)
 
-    pll.params.update(
-        p_FBK_INTEGER_MODE="DISABLED",
-        p_SSC_EN_SDM="ENABLED",
-        p_SSC_ORDER="SDM_ORDER2",
-        p_SSC_N_CODE=66,
-        p_SSC_F_CODE=0b100011110110000,
-        p_FBK_MASK = "0b00010000",
-        p_FBK_MMD_PULS_CTL = 0b0111,
-        p_FBK_CUR_BLE=0b00001000,
-        p_FBK_PI_RC=0b0010,
-        p_FBK_PR_CC=0b1000,
-        p_FBK_PR_IC=0b1000,
-        p_DIVA=64,
-        p_DIV_DEL=0b1000000,
-    )
-
-
     count = Signal(24)
     m.d.sync += count.eq(count + 1)
     m.d.comb += p.request("led", 0).o.eq(pll.locked)

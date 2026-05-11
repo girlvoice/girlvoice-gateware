@@ -474,10 +474,8 @@ class NXPLL(Elaboratable):
                 p_V2I_PP_RES="9K",
                 p_SSC_EN_SDM="ENABLED", # Enable the sigma-delta modulation block
                 p_SSC_ORDER="SDM_ORDER2",
-                p_SEL_FBK="FBKCLK0", # Set clock 0 for feedback
                 p_FBK_MASK = "0b00010000",
                 p_FBK_MMD_PULS_CTL = "0b0111",
-                p_FBK_MMD_DIG="66",
                 p_FBK_CUR_BLE="0b00001000",
                 p_FBK_PI_RC="0b0010",
                 p_FBK_PR_CC="0b1000",
@@ -485,11 +483,15 @@ class NXPLL(Elaboratable):
                 p_DIV_DEL="0b1000000",
                 p_CRIPPLE="1P",
 
+                # TODO hard-coded constants for audio clock synth should be parameterized
+                p_FBK_MMD_DIG="66",
+                p_SEL_FBK="FBKCLK0", # Set clock 0 for feedback
                 p_SSC_N_CODE="0b001000010",       # Fractional synth integer part
                 p_SSC_F_CODE="0b100011110110000", # Fractional synth fractional part
                 p_DIVA="64",
                 p_DELA="64",
                 p_CLKMUX_FB="CMUX_CLKOP",
+                i_FBKCK = clk,
             )
 
         analog_params = self.calculate_analog_parameters(
@@ -508,8 +510,6 @@ class NXPLL(Elaboratable):
             self.params["p_DEL{}".format(letter)] = str(phase - 1)
             self.params["o_CLKO{}".format(n_to_l[n])] = clk
 
-            if n == 0:
-                self.params["i_FBKCK"] = clk
             # TODO: remove hardcode:
             # self.m.d.comb += self.clkout.eq(clk)
 
@@ -526,27 +526,6 @@ class NXPLL(Elaboratable):
                         n_to_l[n],
                     )
                 )
-        self.params.update(
-            p_REF_OSC_CTRL="3P2",
-            p_INTFBKDEL_SEL="DISABLED",
-            p_V2I_PP_RES="9K",
-            p_FBK_INTEGER_MODE="DISABLED",
-            p_SSC_EN_SDM="ENABLED",
-            p_SSC_ORDER="SDM_ORDER2",
-            p_SSC_N_CODE="0b001000010",
-            p_SSC_F_CODE="0b100011110110000",
-            p_FBK_MASK = "0b00010000",
-            p_FBK_MMD_PULS_CTL = "0b0111",
-            p_FBK_MMD_DIG="66",
-            p_FBK_CUR_BLE="0b00001000",
-            p_FBK_PI_RC="0b0010",
-            p_FBK_PR_CC="0b1000",
-            p_FBK_PR_IC="0b1000",
-            p_DIVA="64",
-            p_DELA="64",
-            p_DIV_DEL="0b1000000",
-            p_CRIPPLE="1P",
-        )
 
         if platform and self.create_output_port_clocks:
             i = 0
