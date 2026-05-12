@@ -70,7 +70,7 @@ kB = 1024
 mB = 1024*kB
 
 class GirlvoiceSoc(Component):
-    def __init__(self, *, sys_clk_freq=60e6, finalize_csr_bridge=True,
+    def __init__(self, *, sys_clk_freq=60e6, audio_clk_freq=24e6, finalize_csr_bridge=True,
                  mainram_size=256*kB, cpu_variant="imac+dcache", use_spi_flash = False, sim = False):
 
         super().__init__({})
@@ -79,6 +79,7 @@ class GirlvoiceSoc(Component):
         self.sim = sim
 
         self.sys_clk_freq = sys_clk_freq
+        self.audio_clk_freq = audio_clk_freq
 
         self.use_spi_flash        = False
         self.mainram_base         = 0x00000000
@@ -188,11 +189,23 @@ class GirlvoiceSoc(Component):
 
         sample_width = 16
 
-        bclk_freq = 4e6
-        fs = 32e3
+        fs = 48e3
+        bclk_freq = 64 * fs
 
-        self.i2s_tx = i2s_tx(self.sys_clk_freq, sclk_freq=bclk_freq, sample_width=sample_width)
-        self.i2s_rx = i2s_rx(self.sys_clk_freq, sclk_freq=bclk_freq, sample_width=sample_width)
+        self.i2s_tx = i2s_tx(
+            self.audio_clk_freq,
+            sclk_freq=bclk_freq,
+            sample_width=sample_width,
+            sink_domain="sync",
+            phy_domain="audio"
+        )
+        self.i2s_rx = i2s_rx(
+            self.audio_clk_freq,
+            sclk_freq=bclk_freq,
+            sample_width=sample_width,
+            source_domain="sync",
+            phy_domain="audio"
+        )
 
         # Vocoder!
 

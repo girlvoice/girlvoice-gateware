@@ -56,6 +56,7 @@ class NXPLL(Elaboratable):
         clkout_freq,
         clkout_phase=0,
         create_output_port_clocks=False,
+        enable_fractional_synth = False,
     ):
         # self.logger = logging.getLogger("NXPLL")
         # self.logger.info("Creating NXPLL.")
@@ -79,10 +80,10 @@ class NXPLL(Elaboratable):
 
         self.m = Module()
 
-        self.register_clkin(clkin, clkin_freq)
-        self.create_clkout(cd_out, clkout_freq, phase=clkout_phase)
+        self.is_fractional_synth = enable_fractional_synth
 
-        self.is_fractional_synth = False
+        self.register_clkin(clkin, clkin_freq)
+        self.create_clkout(cd_out, clkout_freq, phase=clkout_phase, enable_fractional_synth=enable_fractional_synth)
 
     def register_clkin(self, clkin, freq):
         (clki_freq_min, clki_freq_max) = self.clki_freq_range
@@ -99,7 +100,7 @@ class NXPLL(Elaboratable):
         # register_clkin_log(self.logger, clkin, freq)
         self.nclkins += 1
 
-    def create_clkout(self, cd, freq, phase=0, margin=1e-2):
+    def create_clkout(self, cd, freq, phase=0, margin=1e-2, enable_fractional_synth = False):
         (clko_freq_min, clko_freq_max) = self.clko_freq_range
         assert freq >= clko_freq_min
         assert freq <= clko_freq_max
@@ -108,17 +109,7 @@ class NXPLL(Elaboratable):
         self.clkouts[self.nclkouts] = (cd.clk, freq, phase, margin)
         # create_clkout_log(self.logger, cd.name, freq, margin, self.nclkouts)
         self.nclkouts += 1
-
-    def create_clkout_fractional(self, cd):
-        (clko_freq_min, clko_freq_max) = self.clko_freq_range
-        assert freq >= clko_freq_min
-        assert freq <= clko_freq_max
-        assert self.nclkouts < self.nclkouts_max
-        self.clkouts[self.nclkouts] = (cd.clk, freq, phase, margin)
-        self.nclkouts += 1
-
-        self.is_fractional_synth = True
-
+        self.is_fractional_synth = enable_fractional_synth
 
     def compute_config(self):
         config = {}
