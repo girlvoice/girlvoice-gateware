@@ -32,13 +32,13 @@ class i2s_tx(wiring.Component):
             }
         )
 
-    def elaborate(self, platform):
+    def elaborate(self, platform) -> Module:
         m = Module()
 
         clk_div = self.clk_div
 
         input_stream = stream.Signature(self.sample_width).flip().create()
-        if self._sink_domain != self.phy_domain:
+        if self._sink_domain != self._domain:
             m.submodules.cdc_fifo = self.cdc_fifo = AsyncFIFO(
                 width=self.sample_width,
                 depth=4,
@@ -46,10 +46,10 @@ class i2s_tx(wiring.Component):
                 w_domain=self._sink_domain
             )
 
-            wiring.connect(m, self.cdc_fifo.w_stream, self.sink)
+            wiring.connect(m, self.cdc_fifo.w_stream, wiring.flipped(self.sink))
             wiring.connect(m, input_stream, self.cdc_fifo.r_stream)
         else:
-            wiring.connect(m, self.sink, input_stream)
+            wiring.connect(m, wiring.flipped(self.sink), input_stream)
 
         sclk_last = Signal()
         sclk_negedge = Signal()
@@ -93,6 +93,8 @@ class i2s_tx(wiring.Component):
         if self._domain != "sync":
             m = DomainRenamer({"sync": self._domain})(m)
 
+        return m
+
 
 class i2s_rx(wiring.Component):
     def __init__(self, sys_clk_freq, sclk_freq, sample_width=18, source_domain="sync", phy_domain="sync"):
@@ -109,7 +111,7 @@ class i2s_rx(wiring.Component):
             }
         )
 
-    def elaborate(self, platform):
+    def elaborate(self, platform) -> Module:
         m = Module()
 
         sclk_last = Signal()
@@ -118,7 +120,7 @@ class i2s_rx(wiring.Component):
         clk_div = Signal(range(self.clk_ratio))
         output_stream = stream.Signature(self.sample_width).create()
 
-        if self._source_domain != self.phy_domain:
+        if self._source_domain != self._domain:
             m.submodules.cdc_fifo = self.cdc_fifo = AsyncFIFO(
                 width=self.sample_width,
                 depth=4,
@@ -127,9 +129,9 @@ class i2s_rx(wiring.Component):
             )
 
             wiring.connect(m, self.cdc_fifo.w_stream, output_stream)
-            wiring.connect(m, self.source, self.cdc_fifo.r_stream)
+            wiring.connect(m, wiring.flipped(self.source), self.cdc_fifo.r_stream)
         else:
-            wiring.connect(m, self.source, output_stream)
+            wiring.connect(m, wiring.flipped(self.source), output_stream)
 
         m.d.comb += sclk_negedge.eq(~self.sclk & sclk_last)
         m.d.sync += sclk_last.eq(self.sclk)
@@ -170,6 +172,7 @@ class i2s_rx(wiring.Component):
 
         if self._domain != "sync":
             m = DomainRenamer({"sync": self._domain})(m)
+        return m
 
 class I2SClockGenerator(wiring.Component):
     def __init__(self, mclk_freq: float, sclk_freq: float):

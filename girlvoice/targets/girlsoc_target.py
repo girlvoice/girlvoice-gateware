@@ -33,19 +33,19 @@ class GirlTop(Elaboratable):
         m.domains.fast = cd_fast = ClockDomain("fast")
         m.domains.audio = cd_audio = ClockDomain("audio")
 
-        m.submodules.pll = pll = NXPLL(
+        m.submodules.pll_core = pll_core = NXPLL(
             clkin=clkin,
             clkin_freq=self.source_clk_freq,
             cd_out=cd_fast,
             clkout=cd_fast.clk,
             clkout_freq=self.fast_clk_freq)
 
-        pll.create_clkout(cd_sync, self.sync_freq)
+        pll_core.create_clkout(cd_sync, self.sync_freq)
 
         platform.add_clock_constraint(cd_sync.clk, self.sync_freq)
         platform.add_clock_constraint(cd_fast.clk, self.fast_clk_freq)
 
-        m.submodules.pll = pll = NXPLL(
+        m.submodules.pll_audio = pll_audio = NXPLL(
             clkin=clkin,
             clkin_freq=self.source_clk_freq,
             cd_out=cd_audio,
@@ -53,7 +53,7 @@ class GirlTop(Elaboratable):
             clkout_freq=self.audio_clk_freq,
             enable_fractional_synth=True,
         )
-        platform.add_clock_constraint(cd_audio, self.audio_clk_freq)
+        platform.add_clock_constraint(cd_audio.clk, self.audio_clk_freq)
 
         ## Add SoC
         m.submodules.soc = self.soc

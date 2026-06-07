@@ -424,8 +424,6 @@ class NXPLL(Elaboratable):
         config = self.compute_config()
         clkfb = Signal()
 
-
-
         self.params.update(
             p_V2I_PP_ICTRL="0b11111",  # Hard coded in all reference files
             p_IPI_CMPN="0b0011",  # Hard coded in all reference files
@@ -456,6 +454,7 @@ class NXPLL(Elaboratable):
         )
 
         if self.is_fractional_synth:
+            frac_fb = Signal()
             self.params.update(
                 p_FBK_INTEGER_MODE="DISABLED", # Disable integer feedback
                 p_ENCLK_CLKOS5="DISABLED", # Disable our integer feedback clock
@@ -482,7 +481,7 @@ class NXPLL(Elaboratable):
                 p_DIVA="64",
                 p_DELA="64",
                 p_CLKMUX_FB="CMUX_CLKOP",
-                i_FBKCK = clk,
+                i_FBKCK = frac_fb,
             )
 
         analog_params = self.calculate_analog_parameters(
@@ -503,7 +502,8 @@ class NXPLL(Elaboratable):
 
             # TODO: remove hardcode:
             # self.m.d.comb += self.clkout.eq(clk)
-
+            if self.is_fractional_synth:
+                self.m.d.comb += frac_fb.eq(clk)
             # In theory this really shouldn't be necessary, in practice
             # the tooling seems to have suspicous clock latency values
             # on generated clocks that are causing timing problems and Lattice
