@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os
-from random import sample
 from amaranth import *
 from amaranth.build import Platform
 from amaranth.lib import wiring, stream
