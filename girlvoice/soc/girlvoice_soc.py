@@ -241,7 +241,7 @@ class GirlvoiceSoc(Component):
     def add_rust_constant(self, line: str):
         self.extra_rust_constants.append(line)
 
-    def elaborate(self, platform: Platform):
+    def elaborate(self, platform: Platform) -> Module:
 
         m = Module()
 

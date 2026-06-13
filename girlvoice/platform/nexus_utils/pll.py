@@ -518,8 +518,6 @@ class NXPLL(Elaboratable):
                     )
                 )
 
-        if platform and self.create_output_port_clocks:
-            i = 0
 
         # print("PLL Parameters:")
         # pprint.pprint(self.params)
