@@ -54,6 +54,9 @@ class GirlTop(Elaboratable):
         )
         platform.add_clock_constraint(cd_audio.clk, self.audio_clk_freq)
 
+        codec_mclk_port = platform.request("aux_clk")
+        m.d.comb += codec_mclk_port.o.eq(cd_audio.clk)
+
         ## Add SoC
         m.submodules.soc = self.soc
 

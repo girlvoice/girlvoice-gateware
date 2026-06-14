@@ -243,7 +243,7 @@ class GirlvoiceRevAPlatform(LatticePlatform):
         kwargs["add_constraints"] += "ldc_set_attribute {USE_PRIMARY=FALSE} [get_ports \"i2c_0__scl__io\"]\n"
 
         # Add async constraint between audio and system clock
-        kwargs["add_preferences"] = "set_clock_groups -asynchronous -group [get_clocks {clk[0]}] -group [get_clocks audio_clk]\n"
+        kwargs["add_preferences"] = "set_clock_groups -asynchronous -group [get_clocks {clk[0]}] -group [get_clocks aux_clk_0__o]\n"
 
         if use_radiant_docker and self.toolchain == "Radiant":
             build_plan = super().build(
