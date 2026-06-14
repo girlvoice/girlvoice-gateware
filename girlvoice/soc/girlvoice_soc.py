@@ -81,6 +81,8 @@ class GirlvoiceSoc(Component):
         self.sys_clk_freq = sys_clk_freq
         self.audio_clk_freq = audio_clk_freq
 
+        self.enable_vocoder = False
+
         self.use_spi_flash        = False
         self.mainram_base         = 0x00000000
         self.mainram_size         = mainram_size
@@ -208,19 +210,19 @@ class GirlvoiceSoc(Component):
         )
 
         # Vocoder!
+        if self.enable_vocoder:
+            self.vocoder = StaticVocoder(
+                start_freq=100,
+                end_freq=5000,
+                num_channels=14,
+                clk_sync_freq=sys_clk_freq,
+                fs=fs,
+                sample_width=sample_width,
+                channel_class=ThreadedVocoderChannel
+            )
 
-        self.vocoder = StaticVocoder(
-            start_freq=100,
-            end_freq=5000,
-            num_channels=14,
-            clk_sync_freq=sys_clk_freq,
-            fs=fs,
-            sample_width=sample_width,
-            channel_class=ThreadedVocoderChannel
-        )
-
-        # Add vocoder wavetable to wb bus
-        self.wb_decoder.add(self.vocoder.synth.wb_bus, addr=self.wavetable_base, name="wavetable")
+            # Add vocoder wavetable to wb bus
+            self.wb_decoder.add(self.vocoder.synth.wb_bus, addr=self.wavetable_base, name="wavetable")
 
         self.permit_bus_traffic = Signal()
 
@@ -339,10 +341,12 @@ class GirlvoiceSoc(Component):
             m.d.comb += amp.clk.o.eq(self.i2s_tx.sclk)
             m.d.comb += amp.data.o.eq(self.i2s_tx.sdout)
 
-        m.submodules.vocoder = self.vocoder
-        wiring.connect(m, self.vocoder.sink, self.i2s_rx.source)
-        wiring.connect(m, self.vocoder.source, self.i2s_tx.sink)
-
+        if self.enable_vocoder:
+            m.submodules.vocoder = self.vocoder
+            wiring.connect(m, self.vocoder.sink, self.i2s_rx.source)
+            wiring.connect(m, self.vocoder.source, self.i2s_tx.sink)
+        else:
+            wiring.connect(m, self.i2s_rx.source, self.i2s_tx.sink)
         # wishbone csr bridge
         if not self.sim:
             m.submodules.wb_to_csr = self.wb_to_csr
