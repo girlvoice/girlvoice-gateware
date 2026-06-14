@@ -118,11 +118,13 @@ impl I2c0 {
             );
         }
 
-        if self.received_nack() {
-            return Err(Error::TransactionFailed);
-        }
+        // Wait for transaction to start
+        while !self.is_bus_busy() {}
 
+        // Wait for it to end
         while self.is_bus_busy() {}
+
+        if self.received_nack() { return Err(Error::ReceivedNack) }
 
         Ok(())
     }

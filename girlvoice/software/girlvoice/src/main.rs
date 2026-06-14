@@ -4,6 +4,7 @@
 use embedded_hal::delay::DelayNs;
 use embedded_hal::spi::SpiDevice;
 use aw88395::Aw88395;
+use embedded_hal::i2c::I2c;
 use sgtl5000::{Sgtl5000};
 use sgtl5000::regmap::{LineOutBiasCurrent, SampleRateSetting, MclkFreqSetting};
 use riscv_rt::entry;
@@ -169,7 +170,6 @@ fn main() -> ! {
     match power_on_codec(&mut codec) {
         Ok(_) => writeln!(serial, "Codec power on success\r").unwrap(),
         Err(e) => writeln!(serial, "Failed to power on codec: {e:?}\r").unwrap(),
-
     }
 
 
