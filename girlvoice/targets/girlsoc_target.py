@@ -13,9 +13,8 @@ from girlvoice.soc.girlvoice_soc import GirlvoiceSoc
 class GirlTop(Elaboratable):
 
     def __init__(self):
-        self.source_clk_freq = 12e6
+        self.source_clk_freq = 24e6
         self.sync_freq = 60e6
-        self.mclk_freq = 24e6
         self.audio_clk_freq = 24.576e6
         self.fast_clk_freq = 2 * self.sync_freq
         self.soc = GirlvoiceSoc(audio_clk_freq=self.audio_clk_freq)
