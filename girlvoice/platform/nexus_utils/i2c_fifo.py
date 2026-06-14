@@ -12,7 +12,7 @@ Wrapper for the Lattice I2CFIFO hard IP on Nexus devices
 class I2CFIFO(wiring.Component):
 
     lmmi: In(lmmi.Signature(addr_width=8, data_width=8))
-    def __init__(self, scl_freq: int, use_hard_io: bool, sim=False):
+    def __init__(self, sys_clk_freq: int, scl_freq: int, use_hard_io: bool, sim=False):
 
         self.use_hard_io = use_hard_io
         self.params = {}
@@ -61,7 +61,7 @@ class I2CFIFO(wiring.Component):
             p_NCRSDAOUTDLYEN = "DIS",                   # Enables 50ns Analog SDA Output Delay
             p_NONUSRTESTSOFTTRIMEN = "DIS",             # Enables soft trimming of the capacitance of the 50ns Filter and 50ns Delay.
             p_NONUSRTSTSOFTTRIMVALUE = "0b000",         # Capacitance trim value for 50ns Filter and 50ns Delay.  Default on power up is 3'b000, after a clock cycle this value with take current hard trim value.
-            p_REGI2CBR = "0b0010010110",                     # I2C Clock Pre-Scale Register value FSCL = FSOURCE / (4 * (I2CBR[9:0] + 1))
+            p_REGI2CBR = self.calc_clock_scaler(sys_clk_freq, scl_freq),                     # I2C Clock Pre-Scale Register value FSCL = FSOURCE / (4 * (I2CBR[9:0] + 1))
             p_TSPTIMERVALUE = "0b10010010111"           # Value that will be loaded into a down counter. This value will ensure I2C timing specification for Start/Repeated Start signal is met. Counted down against the system clock.
         )
 
@@ -111,6 +111,11 @@ class I2CFIFO(wiring.Component):
         data_width = self.lmmi.data_width
         memory_map = MemoryMap(addr_width=addr_width, data_width=data_width)
         # memory_map.add_resource(lmmi.Register(data_width), )
+
+    def calc_clock_scaler(self, source_clk_freq, scl_freq):
+        divider_param = int(((source_clk_freq / scl_freq) / 4) - 1)
+
+        return format(divider_param, "#012b")
 
     def elaborate(self, platform: Platform):
         m = Module()

@@ -183,7 +183,7 @@ class GirlvoiceSoc(Component):
             self.wb_decoder.add(self.spi0.wb_bus, addr=self.spi_data_base, name="spi_fifo")
 
         # lattice i2c
-        self.i2c = I2CFIFO(scl_freq=400e3, use_hard_io=True, sim=sim)
+        self.i2c = I2CFIFO(sys_clk_freq=sys_clk_freq, scl_freq=400e3, use_hard_io=True, sim=sim)
         self.lmmi_to_wb = lmmi.WishboneLMMIBridge(lmmi_bus = self.i2c.lmmi, data_width=32)
         self.wb_decoder.add(self.lmmi_to_wb.wb_bus, addr=self.lmmi_base, name = "wb_to_lmmi")
 
