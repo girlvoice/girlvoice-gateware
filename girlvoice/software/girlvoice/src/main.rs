@@ -5,7 +5,7 @@ use embedded_hal::delay::DelayNs;
 use embedded_hal::spi::SpiDevice;
 use aw88395::Aw88395;
 use sgtl5000::{Sgtl5000};
-use sgtl5000::regmap::LineOutBiasCurrent;
+use sgtl5000::regmap::{LineOutBiasCurrent, SampleRateSetting, MclkFreqSetting};
 use riscv_rt::entry;
 use soc_pac as pac;
 
@@ -25,6 +25,8 @@ use embedded_graphics::{
 use girlvoice_hal as hal;
 use hal::hal_io::Write;
 mod term;
+mod err;
+
 
 use hal::i2c::I2c0;
 
@@ -50,26 +52,31 @@ hal::impl_serial! {
     Serial0: pac::Uart0,
 }
 
-fn power_on_codec(mut sgtl5000: Sgtl5000<I2c0>) {
+fn power_on_codec(sgtl5000: &mut Sgtl5000<I2c0>) -> Result<(), err::Error> {
     // Analog power up settings
-    sgtl5000.power_off_startup_power().unwrap();
-    sgtl5000.enable_int_osc().unwrap();
-    sgtl5000.enable_charge_pump().unwrap();
-    sgtl5000.set_bias(0x7).unwrap(); // Set bias current to 50% of nominal per data sheet
-    sgtl5000.set_analog_gnd(0x04).unwrap(); // Set analog gnd reference voltage to 0.9v (VDDA/2)
-    sgtl5000.set_line_out_ana_gnd(0x4).unwrap(); // Set line out analog ref voltage to 0.9v (VDDIO/2)
-    sgtl5000.set_line_out_bias_current(LineOutBiasCurrent::MicroAmp360).unwrap(); // Set line out bias current to 0.36mA for 10kOhm + 1.0nF load
-    sgtl5000.enable_small_pop().unwrap(); // Minimize pop
+    sgtl5000.power_off_startup_power()?;
+    sgtl5000.enable_int_osc()?;
+    sgtl5000.enable_charge_pump()?;
+    sgtl5000.set_bias(0x7)?; // Set bias current to 50% of nominal per data sheet
+    sgtl5000.set_analog_gnd(0x04)?; // Set analog gnd reference voltage to 0.9v (VDDA/2)
+    sgtl5000.set_line_out_ana_gnd(0x4)?; // Set line out analog ref voltage to 0.9v (VDDIO/2)
+    sgtl5000.set_line_out_bias_current(LineOutBiasCurrent::MicroAmp360)?; // Set line out bias current to 0.36mA for 10kOhm + 1.0nF load
+    sgtl5000.enable_small_pop()?; // Minimize pop
 
     // Note: here datasheet enables short detect for headphone out
 
     // Digital blocks and IO power on
-    sgtl5000.power_on_adc().unwrap();
-    sgtl5000.power_on_dac().unwrap();
-    sgtl5000.power_on_line_out().unwrap();
+    sgtl5000.power_on_adc()?;
+    sgtl5000.power_on_dac()?;
+    sgtl5000.power_on_line_out()?;
 
-    sgtl5000.set_line_out_left_vol(0x5).unwrap();
-    sgtl5000.set_line_out_right_vol(0x5).unwrap();
+    sgtl5000.set_line_out_left_vol(0x5)?;
+    sgtl5000.set_line_out_right_vol(0x5)?;
+
+    sgtl5000.set_sample_rate(SampleRateSetting::kHz48)?;
+    sgtl5000.set_mclk_config(MclkFreqSetting::Fs512)?;
+    sgtl5000.set_i2s_controller(false)?;
+    return Ok(())
 }
 
 use core::panic::PanicInfo;
@@ -152,7 +159,15 @@ fn main() -> ! {
 
     // let mut led = Led0::new(peripherals.led0);
 
-    let i2c0 = I2c0::new(peripherals.i2cfifo);
+    let mut i2c0 = I2c0::new(peripherals.i2cfifo);
+
+    let mut codec = Sgtl5000::new(&mut i2c0);
+    match power_on_codec(&mut codec) {
+        Ok(_) => writeln!(serial, "Codec power on success").unwrap(),
+        Err(e) => writeln!(serial, "Failed to power on codec: {e:?}").unwrap(),
+
+    }
+
 
     let amp = Aw88395::new(i2c0);
 

@@ -7,8 +7,8 @@ use embedded_hal::i2c::{Error, ErrorKind, I2c};
 
 pub const SGTL5000_QFN20_ADDR: u8 = 0x0A;
 
-pub struct Sgtl5000<I2C> {
-    i2c: I2C,
+pub struct Sgtl5000<'a, I2C: I2c> {
+    i2c: &'a mut I2C,
     config: Sgtl5000Config,
 }
 
@@ -18,16 +18,16 @@ pub enum Sgtl5000Error {
     InvalidParam,
 }
 
-impl<I2C: I2c> Sgtl5000<I2C> {
-    pub fn new(i2c: I2C) -> Self {
+impl<'a, I2C: I2c> Sgtl5000<'a, I2C> {
+    pub fn new(i2c: &'a mut I2C) -> Self {
         let config = Sgtl5000Config::default();
         Self { i2c, config }
     }
 
     /// Consume the device and release the i2c device
-    pub fn release(self) -> I2C {
-        self.i2c
-    }
+    // pub fn release(self) -> I2C {
+        // self.i2c
+    // }
 
     pub fn power_off_startup_power(&mut self) -> Result<(), Sgtl5000Error> {
         self.config.chip_ana_power.linereg_simple_powerup = false;
@@ -152,6 +152,11 @@ impl<I2C: I2c> Sgtl5000<I2C> {
     pub fn set_sample_rate(&mut self, fs_setting: SampleRateSetting) -> Result<(), Sgtl5000Error> {
         self.config.chip_clk_ctrl.sys_fs = fs_setting as u8;
         self.update_config(Register::ChipClkCtrl)
+    }
+
+    pub fn set_i2s_controller(&mut self, is_controller: bool) -> Result<(), Sgtl5000Error> {
+        self.config.chip_i2s_ctrl.ms = is_controller;
+        self.update_config(Register::ChipI2SCtrl)
     }
 
     fn update_config(&mut self, reg: Register) -> Result<(), Sgtl5000Error> {
