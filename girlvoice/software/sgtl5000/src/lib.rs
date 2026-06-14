@@ -14,6 +14,7 @@ pub struct Sgtl5000<'a, I2C: I2c> {
 
 #[derive(Debug)]
 pub enum Sgtl5000Error {
+    I2cNack,
     OpFailed,
     InvalidParam,
 }
@@ -98,7 +99,7 @@ impl<'a, I2C: I2c> Sgtl5000<'a, I2C> {
     }
 
     pub fn set_bias(&mut self, bias_code: u8) -> Result<(), Sgtl5000Error> {
-        if bias_code > 0x5 {
+        if bias_code > 0x7 {
             return Err(Sgtl5000Error::InvalidParam);
         }
         self.config.chip_ref_ctrl.bias_ctrl = bias_code;
@@ -170,7 +171,7 @@ impl<'a, I2C: I2c> Sgtl5000<'a, I2C> {
         let regbuf = [reg_bytes[0], reg_bytes[1], value_bytes[0], value_bytes[1]];
         match self.i2c.write(SGTL5000_QFN20_ADDR, &regbuf) {
             Err(e) => match e.kind() {
-                ErrorKind::NoAcknowledge(_) => Err(Sgtl5000Error::OpFailed),
+                ErrorKind::NoAcknowledge(_) => Err(Sgtl5000Error::I2cNack),
                 _ => Err(Sgtl5000Error::OpFailed),
             },
             Ok(_) => Ok(())
@@ -182,7 +183,7 @@ impl<'a, I2C: I2c> Sgtl5000<'a, I2C> {
         let reg_bytes = reg.addr().to_be_bytes();
         match self.i2c.write_read(SGTL5000_QFN20_ADDR, &[reg_bytes[0], reg_bytes[1]], &mut regbuf) {
             Err(e) => match e.kind() {
-                ErrorKind::NoAcknowledge(_) => Err(Sgtl5000Error::OpFailed),
+                ErrorKind::NoAcknowledge(_) => Err(Sgtl5000Error::I2cNack),
                 _ => Err(Sgtl5000Error::OpFailed),
             },
             Ok(_) => Ok(((regbuf[0] as u16) << 8) | (regbuf[1] as u16))

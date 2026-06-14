@@ -119,18 +119,18 @@ fn main() -> ! {
     display.clear(Rgb565::BLACK).unwrap();
 
 
-    // Create styles used by the drawing operations.
-    let thin_stroke = PrimitiveStyle::with_stroke(Rgb565::GREEN, 2);
-    let thick_stroke = PrimitiveStyle::with_stroke(Rgb565::CSS_CRIMSON, 3);
-    let border_stroke = PrimitiveStyleBuilder::new()
-        .stroke_color(Rgb565::CSS_AQUA)
-        .stroke_width(3)
-        .stroke_alignment(StrokeAlignment::Inside)
-        .build();
-    let fill = PrimitiveStyle::with_fill(Rgb565::BLUE);
-    let character_style = MonoTextStyle::new(&FONT_6X10, Rgb565::CSS_PINK);
+    // // Create styles used by the drawing operations.
+    // let thin_stroke = PrimitiveStyle::with_stroke(Rgb565::GREEN, 2);
+    // let thick_stroke = PrimitiveStyle::with_stroke(Rgb565::CSS_CRIMSON, 3);
+    // let border_stroke = PrimitiveStyleBuilder::new()
+    //     .stroke_color(Rgb565::CSS_AQUA)
+    //     .stroke_width(3)
+    //     .stroke_alignment(StrokeAlignment::Inside)
+    //     .build();
+    // let fill = PrimitiveStyle::with_fill(Rgb565::BLUE);
+    // let character_style = MonoTextStyle::new(&FONT_6X10, Rgb565::CSS_PINK);
 
-    let yoffset = 50;
+    // let yoffset = 50;
 
     // Draw a 3px wide outline around the display.
     // display
@@ -147,8 +147,8 @@ fn main() -> ! {
     // .into_styled(thin_stroke)
     // .draw(&mut display).unwrap();
 
-     // Draw centered text.
-    let text = "girlvoice!";
+    //  // Draw centered text.
+    // let text = "girlvoice!";
     // Text::with_alignment(
     //     text,
     //     display.bounding_box().center() + Point::new(0, 15),
@@ -157,14 +157,18 @@ fn main() -> ! {
     // )
     // .draw(&mut display).unwrap();
 
+
+    // display.flush().ok();
+
+
     // let mut led = Led0::new(peripherals.led0);
 
     let mut i2c0 = I2c0::new(peripherals.i2cfifo);
 
     let mut codec = Sgtl5000::new(&mut i2c0);
     match power_on_codec(&mut codec) {
-        Ok(_) => writeln!(serial, "Codec power on success").unwrap(),
-        Err(e) => writeln!(serial, "Failed to power on codec: {e:?}").unwrap(),
+        Ok(_) => writeln!(serial, "Codec power on success\r").unwrap(),
+        Err(e) => writeln!(serial, "Failed to power on codec: {e:?}\r").unwrap(),
 
     }
 

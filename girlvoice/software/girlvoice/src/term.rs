@@ -163,6 +163,12 @@ impl<T: Read + Write, U: I2c, V: DelayNs> Terminal<T, U, V> {
                     writeln!(self.serial, "usage: set_vol <volume> : Set the amplifier volume on a scale from 0-100%\r").unwrap();
                 }
             }
+            Some("i2c_read") => {
+
+            }
+            Some("i2c_write") => {
+
+            }
             Some(_) => writeln!(self.serial, "idk how to do that yet\r").unwrap(),
             None => writeln!(self.serial, "ouch that hurt!\r").unwrap(),
         };
