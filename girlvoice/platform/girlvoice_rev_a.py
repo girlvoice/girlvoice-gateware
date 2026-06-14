@@ -289,7 +289,9 @@ if __name__ == "__main__":
         clkin_freq=24e6,
         cd_out=cd_audio,
         clkout=cd_audio.clk,
-        clkout_freq=24.576e6)
+        clkout_freq=24.576e6,
+        enable_fractional_synth=True
+    )
 
     count = Signal(24)
     m.d.sync += count.eq(count + 1)

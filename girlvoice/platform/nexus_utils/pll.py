@@ -452,6 +452,14 @@ class NXPLL(Elaboratable):
             p_FBK_MMD_DIG="1",
         )
 
+
+        analog_params = self.calculate_analog_parameters(
+            self.clkin_freq, config["clkfb_div"]
+        )
+        self.params.update(analog_params)
+
+        # Somewhat hacky way to override parameters that were calculated for
+        # Integer synthesis
         if self.is_fractional_synth:
             frac_fb = Signal()
             self.params.pop("o_CLKOS5")
@@ -485,11 +493,6 @@ class NXPLL(Elaboratable):
                 p_DELA="64",
                 p_DIV_DEL="0b1000000",
             )
-
-        analog_params = self.calculate_analog_parameters(
-            self.clkin_freq, config["clkfb_div"]
-        )
-        self.params.update(analog_params)
         n_to_l = {0: "P", 1: "S", 2: "S2", 3: "S3", 4: "S4"}
 
         for n, (clk, f, p, m) in sorted(self.clkouts.items()):
@@ -497,10 +500,12 @@ class NXPLL(Elaboratable):
             phase = int((1 + p / 360) * div)
             letter = chr(n + 65)
             self.params["p_ENCLK_CLKO{}".format(n_to_l[n])] = "ENABLED"
-            self.params["p_DIV{}".format(letter)] = str(div - 1)
-            self.params["p_PHI{}".format(letter)] = "0"
-            self.params["p_DEL{}".format(letter)] = str(phase - 1)
             self.params["o_CLKO{}".format(n_to_l[n])] = clk
+
+            if not self.is_fractional_synth:
+                self.params["p_DIV{}".format(letter)] = str(div - 1)
+                self.params["p_PHI{}".format(letter)] = "0"
+                self.params["p_DEL{}".format(letter)] = str(phase - 1)
 
             # TODO: remove hardcode:
             # self.m.d.comb += self.clkout.eq(clk)
