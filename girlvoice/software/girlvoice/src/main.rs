@@ -77,6 +77,13 @@ fn power_on_codec(sgtl5000: &mut Sgtl5000<I2c0>) -> Result<(), err::Error> {
     sgtl5000.set_sample_rate(SampleRateSetting::kHz48)?;
     sgtl5000.set_mclk_config(MclkFreqSetting::Fs512)?;
     sgtl5000.set_i2s_controller(false)?;
+
+    sgtl5000.set_dac_stereo_enabled(false)?;
+    sgtl5000.set_adc_stereo_enabled(false)?;
+
+    sgtl5000.set_dac_source(sgtl5000::regmap::DataSource::Adc)?;
+
+    sgtl5000.set_dac_mute(false, true)?;
     return Ok(())
 }
 

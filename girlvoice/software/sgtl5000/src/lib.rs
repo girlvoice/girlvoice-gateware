@@ -5,6 +5,8 @@ pub mod regmap;
 use regmap::{LineOutBiasCurrent, MclkFreqSetting, Register, SampleRateSetting, Sgtl5000Config};
 use embedded_hal::i2c::{Error, ErrorKind, I2c};
 
+use crate::regmap::DataSource;
+
 pub const SGTL5000_QFN20_ADDR: u8 = 0x0A;
 
 pub struct Sgtl5000<'a, I2C: I2c> {
@@ -69,14 +71,21 @@ impl<'a, I2C: I2c> Sgtl5000<'a, I2C> {
     pub fn power_on_dac(&mut self) -> Result<(), Sgtl5000Error> {
         self.config.chip_ana_power.dac_powerup = true;
         self.config.chip_dig_power.dac_powerup = true;
-        self.update_config(Register::ChipAnaPower).unwrap();
+        self.update_config(Register::ChipAnaPower)?;
         self.update_config(Register::ChipDigPower)
     }
 
     pub fn power_off_dac(&mut self) -> Result<(), Sgtl5000Error> {
         self.config.chip_ana_power.dac_powerup = false;
         self.config.chip_dig_power.dac_powerup = false;
-        self.update_config(Register::ChipAnaPower).unwrap();
+        self.update_config(Register::ChipAnaPower)?;
+        self.update_config(Register::ChipDigPower)
+    }
+
+    pub fn set_adc_power(&mut self, power_on: bool) -> Result<(), Sgtl5000Error> {
+        self.config.chip_ana_power.adc_powerup = power_on;
+        self.config.chip_dig_power.adc_powerup = power_on;
+        self.update_config(Register::ChipAnaPower)?;
         self.update_config(Register::ChipDigPower)
     }
 
@@ -158,6 +167,45 @@ impl<'a, I2C: I2c> Sgtl5000<'a, I2C> {
     pub fn set_i2s_controller(&mut self, is_controller: bool) -> Result<(), Sgtl5000Error> {
         self.config.chip_i2s_ctrl.ms = is_controller;
         self.update_config(Register::ChipI2SCtrl)
+    }
+
+    // Set the source of data for the I2S output
+    pub fn set_i2s_output_source(&mut self, i2s_source: DataSource) -> Result<(), Sgtl5000Error> {
+        self.config.chip_sss_ctrl.set_i2s_select(i2s_source as u8);
+        self.update_config(Register::ChipSSSCtrl)
+    }
+
+    // Set the audio input for the on-chip DAC
+    pub fn set_dac_source(&mut self, dac_source: DataSource) -> Result<(), Sgtl5000Error> {
+        self.config.chip_sss_ctrl.set_dac_select(dac_source as u8);
+        self.update_config(Register::ChipSSSCtrl)
+    }
+
+    pub fn set_i2s_output_enabled(&mut self, is_enabled: bool) -> Result<(), Sgtl5000Error> {
+        self.config.chip_dig_power.i2s_out_powerup = is_enabled;
+        self.update_config(Register::ChipDigPower)
+    }
+
+    pub fn set_i2s_input_enabled(&mut self, is_enabled: bool) -> Result<(), Sgtl5000Error> {
+        self.config.chip_dig_power.i2s_in_powerup = is_enabled;
+        self.update_config(Register::ChipDigPower)
+
+    }
+
+    pub fn set_dac_mute(&mut self, mute_left: bool, mute_right: bool) -> Result<(), Sgtl5000Error> {
+        self.config.chip_adc_dac_ctrl.set_dac_mute_left(mute_left);
+        self.config.chip_adc_dac_ctrl.set_dac_mute_right(mute_right);
+        self.update_config(Register::ChipAdcDacCtrl)
+    }
+
+    pub fn set_dac_stereo_enabled(&mut self, enabled: bool) -> Result<(), Sgtl5000Error> {
+        self.config.chip_ana_power.dac_mono = enabled;
+        self.update_config(Register::ChipAnaPower)
+    }
+
+    pub fn set_adc_stereo_enabled(&mut self, enabled: bool) -> Result<(), Sgtl5000Error> {
+        self.config.chip_ana_power.adc_mono = enabled;
+        self.update_config(Register::ChipAnaPower)
     }
 
     fn update_config(&mut self, reg: Register) -> Result<(), Sgtl5000Error> {

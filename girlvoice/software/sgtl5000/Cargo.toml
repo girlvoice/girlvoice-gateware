@@ -4,4 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+bitfield = "0.19.4"
 embedded-hal = "1.0.0"
