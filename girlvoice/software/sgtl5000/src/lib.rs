@@ -5,7 +5,7 @@ pub mod regmap;
 use regmap::{LineOutBiasCurrent, MclkFreqSetting, Register, SampleRateSetting, Sgtl5000Config};
 use embedded_hal::i2c::{Error, ErrorKind, I2c};
 
-use crate::regmap::DataSource;
+use crate::regmap::{ AdcSource, DataSource};
 
 pub const SGTL5000_QFN20_ADDR: u8 = 0x0A;
 
@@ -50,6 +50,7 @@ impl<'a, I2C: I2c> Sgtl5000<'a, I2C> {
 
     pub fn power_on_line_out(&mut self) -> Result<(), Sgtl5000Error> {
         self.config.chip_ana_power.lineout_powerup = true;
+        self.config.chip_ana_power.vag_powerup = true;
         self.update_config(Register::ChipAnaPower)
     }
 
@@ -60,7 +61,9 @@ impl<'a, I2C: I2c> Sgtl5000<'a, I2C> {
 
     pub fn power_on_adc(&mut self) -> Result<(), Sgtl5000Error> {
         self.config.chip_ana_power.adc_powerup = true;
-        self.update_config(Register::ChipAnaPower)
+        self.config.chip_dig_power.adc_powerup = true;
+        self.update_config(Register::ChipAnaPower)?;
+        self.update_config(Register::ChipDigPower)
     }
 
     pub fn power_off_adc(&mut self) -> Result<(), Sgtl5000Error> {
@@ -181,6 +184,12 @@ impl<'a, I2C: I2c> Sgtl5000<'a, I2C> {
         self.update_config(Register::ChipSSSCtrl)
     }
 
+    // Set the audio input for the on-chip ADC
+    pub fn set_adc_source(&mut self, adc_source: AdcSource) -> Result<(), Sgtl5000Error> {
+        self.config.chip_ana_ctrl.set_adc_select((adc_source as u8) == 1);
+        self.update_config(Register::ChipAnaCtrl)
+    }
+
     pub fn set_i2s_output_enabled(&mut self, is_enabled: bool) -> Result<(), Sgtl5000Error> {
         self.config.chip_dig_power.i2s_out_powerup = is_enabled;
         self.update_config(Register::ChipDigPower)
@@ -196,6 +205,16 @@ impl<'a, I2C: I2c> Sgtl5000<'a, I2C> {
         self.config.chip_adc_dac_ctrl.set_dac_mute_left(mute_left);
         self.config.chip_adc_dac_ctrl.set_dac_mute_right(mute_right);
         self.update_config(Register::ChipAdcDacCtrl)
+    }
+
+    pub fn set_adc_mute(&mut self, mute_enable: bool) -> Result<(), Sgtl5000Error> {
+        self.config.chip_ana_ctrl.set_adc_muted(mute_enable);
+        self.update_config(Register::ChipAnaCtrl)
+    }
+
+    pub fn set_line_out_mute(&mut self, mute_enable: bool) -> Result<(), Sgtl5000Error> {
+        self.config.chip_ana_ctrl.set_line_out_muted(mute_enable);
+        self.update_config(Register::ChipAnaCtrl)
     }
 
     pub fn set_dac_stereo_enabled(&mut self, enabled: bool) -> Result<(), Sgtl5000Error> {

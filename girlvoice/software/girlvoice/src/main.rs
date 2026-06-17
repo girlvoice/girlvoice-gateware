@@ -71,7 +71,7 @@ fn power_on_codec(sgtl5000: &mut Sgtl5000<I2c0>) -> Result<(), err::Error> {
     sgtl5000.power_on_dac()?;
     sgtl5000.power_on_line_out()?;
 
-    sgtl5000.set_line_out_left_vol(0x5)?;
+    sgtl5000.set_line_out_left_vol(0xF)?;
     sgtl5000.set_line_out_right_vol(0x5)?;
 
     sgtl5000.set_sample_rate(SampleRateSetting::kHz48)?;
@@ -82,8 +82,11 @@ fn power_on_codec(sgtl5000: &mut Sgtl5000<I2c0>) -> Result<(), err::Error> {
     sgtl5000.set_adc_stereo_enabled(false)?;
 
     sgtl5000.set_dac_source(sgtl5000::regmap::DataSource::Adc)?;
+    sgtl5000.set_adc_source(sgtl5000::regmap::AdcSource::LineIn)?;
 
-    sgtl5000.set_dac_mute(false, true)?;
+    sgtl5000.set_dac_mute(false, false)?;
+    sgtl5000.set_adc_mute(false)?;
+    sgtl5000.set_line_out_mute(false)?;
     return Ok(())
 }
 

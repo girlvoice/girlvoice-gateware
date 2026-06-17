@@ -202,11 +202,11 @@ bitfield!{
 
 impl MappedRegister for ChipSSSCtrl {
     fn value(&self) -> u16 {
-        self.bit_range(15, 0)
+        self.0
     }
 
     fn update(&mut self, val: u16) {
-        self.set_bit_range(15, 0, val)
+        self.0 = val
     }
 }
 
@@ -231,17 +231,50 @@ bitfield!{
 
 impl MappedRegister for ChipAdcDacCtrl {
     fn value(&self) -> u16 {
-        self.bit_range(15, 0)
+        self.0
     }
 
     fn update(&mut self, val: u16) {
-        self.set_bit_range(15, 0, val)
+        self.0 = val
     }
 }
 
 impl Default for ChipAdcDacCtrl {
     fn default() -> Self {
         Self(0x020C)
+    }
+}
+
+pub enum AdcSource {
+    Microphone = 0x0,
+    LineIn = 0x1,
+}
+
+bitfield!{
+    pub struct ChipAnaCtrl(u16);
+    bool;
+    pub is_adc_muted, set_adc_muted: 0;
+    pub is_adc_zcd_enabled, set_adc_zcd_enabled: 1;
+    pub adc_select, set_adc_select: 2;
+    pub is_hp_muted, set_hp_muted: 4;
+    pub is_hp_zcd_enabled, set_hp_zcd_enabled: 5;
+    pub hp_select, set_hp_select: 6;
+    pub is_line_out_muted, set_line_out_muted: 8;
+}
+
+impl MappedRegister for ChipAnaCtrl {
+    fn value(&self) -> u16 {
+        self.0
+    }
+
+    fn update(&mut self, val: u16) {
+        self.0 = val
+    }
+}
+
+impl Default for ChipAnaCtrl {
+    fn default() -> Self {
+        Self(0x0111)
     }
 }
 
@@ -254,11 +287,11 @@ bitfield!{
 
 impl MappedRegister for ChipDacVol {
     fn value(&self) -> u16 {
-        self.bit_range(15, 0)
+        self.0
     }
 
     fn update(&mut self, val: u16) {
-        self.set_bit_range(15, 0, val)
+        self.0 = val
     }
 }
 
@@ -496,6 +529,7 @@ pub struct Sgtl5000Config {
     pub chip_i2s_ctrl: ChipI2SCtrl,
     pub chip_sss_ctrl: ChipSSSCtrl,
     pub chip_adc_dac_ctrl: ChipAdcDacCtrl,
+    pub chip_ana_ctrl: ChipAnaCtrl,
     pub chip_dac_vol: ChipDacVol,
     pub chip_ref_ctrl: ChipRefCtrl,
     pub chip_line_out_ctrl: ChipLineOutCtrl,
@@ -512,6 +546,7 @@ impl Default for Sgtl5000Config {
             chip_i2s_ctrl: ChipI2SCtrl::default(),
             chip_sss_ctrl: ChipSSSCtrl::default(),
             chip_adc_dac_ctrl: ChipAdcDacCtrl::default(),
+            chip_ana_ctrl: ChipAnaCtrl::default(),
             chip_dac_vol: ChipDacVol::default(),
             chip_ref_ctrl: ChipRefCtrl::default(),
             chip_line_out_ctrl: ChipLineOutCtrl::default(),
@@ -525,29 +560,39 @@ impl Default for Sgtl5000Config {
 impl Sgtl5000Config {
     pub fn reg_val(&self, reg: Register) -> u16 {
         match reg {
+            Register::Id => 0,
             Register::ChipDigPower => self.chip_dig_power.value(),
             Register::ChipClkCtrl => self.chip_clk_ctrl.value(),
             Register::ChipI2SCtrl => self.chip_i2s_ctrl.value(),
+            Register::ChipSSSCtrl => self.chip_sss_ctrl.value(),
+            Register::ChipAdcDacCtrl => self.chip_adc_dac_ctrl.value(),
+            Register::ChipDacVol => self.chip_dac_vol.value(),
+            Register::ChipAnaAdcCtrl => 0,
+            Register::ChipAnaCtrl => self.chip_ana_ctrl.value(),
             Register::ChipRefCtrl => self.chip_ref_ctrl.value(),
             Register::ChipLineOutCtrl => self.chip_line_out_ctrl.value(),
             Register::ChipLineOutVol => self.chip_line_out_vol.value(),
             Register::ChipAnaPower => self.chip_ana_power.value(),
             Register::ChipClkTopCtrl => self.chip_clk_top_ctrl.value(),
-            _ => 0,
         }
     }
 
     pub fn update_reg(&mut self, reg: Register, val: u16) {
         match reg {
+            Register::Id => (),
             Register::ChipDigPower => self.chip_dig_power.update(val),
             Register::ChipClkCtrl => self.chip_clk_ctrl.update(val),
             Register::ChipI2SCtrl => self.chip_i2s_ctrl.update(val),
+            Register::ChipSSSCtrl => self.chip_sss_ctrl.update(val),
+            Register::ChipAdcDacCtrl => self.chip_adc_dac_ctrl.update(val),
+            Register::ChipDacVol => self.chip_dac_vol.update(val),
+            Register::ChipAnaAdcCtrl => (),
+            Register::ChipAnaCtrl => self.chip_ana_ctrl.update(val),
             Register::ChipRefCtrl => self.chip_ref_ctrl.update(val),
             Register::ChipLineOutCtrl => self.chip_line_out_ctrl.update(val),
             Register::ChipLineOutVol => self.chip_line_out_vol.update(val),
             Register::ChipAnaPower => self.chip_ana_power.update(val),
             Register::ChipClkTopCtrl => self.chip_clk_top_ctrl.update(val),
-            _ => (),
         }
     }
 }
