@@ -192,7 +192,7 @@ class GirlvoiceRevAPlatform(LatticePlatform):
         Connector("aux_i2s", 0, {
             "MCLK": "22",
             "SDIN": "10",
-            "SDOUT": "27",
+            "SDOUT": "9",
         })
     ]
 

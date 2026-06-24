@@ -62,7 +62,7 @@ from girlvoice.platform.nexus_utils.lram          import WishboneNXLRAM
 from girlvoice.soc.provider import girlvoice_rev_a as provider
 
 from girlvoice.dsp.vocoder import StaticVocoder, ThreadedVocoderChannel
-from girlvoice.io.i2s import i2s_rx, i2s_tx
+from girlvoice.io.i2s import i2s_rx, i2s_tx, I2SController
 from girlvoice.io import spi
 from girlvoice.platform.nexus_utils.i2c_fifo import I2CFIFO
 
@@ -194,18 +194,26 @@ class GirlvoiceSoc(Component):
         fs = 48e3
         bclk_freq = 64 * fs
 
-        self.i2s_tx = i2s_tx(
-            self.audio_clk_freq,
-            sclk_freq=bclk_freq,
+        # self.i2s_tx = i2s_tx(
+        #     self.audio_clk_freq,
+        #     sclk_freq=bclk_freq,
+        #     sample_width=sample_width,
+        #     sink_domain="sync",
+        #     phy_domain="audio"
+        # )
+        # self.i2s_rx = i2s_rx(
+        #     self.audio_clk_freq,
+        #     sclk_freq=bclk_freq,
+        #     sample_width=sample_width,
+        #     source_domain="sync",
+        #     phy_domain="audio"
+        # )
+
+        self.i2s_controller = I2SController(
             sample_width=sample_width,
-            sink_domain="sync",
-            phy_domain="audio"
-        )
-        self.i2s_rx = i2s_rx(
-            self.audio_clk_freq,
+            sys_clk_freq=sys_clk_freq,
             sclk_freq=bclk_freq,
-            sample_width=sample_width,
-            source_domain="sync",
+            controller_domain="sync",
             phy_domain="audio"
         )
 
@@ -323,30 +331,41 @@ class GirlvoiceSoc(Component):
         m.d.comb += self.spi0_phy.cs.eq(self.spi0.cs)
 
         # I2S TX/RX
-        m.submodules.i2s_rx = self.i2s_rx
-        m.submodules.i2s_tx = self.i2s_tx
+        # m.submodules.i2s_rx = self.i2s_rx
+        # m.submodules.i2s_tx = self.i2s_tx
+        m.submodules.i2s_controller = self.i2s_controller
+
+        wiring.connect(m, self.i2s_controller.sink, self.i2s_controller.source)
 
         if not self.sim:
             mic = platform.request("mic", 0)
 
             m.d.comb += [
-                mic.lrclk.o.eq(self.i2s_rx.lrclk),
-                mic.clk.o.eq(self.i2s_rx.sclk),
-                self.i2s_rx.sdin.eq(mic.data.i)
+                mic.lrclk.o.eq(self.i2s_controller.lrclk),
+                mic.clk.o.eq(self.i2s_controller.sclk),
+                # self.i2s_rx.sdin.eq(mic.data.i)
             ]
 
-            amp = platform.request("amp", 0)
-            m.d.comb += amp.en.o.eq(1)
-            m.d.comb += amp.lrclk.o.eq(~self.i2s_tx.lrclk)
-            m.d.comb += amp.clk.o.eq(self.i2s_tx.sclk)
-            m.d.comb += amp.data.o.eq(self.i2s_tx.sdout)
+            # amp = platform.request("amp", 0)
+            # m.d.comb += amp.en.o.eq(1)
+            # m.d.comb += amp.lrclk.o.eq(~self.i2s_tx.lrclk)
+            # m.d.comb += amp.clk.o.eq(self.i2s_tx.sclk)
+            # m.d.comb += amp.data.o.eq(self.i2s_tx.sdout)
+
+            aux_dout = platform.request("aux_dout", 0)
+            m.d.comb += aux_dout.o.eq(self.i2s_controller.sdout)
+
+            aux_din = platform.request("aux_din", 0)
+            m.d.comb += self.i2s_controller.sdin.eq(aux_din.i)
+
 
         if self.enable_vocoder:
             m.submodules.vocoder = self.vocoder
             wiring.connect(m, self.vocoder.sink, self.i2s_rx.source)
             wiring.connect(m, self.vocoder.source, self.i2s_tx.sink)
         else:
-            wiring.connect(m, self.i2s_rx.source, self.i2s_tx.sink)
+            # wiring.connect(m, self.i2s_rx.source, self.i2s_tx.sink)
+            pass
         # wishbone csr bridge
         if not self.sim:
             m.submodules.wb_to_csr = self.wb_to_csr
