@@ -94,13 +94,13 @@ class GirlvoiceRevAPlatform(LatticePlatform):
         Resource(
             "aux_dout",
             0,
-            Pins("SDOUT", dir="o", conn=("aux_i2s", 0)),
+            Pins("SDOUT", dir="i", conn=("aux_i2s", 0)),
             Attrs(IO_TYPE="LVCMOS18H"),
         ),
         Resource(
             "aux_din",
             0,
-            Pins("SDIN", dir="i", conn=("aux_i2s", 0)),
+            Pins("SDIN", dir="o", conn=("aux_i2s", 0)),
             Attrs(IO_TYPE="LVCMOS18H"),
         ),
         Resource("led", 0, Pins("13", dir="o"), Attrs(IO_TYPE="LVCMOS18H")),

@@ -211,7 +211,7 @@ class GirlvoiceSoc(Component):
 
         self.i2s_controller = I2SController(
             sample_width=sample_width,
-            sys_clk_freq=sys_clk_freq,
+            sys_clk_freq=audio_clk_freq,
             sclk_freq=bclk_freq,
             controller_domain="sync",
             phy_domain="audio"
@@ -348,15 +348,15 @@ class GirlvoiceSoc(Component):
 
             # amp = platform.request("amp", 0)
             # m.d.comb += amp.en.o.eq(1)
-            # m.d.comb += amp.lrclk.o.eq(~self.i2s_tx.lrclk)
-            # m.d.comb += amp.clk.o.eq(self.i2s_tx.sclk)
+            # m.d.comb += amp.lrclk.o.eq(self.i2s_controller.lrclk)
+            # m.d.comb += amp.clk.o.eq(self.i2s_controller.clocking.sclk_falling)
             # m.d.comb += amp.data.o.eq(self.i2s_tx.sdout)
 
-            aux_dout = platform.request("aux_dout", 0)
-            m.d.comb += aux_dout.o.eq(self.i2s_controller.sdout)
-
             aux_din = platform.request("aux_din", 0)
-            m.d.comb += self.i2s_controller.sdin.eq(aux_din.i)
+            m.d.comb += aux_din.o.eq(self.i2s_controller.sdout)
+
+            aux_dout = platform.request("aux_dout", 0)
+            m.d.comb += self.i2s_controller.sdin.eq(aux_dout.i)
 
 
         if self.enable_vocoder:

@@ -148,6 +148,7 @@ class I2SClockGenerator(wiring.Component):
         self.mclk_freq = mclk_freq
         self.sclk_freq = sclk_freq
         self.clk_ratio = int(mclk_freq // sclk_freq)
+        print(f"I2S clock divider: {self.clk_ratio}")
         self.sample_width = max_sample_width
 
 
@@ -168,6 +169,9 @@ class I2SClockGenerator(wiring.Component):
         m.d.comb += sclk_negedge.eq(~self.sclk & sclk_last)
         m.d.comb += self.sclk_falling.eq(sclk_negedge)
         m.d.sync += sclk_last.eq(self.sclk)
+
+        with m.If(self.sclk_falling):
+            m.d.sync += bit_count.eq(bit_count + 1)
 
         with m.If(bit_count == (self.sample_width - 1)):
             with m.If(sclk_negedge):
@@ -383,12 +387,18 @@ class I2SController(wiring.Component):
 
 
 def tx_tb():
-    sys_clk_freq = 64e6
-    sclk_freq = 4e6
-    dut = i2s_tx(sys_clk_freq=sys_clk_freq, sclk_freq=sclk_freq, sample_width=18)
-    sim = Simulator(dut)
+    sys_clk_freq = 24.576e6
+    sclk_freq = 64 * 48e3
+    m = Module()
+    m.submodules.clk_gen = clk_gen = I2SClockGenerator(mclk_freq=sys_clk_freq, sclk_freq=sclk_freq, max_sample_width=32)
+    m.submodules.i2s_tx = dut = i2s_tx(sample_width=16)
+    m.d.comb += [
+        dut.lrclk.eq(clk_gen.lrclk),
+        dut.sclk_falling.eq(clk_gen.sclk_falling)
+    ]
+    sim = Simulator(m)
 
-    samples = [(C(i, 32)) for i in range(32)]
+    samples = [(C(i << 14, 16)) for i in range(32)]
 
     def process():
         while (yield ~dut.sink.ready):
@@ -414,28 +424,42 @@ def tx_tb():
 def rx_tb():
     sys_clk_freq = 64e6
     sclk_freq = 4e6
-    dut = i2s_rx(sys_clk_freq=sys_clk_freq, sclk_freq=sclk_freq)
-    sim = Simulator(dut)
+    m = Module()
+    m.submodules.clk_gen = clk_gen = I2SClockGenerator(mclk_freq=sys_clk_freq, sclk_freq=sclk_freq, max_sample_width=32)
+    m.submodules.i2s_rx = dut = i2s_rx(sample_width=16)
+    m.d.comb += [
+        dut.lrclk.eq(clk_gen.lrclk),
+        dut.sclk_falling.eq(clk_gen.sclk_falling)
+    ]
+    sim = Simulator(m)
 
-    samples = [(C(i << 14, 32)) for i in range(32)]
+    samples_int = [i << 11 for i in range(32)]
+    samples = [(C(i , 16)) for i in samples_int]
 
+    print(len(samples_int))
     def process():
-        sample_in = 0
+        j = 0
         for word in samples:
+            sample_in = samples_int[j]
             for i in range(32):
-                while (yield ~(dut.sclk)):
+                while (yield ~(clk_gen.sclk)):
                     yield Tick()
-                yield dut.sdin.eq(word[31 - i])
 
-                while (yield (dut.sclk)):
+                if i < 16:
+                    yield dut.sdin.eq(word[15 - i])
+                else:
+                    yield dut.sdin.eq(0)
+
+                while (yield (clk_gen.sclk)):
                     yield Tick()
+
                 if (yield dut.source.valid):
                     yield dut.source.ready.eq(1)
-                    sample_out = yield dut.source.data
+                    sample_out = yield dut.source.payload
                     yield Tick()
                     yield dut.source.ready.eq(0)
             assert sample_in == sample_out, f"Expected {sample_in}, got: {sample_out}"
-            sample_in += 1
+            j += 1
 
     sim.add_process(process)
     sim.add_clock(1 / sys_clk_freq)
