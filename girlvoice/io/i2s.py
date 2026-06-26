@@ -5,6 +5,7 @@ from amaranth.build import Platform
 from amaranth.lib import wiring, stream
 from amaranth.lib.wiring import Out, In
 from amaranth.lib.fifo import AsyncFIFO
+from amaranth.lib import data
 
 from amaranth.sim import Simulator, Tick
 
@@ -16,6 +17,21 @@ class Signature(wiring.Signature):
         }
         super().__init__(members)
 
+class StereoPayload(data.StructLayout):
+    def __init__(self, sample_width):
+        super().__init__(
+            {
+                "left": signed(sample_width),
+                "right": signed(sample_width)
+            }
+        )
+    def __call__(self, value):
+        return StereoView(self, value)
+
+class StereoView(data.View):
+    pass
+
+
 class i2s_tx(wiring.Component):
     def __init__(self, sample_width=32, sink_domain="sync", phy_domain="sync"):
         self.sample_width = sample_width
@@ -23,7 +39,7 @@ class i2s_tx(wiring.Component):
         self._sink_domain = sink_domain
         super().__init__(
             {
-                "sink": In(stream.Signature(sample_width)),
+                "sink": In(stream.Signature(StereoPayload(sample_width))),
                 "sdout": Out(1),
                 "lrclk": In(1),
                 "sclk_falling": In(1)
@@ -33,12 +49,12 @@ class i2s_tx(wiring.Component):
     def elaborate(self, platform) -> Module:
         m = Module()
 
-
-        input_stream = stream.Signature(self.sample_width).flip().create()
+        phy_domain = self._domain
+        input_stream = stream.Signature(StereoPayload(self.sample_width)).flip().create()
         if self._sink_domain != self._domain:
             m.submodules.cdc_fifo = self.cdc_fifo = AsyncFIFO(
-                width=self.sample_width,
-                depth=4,
+                width=self.sample_width*2,
+                depth=2,
                 r_domain=self._domain,
                 w_domain=self._sink_domain
             )
@@ -51,30 +67,33 @@ class i2s_tx(wiring.Component):
 
         bit_count = Signal(range(32))
         shift_out = Signal(self.sample_width)
+        shift_next = Signal(self.sample_width)
 
         with m.If(self.sclk_falling):
-            m.d.sync += bit_count.eq(bit_count + 1)
-            m.d.sync += shift_out.eq(shift_out << 1)
+            m.d[phy_domain] += bit_count.eq(bit_count + 1)
+            m.d[phy_domain] += shift_out.eq(shift_out << 1)
 
-        with m.FSM():
+        with m.FSM(domain=phy_domain):
             with m.State("IDLE"):
-                m.d.sync += self.sdout.eq(0)
-                with m.If(bit_count == 0):
-                    m.d.comb += input_stream.ready.eq(1)
-                with m.If(input_stream.valid & input_stream.ready):
-                    m.d.sync += shift_out.eq(input_stream.payload)
+                m.d[phy_domain] += self.sdout.eq(0)
+                with m.If(~self.lrclk):
+                    with m.If(bit_count == 0):
+                        m.d.comb += input_stream.ready.eq(1)
+                    with m.If(input_stream.valid & input_stream.ready):
+                        m.d[phy_domain] += shift_out.eq(input_stream.p.left)
+                        m.d[phy_domain] += shift_next.eq(input_stream.p.right)
+                        m.next = "WRITE"
+                with m.Else():
+                    m.d[phy_domain] += shift_out.eq(shift_next)
                     m.next = "WRITE"
+
             with m.State("WRITE"):
                 with m.If(self.sclk_falling):
-                    m.d.sync += self.sdout.eq(shift_out[self.sample_width - 1])
+                    m.d[phy_domain] += self.sdout.eq(shift_out[self.sample_width - 1])
 
                 with m.If(bit_count >= (self.sample_width)):
                     with m.If(self.sclk_falling):
                         m.next = "IDLE"
-
-
-        if self._domain != "sync":
-            m = DomainRenamer({"sync": self._domain})(m)
 
         return m
 
@@ -86,7 +105,8 @@ class i2s_rx(wiring.Component):
         self._source_domain = source_domain
         super().__init__(
             {
-                "source": Out(stream.Signature(sample_width)),
+                "source_l": Out(stream.Signature(sample_width)),
+                "source_r": Out(stream.Signature(sample_width)),
                 "sdin": In(1),
                 "lrclk": In(1),
                 "sclk_falling": In(1),
@@ -96,12 +116,13 @@ class i2s_rx(wiring.Component):
     def elaborate(self, platform) -> Module:
         m = Module()
 
+        phy_domain = self._domain
         output_stream = stream.Signature(self.sample_width).create()
 
         if self._source_domain != self._domain:
             m.submodules.cdc_fifo = self.cdc_fifo = AsyncFIFO(
                 width=self.sample_width,
-                depth=4,
+                depth=2,
                 r_domain=self._source_domain,
                 w_domain=self._domain
             )
@@ -116,38 +137,37 @@ class i2s_rx(wiring.Component):
         bit_count = Signal(range(32))
 
         with m.If(self.sclk_falling):
-            m.d.sync += bit_count.eq(bit_count + 1)
+            m.d[phy_domain] += bit_count.eq(bit_count + 1)
 
 
         with m.FSM():
             with m.State("IDLE"):
                 with m.If(self.sclk_falling):
-                    m.d.sync += shift_reg.eq(0)
+                    m.d[phy_domain] += shift_reg.eq(0)
                 with m.If(bit_count == 0):
                     m.next = "READ"
             with m.State("READ"):
                 with m.If(self.sclk_falling):
-                    m.d.sync += shift_reg.eq(Cat(self.sdin, shift_reg[:-1]))
+                    m.d[phy_domain] += shift_reg.eq(Cat(self.sdin, shift_reg[:-1]))
 
                 with m.If(bit_count >= self.sample_width):
-                    m.d.sync += output_stream.payload.eq(shift_reg)
-                    m.d.sync += output_stream.valid.eq(1)
+                    m.d[phy_domain] += output_stream.payload.eq(shift_reg)
+                    m.d[phy_domain] += output_stream.valid.eq(1)
                     m.next = "IDLE"
 
         with m.If(output_stream.valid & output_stream.ready):
-            m.d.sync += output_stream.valid.eq(0)
+            m.d[phy_domain] += output_stream.valid.eq(0)
 
-        if self._domain != "sync":
-            m = DomainRenamer({"sync": self._domain})(m)
         return m
 
 class I2SClockGenerator(wiring.Component):
-    def __init__(self, mclk_freq: float, sclk_freq: float, max_sample_width: int):
+    def __init__(self, domain: str, mclk_freq: float, sclk_freq: float, max_sample_width: int):
         assert max_sample_width in [32, 64]
 
         self.mclk_freq = mclk_freq
         self.sclk_freq = sclk_freq
         self.clk_ratio = int(mclk_freq // sclk_freq)
+        self._domain = domain
         print(f"I2S clock divider: {self.clk_ratio}")
         self.sample_width = max_sample_width
 
@@ -183,6 +203,8 @@ class I2SClockGenerator(wiring.Component):
         with m.Else():
             m.d.sync += clk_div.eq(clk_div + 1)
 
+        if self._domain != "sync":
+            m = DomainRenamer({"sync": self._domain})(m)
         return m
 
 class I2STargetTx(wiring.Component):
@@ -349,7 +371,7 @@ class I2SController(wiring.Component):
             max_sample_width = 64
         else:
             raise ValueError(f"Sample width: {sample_width} exceeds maximum allowed")
-        self.clocking = I2SClockGenerator(mclk_freq=sys_clk_freq, sclk_freq=sclk_freq, max_sample_width=max_sample_width)
+        self.clocking = I2SClockGenerator(domain=phy_domain, mclk_freq=sys_clk_freq, sclk_freq=sclk_freq, max_sample_width=max_sample_width)
 
         super().__init__(
             {
@@ -387,33 +409,41 @@ class I2SController(wiring.Component):
 
 
 def tx_tb():
-    sys_clk_freq = 24.576e6
+    sys_clk_freq = 60e6
+    aud_clk_freq = 24.576e6
     sclk_freq = 64 * 48e3
+    sample_width = 24
     m = Module()
-    m.submodules.clk_gen = clk_gen = I2SClockGenerator(mclk_freq=sys_clk_freq, sclk_freq=sclk_freq, max_sample_width=32)
-    m.submodules.i2s_tx = dut = i2s_tx(sample_width=16)
+    m.submodules.clk_gen = clk_gen = I2SClockGenerator(domain="mclk", mclk_freq=aud_clk_freq, sclk_freq=sclk_freq, max_sample_width=32)
+    m.submodules.i2s_tx = dut = i2s_tx(sample_width=sample_width, sink_domain="sync", phy_domain="mclk")
     m.d.comb += [
         dut.lrclk.eq(clk_gen.lrclk),
         dut.sclk_falling.eq(clk_gen.sclk_falling)
     ]
     sim = Simulator(m)
 
-    samples = [(C(i << 14, 16)) for i in range(32)]
+    samples = [(C(i << 14, sample_width)) for i in range(32)]
 
     def process():
+        yield dut.sink.valid.eq(0)
+        yield Tick()
         while (yield ~dut.sink.ready):
             yield Tick()
+            yield Tick("mclk")
 
         for i in range(len(samples)):
-            yield dut.sink.payload.eq(samples[i])
+            yield dut.sink.p.left.eq(samples[i])
             yield dut.sink.valid.eq(1)
             yield Tick()
-            # yield dut.sink.valid.eq(0)
+            if (yield dut.sink.ready):
+                yield dut.sink.valid.eq(0)
             while (yield ~dut.sink.ready):
-                yield Tick()
+                yield Tick("mclk")
+                # yield Tick()
 
     sim.add_process(process)
     sim.add_clock(1 / sys_clk_freq)
+    sim.add_clock(1 / aud_clk_freq, domain="mclk")
 
     os.makedirs("gtkw", exist_ok=True)
     dutname = f"gtkw/{type(dut).__name__}"
@@ -470,9 +500,62 @@ def rx_tb():
         sim.run()
 
 
+def controller_tb():
+    sys_clk_freq = 24.576e6
+    sclk_freq = 64 * 48e3
+    m = Module()
+    sample_width = 24
+    m.submodules.i2s = dut = I2SController(
+        sys_clk_freq=sys_clk_freq,
+        sclk_freq=sclk_freq,
+        sample_width=sample_width
+    )
+    wiring.connect(m, dut.sink, dut.source)
+    sim = Simulator(m)
+
+
+    samples_int = [i << 11 for i in range(32)]
+    samples = [(C(i , sample_width)) for i in samples_int]
+
+    print(len(samples_int))
+    def process():
+        j = 0
+        for word in samples:
+            sample_in = samples_int[j]
+            for i in range(32):
+                while (yield ~(dut.sclk)):
+                    yield Tick()
+
+                if i < sample_width:
+                    yield dut.sdin.eq(word[(sample_width - 1) - i])
+                else:
+                    yield dut.sdin.eq(0)
+
+                while (yield (dut.sclk)):
+                    yield Tick()
+
+                # if (yield dut.source.valid):
+                #     yield dut.source.ready.eq(1)
+                #     sample_out = yield dut.source.payload
+                #     yield Tick()
+                #     yield dut.source.ready.eq(0)
+            # assert sample_in == sample_out, f"Expected {sample_in}, got: {sample_out}"
+            j += 1
+
+
+    sim.add_process(process)
+    sim.add_clock(1 / sys_clk_freq)
+
+    os.makedirs("gtkw", exist_ok=True)
+    dutname = f"gtkw/{type(dut).__name__}"
+    with sim.write_vcd(dutname + f".vcd"):
+        sim.run()
+
+
 def main():
+    # controller_tb()
     tx_tb()
-    rx_tb()
+    # rx_tb()
 
 
 if __name__ == "__main__":
