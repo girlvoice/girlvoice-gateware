@@ -201,6 +201,12 @@ impl<'a, I2C: I2c> Sgtl5000<'a, I2C> {
 
     }
 
+
+    pub fn set_i2s_output_channel_swap(&mut self, is_swapped: bool) -> Result<(), Sgtl5000Error> {
+        self.config.chip_sss_ctrl.set_i2s_lrswap(is_swapped);
+        self.update_config(Register::ChipSSSCtrl)
+    }
+
     pub fn set_dac_mute(&mut self, mute_left: bool, mute_right: bool) -> Result<(), Sgtl5000Error> {
         self.config.chip_adc_dac_ctrl.set_dac_mute_left(mute_left);
         self.config.chip_adc_dac_ctrl.set_dac_mute_right(mute_right);

@@ -189,7 +189,7 @@ class GirlvoiceSoc(Component):
         self.lmmi_to_wb = lmmi.WishboneLMMIBridge(lmmi_bus = self.i2c.lmmi, data_width=32)
         self.wb_decoder.add(self.lmmi_to_wb.wb_bus, addr=self.lmmi_base, name = "wb_to_lmmi")
 
-        sample_width = 16
+        sample_width = 24
 
         fs = 48e3
         bclk_freq = 64 * fs

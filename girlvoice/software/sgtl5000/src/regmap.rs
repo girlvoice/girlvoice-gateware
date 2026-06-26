@@ -195,6 +195,7 @@ bitfield!{
     pub dac_select, set_dac_select: 5, 4;
     pub dap_select, set_dap_select: 7, 6;
     pub dap_mix_select, set_dap_mix_select: 9, 8;
+    pub i2s_lrswap, set_i2s_lrswap: 10;
     pub dac_lrswap, set_dac_lrswap: 12;
     pub dap_lrswap, set_dap_lrswap: 13;
     pub dap_mix_lrswap, set_dap_mix_lrswap: 14;
