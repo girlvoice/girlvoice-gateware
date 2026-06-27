@@ -353,10 +353,12 @@ class GirlvoiceSoc(Component):
             # m.d.comb += amp.data.o.eq(self.i2s_tx.sdout)
 
             aux_din = platform.request("aux_din", 0)
-            m.d.comb += aux_din.o.eq(self.i2s_controller.sdout)
+            # m.d.comb += aux_din.o.eq(self.i2s_controller.sdout)
 
             aux_dout = platform.request("aux_dout", 0)
-            m.d.comb += self.i2s_controller.sdin.eq(aux_dout.i)
+            # m.d.comb += self.i2s_controller.sdin.eq(aux_dout.i)
+
+            m.d.comb += aux_din.o.eq(aux_dout.i)
 
 
         if self.enable_vocoder:

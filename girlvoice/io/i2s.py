@@ -105,8 +105,7 @@ class i2s_rx(wiring.Component):
         self._source_domain = source_domain
         super().__init__(
             {
-                "source_l": Out(stream.Signature(sample_width)),
-                "source_r": Out(stream.Signature(sample_width)),
+                "source": Out(stream.Signature(StereoPayload(sample_width))),
                 "sdin": In(1),
                 "lrclk": In(1),
                 "sclk_falling": In(1),
@@ -117,11 +116,11 @@ class i2s_rx(wiring.Component):
         m = Module()
 
         phy_domain = self._domain
-        output_stream = stream.Signature(self.sample_width).create()
+        output_stream = stream.Signature(StereoPayload(self.sample_width)).create()
 
         if self._source_domain != self._domain:
             m.submodules.cdc_fifo = self.cdc_fifo = AsyncFIFO(
-                width=self.sample_width,
+                width=self.sample_width*2,
                 depth=2,
                 r_domain=self._source_domain,
                 w_domain=self._domain
@@ -140,7 +139,7 @@ class i2s_rx(wiring.Component):
             m.d[phy_domain] += bit_count.eq(bit_count + 1)
 
 
-        with m.FSM():
+        with m.FSM(domain=phy_domain):
             with m.State("IDLE"):
                 with m.If(self.sclk_falling):
                     m.d[phy_domain] += shift_reg.eq(0)
@@ -151,8 +150,11 @@ class i2s_rx(wiring.Component):
                     m.d[phy_domain] += shift_reg.eq(Cat(self.sdin, shift_reg[:-1]))
 
                 with m.If(bit_count >= self.sample_width):
-                    m.d[phy_domain] += output_stream.payload.eq(shift_reg)
-                    m.d[phy_domain] += output_stream.valid.eq(1)
+                    with m.If(self.lrclk):
+                        m.d[phy_domain] += output_stream.p.right.eq(shift_reg)
+                        m.d[phy_domain] += output_stream.valid.eq(1)
+                    with m.Else():
+                        m.d[phy_domain] += output_stream.p.left.eq(shift_reg)
                     m.next = "IDLE"
 
         with m.If(output_stream.valid & output_stream.ready):
@@ -193,13 +195,16 @@ class I2SClockGenerator(wiring.Component):
         with m.If(self.sclk_falling):
             m.d.sync += bit_count.eq(bit_count + 1)
 
-        with m.If(bit_count == (self.sample_width - 1)):
-            with m.If(sclk_negedge):
-                m.d.sync += self.lrclk.eq(~self.lrclk)
+        # with m.If(bit_count == (self.sample_width - 1)):
+        #     with m.If(sclk_negedge):
+        #         m.d.sync += self.lrclk.eq(~self.lrclk)
 
-        m.d.comb += self.sclk.eq(clk_div[-1])
+        # m.d.comb += self.sclk.eq(clk_div[-1])
         with m.If(clk_div >= (self.clk_ratio - 1)):
             m.d.sync += clk_div.eq(0)
+            m.d.sync += self.sclk.eq(~self.sclk)
+            with m.If(self.sclk & (bit_count == (self.sample_width - 1))):
+                m.d.sync += self.lrclk.eq(~self.lrclk)
         with m.Else():
             m.d.sync += clk_div.eq(clk_div + 1)
 
@@ -375,8 +380,8 @@ class I2SController(wiring.Component):
 
         super().__init__(
             {
-                "sink": In(stream.Signature(sample_width)),
-                "source": Out(stream.Signature(sample_width)),
+                "sink": In(stream.Signature(StereoPayload(sample_width))),
+                "source": Out(stream.Signature(StereoPayload(sample_width))),
                 "sclk": Out(1),
                 "lrclk": Out(1),
                 "sdin": In(1),

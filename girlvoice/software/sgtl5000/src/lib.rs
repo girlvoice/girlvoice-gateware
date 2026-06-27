@@ -5,7 +5,7 @@ pub mod regmap;
 use regmap::{LineOutBiasCurrent, MclkFreqSetting, Register, SampleRateSetting, Sgtl5000Config};
 use embedded_hal::i2c::{Error, ErrorKind, I2c};
 
-use crate::regmap::{ AdcSource, DataSource};
+use crate::regmap::{ AdcSource, DataSource, I2SDataWidth};
 
 pub const SGTL5000_QFN20_ADDR: u8 = 0x0A;
 
@@ -201,10 +201,15 @@ impl<'a, I2C: I2c> Sgtl5000<'a, I2C> {
 
     }
 
-
     pub fn set_i2s_output_channel_swap(&mut self, is_swapped: bool) -> Result<(), Sgtl5000Error> {
         self.config.chip_sss_ctrl.set_i2s_lrswap(is_swapped);
         self.update_config(Register::ChipSSSCtrl)
+    }
+
+
+    pub fn set_i2s_sample_width(&mut self, data_length: I2SDataWidth) -> Result<(), Sgtl5000Error> {
+        self.config.chip_i2s_ctrl.dlen = data_length as u8;
+        self.update_config(Register::ChipI2SCtrl)
     }
 
     pub fn set_dac_mute(&mut self, mute_left: bool, mute_right: bool) -> Result<(), Sgtl5000Error> {
