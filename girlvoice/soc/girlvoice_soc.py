@@ -81,7 +81,7 @@ class GirlvoiceSoc(Component):
         self.sys_clk_freq = sys_clk_freq
         self.audio_clk_freq = audio_clk_freq
 
-        self.enable_vocoder = False
+        self.enable_vocoder = True
 
         self.use_spi_flash        = False
         self.mainram_base         = 0x00000000
@@ -189,7 +189,7 @@ class GirlvoiceSoc(Component):
         self.lmmi_to_wb = lmmi.WishboneLMMIBridge(lmmi_bus = self.i2c.lmmi, data_width=32)
         self.wb_decoder.add(self.lmmi_to_wb.wb_bus, addr=self.lmmi_base, name = "wb_to_lmmi")
 
-        sample_width = 24
+        sample_width = 16
 
         fs = 48e3
         bclk_freq = 64 * fs
@@ -220,9 +220,9 @@ class GirlvoiceSoc(Component):
         # Vocoder!
         if self.enable_vocoder:
             self.vocoder = StaticVocoder(
-                start_freq=100,
-                end_freq=5000,
-                num_channels=14,
+                start_freq=300,
+                end_freq=4000,
+                num_channels=15,
                 clk_sync_freq=sys_clk_freq,
                 fs=fs,
                 sample_width=sample_width,
@@ -353,18 +353,27 @@ class GirlvoiceSoc(Component):
             # m.d.comb += amp.data.o.eq(self.i2s_tx.sdout)
 
             aux_din = platform.request("aux_din", 0)
-            # m.d.comb += aux_din.o.eq(self.i2s_controller.sdout)
+            m.d.comb += aux_din.o.eq(self.i2s_controller.sdout)
 
             aux_dout = platform.request("aux_dout", 0)
-            # m.d.comb += self.i2s_controller.sdin.eq(aux_dout.i)
+            m.d.comb += self.i2s_controller.sdin.eq(aux_dout.i)
 
-            m.d.comb += aux_din.o.eq(aux_dout.i)
+            # m.d.comb += aux_din.o.eq(aux_dout.i)
 
 
         if self.enable_vocoder:
             m.submodules.vocoder = self.vocoder
-            wiring.connect(m, self.vocoder.sink, self.i2s_rx.source)
-            wiring.connect(m, self.vocoder.source, self.i2s_tx.sink)
+            m.d.comb += [
+                self.vocoder.sink.valid.eq(self.i2s_controller.source.valid),
+                self.i2s_controller.source.ready.eq(self.vocoder.sink.ready),
+                self.vocoder.sink.payload.eq(self.i2s_controller.source.p.left),
+
+                self.i2s_controller.sink.valid.eq(self.vocoder.source.valid),
+                self.vocoder.source.ready.eq(self.i2s_controller.sink.ready),
+                self.i2s_controller.sink.p.left.eq(self.vocoder.source.p),
+            ]
+            # wiring.connect(m, self.vocoder.sink, self.i2s_controller.source)
+            # wiring.connect(m, self.vocoder.source, self.i2s_tx.sink)
         else:
             # wiring.connect(m, self.i2s_rx.source, self.i2s_tx.sink)
             pass
