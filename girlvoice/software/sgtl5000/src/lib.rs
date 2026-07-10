@@ -27,11 +27,6 @@ impl<'a, I2C: I2c> Sgtl5000<'a, I2C> {
         Self { i2c, config }
     }
 
-    /// Consume the device and release the i2c device
-    // pub fn release(self) -> I2C {
-        // self.i2c
-    // }
-
     pub fn power_off_startup_power(&mut self) -> Result<(), Sgtl5000Error> {
         self.config.chip_ana_power.linereg_simple_powerup = false;
         self.config.chip_ana_power.startup_powerup = false;

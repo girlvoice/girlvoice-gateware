@@ -335,7 +335,6 @@ class GirlvoiceSoc(Component):
         # m.submodules.i2s_tx = self.i2s_tx
         m.submodules.i2s_controller = self.i2s_controller
 
-        wiring.connect(m, self.i2s_controller.sink, self.i2s_controller.source)
 
         if not self.sim:
             mic = platform.request("mic", 0)
@@ -375,8 +374,7 @@ class GirlvoiceSoc(Component):
             # wiring.connect(m, self.vocoder.sink, self.i2s_controller.source)
             # wiring.connect(m, self.vocoder.source, self.i2s_tx.sink)
         else:
-            # wiring.connect(m, self.i2s_rx.source, self.i2s_tx.sink)
-            pass
+            wiring.connect(m, self.i2s_controller.sink, self.i2s_controller.source)
         # wishbone csr bridge
         if not self.sim:
             m.submodules.wb_to_csr = self.wb_to_csr
