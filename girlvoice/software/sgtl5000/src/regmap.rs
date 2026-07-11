@@ -1,10 +1,18 @@
 
+use bitfield::bitfield;
+
+
 #[derive(Copy, Clone)]
 pub enum Register {
     Id = 0x00,
     ChipDigPower = 0x0002,
     ChipClkCtrl = 0x0004,
     ChipI2SCtrl = 0x0006,
+    ChipSSSCtrl = 0x000A,
+    ChipAdcDacCtrl = 0x000E,
+    ChipDacVol = 0x0010,
+    ChipAnaAdcCtrl = 0x0020,
+    ChipAnaCtrl = 0x0024,
     ChipRefCtrl = 0x0028,
     ChipLineOutCtrl = 0x002C,
     ChipLineOutVol = 0x002E,
@@ -14,17 +22,7 @@ pub enum Register {
 
 impl Register {
     pub fn addr(self) -> u16 {
-        match self {
-            Register::Id => 0x000,
-            Register::ChipDigPower => 0x0002,
-            Register::ChipClkCtrl => 0x0004,
-            Register::ChipI2SCtrl => 0x0006,
-            Register::ChipRefCtrl => 0x0028,
-            Register::ChipLineOutCtrl => 0x002C,
-            Register::ChipLineOutVol => 0x002E,
-            Register::ChipAnaPower => 0x0030,
-            Register::ChipClkTopCtrl => 0x0034,
-        }
+        return self as u16;
     }
 }
 
@@ -167,6 +165,142 @@ impl Default for ChipI2SCtrl {
         }
     }
 }
+
+pub enum DataSource {
+    Adc = 0x0,
+    I2sIn = 0x1,
+    Dap = 0x3,
+}
+
+impl TryFrom<u8> for DataSource {
+    type Error = ();
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        const ADC_VAL: u8 = DataSource::Adc as u8;
+        const I2S_VAL: u8 = DataSource::I2sIn as u8;
+        const DAP_VAL: u8 = DataSource::Dap as u8;
+        match value {
+            ADC_VAL => Ok(DataSource::Adc),
+            I2S_VAL => Ok(DataSource::I2sIn),
+            DAP_VAL => Ok(DataSource::Dap),
+            _ => Err(())
+        }
+    }
+}
+
+bitfield!{
+    pub struct ChipSSSCtrl(u16);
+    u8;
+    pub i2s_select, set_i2s_select: 1, 0;
+    pub dac_select, set_dac_select: 5, 4;
+    pub dap_select, set_dap_select: 7, 6;
+    pub dap_mix_select, set_dap_mix_select: 9, 8;
+    pub i2s_lrswap, set_i2s_lrswap: 10;
+    pub dac_lrswap, set_dac_lrswap: 12;
+    pub dap_lrswap, set_dap_lrswap: 13;
+    pub dap_mix_lrswap, set_dap_mix_lrswap: 14;
+}
+
+impl MappedRegister for ChipSSSCtrl {
+    fn value(&self) -> u16 {
+        self.0
+    }
+
+    fn update(&mut self, val: u16) {
+        self.0 = val
+    }
+}
+
+impl Default for ChipSSSCtrl {
+    fn default() -> Self {
+        Self(0x0010)
+    }
+}
+
+bitfield!{
+    pub struct ChipAdcDacCtrl(u16);
+    bool;
+    pub adc_hpf_bypass, set_adc_hpf_bypassed: 0;
+    pub adc_hpf_freeze, set_adc_hpf_frozen: 1;
+    pub is_dac_left_muted, set_dac_mute_left: 2;
+    pub is_dac_right_muted, set_dac_mute_right: 3;
+    pub vol_expo_ramp, set_vol_expo_ramp: 8;
+    pub is_vol_ramp_enabled, set_vol_ramp_enabled: 9;
+    pub is_vol_busy_dac_left, _: 12;
+    pub is_vol_busy_dac_right, _: 13;
+}
+
+impl MappedRegister for ChipAdcDacCtrl {
+    fn value(&self) -> u16 {
+        self.0
+    }
+
+    fn update(&mut self, val: u16) {
+        self.0 = val
+    }
+}
+
+impl Default for ChipAdcDacCtrl {
+    fn default() -> Self {
+        Self(0x020C)
+    }
+}
+
+pub enum AdcSource {
+    Microphone = 0x0,
+    LineIn = 0x1,
+}
+
+bitfield!{
+    pub struct ChipAnaCtrl(u16);
+    bool;
+    pub is_adc_muted, set_adc_muted: 0;
+    pub is_adc_zcd_enabled, set_adc_zcd_enabled: 1;
+    pub adc_select, set_adc_select: 2;
+    pub is_hp_muted, set_hp_muted: 4;
+    pub is_hp_zcd_enabled, set_hp_zcd_enabled: 5;
+    pub hp_select, set_hp_select: 6;
+    pub is_line_out_muted, set_line_out_muted: 8;
+}
+
+impl MappedRegister for ChipAnaCtrl {
+    fn value(&self) -> u16 {
+        self.0
+    }
+
+    fn update(&mut self, val: u16) {
+        self.0 = val
+    }
+}
+
+impl Default for ChipAnaCtrl {
+    fn default() -> Self {
+        Self(0x0111)
+    }
+}
+
+bitfield!{
+    pub struct ChipDacVol(u16);
+    u8;
+    pub dac_vol_left, set_dac_vol_left: 7, 0;
+    pub dac_vol_right, set_dac_vol_right: 15, 8;
+}
+
+impl MappedRegister for ChipDacVol {
+    fn value(&self) -> u16 {
+        self.0
+    }
+
+    fn update(&mut self, val: u16) {
+        self.0 = val
+    }
+}
+
+impl Default for ChipDacVol {
+    fn default() -> Self {
+        Self(0x3C3C)
+    }
+}
+
 
 // ChipRefPower -----------------------
 pub struct ChipRefCtrl {
@@ -393,6 +527,10 @@ pub struct Sgtl5000Config {
     pub chip_dig_power: ChipDigPower,
     pub chip_clk_ctrl: ChipClkCtrl,
     pub chip_i2s_ctrl: ChipI2SCtrl,
+    pub chip_sss_ctrl: ChipSSSCtrl,
+    pub chip_adc_dac_ctrl: ChipAdcDacCtrl,
+    pub chip_ana_ctrl: ChipAnaCtrl,
+    pub chip_dac_vol: ChipDacVol,
     pub chip_ref_ctrl: ChipRefCtrl,
     pub chip_line_out_ctrl: ChipLineOutCtrl,
     pub chip_line_out_vol: ChipLineOutVol,
@@ -406,6 +544,10 @@ impl Default for Sgtl5000Config {
             chip_dig_power: ChipDigPower::default(),
             chip_clk_ctrl: ChipClkCtrl::default(),
             chip_i2s_ctrl: ChipI2SCtrl::default(),
+            chip_sss_ctrl: ChipSSSCtrl::default(),
+            chip_adc_dac_ctrl: ChipAdcDacCtrl::default(),
+            chip_ana_ctrl: ChipAnaCtrl::default(),
+            chip_dac_vol: ChipDacVol::default(),
             chip_ref_ctrl: ChipRefCtrl::default(),
             chip_line_out_ctrl: ChipLineOutCtrl::default(),
             chip_line_out_vol: ChipLineOutVol::default(),
@@ -418,29 +560,39 @@ impl Default for Sgtl5000Config {
 impl Sgtl5000Config {
     pub fn reg_val(&self, reg: Register) -> u16 {
         match reg {
+            Register::Id => 0,
             Register::ChipDigPower => self.chip_dig_power.value(),
             Register::ChipClkCtrl => self.chip_clk_ctrl.value(),
             Register::ChipI2SCtrl => self.chip_i2s_ctrl.value(),
+            Register::ChipSSSCtrl => self.chip_sss_ctrl.value(),
+            Register::ChipAdcDacCtrl => self.chip_adc_dac_ctrl.value(),
+            Register::ChipDacVol => self.chip_dac_vol.value(),
+            Register::ChipAnaAdcCtrl => 0,
+            Register::ChipAnaCtrl => self.chip_ana_ctrl.value(),
             Register::ChipRefCtrl => self.chip_ref_ctrl.value(),
             Register::ChipLineOutCtrl => self.chip_line_out_ctrl.value(),
             Register::ChipLineOutVol => self.chip_line_out_vol.value(),
             Register::ChipAnaPower => self.chip_ana_power.value(),
             Register::ChipClkTopCtrl => self.chip_clk_top_ctrl.value(),
-            _ => 0,
         }
     }
 
     pub fn update_reg(&mut self, reg: Register, val: u16) {
         match reg {
+            Register::Id => (),
             Register::ChipDigPower => self.chip_dig_power.update(val),
             Register::ChipClkCtrl => self.chip_clk_ctrl.update(val),
             Register::ChipI2SCtrl => self.chip_i2s_ctrl.update(val),
+            Register::ChipSSSCtrl => self.chip_sss_ctrl.update(val),
+            Register::ChipAdcDacCtrl => self.chip_adc_dac_ctrl.update(val),
+            Register::ChipDacVol => self.chip_dac_vol.update(val),
+            Register::ChipAnaAdcCtrl => (),
+            Register::ChipAnaCtrl => self.chip_ana_ctrl.update(val),
             Register::ChipRefCtrl => self.chip_ref_ctrl.update(val),
             Register::ChipLineOutCtrl => self.chip_line_out_ctrl.update(val),
             Register::ChipLineOutVol => self.chip_line_out_vol.update(val),
             Register::ChipAnaPower => self.chip_ana_power.update(val),
             Register::ChipClkTopCtrl => self.chip_clk_top_ctrl.update(val),
-            _ => (),
         }
     }
 }

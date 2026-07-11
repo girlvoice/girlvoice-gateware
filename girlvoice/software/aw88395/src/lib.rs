@@ -15,7 +15,7 @@ use libm::Libm;
 
 const AW88395_ADDR: u8 = 0x34;
 
-pub struct Aw88395<I2C> {
+pub struct Aw88395<I2C: I2c> {
     i2c: I2C,
     config: Aw88395Config,
 }

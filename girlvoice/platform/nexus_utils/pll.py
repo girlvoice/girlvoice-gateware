@@ -56,6 +56,7 @@ class NXPLL(Elaboratable):
         clkout_freq,
         clkout_phase=0,
         create_output_port_clocks=False,
+        enable_fractional_synth = False,
     ):
         # self.logger = logging.getLogger("NXPLL")
         # self.logger.info("Creating NXPLL.")
@@ -79,8 +80,10 @@ class NXPLL(Elaboratable):
 
         self.m = Module()
 
+        self.is_fractional_synth = enable_fractional_synth
+
         self.register_clkin(clkin, clkin_freq)
-        self.create_clkout(cd_out, clkout_freq, phase=clkout_phase)
+        self.create_clkout(cd_out, clkout_freq, phase=clkout_phase, enable_fractional_synth=enable_fractional_synth)
 
     def register_clkin(self, clkin, freq):
         (clki_freq_min, clki_freq_max) = self.clki_freq_range
@@ -97,7 +100,7 @@ class NXPLL(Elaboratable):
         # register_clkin_log(self.logger, clkin, freq)
         self.nclkins += 1
 
-    def create_clkout(self, cd, freq, phase=0, margin=1e-2):
+    def create_clkout(self, cd, freq, phase=0, margin=1e-2, enable_fractional_synth = False):
         (clko_freq_min, clko_freq_max) = self.clko_freq_range
         assert freq >= clko_freq_min
         assert freq <= clko_freq_max
@@ -106,6 +109,7 @@ class NXPLL(Elaboratable):
         self.clkouts[self.nclkouts] = (cd.clk, freq, phase, margin)
         # create_clkout_log(self.logger, cd.name, freq, margin, self.nclkouts)
         self.nclkouts += 1
+        self.is_fractional_synth = enable_fractional_synth
 
     def compute_config(self):
         config = {}
@@ -431,6 +435,7 @@ class NXPLL(Elaboratable):
             p_REF_INTEGER_MODE="ENABLED",  # Ref manual has a discrepency so lets always set this value just in case
             p_REF_MMD_DIG="1",  # Divider for the input clock, ie 'M'
             i_PLLRESET=self.reset,
+            i_PLLPOWERDOWN_N=1,
             i_REFCK=self.clkin,
             o_LOCK=self.locked,
             # Use CLKOS5 & divider for feedback
@@ -447,10 +452,47 @@ class NXPLL(Elaboratable):
             p_FBK_MMD_DIG="1",
         )
 
+
         analog_params = self.calculate_analog_parameters(
             self.clkin_freq, config["clkfb_div"]
         )
         self.params.update(analog_params)
+
+        # Somewhat hacky way to override parameters that were calculated for
+        # Integer synthesis
+        if self.is_fractional_synth:
+            frac_fb = Signal()
+            self.params.pop("o_CLKOS5")
+            self.params.update(
+                p_SEL_OUTA="DISABLED",
+                p_FBK_INTEGER_MODE="DISABLED", # Disable integer feedback
+                p_ENCLK_CLKOS5="DISABLED", # Disable our integer feedback clock
+                p_SEL_FBK="DIVA", # Set clock 0 for feedback
+                p_CLKMUX_FB="CMUX_CLKOP",
+                o_INTFBKOP=frac_fb,
+                i_FBKCK = frac_fb,
+
+                p_REF_OSC_CTRL="3P2",
+                p_INTFBKDEL_SEL="DISABLED",
+                p_V2I_PP_RES="9K",
+                p_SSC_EN_SDM="ENABLED", # Enable the sigma-delta modulation block
+                p_SSC_ORDER="SDM_ORDER2",
+                p_FBK_MASK = "0b00010000",
+                p_FBK_MMD_PULS_CTL = "0b0111",
+                p_FBK_CUR_BLE="0b00001000",
+                p_FBK_PI_RC="0b0010",
+                p_FBK_PR_CC="0b1000",
+                p_FBK_PR_IC="0b1000",
+                p_CRIPPLE="1P",
+
+                # TODO hard-coded constants for audio clock synth should be parameterized
+                p_FBK_MMD_DIG="66",
+                p_SSC_N_CODE="0b001000010",       # Fractional synth integer part
+                p_SSC_F_CODE="0b100011110110000", # Fractional synth decimal part
+                p_DIVA="64",
+                p_DELA="64",
+                p_DIV_DEL="0b1000000",
+            )
         n_to_l = {0: "P", 1: "S", 2: "S2", 3: "S3", 4: "S4"}
 
         for n, (clk, f, p, m) in sorted(self.clkouts.items()):
@@ -458,13 +500,15 @@ class NXPLL(Elaboratable):
             phase = int((1 + p / 360) * div)
             letter = chr(n + 65)
             self.params["p_ENCLK_CLKO{}".format(n_to_l[n])] = "ENABLED"
-            self.params["p_DIV{}".format(letter)] = str(div - 1)
-            self.params["p_PHI{}".format(letter)] = "0"
-            self.params["p_DEL{}".format(letter)] = str(phase - 1)
             self.params["o_CLKO{}".format(n_to_l[n])] = clk
+
+            if not self.is_fractional_synth:
+                self.params["p_DIV{}".format(letter)] = str(div - 1)
+                self.params["p_PHI{}".format(letter)] = "0"
+                self.params["p_DEL{}".format(letter)] = str(phase - 1)
+
             # TODO: remove hardcode:
             # self.m.d.comb += self.clkout.eq(clk)
-
             # In theory this really shouldn't be necessary, in practice
             # the tooling seems to have suspicous clock latency values
             # on generated clocks that are causing timing problems and Lattice
@@ -479,8 +523,6 @@ class NXPLL(Elaboratable):
                     )
                 )
 
-        if platform and self.create_output_port_clocks:
-            i = 0
 
         # print("PLL Parameters:")
         # pprint.pprint(self.params)

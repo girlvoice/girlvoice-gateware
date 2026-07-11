@@ -1,5 +1,4 @@
 
-use core::fmt::write;
 
 use embedded_io::{Read, Write};
 use embedded_hal::i2c::I2c;
@@ -40,7 +39,7 @@ impl<T: Read + Write, U: I2c, V: DelayNs> Terminal<T, U, V> {
 
     pub fn handle_char(&mut self) {
 
-        let read_size = self.serial.read(&mut self.char_buf).unwrap();
+        let _read_size = self.serial.read(&mut self.char_buf).unwrap();
         let new_char = self.char_buf[0] as char;
         if self.csi_mode {
             self.handle_csi_command(new_char);
@@ -162,6 +161,12 @@ impl<T: Read + Write, U: I2c, V: DelayNs> Terminal<T, U, V> {
                 } else {
                     writeln!(self.serial, "usage: set_vol <volume> : Set the amplifier volume on a scale from 0-100%\r").unwrap();
                 }
+            }
+            Some("i2c_read") => {
+
+            }
+            Some("i2c_write") => {
+
             }
             Some(_) => writeln!(self.serial, "idk how to do that yet\r").unwrap(),
             None => writeln!(self.serial, "ouch that hurt!\r").unwrap(),

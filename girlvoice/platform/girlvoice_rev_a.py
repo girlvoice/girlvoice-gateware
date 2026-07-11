@@ -89,25 +89,28 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             "aux_clk",
             0,
             Pins("MCLK", dir="o", conn=("aux_i2s", 0)),
-            Attrs(IO_TYPE="LVCMOS18"),
+            Attrs(IO_TYPE="LVCMOS18H"),
         ),
         Resource(
             "aux_dout",
             0,
-            Pins("SDOUT", dir="o", conn=("aux_i2s", 0)),
-            Attrs(IO_TYPE="LVCMOS18"),
+            Pins("SDOUT", dir="i", conn=("aux_i2s", 0)),
+            Attrs(IO_TYPE="LVCMOS18H"),
         ),
         Resource(
             "aux_din",
             0,
-            Pins("SDIN", dir="i", conn=("aux_i2s", 0)),
-            Attrs(IO_TYPE="LVCMOS18"),
+            Pins("SDIN", dir="o", conn=("aux_i2s", 0)),
+            Attrs(IO_TYPE="LVCMOS18H"),
         ),
         Resource("led", 0, Pins("13", dir="o"), Attrs(IO_TYPE="LVCMOS18H")),
 
         Resource(
             "mic",
             0,
+
+            # BCLK/SCLK and LRCLK for microphones is shared with
+            # the aux audio codec
             Subsignal(
                 "clk",
                 Pins("SCLK", dir="o", conn=("mic_i2s", 0)),
@@ -186,11 +189,11 @@ class GirlvoiceRevAPlatform(LatticePlatform):
                 "INT": "37",
             },
         ),
-        # Connector("aux_i2s", 0, {
-        #     "MCLK": "22",
-        #     "SDIN": "10",
-        #     "SDOUT": "27",
-        # })
+        Connector("aux_i2s", 0, {
+            "MCLK": "22",
+            "SDIN": "10",
+            "SDOUT": "9",
+        })
     ]
 
     def has_required_tools(self):
@@ -239,6 +242,9 @@ class GirlvoiceRevAPlatform(LatticePlatform):
         kwargs["add_constraints"] = "ldc_set_sysconfig {{CONFIGIO_VOLTAGE_BANK0=3.3 CONFIGIO_VOLTAGE_BANK1=3.3 JTAG_PORT=DISABLE SLAVE_SPI_PORT=DISABLE MASTER_SPI_PORT=DISABLE}}\n"
         kwargs["add_constraints"] += "ldc_set_attribute {USE_PRIMARY=FALSE} [get_ports \"i2c_0__scl__io\"]\n"
 
+        # Add async constraint between audio and system clock
+        kwargs["add_preferences"] = "set_clock_groups -asynchronous -group [get_clocks {clk[0]}] -group [get_clocks aux_clk_0__o]\n"
+
         if use_radiant_docker and self.toolchain == "Radiant":
             build_plan = super().build(
                 elaboratable, name, build_dir, False, program_opts, do_program, **kwargs
@@ -270,13 +276,28 @@ class GirlvoiceRevAPlatform(LatticePlatform):
 
 
 if __name__ == "__main__":
-    p: Platform = GirlvoiceRevAPlatform()
+    p: Platform = GirlvoiceRevAPlatform(toolchain="Radiant")
 
     m = Module()
 
+    from girlvoice.platform.nexus_utils.pll import NXPLL
+
+
+    m.domains.audio = cd_audio = ClockDomain("audio")
+    m.submodules.pll = pll = NXPLL(
+        clkin=ClockSignal("sync"),
+        clkin_freq=24e6,
+        cd_out=cd_audio,
+        clkout=cd_audio.clk,
+        clkout_freq=24.576e6,
+        enable_fractional_synth=True
+    )
+
     count = Signal(24)
     m.d.sync += count.eq(count + 1)
-    m.d.comb += p.request("led", 0).o.eq(count[-1])
+    m.d.comb += p.request("led", 0).o.eq(pll.locked)
     m.d.comb += p.request("pwr_en", 0).o.eq(1)
+
+    m.d.comb += p.request("aux_clk").o.eq(cd_audio.clk)
 
     p.build(m)
