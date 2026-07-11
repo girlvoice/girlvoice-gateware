@@ -1,6 +1,5 @@
 
 use bitfield::bitfield;
-use bitfield::{BitRange, BitRangeMut};
 
 
 #[derive(Copy, Clone)]

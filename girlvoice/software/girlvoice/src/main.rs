@@ -1,10 +1,7 @@
 #![no_std]
 #![no_main]
 
-use embedded_hal::delay::DelayNs;
-use embedded_hal::spi::SpiDevice;
 use aw88395::Aw88395;
-use embedded_hal::i2c::I2c;
 use sgtl5000::{Sgtl5000};
 use sgtl5000::regmap::{I2SDataWidth, LineOutBiasCurrent, MclkFreqSetting, SampleRateSetting};
 use riscv_rt::entry;
