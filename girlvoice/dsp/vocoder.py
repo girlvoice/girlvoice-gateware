@@ -8,6 +8,7 @@ from amaranth.lib.wiring import In, Out
 from amaranth.lib import stream
 from amaranth.sim import Simulator
 
+from girlvoice.dsp.bandpass_iir_serial import BandpassIIREngine
 from girlvoice.dsp.sine_synth import ParallelSineSynth
 from girlvoice.dsp.vga import VariableGainAmp
 from girlvoice.dsp.bandpass_iir import BandpassIIR
@@ -19,22 +20,16 @@ from girlvoice.stream import stream_get, stream_put
 
 class SerialThreadedVocoderChannel(wiring.Component):
     def __init__(
-        self, channel_edges, env_sink, env_source, fs=48000, sample_width=18
+        self, env_sink, env_source, filt_sink, filt_source, mult_slice, fs=48000, sample_width=18
     ):
         self.fs = fs
         self.sample_width = sample_width
         self.env_sink = env_sink
         self.env_source = env_source
+        self.filt_sink = filt_sink
+        self.filt_source = filt_source
 
-        self.mult = TDMMultiply(sample_width=sample_width, num_threads=2)
-        self.bandpass = BandpassIIR(
-            band_edges=channel_edges,
-            filter_order=1,
-            sample_width=sample_width,
-            fs=fs,
-            mult_slice=self.mult,
-        )
-        self.vga = VariableGainAmp(sample_width, sample_width, mult_slice=self.mult)
+        self.vga = VariableGainAmp(sample_width, sample_width, mult_slice=mult_slice)
 
         super().__init__(
             {
@@ -47,12 +42,10 @@ class SerialThreadedVocoderChannel(wiring.Component):
     def elaborate(self, platform):
         m = Module()
 
-        m.submodules.mult = self.mult
-        m.submodules.bandpass = self.bandpass
         m.submodules.vga = self.vga
 
-        wiring.connect(m, wiring.flipped(self.sink), self.bandpass.sink)
-        wiring.connect(m, self.bandpass.source, self.env_sink)
+        wiring.connect(m, wiring.flipped(self.sink), self.filt_sink)
+        wiring.connect(m, self.filt_source, self.env_sink)
         wiring.connect(m, self.env_source, self.vga.modulator)
         wiring.connect(m, wiring.flipped(self.carrier), self.vga.carrier)
 
@@ -412,29 +405,39 @@ class SerialVocoder(wiring.Component):
             instances=num_channels
         )
 
+        self.bandpass_engine = BandpassIIREngine(
+            num_instances=num_channels,
+            band_edges=self.ch_edges,
+            sample_width=self.sample_width,
+            fs=fs
+        )
+
+        self.vga_mult = TDMMultiply(sample_width=sample_width, num_threads=num_channels)
+
         self.channels = []
         for i in range(len(self.ch_freq)):
             edges = self.ch_edges[i]
             # slice = self.slices[i//2]
             self.channels.append(
                 SerialThreadedVocoderChannel(
-                    channel_edges=edges,
                     fs=fs,
                     sample_width=sample_width,
                     env_sink=self.envelope_engine.sink(i),
-                    env_source=self.envelope_engine.source(i)
-                    # mult_slice=slice
+                    env_source=self.envelope_engine.source(i),
+                    filt_sink=self.bandpass_engine.sink(i),
+                    filt_source=self.bandpass_engine.source(i),
+                    mult_slice=self.vga_mult
                 )
             )
 
         self.demux = ChannelDemux(num_channels=num_channels, sample_width=sample_width)
         self.mux = ChannelMux(num_channels=num_channels, sample_width=sample_width)
 
-        freqs = np.linspace(0, int(self.ch_freq[-1]), int(fs))
-        for ch in self.channels:
-            a = ch.bandpass.a_quant
-            b = ch.bandpass.b_quant
-            w, q = signal.freqz(b=b, a=a, fs=fs)
+        # freqs = np.linspace(0, int(self.ch_freq[-1]), int(fs))
+        # for ch in self.channels:
+        #     a = ch.bandpass.a_quant
+        #     b = ch.bandpass.b_quant
+        #     w, q = signal.freqz(b=b, a=a, fs=fs)
 
         super().__init__(
             {
@@ -449,6 +452,8 @@ class SerialVocoder(wiring.Component):
         m.submodules.mux = self.mux
         m.submodules.demux = self.demux
         m.submodules.envelope_engine = self.envelope_engine
+        m.submodules.bandpass_engine = self.bandpass_engine
+        m.submodules.vga_mult = self.vga_mult
 
         wiring.connect(m, wiring.flipped(self.sink), self.demux.sink)
         wiring.connect(m, wiring.flipped(self.source), self.mux.source)

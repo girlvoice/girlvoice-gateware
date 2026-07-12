@@ -279,7 +279,6 @@ def run_sim():
     (t, input_samples) = generate_chirp(
         duration, fs, start_freq, end_freq, sample_width, amp=1
     )
-    input_samples
     output_samples = np.zeros(int(duration * fs))
 
     async def tb(ctx):
