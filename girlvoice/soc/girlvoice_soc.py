@@ -235,7 +235,7 @@ class GirlvoiceSoc(Component):
             self.vocoder = SerialVocoder(
                 start_freq=300,
                 end_freq=4000,
-                num_channels=16,
+                num_channels=20,
                 fs=fs,
                 sample_width=sample_width,
             )

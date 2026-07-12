@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from math import ceil, log2
 import os
-from tokenize import Single
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
@@ -10,7 +9,6 @@ import amaranth.lib.wiring as wiring
 from amaranth.lib.wiring import In, Out
 from amaranth.lib import stream
 from amaranth.lib import memory
-from girlvoice.dsp.tdm_slice import TDMMultiply
 from typing import List, Tuple
 
 """
@@ -393,7 +391,7 @@ def run_sim():
     fs = 48000
     num_inst = 4
     m = Module()
-    m.submodules.filt = dut = BandpassIIR(
+    m.submodules.filt = dut = BandpassIIREngine(
         center_freq=[500, 5000, 10000, 20000],
         passband_width=[200, 500, 1000, 1000],
         num_instances=num_inst,
