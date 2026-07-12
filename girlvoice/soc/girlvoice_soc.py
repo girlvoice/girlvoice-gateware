@@ -61,7 +61,7 @@ import girlvoice.platform.nexus_utils.lmmi as lmmi
 from girlvoice.platform.nexus_utils.lram          import WishboneNXLRAM
 from girlvoice.soc.provider import girlvoice_rev_a as provider
 
-from girlvoice.dsp.vocoder import StaticVocoder, ThreadedVocoderChannel
+from girlvoice.dsp.vocoder import SerialVocoder, StaticVocoder, ThreadedVocoderChannel
 from girlvoice.io.i2s import i2s_rx, i2s_tx, I2SController
 from girlvoice.io import spi, gpi
 from girlvoice.platform.nexus_utils.i2c_fifo import I2CFIFO
@@ -223,14 +223,21 @@ class GirlvoiceSoc(Component):
 
         # Vocoder!
         if self.enable_vocoder:
-            self.vocoder = StaticVocoder(
+            # self.vocoder = StaticVocoder(
+            #     start_freq=300,
+            #     end_freq=4000,
+            #     num_channels=14,
+            #     clk_sync_freq=sys_clk_freq,
+            #     fs=fs,
+            #     sample_width=sample_width,
+            #     channel_class=ThreadedVocoderChannel
+            # )
+            self.vocoder = SerialVocoder(
                 start_freq=300,
                 end_freq=4000,
-                num_channels=15,
-                clk_sync_freq=sys_clk_freq,
+                num_channels=16,
                 fs=fs,
                 sample_width=sample_width,
-                channel_class=ThreadedVocoderChannel
             )
 
             # Add vocoder wavetable to wb bus

@@ -12,10 +12,54 @@ from girlvoice.dsp.sine_synth import ParallelSineSynth
 from girlvoice.dsp.vga import VariableGainAmp
 from girlvoice.dsp.bandpass_iir import BandpassIIR
 from girlvoice.dsp.envelope import EnvelopeFollower
+from girlvoice.dsp.envelope_serial import SerialEnvelopeFollower
 from girlvoice.dsp.envelope_vga import EnvelopeVGA
 from girlvoice.dsp.tdm_slice import TDMMultiply
 from girlvoice.stream import stream_get, stream_put
 
+class SerialThreadedVocoderChannel(wiring.Component):
+    def __init__(
+        self, channel_edges, env_sink, env_source, fs=48000, sample_width=18
+    ):
+        self.fs = fs
+        self.sample_width = sample_width
+        self.env_sink = env_sink
+        self.env_source = env_source
+
+        self.mult = TDMMultiply(sample_width=sample_width, num_threads=2)
+        self.bandpass = BandpassIIR(
+            band_edges=channel_edges,
+            filter_order=1,
+            sample_width=sample_width,
+            fs=fs,
+            mult_slice=self.mult,
+        )
+        self.vga = VariableGainAmp(sample_width, sample_width, mult_slice=self.mult)
+
+        super().__init__(
+            {
+                "sink": In(stream.Signature(signed(sample_width))),
+                "carrier": In(stream.Signature(signed(sample_width))),
+                "source": Out(stream.Signature(signed(sample_width))),
+            }
+        )
+
+    def elaborate(self, platform):
+        m = Module()
+
+        m.submodules.mult = self.mult
+        m.submodules.bandpass = self.bandpass
+        m.submodules.vga = self.vga
+
+        wiring.connect(m, wiring.flipped(self.sink), self.bandpass.sink)
+        wiring.connect(m, self.bandpass.source, self.env_sink)
+        wiring.connect(m, self.env_source, self.vga.modulator)
+        wiring.connect(m, wiring.flipped(self.carrier), self.vga.carrier)
+
+        wiring.connect(m, wiring.flipped(self.source), self.vga.source)
+
+
+        return m
 
 class ThreadedVocoderChannel(wiring.Component):
     def __init__(
@@ -302,6 +346,109 @@ class StaticVocoder(wiring.Component):
         m.submodules.synth = self.synth
         m.submodules.mux = self.mux
         m.submodules.demux = self.demux
+
+        wiring.connect(m, wiring.flipped(self.sink), self.demux.sink)
+        wiring.connect(m, wiring.flipped(self.source), self.mux.source)
+
+        for i in range(self.num_channels):
+            ch = self.channels[i]
+            m.submodules += ch
+
+            wiring.connect(m, self.demux.source(i), ch.sink)
+            wiring.connect(m, self.mux.sink(i), ch.source)
+            wiring.connect(m, self.synth.source(i), ch.carrier)
+
+        return m
+
+
+class SerialVocoder(wiring.Component):
+    def __init__(
+        self,
+        start_freq,
+        end_freq,
+        num_channels,
+        fs=48000,
+        sample_width=18,
+    ):
+        self.sample_width = sample_width
+        self.num_channels = num_channels
+        self.fs = fs
+
+        self.ch_edges = []
+
+        # Taken from Stanford ECE Vocoder github. This is calculated based on mel scale spacing
+        bandwidth_param = 0.035
+
+        start_mel = mel(start_freq)
+        end_mel = mel(end_freq)
+
+        print(f"Channel range as mel {start_mel}-{end_mel}")
+
+        ch_mel, channel_space = np.linspace(
+            start_mel, end_mel, num_channels, retstep=True
+        )
+        self.ch_freq = mel_to_freq(ch_mel)
+
+        print(f"Channel center frequencies: {self.ch_freq}")
+
+        for freq in self.ch_freq:
+            ch_start = freq * (1 - bandwidth_param)
+            ch_end = freq * (1 + bandwidth_param)
+            self.ch_edges.append([ch_start, ch_end])
+
+        print(f"Generating vocoder channels at {self.ch_edges} Hz")
+
+        mults_per_channel = 2
+        self.num_slices = self.num_channels // 2
+        # self.slices = [TDMMultiply(sample_width=sample_width, num_threads=2 * mults_per_channel) for _ in range(self.num_slices)]
+
+        self.synth = ParallelSineSynth(self.ch_freq, fs, sample_width)
+
+        self.envelope_engine = SerialEnvelopeFollower(
+            sample_width=sample_width,
+            fs=fs,
+            attack_halflife=0.1,
+            decay_halflife=25,
+            instances=num_channels
+        )
+
+        self.channels = []
+        for i in range(len(self.ch_freq)):
+            edges = self.ch_edges[i]
+            # slice = self.slices[i//2]
+            self.channels.append(
+                SerialThreadedVocoderChannel(
+                    channel_edges=edges,
+                    fs=fs,
+                    sample_width=sample_width,
+                    env_sink=self.envelope_engine.sink(i),
+                    env_source=self.envelope_engine.source(i)
+                    # mult_slice=slice
+                )
+            )
+
+        self.demux = ChannelDemux(num_channels=num_channels, sample_width=sample_width)
+        self.mux = ChannelMux(num_channels=num_channels, sample_width=sample_width)
+
+        freqs = np.linspace(0, int(self.ch_freq[-1]), int(fs))
+        for ch in self.channels:
+            a = ch.bandpass.a_quant
+            b = ch.bandpass.b_quant
+            w, q = signal.freqz(b=b, a=a, fs=fs)
+
+        super().__init__(
+            {
+                "sink": In(stream.Signature(signed(sample_width))),
+                "source": Out(stream.Signature(signed(sample_width))),
+            }
+        )
+
+    def elaborate(self, platform):
+        m = Module()
+        m.submodules.synth = self.synth
+        m.submodules.mux = self.mux
+        m.submodules.demux = self.demux
+        m.submodules.envelope_engine = self.envelope_engine
 
         wiring.connect(m, wiring.flipped(self.sink), self.demux.sink)
         wiring.connect(m, wiring.flipped(self.source), self.mux.source)

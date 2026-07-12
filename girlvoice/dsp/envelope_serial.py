@@ -307,7 +307,7 @@ def run_sim():
     m = Module()
     # m.submodules.mult = mult = TDMMultiply(bit_width, num_threads=2)
     num_inst = 4
-    m.submodules.dut = env = EnvelopeFollower(
+    m.submodules.dut = env = SerialEnvelopeFollower(
         sample_width=bit_width, fs=fs, mult_slice=None, attack_halflife=0.75, decay_halflife=2.5, instances=num_inst,
     )
 
@@ -316,21 +316,26 @@ def run_sim():
     duration = 0.1
 
     test_sig_freq = 500
-    (t, input_samples) = generate_ramp(test_sig_freq, duration, fs, bit_width)
-    start_freq = 10
-    end_freq = 10000
+    # (t, input_samples) = generate_ramp(test_sig_freq, duration, fs, bit_width)
+    # start_freq = 10
+    # end_freq = 10000
     # (t, input_samples) = generate_chirp(duration, fs, start_freq, end_freq, bit_width)
     # t, input_samples = generate_impulse(duration, fs, bit_width)
+
+    input_samples = []
+    for i in range(num_inst):
+        t, impulse = generate_impulse(duration, fs, bit_width, start_time=(i * (duration / num_inst)))
+        input_samples.append(impulse)
 
     output_samples = [[] for _ in range(num_inst) ]
     async def tb(ctx):
         samples_processed = 0
 
-        for sample in input_samples:
+        for sample_idx in range(len(t)):
             for i in range(num_inst):
                 sink = env.sink(i)
                 source = env.source(i)
-                await stream_put(ctx, sink, int(sample))
+                await stream_put(ctx, sink, int(input_samples[i][sample_idx]))
                 output_samples[i].append(await stream_get(ctx, source))
 
 
@@ -349,8 +354,8 @@ def run_sim():
         sim.run()
         # bode_plot(fs, duration, end_freq, input_samples, output_samples)
         ax2 = plt.subplot(111)
-        ax2.plot(t, input_samples, alpha=0.5, label="Input")
         for i in range(num_inst):
+            ax2.plot(t, input_samples[i], alpha=0.5, label=f"Input_{i}")
             ax2.plot(t, output_samples[i], alpha=0.5, label=f"Output_{i}")
         ax2.set_xlabel("time (s)")
         plt.title("Envelope Follower")

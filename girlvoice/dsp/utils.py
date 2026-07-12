@@ -57,11 +57,14 @@ def generate_ramp(freq, duration, fs, sample_width):
     return (t, input_samples)
 
 
-def generate_impulse(duration, fs, sample_width):
+def generate_impulse(duration, fs, sample_width, start_time=0):
+    if start_time >= duration:
+        raise ValueError(f"Impulse cannot start after end of waveform. Start time: {start_time}, Duration: {duration}")
     num_samples = int(duration * fs)
+    start_sample = int(start_time * fs)
     t = np.linspace(0, duration, num_samples)
 
     impulse = np.zeros(num_samples)
-    impulse[0:50] = 2 ** (sample_width - 1) - 1
+    impulse[start_sample:start_sample + 50] = 2 ** (sample_width - 1) - 1
 
     return (t, impulse)
