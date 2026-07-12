@@ -116,9 +116,6 @@ class ParallelSineSynth(wiring.Component):
     def elaborate(self, platform):
         m = Module()
 
-        # m.submodules.rom = wavetable_rom = memory.Memory(
-        #     shape=signed(self.sample_width), depth=len(self.lut), init=self.lut
-        # )
         m.submodules.ram = self.wavetable_ram
         rd_port_wavetable: memory.ReadPort = self.wavetable_ram._mem.read_port()
         m.d.comb += rd_port_wavetable.en.eq(1)
