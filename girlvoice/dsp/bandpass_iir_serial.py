@@ -67,6 +67,7 @@ class BandpassIIREngine(wiring.Component):
         # same as above but for the fixed-point representations of the coefficients
         a_coeffs_fp = []
         b_coeffs_fp = []
+        self.taps_raw = []
 
         self.fraction_width = self.sample_width - 1
         for inst_i in range(num_instances):
@@ -80,7 +81,7 @@ class BandpassIIREngine(wiring.Component):
                 N=filter_order, btype=btype, analog=False, fs=fs, output="ba", Wn=inst_band_edges
             )
 
-            self.taps_raw = [b, a]
+            self.taps_raw.append([b, a])
             print(f"Numerator coeffs {b}")
             print(f"Denom: {a}")
 
@@ -144,11 +145,12 @@ class BandpassIIREngine(wiring.Component):
         )
 
         # For debug output of parameter values
-        # self.a_quant = [a / (2**self.fraction_width) for a in a_coeffs_fp]
-        # self.b_quant = [b / (2**self.fraction_width) for b in b_coeffs_fp]
+        self.a_quant = [ [a / (2**self.fraction_width) for a in a_coeffs_fp[inst]] for inst in range(num_instances) ]
+        self.b_quant = [[b / (2**self.fraction_width) for b in b_coeffs_fp[inst]] for inst in range(num_instances)]
 
-        # print(f"Numerator quantized: {self.b_quant}")
-        # print(f"Denom quantized: {self.a_quant}")
+        print(f"Numerator quantized: {self.b_quant}")
+        print(f"Denom quantized: {self.a_quant}")
+
         signature = {}
         for i in range(self.instances):
             signature[f"sink_{i}"] = In(stream.Signature(signed(sample_width)))
@@ -175,6 +177,7 @@ class BandpassIIREngine(wiring.Component):
 
         # Index of current filter instance to process
         cur_inst = Signal(range(self.instances))
+        cur_inst_read_pointer = Signal(range(self.instances))
 
 
         # Memories for storing delayed feedback samples
@@ -183,7 +186,7 @@ class BandpassIIREngine(wiring.Component):
         y_wr_ports = []
         y_wr_en = Signal()
         for tap_i in range(len(self.a_fp)):
-            m.submodules[f"y_{tap_i}_mem"] = y_i_mem =  memory.Memory(
+            m.submodules[f"y_{tap_i + 1}_mem"] = y_i_mem =  memory.Memory(
                 shape=signed(self.sample_width),
                 depth=self.instances,
                 init=[0] * self.instances
@@ -199,7 +202,7 @@ class BandpassIIREngine(wiring.Component):
                 rd_port.en.eq(1),
                 a_i_rd_port.en.eq(1),
                 rd_port.addr.eq(cur_inst),
-                a_i_rd_port.addr.eq(cur_inst),
+                a_i_rd_port.addr.eq(cur_inst_read_pointer),
                 wr_port.addr.eq(cur_inst),
                 wr_port.en.eq(y_wr_en),
             ]
@@ -210,14 +213,7 @@ class BandpassIIREngine(wiring.Component):
             m.submodules[f"b_{tap_i}_mem"] = self.b_mems[tap_i]
             b_i_rd_port = self.b_rd_ports[tap_i]
             m.d.comb += b_i_rd_port.en.eq(1)
-            m.d.comb += b_i_rd_port.addr.eq(cur_inst)
-
-            m.submodules[f"x_{tap_i}_mem"] = x_i_mem =  memory.Memory(
-                shape=signed(self.sample_width),
-                depth=self.instances,
-                init=[0] * self.instances
-            )
-
+            m.d.comb += b_i_rd_port.addr.eq(cur_inst_read_pointer)
 
 
         # Direct form I implementation
@@ -341,6 +337,10 @@ class BandpassIIREngine(wiring.Component):
                     m.d.sync += [
                         y_wr_buf[i + 1].eq(y_rd_buf[i]) for i in range(len(y_wr_buf) - 1)
                     ]
+                    with m.If(cur_inst_read_pointer != (self.instances - 1)):
+                        m.d.sync += cur_inst_read_pointer.eq(cur_inst_read_pointer + 1)
+                    with m.Else():
+                        m.d.sync += cur_inst_read_pointer.eq(0)
                     m.next = "READY"
 
             with m.State("MAC_FEEDBACK"):
@@ -355,7 +355,6 @@ class BandpassIIREngine(wiring.Component):
                 m.d.comb += y_0.eq(output_sample)
                 with m.If(cur_source_ready):
                     m.d.sync += idx.eq(0)
-
                     m.d.sync += output_valid_mask.eq(output_valid_mask.rotate_left(1))
                     with m.If(cur_inst != (self.instances - 1)):
                         m.d.sync += cur_inst.eq(cur_inst + 1)
@@ -365,17 +364,16 @@ class BandpassIIREngine(wiring.Component):
 
         self.fsm = fsm
 
+
         if self.formal:
-            self.add_asserts(m)
+            with m.If(self.fsm.ongoing("READY") & cur_source_ready):
+                m.d.sync += Assert(
+                    ((output_sample >= 0) & (self.acc_round >= 0))
+                    | ((output_sample < 0) & (self.acc_round < 0)),
+                    "IIR Bandpass Accumulator and output sign mismatch!",
+                )
         return m
 
-    def add_asserts(self, m):
-        with m.If(self.fsm.ongoing("READY") & self.source.ready):
-            m.d.sync += Assert(
-                ((self.source.payload >= 0) & (self.acc_round >= 0))
-                | ((self.source.payload < 0) & (self.acc_round < 0)),
-                "IIR Bandpass Accumulator and output sign mismatch!",
-            )
 
 
 # Testbench ----------------------------------------
@@ -392,12 +390,15 @@ def run_sim():
     num_inst = 4
     m = Module()
     m.submodules.filt = dut = BandpassIIREngine(
-        center_freq=[500, 5000, 10000, 20000],
-        passband_width=[200, 500, 1000, 1000],
+        center_freq=[5000, 10000, 1000, 16000],
+        passband_width=[500, 100, 200, 1000],
+        # center_freq=[10000, 5000],
+        # passband_width=[100, 500],
         num_instances=num_inst,
         fs=fs,
         sample_width=sample_width,
         filter_order=1,
+        formal=True,
     )
 
     duration = 0.25
@@ -430,19 +431,22 @@ def run_sim():
     with sim.write_vcd(dutname + f".vcd"):
         sim.run()
         ax2 = plt.subplot(121)
-        # dut_a = (
-        #     dut.a_quant.copy()
-        # )  # The implicit 1 coefficient is removed to save LUTS, add it back in here
-        # dut_a.insert(0, 1.0)
-        # bode_plot(
-        #     fs,
-        #     duration,
-        #     end_freq,
-        #     input_samples,
-        #     output_samples,
-        #     dut.taps_raw,
-        #     [dut.b_quant, dut_a],
-        # )
+        for i in range(num_inst):
+
+            dut_a = (
+                dut.a_quant[i].copy()
+            )  # The implicit 1 coefficient is removed to save LUTS, add it back in here
+            dut_a.insert(0, 1.0)
+            bode_plot(
+                fs,
+                duration,
+                end_freq,
+                input_samples,
+                output_samples[i],
+                dut.taps_raw[i],
+                [dut.b_quant[i], dut_a],
+                suffix = i,
+            )
         ax2.plot(t, input_samples, alpha=0.5, label="Input")
         for i in range(num_inst):
             ax2.plot(t, output_samples[i], alpha=0.5, label=f"Output_{i}")
