@@ -8,7 +8,7 @@ from amaranth.lib.wiring import In, Out
 from amaranth.lib import stream
 from amaranth.sim import Simulator
 
-from girlvoice.dsp.bandpass_iir_serial import BandpassIIREngine
+from girlvoice.dsp.butterworth_iir_serial import ButterworthIIREngine
 from girlvoice.dsp.sine_synth import ParallelSineSynth
 from girlvoice.dsp.vga import VariableGainAmp
 from girlvoice.dsp.bandpass_iir import BandpassIIR
@@ -169,18 +169,33 @@ class ChannelDemux(wiring.Component):
     def elaborate(self, platform):
         m = Module()
 
-        ch_readys = Signal(self.num_channels)
+        ch_readys = Signal(self.num_channels, init=(1 << self.num_channels) - 1)
+
+        payload_buffer = Signal(signed(self.sample_width))
+        buf_valid = Signal()
+
+        with m.If(self.sink.ready & self.sink.valid) :
+            m.d.sync += [
+                payload_buffer.eq(self.sink.payload),
+                ch_readys.eq(0)
+            ]
 
         # The module sink is ready when all channel sinks are ready
         m.d.comb += self.sink.ready.eq(ch_readys.all())
         for i in range(self.num_channels):
             ch_source = self.source(i)
+            with m.If(ch_source.ready & ~ch_readys[i]):
+                m.d.sync += ch_readys[i].eq(1)
+
+            with m.If(ch_source.ready & ch_source.valid):
+                m.d.sync += ch_source.valid.eq(0)
+
+            with m.If(self.sink.ready & self.sink.valid):
+                m.d.sync += ch_source.valid.eq(1)
             m.d.comb += [
                 # Connect the module sink to all channel sinks,
                 # channel inputs are valid when the module sink is valid and all channels are ready
-                ch_source.payload.eq(self.sink.payload),
-                ch_source.valid.eq(self.sink.valid & self.sink.ready),
-                ch_readys.bit_select(i, 1).eq(ch_source.ready),
+                ch_source.payload.eq(payload_buffer),
             ]
 
         return m
@@ -397,19 +412,27 @@ class SerialVocoder(wiring.Component):
 
         self.synth = ParallelSineSynth(self.ch_freq, fs, sample_width)
 
-        self.envelope_engine = SerialEnvelopeFollower(
-            sample_width=sample_width,
-            fs=fs,
-            attack_halflife=0.1,
-            decay_halflife=25,
-            instances=num_channels
+        # self.envelope_engine = SerialEnvelopeFollower(
+        #     sample_width=sample_width,
+        #     fs=fs,
+        #     attack_halflife=0.1,
+        #     decay_halflife=25,
+        #     instances=num_channels
+        # )
+
+        self.envelope_engine = ButterworthIIREngine(
+            sample_width=self.sample_width,
+            fs=self.fs,
+            filter_type="lowpass",
+            band_edges=[50] * num_channels,
+            filter_order=2,
         )
 
-        self.bandpass_engine = BandpassIIREngine(
-            num_instances=num_channels,
+        self.bandpass_engine = ButterworthIIREngine(
             band_edges=self.ch_edges,
             sample_width=self.sample_width,
-            fs=fs
+            fs=fs,
+            filter_type="bandpass"
         )
 
         self.vga_mult = TDMMultiply(sample_width=sample_width, num_threads=num_channels)
@@ -455,7 +478,14 @@ class SerialVocoder(wiring.Component):
         m.submodules.bandpass_engine = self.bandpass_engine
         m.submodules.vga_mult = self.vga_mult
 
-        wiring.connect(m, wiring.flipped(self.sink), self.demux.sink)
+
+
+        # wiring.connect(m, wiring.flipped(self.sink), self.demux.sink)
+        m.d.comb += [
+            self.demux.sink.payload.eq(abs(self.sink.payload)),
+            self.demux.sink.valid.eq(self.sink.valid),
+            self.sink.ready.eq(self.demux.sink.ready),
+        ]
         wiring.connect(m, wiring.flipped(self.source), self.mux.source)
 
         for i in range(self.num_channels):

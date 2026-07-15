@@ -24,10 +24,10 @@ This is achieved by adding 2**(M-1) to the accumulator and then right shifting b
 """
 
 
-class BandpassIIREngine(wiring.Component):
+class ButterworthIIREngine(wiring.Component):
     def __init__(
         self,
-        num_instances: int,
+        filter_type: str,
         band_edges: List[Tuple[float, float]] =None,
         center_freq: List[float] =None,
         passband_width: List[float] =None,
@@ -37,16 +37,24 @@ class BandpassIIREngine(wiring.Component):
         formal=False,
     ):
         self.order = filter_order
-        self.num_taps = 1 + (filter_order * 2)
+        if filter_type == "bandpass":
+            self.num_taps = 1 + (filter_order * 2)
+        else:
+            self.num_taps = 1 + filter_order
         self.sample_width = sample_width
         self.fs = fs
         self.formal = formal
-        self.instances = num_instances
 
         if band_edges is not None:
+            self.instances = len(band_edges)
             band_edges = band_edges
         elif center_freq is not None and passband_width is not None:
+            if len(center_freq) != len(passband_width):
+                raise ValueError("Mismatched number of center frequencies and passband widths")
+            if filter_type != "bandpass":
+                raise ValueError("Non-bandpass filters must have corners specified with band_edges")
             band_edges = []
+            self.instances = len(center_freq)
             for i in range(num_instances):
                 inst_band_edges = [
                     center_freq[i] - passband_width[i] / 2,
@@ -70,11 +78,11 @@ class BandpassIIREngine(wiring.Component):
         self.taps_raw = []
 
         self.fraction_width = self.sample_width - 1
-        for inst_i in range(num_instances):
+        for inst_i in range(self.instances):
             print(f"Band edges: {band_edges}")
-            btype = "bandpass"
+            btype = filter_type
             inst_band_edges = band_edges[inst_i]
-            if inst_band_edges[0] < 0:
+            if filter_type == "bandpass" and inst_band_edges[0] < 0:
                 inst_band_edges = band_edges[1]
                 btype = "lowpass"
             b, a = signal.butter(
@@ -101,7 +109,7 @@ class BandpassIIREngine(wiring.Component):
 
         # Conversion to fixed point needs to happen after all coefficients have been generated
         # This ensures that we have found the maximum number of integer bits needed for all coefficients
-        for i in range(num_instances):
+        for i in range(self.instances):
             a = a_coeffs[i]
             b = b_coeffs[i]
             # The first coefficient for the denominator will always be 1.
@@ -118,7 +126,7 @@ class BandpassIIREngine(wiring.Component):
             a_i_mem = memory.Memory(
                 shape=signed(self.sample_width),
                 depth=self.instances,
-                init=[ a_coeffs_fp[inst][i] for inst in range(num_instances) ]
+                init=[ a_coeffs_fp[inst][i] for inst in range(self.instances) ]
             )
             self.a_mems.append(a_i_mem)
             self.a_rd_ports.append(a_i_mem.read_port())
@@ -129,7 +137,7 @@ class BandpassIIREngine(wiring.Component):
             b_i_mem = memory.Memory(
                 shape=signed(self.sample_width),
                 depth=self.instances,
-                init=[ b_coeffs_fp[inst][i] for inst in range(num_instances) ]
+                init=[ b_coeffs_fp[inst][i] for inst in range(self.instances) ]
             )
             self.b_mems.append(b_i_mem)
             self.b_rd_ports.append(b_i_mem.read_port())
@@ -145,8 +153,8 @@ class BandpassIIREngine(wiring.Component):
         )
 
         # For debug output of parameter values
-        self.a_quant = [ [a / (2**self.fraction_width) for a in a_coeffs_fp[inst]] for inst in range(num_instances) ]
-        self.b_quant = [[b / (2**self.fraction_width) for b in b_coeffs_fp[inst]] for inst in range(num_instances)]
+        self.a_quant = [ [a / (2**self.fraction_width) for a in a_coeffs_fp[inst]] for inst in range(self.instances) ]
+        self.b_quant = [[b / (2**self.fraction_width) for b in b_coeffs_fp[inst]] for inst in range(self.instances)]
 
         print(f"Numerator quantized: {self.b_quant}")
         print(f"Denom quantized: {self.a_quant}")
@@ -389,12 +397,22 @@ def run_sim():
     fs = 48000
     num_inst = 4
     m = Module()
-    m.submodules.filt = dut = BandpassIIREngine(
-        center_freq=[5000, 10000, 1000, 16000],
-        passband_width=[500, 100, 200, 1000],
-        # center_freq=[10000, 5000],
-        # passband_width=[100, 500],
-        num_instances=num_inst,
+    # m.submodules.filt = dut = BandpassIIREngine(
+    #     filter_type="bandpass"
+    #     center_freq=[5000, 10000, 1000, 16000],
+    #     passband_width=[500, 100, 200, 1000],
+    #     # center_freq=[10000, 5000],
+    #     # passband_width=[100, 500],
+    #     num_instances=num_inst,
+    #     fs=fs,
+    #     sample_width=sample_width,
+    #     filter_order=1,
+    #     formal=True,
+    # )
+
+    m.submodules.filt = dut = ButterworthIIREngine(
+        filter_type="lowpass",
+        band_edges=[5000, 10000, 1000, 16000],
         fs=fs,
         sample_width=sample_width,
         filter_order=1,
