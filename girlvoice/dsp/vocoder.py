@@ -46,6 +46,9 @@ class SerialThreadedVocoderChannel(wiring.Component):
 
         wiring.connect(m, wiring.flipped(self.sink), self.filt_sink)
         wiring.connect(m, self.filt_source, self.env_sink)
+        m.d.comb += [
+            self.env_sink.payload.eq(abs(self.filt_source.payload))
+        ]
         wiring.connect(m, self.env_source, self.vga.modulator)
         wiring.connect(m, wiring.flipped(self.carrier), self.vga.carrier)
 
@@ -225,8 +228,8 @@ class ChannelMux(wiring.Component):
         idx = Signal(range(self.num_channels + 1))
 
         ch_sink_mux = Array([self.sink(i) for i in range(self.num_channels)])
-        cur_sample = Signal(self.sample_width)
-        next_sample = Signal(self.sample_width)
+        cur_sample = Signal(signed(self.sample_width))
+        next_sample = Signal(signed(self.sample_width))
 
         ch_valids = Signal(self.num_channels)
         m.d.comb += [
@@ -424,8 +427,8 @@ class SerialVocoder(wiring.Component):
             sample_width=self.sample_width,
             fs=self.fs,
             filter_type="lowpass",
-            band_edges=[50] * num_channels,
-            filter_order=2,
+            band_edges=[75] * num_channels,
+            filter_order=1,
         )
 
         self.bandpass_engine = ButterworthIIREngine(
@@ -478,14 +481,7 @@ class SerialVocoder(wiring.Component):
         m.submodules.bandpass_engine = self.bandpass_engine
         m.submodules.vga_mult = self.vga_mult
 
-
-
-        # wiring.connect(m, wiring.flipped(self.sink), self.demux.sink)
-        m.d.comb += [
-            self.demux.sink.payload.eq(abs(self.sink.payload)),
-            self.demux.sink.valid.eq(self.sink.valid),
-            self.sink.ready.eq(self.demux.sink.ready),
-        ]
+        wiring.connect(m, wiring.flipped(self.sink), self.demux.sink)
         wiring.connect(m, wiring.flipped(self.source), self.mux.source)
 
         for i in range(self.num_channels):

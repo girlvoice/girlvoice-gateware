@@ -45,6 +45,8 @@ class ButterworthIIREngine(wiring.Component):
         self.fs = fs
         self.formal = formal
 
+        print(f"Generting new {filter_type} filter ")
+
         if band_edges is not None:
             self.instances = len(band_edges)
             band_edges = band_edges
@@ -55,7 +57,7 @@ class ButterworthIIREngine(wiring.Component):
                 raise ValueError("Non-bandpass filters must have corners specified with band_edges")
             band_edges = []
             self.instances = len(center_freq)
-            for i in range(num_instances):
+            for i in range(self.instances):
                 inst_band_edges = [
                     center_freq[i] - passband_width[i] / 2,
                     center_freq[i] + passband_width[i] / 2,
@@ -79,7 +81,7 @@ class ButterworthIIREngine(wiring.Component):
 
         self.fraction_width = self.sample_width - 1
         for inst_i in range(self.instances):
-            print(f"Band edges: {band_edges}")
+            print(f"Band edges: {band_edges[inst_i]}")
             btype = filter_type
             inst_band_edges = band_edges[inst_i]
             if filter_type == "bandpass" and inst_band_edges[0] < 0:
@@ -372,7 +374,6 @@ class ButterworthIIREngine(wiring.Component):
 
         self.fsm = fsm
 
-
         if self.formal:
             with m.If(self.fsm.ongoing("READY") & cur_source_ready):
                 m.d.sync += Assert(
@@ -393,31 +394,30 @@ def run_sim():
     from girlvoice.dsp.utils import generate_chirp, bode_plot
 
     clk_freq = 60e6
-    sample_width = 16  # Number of 2s complement bits
+    sample_width = 18  # Number of 2s complement bits
     fs = 48000
     num_inst = 4
     m = Module()
-    # m.submodules.filt = dut = BandpassIIREngine(
-    #     filter_type="bandpass"
-    #     center_freq=[5000, 10000, 1000, 16000],
-    #     passband_width=[500, 100, 200, 1000],
-    #     # center_freq=[10000, 5000],
-    #     # passband_width=[100, 500],
-    #     num_instances=num_inst,
-    #     fs=fs,
-    #     sample_width=sample_width,
-    #     filter_order=1,
-    #     formal=True,
-    # )
-
     m.submodules.filt = dut = ButterworthIIREngine(
-        filter_type="lowpass",
-        band_edges=[5000, 10000, 1000, 16000],
+        filter_type="bandpass",
+        center_freq=[90, 200, 400, 1000],
+        passband_width=[10, 50, 200, 100],
+        # center_freq=[10000, 5000],
+        # passband_width=[100, 500],
         fs=fs,
         sample_width=sample_width,
         filter_order=1,
         formal=True,
     )
+
+    # m.submodules.filt = dut = ButterworthIIREngine(
+    #     filter_type="lowpass",
+    #     band_edges=[50, 75],
+    #     fs=fs,
+    #     sample_width=sample_width,
+    #     filter_order=1,
+    #     formal=True,
+    # )
 
     duration = 0.25
     start_freq = 1
