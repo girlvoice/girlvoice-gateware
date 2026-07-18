@@ -79,30 +79,27 @@ macro_rules! impl_gpi {
         $IDX:literal,
     )+) => {
         $(
-            pub struct $GPIX {
-                registers: $PACGPIX,
+            pub struct $GPIX<'a> {
+                registers: &'a $PACGPIX,
             }
 
-            impl $GPIX {
-                pub fn new(registers: $PACGPIX) -> Self {
+            impl<'a> $GPIX<'a> {
+                pub fn new(registers: &'a $PACGPIX) -> Self {
                     Self { registers }
                 }
 
-                pub fn free(self) -> $PACGPIX {
-                    self.registers
-                }
             }
-            impl $crate::hal::digital::ErrorType for $GPIX {
+            impl $crate::hal::digital::ErrorType for $GPIX<'_> {
                 type Error = $crate::gpio::GpioError;
             }
 
-            impl $crate::hal::digital::InputPin for $GPIX {
+            impl $crate::hal::digital::InputPin for $GPIX<'_> {
                 fn is_low(&mut self) -> Result<bool, Self::Error> {
                     Ok(((self.registers.input().read().bits() >> $IDX) & 0x1) != 0x1)
                 }
 
                 fn is_high(&mut self) -> Result<bool, Self::Error> {
-                    Ok(self.registers.input().read().pin_0().bit())
+                    Ok(((self.registers.input().read().bits() >> $IDX) & 0x1) == 0x1)
                 }
             }
         )+

@@ -44,8 +44,16 @@ hal::impl_gpio!{
 }
 
 hal::impl_gpi!{
-    Gpi0: pac::Gpi0,
+    ButtonUp: pac::Gpi0,
+    1,
+}
+hal::impl_gpi!{
+    ButtonDown: pac::Gpi0,
     0,
+}
+hal::impl_gpi!{
+    ButtonPower: pac::Gpi0,
+    2,
 }
 
 hal::impl_timer! {
@@ -124,8 +132,8 @@ fn main() -> ! {
     let gpo1 = Gpo1::new(peripherals.gpo1);
 
 
-    peripherals.gpo1.input().read().bits()
-    let mut gpi0 = Gpi0::new(peripherals.gpi0);
+    let mut button_up = ButtonUp::new(& peripherals.gpi0);
+    let mut button_down = ButtonDown::new(& peripherals.gpi0);
     // This should be a part of the PAC but wishbone memory resource locations are not
     // properly included in the SVD generation yet
     const SPI_FIFO_ADDR: usize = 0xc0000000;
@@ -211,20 +219,14 @@ fn main() -> ! {
         // img.draw(&mut display).unwrap();
         term.handle_char();
 
-        if gpi0.is_low().unwrap() {
-            debounce += 1;
-            if debounce > 10 {
-                let enabled = led0.is_set_high().unwrap();
-                if enabled {
-                    led0.set_low().unwrap();
-                } else {
-                    led0.set_high().unwrap();
-                }
-
-                debounce = 0
-            }
-        } else {
-            debounce = 0
+        if button_down.is_low().unwrap() {
+            led0.set_high().unwrap();
+        }
+        else if button_up.is_low().unwrap() {
+            led0.set_high().unwrap();
+        }
+         else {
+            led0.set_low().unwrap();
         }
     }
 }

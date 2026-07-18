@@ -315,8 +315,8 @@ class GirlvoiceSoc(Component):
             btn_up = platform.request("button_up")
             btn_down = platform.request("button_down")
             btn_power = platform.request("btn_pwr")
-            m.d.comb += self.gpi0.pins[0].eq(btn_up.i)
-            m.d.comb += self.gpi0.pins[1].eq(btn_down.i)
+            m.d.comb += self.gpi0.pins[0].eq(btn_down.i)
+            m.d.comb += self.gpi0.pins[1].eq(btn_up.i)
             m.d.comb += self.gpi0.pins[2].eq(btn_power.i)
 
         # i2c0
