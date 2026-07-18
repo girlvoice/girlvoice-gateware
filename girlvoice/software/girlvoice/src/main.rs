@@ -45,6 +45,7 @@ hal::impl_gpio!{
 
 hal::impl_gpi!{
     Gpi0: pac::Gpi0,
+    0,
 }
 
 hal::impl_timer! {
@@ -122,6 +123,8 @@ fn main() -> ! {
     peripherals.gpo1.output().write(|w| w.pin_1().bit(true));
     let gpo1 = Gpo1::new(peripherals.gpo1);
 
+
+    peripherals.gpo1.input().read().bits()
     let mut gpi0 = Gpi0::new(peripherals.gpi0);
     // This should be a part of the PAC but wishbone memory resource locations are not
     // properly included in the SVD generation yet
@@ -205,7 +208,7 @@ fn main() -> ! {
 
     let mut debounce = 0;
     loop {
-        img.draw(&mut display).unwrap();
+        // img.draw(&mut display).unwrap();
         term.handle_char();
 
         if gpi0.is_low().unwrap() {

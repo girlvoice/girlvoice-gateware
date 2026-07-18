@@ -76,6 +76,7 @@ macro_rules! impl_gpio {
 macro_rules! impl_gpi {
     ($(
         $GPIX:ident: $PACGPIX:ty,
+        $IDX:literal,
     )+) => {
         $(
             pub struct $GPIX {
@@ -97,7 +98,7 @@ macro_rules! impl_gpi {
 
             impl $crate::hal::digital::InputPin for $GPIX {
                 fn is_low(&mut self) -> Result<bool, Self::Error> {
-                    Ok(self.registers.input().read().pin_0().bit() == false)
+                    Ok(((self.registers.input().read().bits() >> $IDX) & 0x1) != 0x1)
                 }
 
                 fn is_high(&mut self) -> Result<bool, Self::Error> {
