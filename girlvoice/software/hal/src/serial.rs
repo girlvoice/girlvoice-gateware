@@ -79,6 +79,12 @@ macro_rules! impl_serial {
                 }
             }
 
+            impl $crate::hal_io::ReadReady for $SERIALX {
+                fn read_ready(&mut self) -> Result<bool, Self::Error> {
+                    return Ok(self.registers.rx_avail().read().rxe().bit());
+                }
+            }
+
         )+
     }
 }
