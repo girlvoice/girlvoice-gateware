@@ -2,10 +2,11 @@
 #![no_main]
 
 use aw88395::Aw88395;
+use embedded_hal::digital::{InputPin, OutputPin, StatefulOutputPin};
 use sgtl5000::{Sgtl5000};
 use sgtl5000::regmap::{I2SDataWidth, LineOutBiasCurrent, MclkFreqSetting, SampleRateSetting};
 use riscv_rt::entry;
-use soc_pac as pac;
+use soc_pac::{self as pac, led0};
 
 use mipidsi::interface::SpiInterface;
 use mipidsi::{Builder, models::GC9A01, options::ColorInversion, TestImage};
@@ -40,6 +41,19 @@ hal::impl_spi!{
 
 hal::impl_gpio!{
     Led0: pac::Led0,
+}
+
+hal::impl_gpi!{
+    ButtonUp: pac::Gpi0,
+    1,
+}
+hal::impl_gpi!{
+    ButtonDown: pac::Gpi0,
+    0,
+}
+hal::impl_gpi!{
+    ButtonPower: pac::Gpi0,
+    2,
 }
 
 hal::impl_timer! {
@@ -111,10 +125,15 @@ fn main() -> ! {
     let mut delay = DELAY::new(peripherals.timer0, SYS_CLK_FREQ);
     let mut serial = Serial0::new(peripherals.uart0);
 
+    let mut led0 = Led0::new(peripherals.led0);
+
     peripherals.gpo1.mode().write(|w| unsafe { w.pin_1().bits(0x1)});
     peripherals.gpo1.output().write(|w| w.pin_1().bit(true));
     let gpo1 = Gpo1::new(peripherals.gpo1);
 
+
+    let mut button_up = ButtonUp::new(& peripherals.gpi0);
+    let mut button_down = ButtonDown::new(& peripherals.gpi0);
     // This should be a part of the PAC but wishbone memory resource locations are not
     // properly included in the SVD generation yet
     const SPI_FIFO_ADDR: usize = 0xc0000000;
@@ -192,9 +211,22 @@ fn main() -> ! {
     let mut term = term::Terminal::new(serial, amp, delay);
 
     let img = TestImage::new();
+
     img.draw(&mut display).unwrap();
+
+    let mut debounce = 0;
     loop {
-        img.draw(&mut display).unwrap();
+        // img.draw(&mut display).unwrap();
         term.handle_char();
+
+        if button_down.is_low().unwrap() {
+            led0.set_high().unwrap();
+        }
+        else if button_up.is_low().unwrap() {
+            led0.set_high().unwrap();
+        }
+         else {
+            led0.set_low().unwrap();
+        }
     }
 }

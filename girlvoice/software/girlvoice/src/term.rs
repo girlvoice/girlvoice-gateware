@@ -1,12 +1,12 @@
 
 
-use embedded_io::{Read, Write};
+use embedded_io::{Read, ReadReady, Write};
 use embedded_hal::i2c::I2c;
 use embedded_hal::delay::DelayNs;
 use fixedstr::*;
 use aw88395::Aw88395;
 
-pub struct Terminal<T: Read + Write, U: I2c, V: DelayNs> {
+pub struct Terminal<T: Read + Write + ReadReady, U: I2c, V: DelayNs> {
     serial: T,
     cmd_str: zstr<256>,
     prev_cmd: zstr<256>,
@@ -24,7 +24,7 @@ fn parse_addr(addr_token: &str) -> Option<u32> {
     }
 }
 
-impl<T: Read + Write, U: I2c, V: DelayNs> Terminal<T, U, V> {
+impl<T: Read + Write + ReadReady, U: I2c, V: DelayNs> Terminal<T, U, V> {
     pub fn new(serial: T, amp: Aw88395<U>, timer: V) -> Self {
         Self {
             serial: serial,
@@ -38,7 +38,9 @@ impl<T: Read + Write, U: I2c, V: DelayNs> Terminal<T, U, V> {
     }
 
     pub fn handle_char(&mut self) {
-
+        if !self.serial.read_ready().unwrap() {
+            return
+        }
         let _read_size = self.serial.read(&mut self.char_buf).unwrap();
         let new_char = self.char_buf[0] as char;
         if self.csi_mode {
