@@ -350,8 +350,6 @@ class GirlvoiceSoc(Component):
         m.d.comb += self.spi0_phy.cs.eq(self.spi0.cs)
 
         # I2S TX/RX
-        # m.submodules.i2s_rx = self.i2s_rx
-        # m.submodules.i2s_tx = self.i2s_tx
         m.submodules.i2s_controller = self.i2s_controller
 
 
@@ -361,22 +359,21 @@ class GirlvoiceSoc(Component):
             m.d.comb += [
                 mic.lrclk.o.eq(self.i2s_controller.lrclk),
                 mic.clk.o.eq(self.i2s_controller.sclk),
-                # self.i2s_rx.sdin.eq(mic.data.i)
+                self.i2s_controller.sdin.eq(mic.data.i)
             ]
 
-            # amp = platform.request("amp", 0)
-            # m.d.comb += amp.en.o.eq(1)
-            # m.d.comb += amp.lrclk.o.eq(self.i2s_controller.lrclk)
-            # m.d.comb += amp.clk.o.eq(self.i2s_controller.clocking.sclk_falling)
-            # m.d.comb += amp.data.o.eq(self.i2s_tx.sdout)
+            amp = platform.request("amp", 0)
+            m.d.comb += amp.en.o.eq(1)
+            m.d.comb += amp.lrclk.o.eq(self.i2s_controller.lrclk)
+            m.d.comb += amp.clk.o.eq(self.i2s_controller.sclk)
+            m.d.comb += amp.data.o.eq(self.i2s_controller.sdout)
 
             aux_din = platform.request("aux_din", 0)
             m.d.comb += aux_din.o.eq(self.i2s_controller.sdout)
 
-            aux_dout = platform.request("aux_dout", 0)
-            m.d.comb += self.i2s_controller.sdin.eq(aux_dout.i)
+            # aux_dout = platform.request("aux_dout", 0)
+            # m.d.comb += self.i2s_controller.sdin.eq(aux_dout.i)
 
-            # m.d.comb += aux_din.o.eq(aux_dout.i)
 
 
         if self.enable_vocoder:

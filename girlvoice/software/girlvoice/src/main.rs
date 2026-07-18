@@ -210,6 +210,8 @@ fn main() -> ! {
 
     let mut term = term::Terminal::new(serial, amp, delay);
 
+    term.initialize_amplifier();
+
     let img = TestImage::new();
 
     img.draw(&mut display).unwrap();

@@ -175,7 +175,7 @@ impl<T: Read + Write + ReadReady, U: I2c, V: DelayNs> Terminal<T, U, V> {
         };
     }
 
-    fn initialize_amplifier(&mut self) {
+    pub fn initialize_amplifier(&mut self) {
         writeln!(self.serial, "Beginning amplifier initialization.\r").unwrap();
         if self.amp.soft_reset().is_err() {
             writeln!(self.serial, "Failed to reset amplifier\r").unwrap();
