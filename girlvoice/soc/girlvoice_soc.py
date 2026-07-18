@@ -223,15 +223,6 @@ class GirlvoiceSoc(Component):
 
         # Vocoder!
         if self.enable_vocoder:
-            # self.vocoder = StaticVocoder(
-            #     start_freq=300,
-            #     end_freq=4000,
-            #     num_channels=14,
-            #     clk_sync_freq=sys_clk_freq,
-            #     fs=fs,
-            #     sample_width=sample_width,
-            #     channel_class=ThreadedVocoderChannel
-            # )
             self.vocoder = SerialVocoder(
                 start_freq=300,
                 end_freq=4000,
