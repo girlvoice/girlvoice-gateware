@@ -81,7 +81,7 @@ class GirlvoiceSoc(Component):
         self.sys_clk_freq = sys_clk_freq
         self.audio_clk_freq = audio_clk_freq
 
-        self.enable_vocoder = True
+        self.enable_vocoder = False
 
         self.use_spi_flash        = False
         self.mainram_base         = 0x00000000
@@ -318,7 +318,6 @@ class GirlvoiceSoc(Component):
             m.d.comb += self.gpi0.pins[0].eq(btn_up.i)
             m.d.comb += self.gpi0.pins[1].eq(btn_down.i)
             m.d.comb += self.gpi0.pins[2].eq(btn_power.i)
-
 
         # i2c0
         m.submodules.i2c0 = self.i2c
