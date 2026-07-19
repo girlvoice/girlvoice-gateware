@@ -81,7 +81,7 @@ class GirlvoiceSoc(Component):
         self.sys_clk_freq = sys_clk_freq
         self.audio_clk_freq = audio_clk_freq
 
-        self.enable_vocoder = False
+        self.enable_vocoder = True
 
         self.use_spi_flash        = False
         self.mainram_base         = 0x00000000
@@ -224,9 +224,9 @@ class GirlvoiceSoc(Component):
         # Vocoder!
         if self.enable_vocoder:
             self.vocoder = SerialVocoder(
-                start_freq=300,
+                start_freq=250,
                 end_freq=4000,
-                num_channels=20,
+                num_channels=32,
                 fs=fs,
                 sample_width=sample_width,
             )
@@ -312,10 +312,10 @@ class GirlvoiceSoc(Component):
             m.submodules.gpi0 = self.gpi0
             btn_up = platform.request("button_up")
             btn_down = platform.request("button_down")
-            btn_power = platform.request("btn_pwr")
+            # btn_power = platform.request("btn_pwr")
             m.d.comb += self.gpi0.pins[0].eq(btn_down.i)
             m.d.comb += self.gpi0.pins[1].eq(btn_up.i)
-            m.d.comb += self.gpi0.pins[2].eq(btn_power.i)
+            # m.d.comb += self.gpi0.pins[2].eq(btn_power.i)
 
         # i2c0
         m.submodules.i2c0 = self.i2c
@@ -366,8 +366,9 @@ class GirlvoiceSoc(Component):
             # m.d.comb += self.i2s_controller.sdin.eq(aux_dout.i)
 
 
+        vocoder_enable = Signal(init=1)
 
-        if self.enable_vocoder:
+        with m.If(vocoder_enable):
             m.submodules.vocoder = self.vocoder
             m.d.comb += [
                 self.vocoder.sink.valid.eq(self.i2s_controller.source.valid),
@@ -380,11 +381,37 @@ class GirlvoiceSoc(Component):
             ]
             # wiring.connect(m, self.vocoder.sink, self.i2s_controller.source)
             # wiring.connect(m, self.vocoder.source, self.i2s_tx.sink)
-        else:
+        with m.Else():
             wiring.connect(m, self.i2s_controller.sink, self.i2s_controller.source)
         # wishbone csr bridge
         if not self.sim:
             m.submodules.wb_to_csr = self.wb_to_csr
+
+        ## Power On/Off
+        pwr_en = platform.request("pwr_en", 0)
+
+        pwr_on = Signal(init=1)
+        m.d.comb += pwr_en.o.eq(pwr_on)
+
+        btn_power = platform.request("btn_pwr")
+
+        btn_power_prev = Signal(init=1)
+        m.d.sync += btn_power_prev.eq(btn_power.i)
+
+        btn_power_rising = Signal()
+        m.d.comb += btn_power_rising.eq(~btn_power_prev & btn_power.i)
+
+        with m.If(btn_power_rising):
+            m.d.sync += vocoder_enable.eq(~vocoder_enable)
+
+        pwr_on_reg = Signal(28)
+        with m.If(pwr_on & btn_power.i):
+            with m.If(~pwr_on_reg.all()):
+                m.d.sync += pwr_on_reg.eq(pwr_on_reg + 1)
+            with m.Else():
+                m.d.sync += pwr_on.eq(0)
+        with m.Else():
+            m.d.sync += pwr_on_reg.eq(0)
 
         # Memory controller hangs if we start making requests to it straight away.
         on_delay = Signal(32)
