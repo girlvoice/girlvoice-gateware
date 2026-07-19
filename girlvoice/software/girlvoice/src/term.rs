@@ -12,7 +12,7 @@ pub struct Terminal<T: Read + Write + ReadReady, U: I2c, V: DelayNs> {
     prev_cmd: zstr<256>,
     char_buf: [u8; 1],
     csi_mode: bool,
-    amp: Aw88395<U>,
+    pub amp: Aw88395<U>,
     timer: V
 }
 
@@ -232,6 +232,9 @@ impl<T: Read + Write + ReadReady, U: I2c, V: DelayNs> Terminal<T, U, V> {
             return;
         }
 
+        if self.amp.enable_hagc().is_err() {
+            return;
+        }
     }
 
     fn wait_for_pll_lock(&mut self) -> bool {

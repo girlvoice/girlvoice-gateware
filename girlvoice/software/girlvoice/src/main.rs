@@ -12,7 +12,7 @@ use mipidsi::interface::SpiInterface;
 use mipidsi::{Builder, models::GC9A01, options::ColorInversion, TestImage};
 
 use embedded_graphics::{
-    mono_font::{ascii::FONT_6X10, MonoTextStyle},
+    mono_font::{ascii::FONT_7X13, MonoTextStyle},
     pixelcolor::Rgb565,
     prelude::*,
     primitives::{
@@ -160,7 +160,7 @@ fn main() -> ! {
     //     .stroke_alignment(StrokeAlignment::Inside)
     //     .build();
     // let fill = PrimitiveStyle::with_fill(Rgb565::BLUE);
-    // let character_style = MonoTextStyle::new(&FONT_6X10, Rgb565::CSS_PINK);
+    let character_style = MonoTextStyle::new(&FONT_7X13, Rgb565::CSS_WHITE_SMOKE);
 
     // let yoffset = 50;
 
@@ -180,14 +180,14 @@ fn main() -> ! {
     // .draw(&mut display).unwrap();
 
     //  // Draw centered text.
-    // let text = "girlvoice!";
-    // Text::with_alignment(
-    //     text,
-    //     display.bounding_box().center() + Point::new(0, 15),
-    //     character_style,
-    //     Alignment::Center,
-    // )
-    // .draw(&mut display).unwrap();
+    let text = ":3";
+    Text::with_alignment(
+        text,
+        display.bounding_box().center() + Point::new(0, 15),
+        character_style,
+        Alignment::Center,
+    )
+    .draw(&mut display).unwrap();
 
 
     // display.flush().ok();
@@ -212,23 +212,46 @@ fn main() -> ! {
 
     term.initialize_amplifier();
 
-    let img = TestImage::new();
+    // let img = TestImage::new();
 
-    img.draw(&mut display).unwrap();
+    // img.draw(&mut display).unwrap();
 
-    let mut debounce = 0;
+    let mut debounce_up = 0;
+    let mut debounce_down = 0;
+    const DEBOUNCE_THRESH: i32 = 10;
+    const VOL_INCREMENT: u16 = 10;
+    let mut volume_pct = 50;
+    term.amp.set_volume_percent(volume_pct).ok();
+    led0.set_high().ok();
     loop {
         // img.draw(&mut display).unwrap();
         term.handle_char();
 
         if button_down.is_low().unwrap() {
-            led0.set_high().unwrap();
+            debounce_down += 1;
+        } else {
+            debounce_down = 0;
         }
-        else if button_up.is_low().unwrap() {
-            led0.set_high().unwrap();
+
+        if button_up.is_low().unwrap() {
+            debounce_up += 1;
+        } else {
+            debounce_up = 0;
         }
-         else {
-            led0.set_low().unwrap();
+
+        if debounce_down == DEBOUNCE_THRESH {
+            if volume_pct != 0 {
+                volume_pct -= VOL_INCREMENT;
+                term.amp.set_volume_percent(volume_pct).ok();
+            }
         }
+        if debounce_up == DEBOUNCE_THRESH {
+            if volume_pct != 100 {
+                volume_pct += VOL_INCREMENT;
+                term.amp.set_volume_percent(volume_pct).ok();
+            }
+
+        }
+
     }
 }

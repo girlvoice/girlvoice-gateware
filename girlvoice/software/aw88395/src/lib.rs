@@ -124,6 +124,11 @@ impl<I2C: I2c> Aw88395<I2C> {
         self.update_config(Register::I2SCtrl)
     }
 
+    pub fn set_hagc_enabled(&mut self, enabled: bool) -> Result<(), Aw88395Error> {
+        self.config.sys_ctrl.hagce = enabled;
+        self.update_config(Register::SysCtrl)
+    }
+
     pub fn set_volume(&mut self, volume: u16) -> Result<(), Aw88395Error> {
         if volume > MAX_VOLUME_SETTING {
             return Err(Aw88395Error::OutOfRange);
