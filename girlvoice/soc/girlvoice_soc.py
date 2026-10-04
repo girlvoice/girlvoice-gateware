@@ -57,6 +57,7 @@ from luna_soc.util                        import readbin
 from luna_soc.generate.svd                import SVD
 
 from girlvoice.dsp import vocoder
+from girlvoice.dsp.butterworth_iir_serial import ButterworthIIREngine
 import girlvoice.platform.nexus_utils.lmmi as lmmi
 from girlvoice.platform.nexus_utils.lram          import WishboneNXLRAM
 from girlvoice.soc.provider import girlvoice_rev_a as provider
@@ -212,6 +213,14 @@ class GirlvoiceSoc(Component):
         #     source_domain="sync",
         #     phy_domain="audio"
         # )
+
+        self.notch = ButterworthIIREngine(
+            filter_type="bandstop",
+            band_edges=[[2200, 2400]],
+            filter_order=1,
+            sample_width=sample_width,
+            fs=fs
+        )
 
         self.i2s_controller = I2SController(
             sample_width=sample_width,
@@ -370,19 +379,28 @@ class GirlvoiceSoc(Component):
 
         with m.If(vocoder_enable):
             m.submodules.vocoder = self.vocoder
+            m.submodules.notch = self.notch
             m.d.comb += [
-                self.vocoder.sink.valid.eq(self.i2s_controller.source.valid),
-                self.i2s_controller.source.ready.eq(self.vocoder.sink.ready),
-                self.vocoder.sink.payload.eq(self.i2s_controller.source.p.left),
+                self.notch.sink(0).valid.eq(self.i2s_controller.source.valid),
+                self.i2s_controller.source.ready.eq(self.notch.sink(0).ready),
+                self.notch.sink(0).payload.eq(self.i2s_controller.source.p.left),
 
                 self.i2s_controller.sink.valid.eq(self.vocoder.source.valid),
                 self.vocoder.source.ready.eq(self.i2s_controller.sink.ready),
                 self.i2s_controller.sink.p.left.eq(self.vocoder.source.p),
             ]
-            # wiring.connect(m, self.vocoder.sink, self.i2s_controller.source)
+            wiring.connect(m, self.vocoder.sink, self.notch.source(0))
             # wiring.connect(m, self.vocoder.source, self.i2s_tx.sink)
         with m.Else():
-            wiring.connect(m, self.i2s_controller.sink, self.i2s_controller.source)
+            m.d.comb += [
+                self.notch.sink(0).valid.eq(self.i2s_controller.source.valid),
+                self.i2s_controller.source.ready.eq(self.notch.sink(0).ready),
+                self.notch.sink(0).payload.eq(self.i2s_controller.source.p.left),
+
+                self.i2s_controller.sink.valid.eq(self.notch.source(0).valid),
+                self.notch.source(0).ready.eq(self.i2s_controller.sink.ready),
+                self.i2s_controller.sink.p.left.eq(self.notch.source(0).p),
+            ]
         # wishbone csr bridge
         if not self.sim:
             m.submodules.wb_to_csr = self.wb_to_csr

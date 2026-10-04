@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from math import log
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy import signal
 from amaranth import *
@@ -443,7 +444,6 @@ class SerialVocoder(wiring.Component):
         self.channels = []
         for i in range(len(self.ch_freq)):
             edges = self.ch_edges[i]
-            # slice = self.slices[i//2]
             self.channels.append(
                 SerialThreadedVocoderChannel(
                     fs=fs,
@@ -465,12 +465,48 @@ class SerialVocoder(wiring.Component):
         #     b = ch.bandpass.b_quant
         #     w, q = signal.freqz(b=b, a=a, fs=fs)
 
+        self.display_channel_filters()
         super().__init__(
             {
                 "sink": In(stream.Signature(signed(sample_width))),
                 "source": Out(stream.Signature(signed(sample_width))),
             }
         )
+
+    def display_channel_filters(self):
+
+
+
+        fig, axs = plt.subplots(4, 8)
+        print(len(axs))
+        for ch_idx in range(self.num_channels):
+            a_quant = self.bandpass_engine.a_quant[ch_idx]
+            b_quant = self.bandpass_engine.b_quant[ch_idx]
+            a = self.bandpass_engine.taps_raw[ch_idx][1]
+            b = self.bandpass_engine.taps_raw[ch_idx][0]
+
+            a_quant.insert(0, 1)
+            print(a)
+            print(a_quant)
+            print(b)
+            print(b_quant)
+
+            w_ideal, h_ideal = signal.freqz(b=b, a=a, worN=2048, fs=self.fs)
+            w_q, h_q = signal.freqz(b=b_quant, a=a_quant, worN=2048, fs=self.fs)
+
+            row = ch_idx // 8
+            ax = axs[row][ch_idx % 8]
+            ax.semilogx(w_ideal, 20 * np.log10(abs(h_ideal)), label=f"Ideal Gain channel {ch_idx}")
+            ax.semilogx(w_q, 20 * np.log10(np.abs(h_q)), label=f"Quantized Coeff Gain channel {ch_idx}")
+            ax.set_xlabel("Frequency log(Hz)")
+            ax.set_ylabel("Gain (dB)")
+            ax.set_ylim(-80, 5)
+            ax.grid(which="minor", color="0.9")
+            ax.grid()
+            ax.axhline(-3, color="#c0392b", ls="--", lw=1, label="-3 dB")
+
+        plt.show()
+
 
     def elaborate(self, platform):
         m = Module()

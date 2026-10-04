@@ -37,7 +37,7 @@ class ButterworthIIREngine(wiring.Component):
         formal=False,
     ):
         self.order = filter_order
-        if filter_type == "bandpass":
+        if filter_type == "bandpass" or filter_type=="bandstop":
             self.num_taps = 1 + (filter_order * 2)
         else:
             self.num_taps = 1 + filter_order
@@ -254,9 +254,21 @@ class ButterworthIIREngine(wiring.Component):
         acc_width = (self.sample_width * 2) + (num_taps * 2)
         acc = Signal(signed(acc_width))
         self.acc_round = acc_round = Signal(signed(acc_width))
+        acc_shift = Signal(signed(acc_width))
         # m.d.comb += acc_round.eq(acc + 2**(self.fraction_width-1))
         m.d.comb += acc_round.eq(acc)
-        m.d.comb += output_sample.eq(acc_round >> self.fraction_width)
+
+        m.d.comb += acc_shift.eq(acc_round >> self.fraction_width)
+        acc_overflow = Signal()
+        m.d.comb += acc_overflow.eq((acc_shift > (2**(self.sample_width - 1) - 1)) | (acc_shift < -(2**(self.sample_width - 1))))
+        with m.If(acc_overflow):
+            with m.If(acc_round < 0):
+                m.d.comb += output_sample.eq(-2**(self.sample_width - 1))
+            with m.Else():
+                m.d.comb += output_sample.eq(2**(self.sample_width - 1) - 1)
+
+        with m.Else():
+            m.d.comb += output_sample.eq(acc_round >> self.fraction_width)
 
 
         # ------- Souce Muxing control signals --------
@@ -394,16 +406,22 @@ def run_sim():
     from girlvoice.dsp.utils import generate_chirp, bode_plot
 
     clk_freq = 60e6
-    sample_width = 18  # Number of 2s complement bits
+    sample_width = 16  # Number of 2s complement bits
     fs = 48000
-    num_inst = 4
+    num_inst = 1
     m = Module()
+    # m.submodules.filt = dut = ButterworthIIREngine(
+    #     filter_type="bandpass",
+    #     center_freq=[90, 200, 400, 1000],
+    #     passband_width=[10, 50, 200, 100],
+    #     fs=fs,
+    #     sample_width=sample_width,
+    #     filter_order=1,
+    #     formal=True,
+    # )
     m.submodules.filt = dut = ButterworthIIREngine(
-        filter_type="bandpass",
-        center_freq=[90, 200, 400, 1000],
-        passband_width=[10, 50, 200, 100],
-        # center_freq=[10000, 5000],
-        # passband_width=[100, 500],
+        filter_type="bandstop",
+        band_edges=[[2150, 2450]],
         fs=fs,
         sample_width=sample_width,
         filter_order=1,
@@ -423,9 +441,9 @@ def run_sim():
     start_freq = 1
     end_freq = fs / 2
     (t, input_samples) = generate_chirp(
-        duration, fs, start_freq, end_freq, sample_width, amp=1
+        duration, fs, start_freq, end_freq, sample_width, amp=0.8
     )
-    # output_samples = np.zeros(int(duration * fs))
+    input_samples = np.zeros(len(t))
     output_samples = [[] for _ in range(num_inst) ]
 
     async def tb(ctx):
