@@ -85,7 +85,7 @@ class ButterworthIIREngine(wiring.Component):
             btype = filter_type
             inst_band_edges = band_edges[inst_i]
             if filter_type == "bandpass" and inst_band_edges[0] < 0:
-                inst_band_edges = band_edges[1]
+                inst_band_edges = inst_band_edges[1]
                 btype = "lowpass"
             b, a = signal.butter(
                 N=filter_order, btype=btype, analog=False, fs=fs, output="ba", Wn=inst_band_edges
