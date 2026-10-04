@@ -195,6 +195,11 @@ class ButterworthIIREngine(wiring.Component):
         y_rd_ports = []
         y_wr_ports = []
         y_wr_en = Signal()
+
+        x_mems = []
+        x_rd_ports = []
+        x_wr_ports = []
+        x_wr_en = Signal()
         for tap_i in range(len(self.a_fp)):
             m.submodules[f"y_{tap_i + 1}_mem"] = y_i_mem =  memory.Memory(
                 shape=signed(self.sample_width),
@@ -202,23 +207,46 @@ class ButterworthIIREngine(wiring.Component):
                 init=[0] * self.instances
             )
             y_mems.append(y_i_mem)
-            rd_port = y_i_mem.read_port()
-            wr_port = y_i_mem.write_port()
-            y_rd_ports.append(rd_port)
-            y_wr_ports.append(wr_port)
+            y_rd_port = y_i_mem.read_port()
+            y_wr_port = y_i_mem.write_port()
+            y_rd_ports.append(y_rd_port)
+            y_wr_ports.append(y_wr_port)
+
+            m.submodules[f"x_{tap_i + 1}_mem"] = x_i_mem =  memory.Memory(
+                shape=signed(self.sample_width),
+                depth=self.instances,
+                init=[0] * self.instances
+            )
+            x_mems.append(y_i_mem)
+            x_rd_port = x_i_mem.read_port()
+            x_wr_port = x_i_mem.write_port()
+            x_rd_ports.append(x_rd_port)
+            x_wr_ports.append(x_wr_port)
+
 
             a_i_rd_port = self.a_rd_ports[tap_i]
             m.d.comb += [
-                rd_port.en.eq(1),
+                # Read ports are always open
+                y_rd_port.en.eq(1),
+                x_rd_port.en.eq(1),
                 a_i_rd_port.en.eq(1),
-                rd_port.addr.eq(cur_inst),
+
+                # Read address is the current filter instance being processed
+                y_rd_port.addr.eq(cur_inst),
+                x_rd_port.addr.eq(cur_inst),
                 a_i_rd_port.addr.eq(cur_inst_read_pointer),
-                wr_port.addr.eq(cur_inst),
-                wr_port.en.eq(y_wr_en),
+
+                y_wr_port.addr.eq(cur_inst),
+                x_wr_port.addr.eq(cur_inst),
+
+                # All write memories share an enable
+                y_wr_port.en.eq(y_wr_en),
+                x_wr_port.en.eq(x_wr_en),
             ]
 
             m.submodules[f"a_{tap_i + 1}_mem"] = self.a_mems[tap_i]
 
+        # B parameters are handled separately since there is one fewer
         for tap_i in range(num_taps):
             m.submodules[f"b_{tap_i}_mem"] = self.b_mems[tap_i]
             b_i_rd_port = self.b_rd_ports[tap_i]
@@ -233,7 +261,10 @@ class ButterworthIIREngine(wiring.Component):
         y_rd_buf = Array([ y_rd_ports[i].data for i in range(num_taps - 1) ])
         y_wr_buf = Array([ y_wr_ports[i].data for i in range(num_taps - 1) ])
 
-        idx = Signal(range(num_taps))
+        x_rd_buf = Array([ x_rd_ports[i].data for i in range(num_taps - 1) ])
+        x_wr_buf = Array([ x_wr_ports[i].data for i in range(num_taps - 1) ])
+
+        idx = Signal(range(num_taps)) # Tracks the current filter tap being processed
 
         x_0 = Signal(signed(self.sample_width))
         y_0 = Signal(signed(self.sample_width))
@@ -244,12 +275,14 @@ class ButterworthIIREngine(wiring.Component):
 
         output_sample = Signal(signed(self.sample_width))
 
-        m.d.comb += x_i.eq(x_buf[idx])
+        # m.d.comb += x_i.eq(x_buf[idx])
+        m.d.comb += x_i.eq(x_rd_buf[idx - 1])
         m.d.comb += y_i.eq(y_rd_buf[idx])
         m.d.comb += a_i.eq(self.a_fp[idx])
         m.d.comb += b_i.eq(self.b_fp[idx])
 
         m.d.comb += y_wr_buf[0].eq(y_0)
+        m.d.comb += x_wr_buf[0].eq(x_0)
 
         acc_width = (self.sample_width * 2) + (num_taps * 2)
         acc = Signal(signed(acc_width))
@@ -334,11 +367,7 @@ class ButterworthIIREngine(wiring.Component):
             with m.State("LOAD"):
                 m.d.comb += input_sample_ready.eq(1)
                 with m.If(cur_sink_valid):
-                    with m.If(cur_inst == 0):
-                        m.d.sync += [
-                            x_buf[i + 1].eq(x_buf[i]) for i in range(num_taps - 1)
-                        ]
-                    m.d.sync += x_buf[0].eq(x_0)
+                    # with m.If(cur_inst == 0):
                     m.d.sync += acc.eq(0)
                     # m.d.sync += idx.eq(idx + 1)
                     m.d.sync += mac_i_1.eq(x_0)
@@ -348,6 +377,7 @@ class ButterworthIIREngine(wiring.Component):
 
             with m.State("MAC_FORWARD"):
                 m.d.sync += y_wr_en.eq(0)
+                m.d.sync += x_wr_en.eq(0)
                 m.d.sync += acc.eq(acc + mult_node)
                 m.d.sync += idx.eq(idx + 1)
 
@@ -356,9 +386,15 @@ class ButterworthIIREngine(wiring.Component):
                 m.next = "MAC_FEEDBACK"
                 with m.If(idx == num_taps - 1):
                     m.d.sync += y_wr_en.eq(1)
+                    m.d.sync += x_wr_en.eq(1)
                     m.d.sync += [
                         y_wr_buf[i + 1].eq(y_rd_buf[i]) for i in range(len(y_wr_buf) - 1)
                     ]
+                    m.d.sync += [
+                        x_wr_buf[i + 1].eq(x_rd_buf[i]) for i in range(len(x_wr_buf) - 1)
+                    ]
+
+                    # Increment which instance we are reading parameters/feedback/delay from
                     with m.If(cur_inst_read_pointer != (self.instances - 1)):
                         m.d.sync += cur_inst_read_pointer.eq(cur_inst_read_pointer + 1)
                     with m.Else():
@@ -374,6 +410,7 @@ class ButterworthIIREngine(wiring.Component):
             with m.State("READY"):
                 m.d.comb += output_sample_valid.eq(1)
                 m.d.sync += y_wr_en.eq(0)
+                m.d.sync += x_wr_en.eq(0)
                 m.d.comb += y_0.eq(output_sample)
                 with m.If(cur_source_ready):
                     m.d.sync += idx.eq(0)
@@ -408,25 +445,25 @@ def run_sim():
     clk_freq = 60e6
     sample_width = 16  # Number of 2s complement bits
     fs = 48000
-    num_inst = 1
     m = Module()
-    # m.submodules.filt = dut = ButterworthIIREngine(
-    #     filter_type="bandpass",
-    #     center_freq=[90, 200, 400, 1000],
-    #     passband_width=[10, 50, 200, 100],
-    #     fs=fs,
-    #     sample_width=sample_width,
-    #     filter_order=1,
-    #     formal=True,
-    # )
     m.submodules.filt = dut = ButterworthIIREngine(
-        filter_type="bandstop",
-        band_edges=[[2150, 2450]],
+        filter_type="bandpass",
+        center_freq=[200, 400],
+        passband_width=[50, 200],
         fs=fs,
         sample_width=sample_width,
         filter_order=1,
         formal=True,
     )
+    num_inst = dut.instances
+    # m.submodules.filt = dut = ButterworthIIREngine(
+    #     filter_type="bandstop",
+    #     band_edges=[[2150, 2450]],
+    #     fs=fs,
+    #     sample_width=sample_width,
+    #     filter_order=1,
+    #     formal=True,
+    # )
 
     # m.submodules.filt = dut = ButterworthIIREngine(
     #     filter_type="lowpass",
@@ -443,7 +480,7 @@ def run_sim():
     (t, input_samples) = generate_chirp(
         duration, fs, start_freq, end_freq, sample_width, amp=0.8
     )
-    input_samples = np.zeros(len(t))
+    # input_samples = np.zeros(len(t))
     output_samples = [[] for _ in range(num_inst) ]
 
     async def tb(ctx):
