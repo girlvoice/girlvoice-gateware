@@ -465,9 +465,6 @@ class SerialVocoder(wiring.Component):
         )
 
     def display_channel_filters(self):
-
-
-
         fig, axs = plt.subplots(4, 8)
         print(len(axs))
         for ch_idx in range(self.num_channels):

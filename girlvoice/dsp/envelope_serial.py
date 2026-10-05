@@ -38,7 +38,6 @@ class SerialEnvelopeFollower(wiring.Component):
         attack_halflife=10,
         decay_halflife=20,
         instances = 10,
-        mult_slice: TDMMultiply = None,
         formal=False,
     ):
         self.formal = formal
@@ -76,12 +75,6 @@ class SerialEnvelopeFollower(wiring.Component):
         decay_quant = self.decay_fp.value / 2**self.fraction_width
         print(f"Envelope Decay parameter quantized: {decay_quant}")
         print(f"Envelope Attack parameter quantized: {attack_quant}")
-
-        if mult_slice is not None:
-            assert mult_slice.sample_width >= self.sample_width
-            self.mult = mult_slice
-        else:
-            self.mult = None
 
         signature = {}
         for i in range(self.instances):
@@ -196,95 +189,58 @@ class SerialEnvelopeFollower(wiring.Component):
         # The current sink is valid if its respective bit in the vector of all ready bits is high
         m.d.comb += cur_sink_valid.eq((input_valid_vec & input_ready_mask).any())
 
-        if self.mult is None:
-            mac_out = Signal(signed(mac_width))
-            mac_in_1 = Signal(signed(self.sample_width))
-            mac_in_2 = Signal(signed(self.sample_width))
-            m.d.comb += mac_out.eq(acc + (mac_in_1 * mac_in_2))
-            # m.d.sync += Assert(acc >= 0, "Envelope accumulator overflow")
+        mac_out = Signal(signed(mac_width))
+        mac_in_1 = Signal(signed(self.sample_width))
+        mac_in_2 = Signal(signed(self.sample_width))
+        m.d.comb += mac_out.eq(acc + (mac_in_1 * mac_in_2))
+        # m.d.sync += Assert(acc >= 0, "Envelope accumulator overflow")
 
-            # Quantized accumulator output
-            m.d.comb += acc_quant.eq((mac_out) >> (self.fraction_width))
-            m.d.comb += output_sample.eq(acc_quant)
+        # Quantized accumulator output
+        m.d.comb += acc_quant.eq((mac_out) >> (self.fraction_width))
+        m.d.comb += output_sample.eq(acc_quant)
 
-            # # Saturated sample output:
-            # with m.If(acc_quant >= 0):
-            #     m.d.comb += output_sample.eq(acc_quant)
-            # with m.Else():
-            #     m.d.comb += output_sample.eq(
-            #         2 ** (self.sample_width - 1) - 1
-            #     )
+        # # Saturated sample output:
+        # with m.If(acc_quant >= 0):
+        #     m.d.comb += output_sample.eq(acc_quant)
+        # with m.Else():
+        #     m.d.comb += output_sample.eq(
+        #         2 ** (self.sample_width - 1) - 1
+        #     )
 
 
-            with m.FSM():
-                with m.State("LOAD"):
-                    m.d.comb += output_sample_valid.eq(0)
-                    m.d.comb += input_sample_ready.eq(1)
-                    with m.If(cur_sink_valid):
-                        m.d.sync += acc.eq(0)
-                        m.d.sync += mac_in_1.eq(param_comp)
-                        m.d.sync += mac_in_2.eq(abs(x))
-                        # m.d.sync += y.eq(rd_port.data)
-                        m.d.sync += input_ready_mask.eq(input_ready_mask.rotate_left(1))
-                        m.next = "MULT_Y"
-                with m.State("MULT_Y"):
-                    m.d.comb += y.eq(rd_port.data)
-                    m.d.sync += acc.eq(mac_out)
-                    m.d.sync += mac_in_1.eq(param)
-                    m.d.sync += mac_in_2.eq(y)
-                    m.d.sync += wr_port.en.eq(1)
-                    m.d.sync += rd_port.addr.eq(cur_inst + 1),
-                    m.next = "READY"
-                with m.State("READY"):
-                    m.d.sync += wr_port.en.eq(0)
-                    m.d.comb += output_sample_valid.eq(1)
-                    m.d.comb += y.eq(output_sample)
-                    # Saturation logic:
-                    with m.If(cur_source_ready):
-                        m.d.sync += output_valid_mask.eq(output_valid_mask.rotate_left(1))
-                        with m.If(cur_inst != (self.instances - 1)):
-                            m.d.sync += cur_inst.eq(cur_inst + 1)
-                        with m.Else():
-                            m.d.sync += cur_inst.eq(0)
-                        # m.d.sync += Assert(self.source.payload >= 0, "Envelope follower gave negative output")
-                        m.next = "LOAD"
+        with m.FSM():
+            with m.State("LOAD"):
+                m.d.comb += output_sample_valid.eq(0)
+                m.d.comb += input_sample_ready.eq(1)
+                with m.If(cur_sink_valid):
+                    m.d.sync += acc.eq(0)
+                    m.d.sync += mac_in_1.eq(param_comp)
+                    m.d.sync += mac_in_2.eq(abs(x))
+                    # m.d.sync += y.eq(rd_port.data)
+                    m.d.sync += input_ready_mask.eq(input_ready_mask.rotate_left(1))
+                    m.next = "MULT_Y"
+            with m.State("MULT_Y"):
+                m.d.comb += y.eq(rd_port.data)
+                m.d.sync += acc.eq(mac_out)
+                m.d.sync += mac_in_1.eq(param)
+                m.d.sync += mac_in_2.eq(y)
+                m.d.sync += wr_port.en.eq(1)
+                m.d.sync += rd_port.addr.eq(cur_inst + 1),
+                m.next = "READY"
+            with m.State("READY"):
+                m.d.sync += wr_port.en.eq(0)
+                m.d.comb += output_sample_valid.eq(1)
+                m.d.comb += y.eq(output_sample)
+                # Saturation logic:
+                with m.If(cur_source_ready):
+                    m.d.sync += output_valid_mask.eq(output_valid_mask.rotate_left(1))
+                    with m.If(cur_inst != (self.instances - 1)):
+                        m.d.sync += cur_inst.eq(cur_inst + 1)
+                    with m.Else():
+                        m.d.sync += cur_inst.eq(0)
+                    # m.d.sync += Assert(self.source.payload >= 0, "Envelope follower gave negative output")
+                    m.next = "LOAD"
 
-        else:
-            mac_out = self.mult.source
-            mac_in_1, mac_in_2, mult_valid = self.mult.get_next_thread_ports()
-
-            m.d.comb += acc_quant.eq(acc >> self.fraction_width)
-
-            m.d.comb += self.source.payload.eq(Mux(acc_quant > self.gate, acc_quant, 0))
-            with m.If(self.sink.valid & self.sink.ready):
-                m.d.sync += mac_in_1.eq(param_comp)
-                m.d.sync += mac_in_2.eq(abs(x))
-            with m.If(self.source.valid & self.source.ready):
-                m.d.sync += self.source.valid.eq(0)
-                m.d.sync += y.eq(self.source.payload)
-                if self.formal:
-                    m.d.sync += Assert(self.source.payload >= 0)
-
-            with m.FSM():
-                with m.State("LOAD"):
-                    m.d.comb += self.sink.ready.eq(~self.source.valid & mult_valid)
-
-                    with m.If(self.sink.valid & self.sink.ready):
-                        m.d.sync += acc.eq(0)
-                        m.next = "MULT_Y"
-
-                with m.State("MULT_Y"):
-                    with m.If(mult_valid):
-                        m.d.sync += acc.eq(mac_out)
-                        m.d.sync += mac_in_1.eq(param)
-                        m.d.sync += mac_in_2.eq(y)
-                        m.next = "WAIT"
-
-                with m.State("WAIT"):
-                    with m.If(mult_valid):
-                        m.d.sync += acc.eq(mac_out + acc)
-                        m.d.sync += self.source.valid.eq(1)
-                        m.next = "LOAD"
 
         return m
 
@@ -308,13 +264,10 @@ def run_sim():
     fs = 48000
 
     m = Module()
-    # m.submodules.mult = mult = TDMMultiply(bit_width, num_threads=2)
     num_inst = 4
     m.submodules.dut = env = SerialEnvelopeFollower(
-        sample_width=bit_width, fs=fs, mult_slice=None, attack_halflife=0.75, decay_halflife=30, instances=num_inst,
+        sample_width=bit_width, fs=fs, attack_halflife=0.75, decay_halflife=30, instances=num_inst,
     )
-
-    # m.d.comb += [source.ready.eq(1) for source in env.sources()]
 
     duration = 0.1
 
