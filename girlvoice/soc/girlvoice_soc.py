@@ -44,7 +44,7 @@ import os
 
 from amaranth                                    import *
 from amaranth.build                              import Platform
-from amaranth.lib                                import wiring
+from amaranth.lib                                import wiring, io
 from amaranth.lib.wiring                         import Component, In, Out, flipped, connect
 
 from amaranth_soc                                import csr, gpio, wishbone
@@ -321,10 +321,8 @@ class GirlvoiceSoc(Component):
             m.submodules.gpi0 = self.gpi0
             btn_up = platform.request("button_up")
             btn_down = platform.request("button_down")
-            # btn_power = platform.request("btn_pwr")
             m.d.comb += self.gpi0.pins[0].eq(btn_down.i)
             m.d.comb += self.gpi0.pins[1].eq(btn_up.i)
-            # m.d.comb += self.gpi0.pins[2].eq(btn_power.i)
 
         # i2c0
         m.submodules.i2c0 = self.i2c
@@ -406,21 +404,22 @@ class GirlvoiceSoc(Component):
             m.submodules.wb_to_csr = self.wb_to_csr
 
         ## Power On/Off
-        pwr_en = platform.request("pwr_en", 0)
+        if not self.sim:
+            m.d.submodules.pwr_en = pwr_en = io.Buffer("o", platform.request("pwr_en", dir="-"))
 
-        pwr_on = Signal(init=1)
-        m.d.comb += pwr_en.o.eq(pwr_on)
+            pwr_on = Signal(init=1)
+            m.d.comb += pwr_en.o.eq(pwr_on)
 
-        btn_power = platform.request("btn_pwr")
+            m.d.comb.btn_power = btn_power = io.FFBuffer("i", platform.request("btn_pwr"))
 
-        btn_power_prev = Signal(init=1)
-        m.d.sync += btn_power_prev.eq(btn_power.i)
+            btn_power_prev = Signal(init=1)
+            m.d.sync += btn_power_prev.eq(btn_power.i)
 
-        btn_power_rising = Signal()
-        m.d.comb += btn_power_rising.eq(~btn_power_prev & btn_power.i)
+            btn_power_rising = Signal()
+            m.d.comb += btn_power_rising.eq(~btn_power_prev & btn_power.i)
 
-        with m.If(btn_power_rising):
-            m.d.sync += vocoder_enable.eq(~vocoder_enable)
+            with m.If(btn_power_rising):
+                m.d.sync += vocoder_enable.eq(~vocoder_enable)
 
         pwr_on_reg = Signal(28)
         with m.If(pwr_on & btn_power.i):

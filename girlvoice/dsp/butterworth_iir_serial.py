@@ -255,9 +255,6 @@ class ButterworthIIREngine(wiring.Component):
 
 
         # Direct form I implementation
-        x_buf = Array(
-            [Signal(signed(self.sample_width), name=f"x_{i}") for i in range(num_taps)]
-        )
         y_rd_buf = Array([ y_rd_ports[i].data for i in range(num_taps - 1) ])
         y_wr_buf = Array([ y_wr_ports[i].data for i in range(num_taps - 1) ])
 
@@ -282,7 +279,6 @@ class ButterworthIIREngine(wiring.Component):
         m.d.comb += b_i.eq(self.b_fp[idx])
 
         m.d.comb += y_wr_buf[0].eq(y_0)
-        m.d.comb += x_wr_buf[0].eq(x_0)
 
         acc_width = (self.sample_width * 2) + (num_taps * 2)
         acc = Signal(signed(acc_width))
@@ -367,11 +363,11 @@ class ButterworthIIREngine(wiring.Component):
             with m.State("LOAD"):
                 m.d.comb += input_sample_ready.eq(1)
                 with m.If(cur_sink_valid):
-                    # with m.If(cur_inst == 0):
                     m.d.sync += acc.eq(0)
                     # m.d.sync += idx.eq(idx + 1)
                     m.d.sync += mac_i_1.eq(x_0)
                     m.d.sync += mac_i_2.eq(b_i)
+                    m.d.sync += x_wr_buf[0].eq(x_0)
                     m.d.sync += input_ready_mask.eq(input_ready_mask.rotate_left(1))
                     m.next = "MAC_FORWARD"
 
