@@ -439,14 +439,15 @@ class GirlvoiceSoc(Component):
             with m.If(btn_power_rising):
                 m.d.sync += vocoder_enable.eq(~vocoder_enable)
 
-        pwr_on_reg = Signal(28)
-        with m.If(pwr_on & btn_power_debounced):
-            with m.If(~pwr_on_reg.all()):
-                m.d.sync += pwr_on_reg.eq(pwr_on_reg + 1)
+            # Power off logic
+            pwr_on_reg = Signal(28)
+            with m.If(pwr_on & btn_power_debounced):
+                with m.If(~pwr_on_reg.all()):
+                    m.d.sync += pwr_on_reg.eq(pwr_on_reg + 1)
+                with m.Else():
+                    m.d.sync += pwr_on.eq(0)
             with m.Else():
-                m.d.sync += pwr_on.eq(0)
-        with m.Else():
-            m.d.sync += pwr_on_reg.eq(0)
+                m.d.sync += pwr_on_reg.eq(0)
 
         # Memory controller hangs if we start making requests to it straight away.
         on_delay = Signal(32)

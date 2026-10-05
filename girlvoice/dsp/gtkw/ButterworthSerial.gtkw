@@ -1,0 +1,67 @@
+[*]
+[*] GTKWave Analyzer v3.3.128 (w)1999-2026 BSI
+[*] Mon Oct  5 01:14:43 2026
+[*]
+[dumpfile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/gtkw/ButterworthIIREngine.vcd"
+[dumpfile_mtime] "Sun Oct  4 03:56:30 2026"
+[dumpfile_size] 52490471
+[savefile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/gtkw/ButterworthSerial.gtkw"
+[timestart] 21679300000
+[size] 1920 988
+[pos] -1 -1
+*-26.000000 21865800000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] bench.
+[treeopen] bench.top.
+[treeopen] bench.top.filt.
+[sst_width] 361
+[signals_width] 382
+[sst_expanded] 1
+[sst_vpaned_height] 292
+@28
+bench.top.clk
+bench.top.filt.cur_inst
+bench.top.filt.fsm_state
+bench.top.filt.idx[1:0]
+bench.top.filt.x_wr_en
+@22
+bench.top.filt.x_i[15:0]
+bench.top.filt.x_0[15:0]
+bench.top.filt.x_1_mem.x_rd_port__data[15:0]
+bench.top.filt.x_2_mem.x_rd_port__data[15:0]
+@800200
+-Sinks
+@22
+bench.top.filt.sink_0__payload[15:0]
+@28
+bench.top.filt.sink_0__ready
+bench.top.filt.sink_0__valid
+@22
+bench.top.filt.sink_1__payload[15:0]
+@28
+bench.top.filt.sink_1__ready
+bench.top.filt.sink_1__valid
+@1000200
+-Sinks
+@c00200
+-Sources
+@22
+bench.top.filt.source_0__payload[15:0]
+@28
+bench.top.filt.source_0__ready
+bench.top.filt.source_0__valid
+@22
+bench.top.filt.source_1__payload[15:0]
+@28
+bench.top.filt.source_1__ready
+bench.top.filt.source_1__valid
+@1401200
+-Sources
+@22
+bench.top.filt.mac_i_1[15:0]
+bench.top.filt.mac_i_2[15:0]
+bench.top.filt.y_0[15:0]
+bench.top.filt.y_i[15:0]
+bench.top.filt.y_1_mem.y_rd_port__data[15:0]
+bench.top.filt.y_2_mem.y_rd_port__data[15:0]
+[pattern_trace] 1
+[pattern_trace] 0

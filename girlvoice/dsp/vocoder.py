@@ -46,8 +46,9 @@ class SerialThreadedVocoderChannel(wiring.Component):
         m.submodules.vga = self.vga
 
         wiring.connect(m, wiring.flipped(self.sink), self.filt_sink)
-        wiring.connect(m, self.filt_source, self.env_sink)
         m.d.comb += [
+            self.filt_source.ready.eq(self.env_sink.ready),
+            self.env_sink.valid.eq(self.filt_source.valid),
             self.env_sink.payload.eq(abs(self.filt_source.payload))
         ]
         wiring.connect(m, self.env_source, self.vga.modulator)
