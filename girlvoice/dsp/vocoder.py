@@ -412,17 +412,8 @@ class SerialVocoder(wiring.Component):
 
         mults_per_channel = 2
         self.num_slices = self.num_channels // 2
-        # self.slices = [TDMMultiply(sample_width=sample_width, num_threads=2 * mults_per_channel) for _ in range(self.num_slices)]
 
         self.synth = ParallelSineSynth(self.ch_freq, fs, sample_width)
-
-        # self.envelope_engine = SerialEnvelopeFollower(
-        #     sample_width=sample_width,
-        #     fs=fs,
-        #     attack_halflife=0.1,
-        #     decay_halflife=25,
-        #     instances=num_channels
-        # )
 
         self.envelope_engine = ButterworthIIREngine(
             sample_width=self.sample_width,

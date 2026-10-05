@@ -105,6 +105,24 @@ class SerialEnvelopeFollower(wiring.Component):
     def elaborate(self, platform):
         m = Module()
 
+
+        # ----------- Feedback term memory ---------------
+
+        # Index of current filter instance being handled
+        cur_inst = Signal(range(self.instances))
+
+        # Y memory read address leads the cur_inst by one cycle
+        rd_addr = Signal(range(self.instances))
+        # Feedback sample memory for each channel
+        m.submodules.mem = mem = memory.Memory(
+            shape=signed(self.sample_width),
+            depth=self.instances,
+            init = [0] * self.instances
+        )
+
+        rd_port: memory.ReadPort = mem.read_port()
+        wr_port: memory.WritePort = mem.write_port()
+
         # ---------- Core DSP registers and parameter control logic ---------
         mac_width = self.sample_width * 2
         acc = Signal(signed(mac_width))
@@ -115,30 +133,15 @@ class SerialEnvelopeFollower(wiring.Component):
 
         param = Signal(signed(self.sample_width))
         param_comp = Signal(signed(self.sample_width))
-        m.d.comb += param.eq(Mux(abs(x) > y, self.attack_fp, self.decay_fp))
-        m.d.comb += param_comp.eq(Mux(abs(x) > y, self.attack_comp, self.decay_comp))
+        m.d.comb += param.eq(Mux(abs(x) > rd_port.data, self.attack_fp, self.decay_fp))
+        m.d.comb += param_comp.eq(Mux(abs(x) > rd_port.data, self.attack_comp, self.decay_comp))
 
-        # ----------- Feedback term memory ---------------
-
-        # Index of current filter instance being handled
-        cur_inst = Signal(range(self.instances))
-        # Feedback sample memory for each channel
-        m.submodules.mem = mem = memory.Memory(
-            shape=signed(self.sample_width),
-            depth=self.instances,
-            init = [0] * self.instances
-        )
-
-        rd_port: memory.ReadPort = mem.read_port()
-        wr_port: memory.WritePort = mem.write_port()
         m.d.comb += [
             rd_port.en.eq(1),
-            rd_port.addr.eq(cur_inst),
 
             wr_port.data.eq(y),
             wr_port.addr.eq(cur_inst)
         ]
-
 
         # ------- Souce Muxing control signals --------
         # The global ouput valid signal, all individual output valids are masked by this
@@ -221,7 +224,6 @@ class SerialEnvelopeFollower(wiring.Component):
                         m.d.sync += acc.eq(0)
                         m.d.sync += mac_in_1.eq(param_comp)
                         m.d.sync += mac_in_2.eq(abs(x))
-                        # m.d.sync += mac_in_2.eq(x)
                         # m.d.sync += y.eq(rd_port.data)
                         m.d.sync += input_ready_mask.eq(input_ready_mask.rotate_left(1))
                         m.next = "MULT_Y"
@@ -231,6 +233,7 @@ class SerialEnvelopeFollower(wiring.Component):
                     m.d.sync += mac_in_1.eq(param)
                     m.d.sync += mac_in_2.eq(y)
                     m.d.sync += wr_port.en.eq(1)
+                    m.d.sync += rd_port.addr.eq(cur_inst + 1),
                     m.next = "READY"
                 with m.State("READY"):
                     m.d.sync += wr_port.en.eq(0)
@@ -308,7 +311,7 @@ def run_sim():
     # m.submodules.mult = mult = TDMMultiply(bit_width, num_threads=2)
     num_inst = 4
     m.submodules.dut = env = SerialEnvelopeFollower(
-        sample_width=bit_width, fs=fs, mult_slice=None, attack_halflife=0.75, decay_halflife=2.5, instances=num_inst,
+        sample_width=bit_width, fs=fs, mult_slice=None, attack_halflife=0.75, decay_halflife=30, instances=num_inst,
     )
 
     # m.d.comb += [source.ready.eq(1) for source in env.sources()]
