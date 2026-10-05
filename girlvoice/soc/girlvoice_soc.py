@@ -412,17 +412,35 @@ class GirlvoiceSoc(Component):
 
             m.d.comb.btn_power = btn_power = io.FFBuffer("i", platform.request("btn_pwr"))
 
+            debounce_ms = 15
+            debounce_counts = (debounce_ms / 1000) * self.sys_clk_freq
+
+            debounce_counter= Signal(range(debounce_counts))
+            btn_power_debounced = Signal()
+            with m.If(btn_power.i):
+                with m.If(debounce_counter <= debounce_counts):
+                    m.d.sync += debounce_counter.eq(debounce_counter + 1)
+            with m.Else():
+                with m.If(debounce_counter != 0):
+                    m.d.sync += debounce_counter.eq(debounce_counter - 1)
+
+            with m.If(debounce_counter > debounce_counts):
+                m.d.sync += btn_power_debounced.eq(1)
+
+            with m.If(debounce_counter == 0):
+                m.d.sync += btn_power_debounced.eq(0)
+
             btn_power_prev = Signal(init=1)
-            m.d.sync += btn_power_prev.eq(btn_power.i)
+            m.d.sync += btn_power_prev.eq(btn_power_debounced)
 
             btn_power_rising = Signal()
-            m.d.comb += btn_power_rising.eq(~btn_power_prev & btn_power.i)
+            m.d.comb += btn_power_rising.eq(~btn_power_prev & btn_power_debounced)
 
             with m.If(btn_power_rising):
                 m.d.sync += vocoder_enable.eq(~vocoder_enable)
 
         pwr_on_reg = Signal(28)
-        with m.If(pwr_on & btn_power.i):
+        with m.If(pwr_on & btn_power_debounced):
             with m.If(~pwr_on_reg.all()):
                 m.d.sync += pwr_on_reg.eq(pwr_on_reg + 1)
             with m.Else():
