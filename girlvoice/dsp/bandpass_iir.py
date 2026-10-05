@@ -265,12 +265,13 @@ def run_sim():
     m = Module()
     m.submodules.mult = mult = TDMMultiply(sample_width=sample_width, num_threads=3)
     m.submodules.filt = dut = BandpassIIR(
-        center_freq=5000,
-        passband_width=1000,
+        center_freq=1000,
+        passband_width=750,
         fs=fs,
         sample_width=sample_width,
         filter_order=1,
         mult_slice=mult,
+        formal=True
     )
 
     duration = 0.25
@@ -279,7 +280,6 @@ def run_sim():
     (t, input_samples) = generate_chirp(
         duration, fs, start_freq, end_freq, sample_width, amp=1
     )
-    input_samples
     output_samples = np.zeros(int(duration * fs))
 
     async def tb(ctx):

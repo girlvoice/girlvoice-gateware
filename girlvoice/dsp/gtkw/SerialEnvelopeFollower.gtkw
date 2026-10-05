@@ -1,0 +1,123 @@
+[*]
+[*] GTKWave Analyzer v3.3.127 (w)1999-2026 BSI
+[*] Sun Jul 12 07:35:00 2026
+[*]
+[dumpfile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/gtkw/EnvelopeFollower.vcd"
+[dumpfile_mtime] "Sun Jul 12 04:17:35 2026"
+[dumpfile_size] 15893650
+[savefile] "/home/sage/programming_stuff/sage/girlvoice/girlvoice/dsp/gtkw/SerialEnvelopeFollower.gtkw"
+[timestart] 141431400000
+[size] 1920 988
+[pos] -1 -1
+*-25.000000 141494300000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] bench.
+[treeopen] bench.top.
+[sst_width] 286
+[signals_width] 357
+[sst_expanded] 1
+[sst_vpaned_height] 296
+@28
+bench.top.clk
+bench.top.dut.fsm_state
+@800200
+-input
+@28
+bench.top.dut.cur_sink_valid
+@22
+bench.top.dut.input_valid_vec[3:0]
+bench.top.dut.sink_vector[63:0]
+bench.top.dut.input_ready_mask[3:0]
+@1000200
+-input
+@800200
+-sinks
+@40000421
+[fpshift_count] 15
+bench.top.dut.sink_0__payload[15:0]
+@28
+bench.top.dut.sink_0__ready
+bench.top.dut.sink_0__valid
+@40000421
+[fpshift_count] 15
+bench.top.dut.sink_1__payload[15:0]
+@28
+bench.top.dut.sink_1__ready
+bench.top.dut.sink_1__valid
+@40000421
+[fpshift_count] 15
+bench.top.dut.sink_2__payload[15:0]
+@28
+bench.top.dut.sink_2__ready
+bench.top.dut.sink_2__valid
+@40000421
+[fpshift_count] 15
+bench.top.dut.sink_3__payload[15:0]
+@28
+bench.top.dut.sink_3__ready
+bench.top.dut.sink_3__valid
+@1000200
+-sinks
+@c00200
+-output
+@22
+bench.top.dut.output_valid_mask[3:0]
+@40000420
+[fpshift_count] 15
+bench.top.dut.source_0__payload[15:0]
+@28
+bench.top.dut.source_0__ready
+bench.top.dut.source_0__valid
+@40000420
+[fpshift_count] 15
+bench.top.dut.source_1__payload[15:0]
+@28
+bench.top.dut.source_1__ready
+bench.top.dut.source_1__valid
+@40000420
+[fpshift_count] 15
+bench.top.dut.source_2__payload[15:0]
+@28
+bench.top.dut.source_2__ready
+bench.top.dut.source_2__valid
+@40000420
+[fpshift_count] 15
+bench.top.dut.source_3__payload[15:0]
+@28
+bench.top.dut.source_3__ready
+bench.top.dut.source_3__valid
+@1401200
+-output
+@40000420
+[fpshift_count] 15
+bench.top.dut.y[15:0]
+[fpshift_count] 15
+bench.top.dut.x[15:0]
+[fpshift_count] 15
+bench.top.dut.mac_in_1[15:0]
+[fpshift_count] 15
+bench.top.dut.mac_in_2[15:0]
+[fpshift_count] 30
+bench.top.dut.mac_out[31:0]
+[fpshift_count] 15
+bench.top.dut.output_sample[15:0]
+[fpshift_count] 15
+bench.top.dut.acc_quant[15:0]
+@800200
+-mem
+@28
+bench.top.dut.rd_port__addr[1:0]
+@40000420
+[fpshift_count] 15
+bench.top.dut.rd_port__data[15:0]
+[fpshift_count] 15
+bench.top.dut.\mem[0][15:0]
+[fpshift_count] 15
+bench.top.dut.\mem[1][15:0]
+[fpshift_count] 15
+bench.top.dut.\mem[2][15:0]
+[fpshift_count] 15
+bench.top.dut.\mem[3][15:0]
+@1000200
+-mem
+[pattern_trace] 1
+[pattern_trace] 0

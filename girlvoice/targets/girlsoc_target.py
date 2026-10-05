@@ -60,11 +60,6 @@ class GirlTop(Elaboratable):
         ## Add SoC
         m.submodules.soc = self.soc
 
-        ## Power On/Off
-        pwr_en = platform.request("pwr_en", 0)
-
-        pwr_on = Signal(init=1)
-        m.d.comb += pwr_en.o.eq(pwr_on)
 
         return m
 

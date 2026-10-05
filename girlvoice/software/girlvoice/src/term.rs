@@ -12,7 +12,7 @@ pub struct Terminal<T: Read + Write + ReadReady, U: I2c, V: DelayNs> {
     prev_cmd: zstr<256>,
     char_buf: [u8; 1],
     csi_mode: bool,
-    amp: Aw88395<U>,
+    pub amp: Aw88395<U>,
     timer: V
 }
 
@@ -175,7 +175,7 @@ impl<T: Read + Write + ReadReady, U: I2c, V: DelayNs> Terminal<T, U, V> {
         };
     }
 
-    fn initialize_amplifier(&mut self) {
+    pub fn initialize_amplifier(&mut self) {
         writeln!(self.serial, "Beginning amplifier initialization.\r").unwrap();
         if self.amp.soft_reset().is_err() {
             writeln!(self.serial, "Failed to reset amplifier\r").unwrap();
@@ -232,6 +232,9 @@ impl<T: Read + Write + ReadReady, U: I2c, V: DelayNs> Terminal<T, U, V> {
             return;
         }
 
+        if self.amp.enable_hagc().is_err() {
+            return;
+        }
     }
 
     fn wait_for_pll_lock(&mut self) -> bool {

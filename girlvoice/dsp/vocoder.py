@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from math import log
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy import signal
 from amaranth import *
@@ -8,14 +9,55 @@ from amaranth.lib.wiring import In, Out
 from amaranth.lib import stream
 from amaranth.sim import Simulator
 
+from girlvoice.dsp.butterworth_iir_serial import ButterworthIIREngine
 from girlvoice.dsp.sine_synth import ParallelSineSynth
 from girlvoice.dsp.vga import VariableGainAmp
 from girlvoice.dsp.bandpass_iir import BandpassIIR
 from girlvoice.dsp.envelope import EnvelopeFollower
+from girlvoice.dsp.envelope_serial import SerialEnvelopeFollower
 from girlvoice.dsp.envelope_vga import EnvelopeVGA
 from girlvoice.dsp.tdm_slice import TDMMultiply
 from girlvoice.stream import stream_get, stream_put
 
+class SerialThreadedVocoderChannel(wiring.Component):
+    def __init__(
+        self, env_sink, env_source, filt_sink, filt_source, mult_slice, fs=48000, sample_width=18
+    ):
+        self.fs = fs
+        self.sample_width = sample_width
+        self.env_sink = env_sink
+        self.env_source = env_source
+        self.filt_sink = filt_sink
+        self.filt_source = filt_source
+
+        self.vga = VariableGainAmp(sample_width, sample_width, mult_slice=mult_slice)
+
+        super().__init__(
+            {
+                "sink": In(stream.Signature(signed(sample_width))),
+                "carrier": In(stream.Signature(signed(sample_width))),
+                "source": Out(stream.Signature(signed(sample_width))),
+            }
+        )
+
+    def elaborate(self, platform):
+        m = Module()
+
+        m.submodules.vga = self.vga
+
+        wiring.connect(m, wiring.flipped(self.sink), self.filt_sink)
+        m.d.comb += [
+            self.filt_source.ready.eq(self.env_sink.ready),
+            self.env_sink.valid.eq(self.filt_source.valid),
+            self.env_sink.payload.eq(abs(self.filt_source.payload))
+        ]
+        wiring.connect(m, self.env_source, self.vga.modulator)
+        wiring.connect(m, wiring.flipped(self.carrier), self.vga.carrier)
+
+        wiring.connect(m, wiring.flipped(self.source), self.vga.source)
+
+
+        return m
 
 class ThreadedVocoderChannel(wiring.Component):
     def __init__(
@@ -132,18 +174,33 @@ class ChannelDemux(wiring.Component):
     def elaborate(self, platform):
         m = Module()
 
-        ch_readys = Signal(self.num_channels)
+        ch_readys = Signal(self.num_channels, init=(1 << self.num_channels) - 1)
+
+        payload_buffer = Signal(signed(self.sample_width))
+        buf_valid = Signal()
+
+        with m.If(self.sink.ready & self.sink.valid) :
+            m.d.sync += [
+                payload_buffer.eq(self.sink.payload),
+                ch_readys.eq(0)
+            ]
 
         # The module sink is ready when all channel sinks are ready
         m.d.comb += self.sink.ready.eq(ch_readys.all())
         for i in range(self.num_channels):
             ch_source = self.source(i)
+            with m.If(ch_source.ready & ~ch_readys[i]):
+                m.d.sync += ch_readys[i].eq(1)
+
+            with m.If(ch_source.ready & ch_source.valid):
+                m.d.sync += ch_source.valid.eq(0)
+
+            with m.If(self.sink.ready & self.sink.valid):
+                m.d.sync += ch_source.valid.eq(1)
             m.d.comb += [
                 # Connect the module sink to all channel sinks,
                 # channel inputs are valid when the module sink is valid and all channels are ready
-                ch_source.payload.eq(self.sink.payload),
-                ch_source.valid.eq(self.sink.valid & self.sink.ready),
-                ch_readys.bit_select(i, 1).eq(ch_source.ready),
+                ch_source.payload.eq(payload_buffer),
             ]
 
         return m
@@ -173,8 +230,8 @@ class ChannelMux(wiring.Component):
         idx = Signal(range(self.num_channels + 1))
 
         ch_sink_mux = Array([self.sink(i) for i in range(self.num_channels)])
-        cur_sample = Signal(self.sample_width)
-        next_sample = Signal(self.sample_width)
+        cur_sample = Signal(signed(self.sample_width))
+        next_sample = Signal(signed(self.sample_width))
 
         ch_valids = Signal(self.num_channels)
         m.d.comb += [
@@ -302,6 +359,152 @@ class StaticVocoder(wiring.Component):
         m.submodules.synth = self.synth
         m.submodules.mux = self.mux
         m.submodules.demux = self.demux
+
+        wiring.connect(m, wiring.flipped(self.sink), self.demux.sink)
+        wiring.connect(m, wiring.flipped(self.source), self.mux.source)
+
+        for i in range(self.num_channels):
+            ch = self.channels[i]
+            m.submodules += ch
+
+            wiring.connect(m, self.demux.source(i), ch.sink)
+            wiring.connect(m, self.mux.sink(i), ch.source)
+            wiring.connect(m, self.synth.source(i), ch.carrier)
+
+        return m
+
+
+class SerialVocoder(wiring.Component):
+    def __init__(
+        self,
+        start_freq,
+        end_freq,
+        num_channels,
+        fs=48000,
+        sample_width=18,
+    ):
+        self.sample_width = sample_width
+        self.num_channels = num_channels
+        self.fs = fs
+
+        self.ch_edges = []
+
+        # Taken from Stanford ECE Vocoder github. This is calculated based on mel scale spacing
+        bandwidth_param = 0.035
+
+        start_mel = mel(start_freq)
+        end_mel = mel(end_freq)
+
+        print(f"Channel range as mel {start_mel}-{end_mel}")
+
+        ch_mel, channel_space = np.linspace(
+            start_mel, end_mel, num_channels, retstep=True
+        )
+        self.ch_freq = mel_to_freq(ch_mel)
+
+        print(f"Channel center frequencies: {self.ch_freq}")
+
+        for freq in self.ch_freq:
+            ch_start = freq * (1 - bandwidth_param)
+            ch_end = freq * (1 + bandwidth_param)
+            self.ch_edges.append([ch_start, ch_end])
+
+        print(f"Generating vocoder channels at {self.ch_edges} Hz")
+
+        mults_per_channel = 2
+        self.num_slices = self.num_channels // 2
+
+        self.synth = ParallelSineSynth(self.ch_freq, fs, sample_width)
+
+        self.envelope_engine = ButterworthIIREngine(
+            sample_width=self.sample_width,
+            fs=self.fs,
+            filter_type="lowpass",
+            band_edges=[75] * num_channels,
+            filter_order=1,
+        )
+
+        self.bandpass_engine = ButterworthIIREngine(
+            band_edges=self.ch_edges,
+            sample_width=self.sample_width,
+            fs=fs,
+            filter_type="bandpass"
+        )
+
+        self.vga_mult = TDMMultiply(sample_width=sample_width, num_threads=num_channels)
+
+        self.channels = []
+        for i in range(len(self.ch_freq)):
+            edges = self.ch_edges[i]
+            self.channels.append(
+                SerialThreadedVocoderChannel(
+                    fs=fs,
+                    sample_width=sample_width,
+                    env_sink=self.envelope_engine.sink(i),
+                    env_source=self.envelope_engine.source(i),
+                    filt_sink=self.bandpass_engine.sink(i),
+                    filt_source=self.bandpass_engine.source(i),
+                    mult_slice=self.vga_mult
+                )
+            )
+
+        self.demux = ChannelDemux(num_channels=num_channels, sample_width=sample_width)
+        self.mux = ChannelMux(num_channels=num_channels, sample_width=sample_width)
+
+        # freqs = np.linspace(0, int(self.ch_freq[-1]), int(fs))
+        # for ch in self.channels:
+        #     a = ch.bandpass.a_quant
+        #     b = ch.bandpass.b_quant
+        #     w, q = signal.freqz(b=b, a=a, fs=fs)
+
+        self.display_channel_filters()
+        super().__init__(
+            {
+                "sink": In(stream.Signature(signed(sample_width))),
+                "source": Out(stream.Signature(signed(sample_width))),
+            }
+        )
+
+    def display_channel_filters(self):
+        fig, axs = plt.subplots(4, 8)
+        print(len(axs))
+        for ch_idx in range(self.num_channels):
+            a_quant = self.bandpass_engine.a_quant[ch_idx]
+            b_quant = self.bandpass_engine.b_quant[ch_idx]
+            a = self.bandpass_engine.taps_raw[ch_idx][1]
+            b = self.bandpass_engine.taps_raw[ch_idx][0]
+
+            a_quant.insert(0, 1)
+            print(a)
+            print(a_quant)
+            print(b)
+            print(b_quant)
+
+            w_ideal, h_ideal = signal.freqz(b=b, a=a, worN=2048, fs=self.fs)
+            w_q, h_q = signal.freqz(b=b_quant, a=a_quant, worN=2048, fs=self.fs)
+
+            row = ch_idx // 8
+            ax = axs[row][ch_idx % 8]
+            ax.semilogx(w_ideal, 20 * np.log10(abs(h_ideal)), label=f"Ideal Gain channel {ch_idx}")
+            ax.semilogx(w_q, 20 * np.log10(np.abs(h_q)), label=f"Quantized Coeff Gain channel {ch_idx}")
+            ax.set_xlabel("Frequency log(Hz)")
+            ax.set_ylabel("Gain (dB)")
+            ax.set_ylim(-80, 5)
+            ax.grid(which="minor", color="0.9")
+            ax.grid()
+            ax.axhline(-3, color="#c0392b", ls="--", lw=1, label="-3 dB")
+
+        plt.show()
+
+
+    def elaborate(self, platform):
+        m = Module()
+        m.submodules.synth = self.synth
+        m.submodules.mux = self.mux
+        m.submodules.demux = self.demux
+        m.submodules.envelope_engine = self.envelope_engine
+        m.submodules.bandpass_engine = self.bandpass_engine
+        m.submodules.vga_mult = self.vga_mult
 
         wiring.connect(m, wiring.flipped(self.sink), self.demux.sink)
         wiring.connect(m, wiring.flipped(self.source), self.mux.source)

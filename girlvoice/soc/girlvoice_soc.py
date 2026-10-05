@@ -44,7 +44,7 @@ import os
 
 from amaranth                                    import *
 from amaranth.build                              import Platform
-from amaranth.lib                                import wiring
+from amaranth.lib                                import wiring, io
 from amaranth.lib.wiring                         import Component, In, Out, flipped, connect
 
 from amaranth_soc                                import csr, gpio, wishbone
@@ -57,11 +57,12 @@ from luna_soc.util                        import readbin
 from luna_soc.generate.svd                import SVD
 
 from girlvoice.dsp import vocoder
+from girlvoice.dsp.butterworth_iir_serial import ButterworthIIREngine
 import girlvoice.platform.nexus_utils.lmmi as lmmi
 from girlvoice.platform.nexus_utils.lram          import WishboneNXLRAM
 from girlvoice.soc.provider import girlvoice_rev_a as provider
 
-from girlvoice.dsp.vocoder import StaticVocoder, ThreadedVocoderChannel
+from girlvoice.dsp.vocoder import SerialVocoder, StaticVocoder, ThreadedVocoderChannel
 from girlvoice.io.i2s import i2s_rx, i2s_tx, I2SController
 from girlvoice.io import spi, gpi
 from girlvoice.platform.nexus_utils.i2c_fifo import I2CFIFO
@@ -81,7 +82,7 @@ class GirlvoiceSoc(Component):
         self.sys_clk_freq = sys_clk_freq
         self.audio_clk_freq = audio_clk_freq
 
-        self.enable_vocoder = False
+        self.enable_vocoder = True
 
         self.use_spi_flash        = False
         self.mainram_base         = 0x00000000
@@ -213,6 +214,14 @@ class GirlvoiceSoc(Component):
         #     phy_domain="audio"
         # )
 
+        self.notch = ButterworthIIREngine(
+            filter_type="bandstop",
+            band_edges=[[2200, 2400]],
+            filter_order=1,
+            sample_width=sample_width,
+            fs=fs
+        )
+
         self.i2s_controller = I2SController(
             sample_width=sample_width,
             sys_clk_freq=audio_clk_freq,
@@ -223,14 +232,12 @@ class GirlvoiceSoc(Component):
 
         # Vocoder!
         if self.enable_vocoder:
-            self.vocoder = StaticVocoder(
-                start_freq=300,
+            self.vocoder = SerialVocoder(
+                start_freq=250,
                 end_freq=4000,
-                num_channels=15,
-                clk_sync_freq=sys_clk_freq,
+                num_channels=32,
                 fs=fs,
                 sample_width=sample_width,
-                channel_class=ThreadedVocoderChannel
             )
 
             # Add vocoder wavetable to wb bus
@@ -314,10 +321,8 @@ class GirlvoiceSoc(Component):
             m.submodules.gpi0 = self.gpi0
             btn_up = platform.request("button_up")
             btn_down = platform.request("button_down")
-            btn_power = platform.request("btn_pwr")
             m.d.comb += self.gpi0.pins[0].eq(btn_down.i)
             m.d.comb += self.gpi0.pins[1].eq(btn_up.i)
-            m.d.comb += self.gpi0.pins[2].eq(btn_power.i)
 
         # i2c0
         m.submodules.i2c0 = self.i2c
@@ -343,8 +348,6 @@ class GirlvoiceSoc(Component):
         m.d.comb += self.spi0_phy.cs.eq(self.spi0.cs)
 
         # I2S TX/RX
-        # m.submodules.i2s_rx = self.i2s_rx
-        # m.submodules.i2s_tx = self.i2s_tx
         m.submodules.i2s_controller = self.i2s_controller
 
 
@@ -354,42 +357,97 @@ class GirlvoiceSoc(Component):
             m.d.comb += [
                 mic.lrclk.o.eq(self.i2s_controller.lrclk),
                 mic.clk.o.eq(self.i2s_controller.sclk),
-                # self.i2s_rx.sdin.eq(mic.data.i)
+                self.i2s_controller.sdin.eq(mic.data.i)
             ]
 
-            # amp = platform.request("amp", 0)
-            # m.d.comb += amp.en.o.eq(1)
-            # m.d.comb += amp.lrclk.o.eq(self.i2s_controller.lrclk)
-            # m.d.comb += amp.clk.o.eq(self.i2s_controller.clocking.sclk_falling)
-            # m.d.comb += amp.data.o.eq(self.i2s_tx.sdout)
+            amp = platform.request("amp", 0)
+            m.d.comb += amp.en.o.eq(1)
+            m.d.comb += amp.lrclk.o.eq(self.i2s_controller.lrclk)
+            m.d.comb += amp.clk.o.eq(self.i2s_controller.sclk)
+            m.d.comb += amp.data.o.eq(self.i2s_controller.sdout)
 
             aux_din = platform.request("aux_din", 0)
             m.d.comb += aux_din.o.eq(self.i2s_controller.sdout)
 
-            aux_dout = platform.request("aux_dout", 0)
-            m.d.comb += self.i2s_controller.sdin.eq(aux_dout.i)
-
-            # m.d.comb += aux_din.o.eq(aux_dout.i)
+            # aux_dout = platform.request("aux_dout", 0)
+            # m.d.comb += self.i2s_controller.sdin.eq(aux_dout.i)
 
 
-        if self.enable_vocoder:
+        vocoder_enable = Signal(init=1)
+
+        with m.If(vocoder_enable):
             m.submodules.vocoder = self.vocoder
+            m.submodules.notch = self.notch
             m.d.comb += [
-                self.vocoder.sink.valid.eq(self.i2s_controller.source.valid),
-                self.i2s_controller.source.ready.eq(self.vocoder.sink.ready),
-                self.vocoder.sink.payload.eq(self.i2s_controller.source.p.left),
+                self.notch.sink(0).valid.eq(self.i2s_controller.source.valid),
+                self.i2s_controller.source.ready.eq(self.notch.sink(0).ready),
+                self.notch.sink(0).payload.eq(self.i2s_controller.source.p.left),
 
                 self.i2s_controller.sink.valid.eq(self.vocoder.source.valid),
                 self.vocoder.source.ready.eq(self.i2s_controller.sink.ready),
                 self.i2s_controller.sink.p.left.eq(self.vocoder.source.p),
             ]
-            # wiring.connect(m, self.vocoder.sink, self.i2s_controller.source)
+            wiring.connect(m, self.vocoder.sink, self.notch.source(0))
             # wiring.connect(m, self.vocoder.source, self.i2s_tx.sink)
-        else:
-            wiring.connect(m, self.i2s_controller.sink, self.i2s_controller.source)
+        with m.Else():
+            m.d.comb += [
+                self.notch.sink(0).valid.eq(self.i2s_controller.source.valid),
+                self.i2s_controller.source.ready.eq(self.notch.sink(0).ready),
+                self.notch.sink(0).payload.eq(self.i2s_controller.source.p.left),
+
+                self.i2s_controller.sink.valid.eq(self.notch.source(0).valid),
+                self.notch.source(0).ready.eq(self.i2s_controller.sink.ready),
+                self.i2s_controller.sink.p.left.eq(self.notch.source(0).p),
+            ]
         # wishbone csr bridge
         if not self.sim:
             m.submodules.wb_to_csr = self.wb_to_csr
+
+        ## Power On/Off
+        if not self.sim:
+            m.submodules.pwr_en = pwr_en = io.Buffer("o", platform.request("pwr_en", dir="-"))
+
+            pwr_on = Signal(init=1)
+            m.d.comb += pwr_en.o.eq(pwr_on)
+
+            m.submodules.btn_power = btn_power = io.FFBuffer("i", platform.request("btn_pwr", dir="-"))
+
+            debounce_ms = 15
+            debounce_counts = int((debounce_ms / 1000) * self.sys_clk_freq)
+
+            debounce_counter= Signal(range(debounce_counts))
+            btn_power_debounced = Signal()
+            with m.If(btn_power.i):
+                with m.If(debounce_counter <= debounce_counts):
+                    m.d.sync += debounce_counter.eq(debounce_counter + 1)
+            with m.Else():
+                with m.If(debounce_counter != 0):
+                    m.d.sync += debounce_counter.eq(debounce_counter - 1)
+
+            with m.If(debounce_counter > debounce_counts):
+                m.d.sync += btn_power_debounced.eq(1)
+
+            with m.If(debounce_counter == 0):
+                m.d.sync += btn_power_debounced.eq(0)
+
+            btn_power_prev = Signal(init=1)
+            m.d.sync += btn_power_prev.eq(btn_power_debounced)
+
+            btn_power_rising = Signal()
+            m.d.comb += btn_power_rising.eq(~btn_power_prev & btn_power_debounced)
+
+            with m.If(btn_power_rising):
+                m.d.sync += vocoder_enable.eq(~vocoder_enable)
+
+            # Power off logic
+            pwr_on_reg = Signal(28)
+            with m.If(pwr_on & btn_power_debounced):
+                with m.If(~pwr_on_reg.all()):
+                    m.d.sync += pwr_on_reg.eq(pwr_on_reg + 1)
+                with m.Else():
+                    m.d.sync += pwr_on.eq(0)
+            with m.Else():
+                m.d.sync += pwr_on_reg.eq(0)
 
         # Memory controller hangs if we start making requests to it straight away.
         on_delay = Signal(32)
