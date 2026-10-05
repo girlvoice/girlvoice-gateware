@@ -405,15 +405,15 @@ class GirlvoiceSoc(Component):
 
         ## Power On/Off
         if not self.sim:
-            m.d.submodules.pwr_en = pwr_en = io.Buffer("o", platform.request("pwr_en", dir="-"))
+            m.submodules.pwr_en = pwr_en = io.Buffer("o", platform.request("pwr_en", dir="-"))
 
             pwr_on = Signal(init=1)
             m.d.comb += pwr_en.o.eq(pwr_on)
 
-            m.d.comb.btn_power = btn_power = io.FFBuffer("i", platform.request("btn_pwr"))
+            m.submodules.btn_power = btn_power = io.FFBuffer("i", platform.request("btn_pwr", dir="-"))
 
             debounce_ms = 15
-            debounce_counts = (debounce_ms / 1000) * self.sys_clk_freq
+            debounce_counts = int((debounce_ms / 1000) * self.sys_clk_freq)
 
             debounce_counter= Signal(range(debounce_counts))
             btn_power_debounced = Signal()
