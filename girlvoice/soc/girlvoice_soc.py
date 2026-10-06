@@ -207,6 +207,8 @@ class GirlvoiceSoc(Component):
             )
             self.wb_decoder.add(self.spi1_mmap.bus, addr=self.spiflash_base, name="spiflash")
 
+            # Weird corrupted data when reading from the flash with 120MHz. Need to debug
+            # if a bus error or CDC error
             # self.spi1_cdc = spiflash.port.SPIControlPortCDC(
             #     data_width=wb_data_width,
             #     domain_a="sync",
@@ -377,16 +379,16 @@ class GirlvoiceSoc(Component):
         m.submodules.spiflash_provider = self.spiflash_pads
 
         # With CDC
-        # m.submodules.spi1_cdc = self.spi1_cdc
-        # wiring.connect(m, self.spi1_mmap.source, self.spi1_cdc.a.source)
-        # wiring.connect(m, self.spi1_mmap.sink, self.spi1_cdc.a.sink)
-        # m.d.comb += self.spi1_cdc.a.cs.eq(self.spi1_mmap.cs)
-        # wiring.connect(m, self.spi1_phy, self.spi1_cdc.b)
+        m.submodules.spi1_cdc = self.spi1_cdc
+        wiring.connect(m, self.spi1_mmap.source, self.spi1_cdc.a.source)
+        wiring.connect(m, self.spi1_mmap.sink, self.spi1_cdc.a.sink)
+        m.d.comb += self.spi1_cdc.a.cs.eq(self.spi1_mmap.cs)
+        wiring.connect(m, self.spi1_phy, self.spi1_cdc.b)
 
         # Without CDC
-        wiring.connect(m, self.spi1_mmap.source, self.spi1_phy.source)
-        wiring.connect(m, self.spi1_mmap.sink, self.spi1_phy.sink)
-        m.d.comb += self.spi1_phy.cs.eq(self.spi1_mmap.cs)
+        # wiring.connect(m, self.spi1_mmap.source, self.spi1_phy.source)
+        # wiring.connect(m, self.spi1_mmap.sink, self.spi1_phy.sink)
+        # m.d.comb += self.spi1_phy.cs.eq(self.spi1_mmap.cs)
         # wiring.connect(m, self.spi1_phy, self.spi1_phy.)
 
 

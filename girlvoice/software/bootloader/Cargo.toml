@@ -1,0 +1,13 @@
+[package]
+name = "girlvoice-bootloader"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+embedded-hal = "1.0.0"
+soc-pac = { path = "../soc-pac", features = ["rt", "critical-section"] }
+girlvoice-hal = { path = "../hal" }
+panic-halt = "1.0.0"
+riscv = {version = "0.11.1" }
+riscv-rt = "0.12.2"
