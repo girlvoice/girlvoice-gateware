@@ -54,6 +54,7 @@ from amaranth_soc.wishbone.sram                  import WishboneSRAM
 from luna_soc.gateware.core               import spiflash, timer, uart
 from luna_soc.gateware.cpu                import InterruptController, VexRiscv
 from luna_soc.util                        import readbin
+from luna_soc.generate import introspect, rust
 from luna_soc.generate.svd                import SVD
 
 from girlvoice.dsp import vocoder
@@ -82,9 +83,8 @@ class GirlvoiceSoc(Component):
         self.sys_clk_freq = sys_clk_freq
         self.audio_clk_freq = audio_clk_freq
 
-        self.enable_vocoder = True
 
-        self.use_spi_flash        = False
+        self.use_spi_flash        = use_spi_flash
         self.mainram_base         = 0x00000000
         self.mainram_size         = mainram_size
         self.spiflash_base        = 0x10000000
@@ -104,9 +104,12 @@ class GirlvoiceSoc(Component):
         self.gpo1_base            = 0x00000600
         self.gpi0_base            = 0x00000700
 
-        if not use_spi_flash:
+        if not self.use_spi_flash:
             self.reset_addr  = self.mainram_base
             self.fw_base     = None
+        else:
+            self.fw_base     = 0x00100000
+            self.reset_addr  = self.spiflash_base + self.fw_base
 
         # cpu
         self.cpu = VexRiscv(
@@ -147,7 +150,6 @@ class GirlvoiceSoc(Component):
 
 
         # csr decoder
-
         if not self.sim:
             csr_addr_width = 28
             csr_data_width = 8
@@ -188,6 +190,28 @@ class GirlvoiceSoc(Component):
 
             self.csr_decoder.add(self.spi0.bus, addr=self.spiflash_ctrl_base, name="spiflash_ctrl")
             self.wb_decoder.add(self.spi0.wb_bus, addr=self.spi_data_base, name="spi_fifo")
+
+            # SPI Flash
+            self.spiflash_pads = provider.SPIFlashProvider(id="spi_flash_4x")
+            self.spi1_phy = spiflash.SPIPHYController(
+                pads = self.spiflash_pads.pins,
+                domain="sync",
+                divisor=0
+            )
+
+            self.spi1_mmap = spiflash.mmap.SPIFlashMemoryMap(
+                size=self.spiflash_size,
+                data_width=wb_data_width,
+                name="spiflash",
+
+            )
+            self.wb_decoder.add(self.spi1_mmap.bus, addr=self.spiflash_base, name="spiflash")
+
+            # self.spi1_cdc = spiflash.port.SPIControlPortCDC(
+            #     data_width=wb_data_width,
+            #     domain_a="sync",
+            #     domain_b="fast",
+            # )
 
         # lattice i2c
         self.i2c = I2CFIFO(sys_clk_freq=sys_clk_freq, scl_freq=400e3, use_hard_io=True, sim=sim)
@@ -231,17 +255,16 @@ class GirlvoiceSoc(Component):
         )
 
         # Vocoder!
-        if self.enable_vocoder:
-            self.vocoder = SerialVocoder(
-                start_freq=250,
-                end_freq=4000,
-                num_channels=32,
-                fs=fs,
-                sample_width=sample_width,
-            )
+        self.vocoder = SerialVocoder(
+            start_freq=250,
+            end_freq=4000,
+            num_channels=32,
+            fs=fs,
+            sample_width=sample_width,
+        )
 
-            # Add vocoder wavetable to wb bus
-            self.wb_decoder.add(self.vocoder.synth.wb_bus, addr=self.wavetable_base, name="wavetable")
+        # Add vocoder wavetable to wb bus
+        self.wb_decoder.add(self.vocoder.synth.wb_bus, addr=self.wavetable_base, name="wavetable")
 
         self.permit_bus_traffic = Signal()
 
@@ -346,6 +369,26 @@ class GirlvoiceSoc(Component):
         wiring.connect(m, self.spi0.source, self.spi0_phy.source)
         m.d.comb += self.spi0_phy.sink.ready.eq(1)
         m.d.comb += self.spi0_phy.cs.eq(self.spi0.cs)
+
+
+        # SPI Flash chip
+        m.submodules.spi1_phy = self.spi1_phy
+        m.submodules.spi1 = self.spi1_mmap
+        m.submodules.spiflash_provider = self.spiflash_pads
+
+        # With CDC
+        # m.submodules.spi1_cdc = self.spi1_cdc
+        # wiring.connect(m, self.spi1_mmap.source, self.spi1_cdc.a.source)
+        # wiring.connect(m, self.spi1_mmap.sink, self.spi1_cdc.a.sink)
+        # m.d.comb += self.spi1_cdc.a.cs.eq(self.spi1_mmap.cs)
+        # wiring.connect(m, self.spi1_phy, self.spi1_cdc.b)
+
+        # Without CDC
+        wiring.connect(m, self.spi1_mmap.source, self.spi1_phy.source)
+        wiring.connect(m, self.spi1_mmap.sink, self.spi1_phy.sink)
+        m.d.comb += self.spi1_phy.cs.eq(self.spi1_mmap.cs)
+        # wiring.connect(m, self.spi1_phy, self.spi1_phy.)
+
 
         # I2S TX/RX
         m.submodules.i2s_controller = self.i2s_controller
@@ -470,7 +513,10 @@ class GirlvoiceSoc(Component):
         """Generate top-level SVD."""
         print("Generating SVD ...", dst_svd)
         with open(dst_svd, "w") as f:
-            SVD(self).generate(file=f)
+            soc        = introspect.soc(self)
+            memory_map = introspect.memory_map(soc)
+            interrupts = introspect.interrupts(soc)
+            SVD(memory_map, interrupts).generate(file=f)
         print("Wrote SVD ...", dst_svd)
 
     def genmem(self, dst_mem):
@@ -489,9 +535,13 @@ class GirlvoiceSoc(Component):
             "REGION_ALIAS(\"REGION_STACK\", mainram);\n"
         )
         with open(dst_mem, "w") as f:
-            f.write(memory_x.format(mainram_base=hex(self.mainram_base),
-                                    mainram_size=hex(self.mainram.size),
-                                    ))
+            soc        = introspect.soc(self)
+            memory_map = introspect.memory_map(soc)
+            reset_addr = introspect.reset_addr(soc)
+            rust.LinkerScript(memory_map, reset_addr).generate(file=f)
+            # f.write(memory_x.format(mainram_base=hex(self.mainram_base),
+            #                         mainram_size=hex(self.mainram.size),
+            #                         ))
 
     def genconst(self, dst):
         """Generate some high-level constants used by application code."""

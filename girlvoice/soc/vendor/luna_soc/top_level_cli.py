@@ -138,14 +138,18 @@ def top_level_cli(fragment, *pos_args, **kwargs):
             c.LinkerScript(memory_map, reset_addr).generate(file=None)
         sys.exit(0)
 
+
+    rust_root = os.path.join(os.path.dirname(__file__), "../../../software")
     # If we've been asked to generate Rust linker region info, generate -only- that.
+    print(rust_root)
     if args.generate_memory_x:
         logging.info("Generating Rust linker region info script for SoC")
         from luna_soc.generate import rust, introspect
         soc        = introspect.soc(fragment)
         memory_map = introspect.memory_map(soc)
         reset_addr = introspect.reset_addr(soc)
-        with open("memory.x", "w") as f:
+        memory_x_output_path = os.path.join(rust_root, "girlvoice/memory.x")
+        with open(memory_x_output_path, "w") as f:
             rust.LinkerScript(memory_map, reset_addr).generate(file=f)
         sys.exit(0)
 
@@ -156,7 +160,8 @@ def top_level_cli(fragment, *pos_args, **kwargs):
         soc        = introspect.soc(fragment)
         memory_map = introspect.memory_map(soc)
         interrupts = introspect.interrupts(soc)
-        with open("../software/soc-pac/girlsoc.svd", "w") as f:
+        svd_output_path = os.path.join(rust_root, "soc-pac/girlvoice.svd")
+        with open(svd_output_path, "w") as f:
             svd.SVD(memory_map, interrupts).generate(file=f)
         sys.exit(0)
 
