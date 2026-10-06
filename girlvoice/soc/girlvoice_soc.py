@@ -73,20 +73,18 @@ mB = 1024*kB
 
 class GirlvoiceSoc(Component):
     def __init__(self, *, sys_clk_freq=60e6, audio_clk_freq=24e6, finalize_csr_bridge=True,
-                 mainram_size=256*kB, cpu_variant="imac+dcache", use_spi_flash = True, sim = False):
+                 mainram_size=256*kB, cpu_variant="imac+dcache", use_spi_flash = False, sim = False):
 
         super().__init__({})
 
-        self.enable_dsp = False
         self.firmware_path = ""
         self.sim = sim
 
         self.sys_clk_freq = sys_clk_freq
         self.audio_clk_freq = audio_clk_freq
 
-        self.enable_vocoder = True
 
-        self.use_spi_flash        = True
+        self.use_spi_flash        = use_spi_flash
         self.mainram_base         = 0x00000000
         self.mainram_size         = mainram_size
         self.spiflash_base        = 0x10000000
@@ -257,17 +255,16 @@ class GirlvoiceSoc(Component):
         )
 
         # Vocoder!
-        if self.enable_vocoder:
-            self.vocoder = SerialVocoder(
-                start_freq=250,
-                end_freq=4000,
-                num_channels=32,
-                fs=fs,
-                sample_width=sample_width,
-            )
+        self.vocoder = SerialVocoder(
+            start_freq=250,
+            end_freq=4000,
+            num_channels=32,
+            fs=fs,
+            sample_width=sample_width,
+        )
 
-            # Add vocoder wavetable to wb bus
-            self.wb_decoder.add(self.vocoder.synth.wb_bus, addr=self.wavetable_base, name="wavetable")
+        # Add vocoder wavetable to wb bus
+        self.wb_decoder.add(self.vocoder.synth.wb_bus, addr=self.wavetable_base, name="wavetable")
 
         self.permit_bus_traffic = Signal()
 
