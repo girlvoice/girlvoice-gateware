@@ -105,8 +105,9 @@ class GirlvoiceSoc(Component):
         self.gpi0_base            = 0x00000700
 
         if not self.use_spi_flash:
-            self.reset_addr  = self.mainram_base
-            self.fw_base     = None
+            # self.reset_addr  = self.mainram_base
+            self.reset_addr  = 0x00030000
+            self.fw_base     = "0x00030000"
         else:
             self.fw_base     = 0x00100000
             self.reset_addr  = self.spiflash_base + self.fw_base
@@ -292,9 +293,14 @@ class GirlvoiceSoc(Component):
         m = Module()
 
         # mainram
-        maybe_fw_init = readbin.get_mem_data(self.firmware_path, data_width=32, endianness="little")
+        maybe_fw_init = readbin.get_mem_data(
+            {self.firmware_path: self.fw_base},
+            data_width=32,
+            endianness="little",
+        )
         if maybe_fw_init is None:
             raise RuntimeError("No firmware found to initialize")
+
         if not self.use_spi_flash:
             print("Initializing SoC RAM from firmware")
             self.mainram.init = maybe_fw_init
@@ -379,16 +385,16 @@ class GirlvoiceSoc(Component):
         m.submodules.spiflash_provider = self.spiflash_pads
 
         # With CDC
-        m.submodules.spi1_cdc = self.spi1_cdc
-        wiring.connect(m, self.spi1_mmap.source, self.spi1_cdc.a.source)
-        wiring.connect(m, self.spi1_mmap.sink, self.spi1_cdc.a.sink)
-        m.d.comb += self.spi1_cdc.a.cs.eq(self.spi1_mmap.cs)
-        wiring.connect(m, self.spi1_phy, self.spi1_cdc.b)
+        # m.submodules.spi1_cdc = self.spi1_cdc
+        # wiring.connect(m, self.spi1_mmap.source, self.spi1_cdc.a.source)
+        # wiring.connect(m, self.spi1_mmap.sink, self.spi1_cdc.a.sink)
+        # m.d.comb += self.spi1_cdc.a.cs.eq(self.spi1_mmap.cs)
+        # wiring.connect(m, self.spi1_phy, self.spi1_cdc.b)
 
         # Without CDC
-        # wiring.connect(m, self.spi1_mmap.source, self.spi1_phy.source)
-        # wiring.connect(m, self.spi1_mmap.sink, self.spi1_phy.sink)
-        # m.d.comb += self.spi1_phy.cs.eq(self.spi1_mmap.cs)
+        wiring.connect(m, self.spi1_mmap.source, self.spi1_phy.source)
+        wiring.connect(m, self.spi1_mmap.sink, self.spi1_phy.sink)
+        m.d.comb += self.spi1_phy.cs.eq(self.spi1_mmap.cs)
         # wiring.connect(m, self.spi1_phy, self.spi1_phy.)
 
 
@@ -506,8 +512,10 @@ class GirlvoiceSoc(Component):
         return m
 
     def build(self, name, build_dir):
-        firmware_root = os.path.join( os.getcwd(),"../software/girlvoice")
-        firmware_bin_path = os.path.join(firmware_root, "girlvoice.bin")
+        # firmware_root = os.path.join( os.getcwd(),"../software/girlvoice")
+        # firmware_bin_path = os.path.join(firmware_root, "girlvoice.bin")
+        firmware_root = os.path.join( os.getcwd(),"../software/bootloader")
+        firmware_bin_path = os.path.join(firmware_root, "bootloader.bin")
         GirlvoiceSoc.compile_firmware(firmware_root, firmware_bin_path)
         self.firmware_path = firmware_bin_path
 
