@@ -45,7 +45,7 @@ fn main() -> ! {
             ram_ptr.offset(i).write_volatile(word);
         }
         words_copied += 1;
-        if words_copied % 10 == 0 {
+        if words_copied % 1024 == 0 {
             let cur_ram_ptr = unsafe { ram_ptr.offset(i) };
             writeln!(serial, "{words_copied}/{fw_size_words} : ( {cur_ram_ptr:?} ) \r").unwrap();
         }
@@ -56,7 +56,5 @@ fn main() -> ! {
     let fw_fn_ptr: fn() = unsafe { core::mem::transmute(ram_ptr) };
 
     fw_fn_ptr();
-    loop {
-
-    }
+    loop {}
 }
