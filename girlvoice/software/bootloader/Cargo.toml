@@ -11,3 +11,5 @@ girlvoice-hal = { path = "../hal" }
 panic-halt = "1.0.0"
 riscv = {version = "0.11.1" }
 riscv-rt = "0.12.2"
+mipidsi = "0.10.0"
+embedded-graphics = "0.8.2"
