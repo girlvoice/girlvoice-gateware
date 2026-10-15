@@ -104,13 +104,14 @@ class GirlvoiceSoc(Component):
         self.gpo1_base            = 0x00000600
         self.gpi0_base            = 0x00000700
 
-        if not self.use_spi_flash:
-            # self.reset_addr  = self.mainram_base
+        # If the SPI flash is enabled, set the reset address to the bootloader location
+        # the firmware base is used to determine where the bootloader firmware is placed in mainram
+        if self.use_spi_flash:
             self.reset_addr  = 0x00030000
-            self.fw_base     = "0x00030000"
+            self.fw_base     = hex(self.reset_addr)
         else:
-            self.fw_base     = 0x00100000
-            self.reset_addr  = self.spiflash_base + self.fw_base
+            self.reset_addr  = self.mainram_base
+            self.fw_base     = hex(self.mainram_base)
 
         # cpu
         self.cpu = VexRiscv(
@@ -192,29 +193,29 @@ class GirlvoiceSoc(Component):
             self.csr_decoder.add(self.spi0.bus, addr=self.spiflash_ctrl_base, name="spiflash_ctrl")
             self.wb_decoder.add(self.spi0.wb_bus, addr=self.spi_data_base, name="spi_fifo")
 
-            # SPI Flash
-            self.spiflash_pads = provider.SPIFlashProvider(id="spi_flash_4x")
-            self.spi1_phy = spiflash.SPIPHYController(
-                pads = self.spiflash_pads.pins,
-                domain="sync",
-                divisor=0
-            )
+            if self.use_spi_flash:
+                # SPI Flash
+                self.spiflash_pads = provider.SPIFlashProvider(id="spi_flash_4x")
+                self.spi1_phy = spiflash.SPIPHYController(
+                    pads = self.spiflash_pads.pins,
+                    domain="sync",
+                    divisor=0
+                )
 
-            self.spi1_mmap = spiflash.mmap.SPIFlashMemoryMap(
-                size=self.spiflash_size,
-                data_width=wb_data_width,
-                name="spiflash",
+                self.spi1_mmap = spiflash.mmap.SPIFlashMemoryMap(
+                    size=self.spiflash_size,
+                    data_width=wb_data_width,
+                    name="spiflash",
+                )
+                self.wb_decoder.add(self.spi1_mmap.bus, addr=self.spiflash_base, name="spiflash")
 
-            )
-            self.wb_decoder.add(self.spi1_mmap.bus, addr=self.spiflash_base, name="spiflash")
-
-            # Weird corrupted data when reading from the flash with 120MHz. Need to debug
-            # if a bus error or CDC error
-            # self.spi1_cdc = spiflash.port.SPIControlPortCDC(
-            #     data_width=wb_data_width,
-            #     domain_a="sync",
-            #     domain_b="fast",
-            # )
+                # Weird corrupted data when reading from the flash with 120MHz. Need to debug
+                # if a bus error or CDC error
+                # self.spi1_cdc = spiflash.port.SPIControlPortCDC(
+                #     data_width=wb_data_width,
+                #     domain_a="sync",
+                #     domain_b="fast",
+                # )
 
         # lattice i2c
         self.i2c = I2CFIFO(sys_clk_freq=sys_clk_freq, scl_freq=400e3, use_hard_io=True, sim=sim)
@@ -225,21 +226,6 @@ class GirlvoiceSoc(Component):
 
         fs = 48e3
         bclk_freq = 64 * fs
-
-        # self.i2s_tx = i2s_tx(
-        #     self.audio_clk_freq,
-        #     sclk_freq=bclk_freq,
-        #     sample_width=sample_width,
-        #     sink_domain="sync",
-        #     phy_domain="audio"
-        # )
-        # self.i2s_rx = i2s_rx(
-        #     self.audio_clk_freq,
-        #     sclk_freq=bclk_freq,
-        #     sample_width=sample_width,
-        #     source_domain="sync",
-        #     phy_domain="audio"
-        # )
 
         self.notch = ButterworthIIREngine(
             filter_type="bandstop",
@@ -380,22 +366,22 @@ class GirlvoiceSoc(Component):
 
 
         # SPI Flash chip
-        m.submodules.spi1_phy = self.spi1_phy
-        m.submodules.spi1 = self.spi1_mmap
-        m.submodules.spiflash_provider = self.spiflash_pads
+        if self.use_spi_flash:
+            m.submodules.spi1_phy = self.spi1_phy
+            m.submodules.spi1 = self.spi1_mmap
+            m.submodules.spiflash_provider = self.spiflash_pads
 
-        # With CDC
-        # m.submodules.spi1_cdc = self.spi1_cdc
-        # wiring.connect(m, self.spi1_mmap.source, self.spi1_cdc.a.source)
-        # wiring.connect(m, self.spi1_mmap.sink, self.spi1_cdc.a.sink)
-        # m.d.comb += self.spi1_cdc.a.cs.eq(self.spi1_mmap.cs)
-        # wiring.connect(m, self.spi1_phy, self.spi1_cdc.b)
+            # With CDC
+            # m.submodules.spi1_cdc = self.spi1_cdc
+            # wiring.connect(m, self.spi1_mmap.source, self.spi1_cdc.a.source)
+            # wiring.connect(m, self.spi1_mmap.sink, self.spi1_cdc.a.sink)
+            # m.d.comb += self.spi1_cdc.a.cs.eq(self.spi1_mmap.cs)
+            # wiring.connect(m, self.spi1_phy, self.spi1_cdc.b)
 
-        # Without CDC
-        wiring.connect(m, self.spi1_mmap.source, self.spi1_phy.source)
-        wiring.connect(m, self.spi1_mmap.sink, self.spi1_phy.sink)
-        m.d.comb += self.spi1_phy.cs.eq(self.spi1_mmap.cs)
-        # wiring.connect(m, self.spi1_phy, self.spi1_phy.)
+            # Without CDC
+            wiring.connect(m, self.spi1_mmap.source, self.spi1_phy.source)
+            wiring.connect(m, self.spi1_mmap.sink, self.spi1_phy.sink)
+            m.d.comb += self.spi1_phy.cs.eq(self.spi1_mmap.cs)
 
 
         # I2S TX/RX
@@ -511,9 +497,8 @@ class GirlvoiceSoc(Component):
 
         return m
 
+    # Build the SoC bootloader
     def build(self, name, build_dir):
-        # firmware_root = os.path.join( os.getcwd(),"../software/girlvoice")
-        # firmware_bin_path = os.path.join(firmware_root, "girlvoice.bin")
         firmware_root = os.path.join( os.getcwd(),"../software/bootloader")
         firmware_bin_path = os.path.join(firmware_root, "bootloader.bin")
         GirlvoiceSoc.compile_firmware(firmware_root, firmware_bin_path)
@@ -549,9 +534,6 @@ class GirlvoiceSoc(Component):
             memory_map = introspect.memory_map(soc)
             reset_addr = introspect.reset_addr(soc)
             rust.LinkerScript(memory_map, reset_addr).generate(file=f)
-            # f.write(memory_x.format(mainram_base=hex(self.mainram_base),
-            #                         mainram_size=hex(self.mainram.size),
-            #                         ))
 
     def genconst(self, dst):
         """Generate some high-level constants used by application code."""
