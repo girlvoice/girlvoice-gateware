@@ -425,7 +425,6 @@ class GirlvoiceSoc(Component):
                 self.i2s_controller.sink.p.left.eq(self.vocoder.source.p),
             ]
             wiring.connect(m, self.vocoder.sink, self.notch.source(0))
-            # wiring.connect(m, self.vocoder.source, self.i2s_tx.sink)
         with m.Else():
             m.d.comb += [
                 self.notch.sink(0).valid.eq(self.i2s_controller.source.valid),
