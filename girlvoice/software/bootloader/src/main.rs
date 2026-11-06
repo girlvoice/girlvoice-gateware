@@ -121,8 +121,13 @@ fn main() -> ! {
 
     writeln!(serial, "Firmware upload complete, beginning execution from {ram_ptr:?}\r").unwrap();
 
-    let fw_fn_ptr: fn() = unsafe { core::mem::transmute(ram_ptr) };
-
-    fw_fn_ptr();
-    loop {}
+    // Disable interrupts and jump to the firmware execution address
+    riscv::interrupt::machine::disable();
+    unsafe {
+        core::arch::asm!(
+            "jr {entry}",
+            entry=in(reg) FW_RAM_BASE,
+            options(noreturn)
+        )
+    }
 }
