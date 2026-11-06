@@ -73,7 +73,7 @@ mB = 1024*kB
 
 class GirlvoiceSoc(Component):
     def __init__(self, *, sys_clk_freq=60e6, audio_clk_freq=24e6, finalize_csr_bridge=True,
-                 mainram_size=256*kB, cpu_variant="imac+dcache", use_spi_flash = False, sim = False):
+                 mainram_size=256*kB, cpu_variant="imac+dcache", use_spi_flash = True, sim = False):
 
         super().__init__({})
 
@@ -287,9 +287,8 @@ class GirlvoiceSoc(Component):
         if maybe_fw_init is None:
             raise RuntimeError("No firmware found to initialize")
 
-        if not self.use_spi_flash:
-            print("Initializing SoC RAM from firmware")
-            self.mainram.init = maybe_fw_init
+        print("Initializing SoC RAM from firmware")
+        self.mainram.init = maybe_fw_init
 
         # bus
         m.submodules.wb_arbiter = self.wb_arbiter
@@ -498,8 +497,10 @@ class GirlvoiceSoc(Component):
 
     # Build the SoC bootloader
     def build(self, name, build_dir):
-        firmware_root = os.path.join( os.getcwd(),"../software/bootloader")
-        firmware_bin_path = os.path.join(firmware_root, "bootloader.bin")
+        firmware_name = "bootloader" if self.use_spi_flash else "girlvoice"
+        firmware_root = os.path.join( os.getcwd(),f"../software/{firmware_name}")
+        firmware_bin_path = os.path.join(firmware_root, f"{firmware_name}.bin")
+
         GirlvoiceSoc.compile_firmware(firmware_root, firmware_bin_path)
         self.firmware_path = firmware_bin_path
 
