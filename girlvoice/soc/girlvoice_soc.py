@@ -107,8 +107,9 @@ class GirlvoiceSoc(Component):
         # If the SPI flash is enabled, set the reset address to the bootloader location
         # the firmware base is used to determine where the bootloader firmware is placed in mainram
         if self.use_spi_flash:
-            self.reset_addr  = 0x00030000
-            self.fw_base     = hex(self.reset_addr)
+            # self.reset_addr  = 0x00030000
+            # self.fw_base     = hex(self.reset_addr)
+            self.reset_addr = self.spiflash_base + 0x200000
         else:
             self.reset_addr  = self.mainram_base
             self.fw_base     = hex(self.mainram_base)
@@ -279,16 +280,17 @@ class GirlvoiceSoc(Component):
         m = Module()
 
         # mainram
-        maybe_fw_init = readbin.get_mem_data(
-            {self.firmware_path: self.fw_base},
-            data_width=32,
-            endianness="little",
-        )
-        if maybe_fw_init is None:
-            raise RuntimeError("No firmware found to initialize")
 
-        print("Initializing SoC RAM from firmware")
-        self.mainram.init = maybe_fw_init
+        if not self.use_spi_flash:
+            maybe_fw_init = readbin.get_mem_data(
+                {self.firmware_path: self.fw_base},
+                data_width=32,
+                endianness="little",
+            )
+            if maybe_fw_init is None:
+                raise RuntimeError("No firmware found to initialize")
+            print("Initializing SoC RAM from firmware")
+            self.mainram.init = maybe_fw_init
 
         # bus
         m.submodules.wb_arbiter = self.wb_arbiter

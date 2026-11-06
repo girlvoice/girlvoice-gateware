@@ -6,14 +6,13 @@
  */
 
 MEMORY {
-    blockram : ORIGIN = 0x00000000, LENGTH = 0x00030000
-    bootloader_ram : ORIGIN = 0x00030000, LENGTH = 0x00010000
-    spiflash : ORIGIN = 0x10000000, LENGTH = 0x00400000
+    spiflash : ORIGIN = 0x10200000, LENGTH = 0x00100000
+    scratch  : ORIGIN = 0x0003F000, LENGTH = 0x00001000
 }
 
-REGION_ALIAS("REGION_TEXT", bootloader_ram);
-REGION_ALIAS("REGION_RODATA", bootloader_ram);
-REGION_ALIAS("REGION_DATA", bootloader_ram);
-REGION_ALIAS("REGION_BSS", bootloader_ram);
-REGION_ALIAS("REGION_HEAP", bootloader_ram);
-REGION_ALIAS("REGION_STACK", bootloader_ram);
+REGION_ALIAS("REGION_TEXT", spiflash);
+REGION_ALIAS("REGION_RODATA", spiflash);
+REGION_ALIAS("REGION_DATA", scratch);
+REGION_ALIAS("REGION_BSS", scratch);
+REGION_ALIAS("REGION_HEAP", scratch);
+REGION_ALIAS("REGION_STACK", scratch);
