@@ -39,3 +39,5 @@ run: `svd2rust -i girlsoc.svd --target riscv` to create the PAC `lib.rs` file.
 Use `pdm run girlvoice/targets/girlsoc_target.py --keep-files --toolchain radiant` to build the LUNA-SOC based design
 
 The FPGA bitstream can be programmed with `iceprog`.
+
+Firmware binaries can also be flashed with `iceprog` targeting a specific memory offset. `iceprog -o 1M girlvoice.bin`

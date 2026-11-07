@@ -1,4 +1,3 @@
-use core::u8;
 
 use embedded_hal::i2c::SevenBitAddress;
 use embedded_hal::i2c::{self, I2c, Operation};

@@ -265,11 +265,10 @@ class GirlvoiceRevAPlatform(LatticePlatform):
             )
 
     def toolchain_program(self, products, name):
-        ecpprog = os.environ.get("ECPPROG", "ecpprog")
-        with products.extract("{}.bit".format(name)) as bitstream_filename:
-            if self.toolchain == "Radiant":
-                bitstream_filename = f"build/impl/{name}_impl.bit"
-            subprocess.check_call(ecpprog, "-S", bitstream_filename)
+        iceprog = os.environ.get("ICEPROG", "iceprog")
+        with products.extract(f"impl/{name}_impl.bit") as bitstream_filename:
+            print(bitstream_filename)
+            subprocess.check_call([iceprog, bitstream_filename])
 
 
 if __name__ == "__main__":
